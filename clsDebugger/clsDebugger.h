@@ -1,7 +1,10 @@
-#pragma once
+#ifndef CLSDEBUGGER
+#define CLSDEBUGGER
+
+#pragma pack(1)
+
 #include <string>
 #include <vector>
-#include <sstream>
 
 #include <Windows.h>
 #include <process.h>
@@ -54,7 +57,7 @@ class clsDebugger
 
 	struct DLLStruct
 	{
-		wstring sPath;
+		PTCHAR sPath;
 		bool bLoaded;
 		DWORD dwBaseAdr;
 		DWORD dwPID;
@@ -69,15 +72,6 @@ class clsDebugger
 		DWORD dwExitCode;
 	};
 
-	struct ExceptionStruct
-	{
-		DWORD dwExceptionOffset;
-		DWORD dwExceptionCode;
-		DWORD dwPID;
-		DWORD dwTID;
-	};
-
-
 	struct PIDStruct
 	{
 		DWORD dwPID;
@@ -87,7 +81,7 @@ class clsDebugger
 		BOOL bRunning;
 		BOOL bSymLoad;
 		HANDLE hSymInfo;
-		wstring sFileName;
+		PTCHAR sFileName;
 	};
 
 	struct BPStruct
@@ -114,10 +108,8 @@ public:
 
 	vector<DLLStruct> DLLs;
 	vector<ThreadStruct> Threads;
-	vector<ExceptionStruct> Exceptions;
 	vector<PIDStruct> PIDs;
-	vector<wstring>DbgStrings;
-	vector<wstring>Log;
+	vector<PTCHAR>DbgStrings;
 	vector<BPStruct>SoftwareBPs;
 	vector<BPStruct>MemoryBPs;
 	vector<BPStruct>HardwareBPs;
@@ -162,7 +154,7 @@ public:
 	int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 	int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
 	int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
+	int (*dwOnDbgString)(PTCHAR sMessage,DWORD dwPID);
 	int (*dwOnLog)(wstring sLog);
 	int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 	int (*dwOnCallStack)(DWORD dwStackAddr,
@@ -173,6 +165,7 @@ public:
 	wstring GetTarget();
 
 private:
+	PTCHAR tcLogString;
 	wstring _sTarget;
 	STARTUPINFO _si;
 	PROCESS_INFORMATION _pi;
@@ -190,11 +183,11 @@ private:
 	static unsigned _stdcall DebuggingEntry(LPVOID pThis);
 
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
-	bool PBProcInfo(DWORD dwPID,wstring sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hSymInfo);
+	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hSymInfo);
 	bool PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	bool PBDLLInfo(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
-	bool PBLogInfo(wstring sLog);
-	bool PBDbgString(wstring sMessage,DWORD dwPID);
+	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
+	bool PBLogInfo();
+	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
 	bool wSoftwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
 	bool wMemoryBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep);
 	bool wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep);
@@ -208,6 +201,7 @@ private:
 	DWORD CallBreakDebugger(DEBUG_EVENT debug_event,DWORD dwHandle);
 	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT debug_event);
 
-	wstring GetFileNameFromHandle(HANDLE hFile);
+	PTCHAR GetFileNameFromHandle(HANDLE hFile);
 };
 
+#endif

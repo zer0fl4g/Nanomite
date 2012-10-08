@@ -6,6 +6,7 @@ clsDebugger::clsDebugger()
 	_isDebugging = false;
 	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;
 	hDebuggingHandle = CreateEvent(NULL,false,false,L"clsDebugger");
+	tcLogString = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	dbgSettings = tempSet;
 }
@@ -17,12 +18,15 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_isDebugging = false;
 	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;
 	hDebuggingHandle = CreateEvent(NULL,false,false,L"clsDebugger");
+	tcLogString = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	dbgSettings = tempSet;
 }
 
 clsDebugger::~clsDebugger(void)
 {
+	CleanWorkSpace();
+	free(tcLogString);
 }
 
 bool clsDebugger::IsValidFile()
@@ -43,11 +47,13 @@ wstring clsDebugger::GetTarget()
 
 void clsDebugger::CleanWorkSpace()
 {
+	for(int i = 0; i < DLLs.size(); i++)
+		free(DLLs[i].sPath);
 	DLLs.clear();
-	Exceptions.clear();
 	Threads.clear();
+	for(int i = 0; i < PIDs.size(); i++)
+		PIDs[i].sFileName;
 	PIDs.clear();
-	Log.clear();
 	DbgStrings.clear();
 }
 
@@ -75,8 +81,9 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 
 			if(DebugBreakProcess(hProcess))
 			{
-				wstringstream ss; ss << L"[!] 0x" << hex << dwPID << L" Debugging suspended!";
-				PBLogInfo(ss.str());
+				memset(tcLogString,0x00,255 * sizeof(TCHAR));
+				swprintf_s(tcLogString,255,L"[!] %X Debugging suspended!",dwPID);
+				PBLogInfo();
 				return true;
 			}
 		}
@@ -84,8 +91,9 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 		{
 			if(SuspendProcess(dwPID,true))
 			{
-				wstringstream ss; ss << L"[!] 0x" << hex << dwPID << L" Debugging suspended!";
-				PBLogInfo(ss.str());
+				memset(tcLogString,0x00,255 * sizeof(TCHAR));
+				swprintf_s(tcLogString,255,L"[!] %X Debugging suspended!",dwPID);
+				PBLogInfo();
 				return true;
 			}
 		}
@@ -97,12 +105,7 @@ bool clsDebugger::StopDebuggingAll()
 {
 	_isDebugging = false;
 	for(size_t i = 0;i < PIDs.size();i++)
-	{
-		if(CheckProcessState(PIDs[i].dwPID))
-		{
-			StopDebugging(PIDs[i].dwPID);
-		}
-	}	
+		StopDebugging(PIDs[i].dwPID);
 	return PulseEvent(_hDbgEvent);
 }
 
@@ -173,26 +176,20 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspende
 	}
 
 	if(dwOnThread != NULL)
-	{
 		dwOnThread(dwPID,dwTID,dwEP,bSuspended,dwExitCode,bFound);
-	}
 
-	wstringstream sTempLog;
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
 
 	if(bFound)
-	{
-		sTempLog << "[-] Exit Thread(" << hex << dwTID << ") in Process(" << hex << dwPID << ") with Exitcode: " << dwExitCode;
-	}
+		swprintf_s(tcLogString,255,L"[-] Exit Thread(%X) in Process(%X) with Exitcode: %X",dwTID,dwPID,dwExitCode);
 	else
-	{
-		sTempLog << "[+] New Thread(" << hex << dwTID << ") in Process(" << hex << dwPID << ") with Entrypoint: " << dwEP;
-	}
-	PBLogInfo(sTempLog.str());
+		swprintf_s(tcLogString,255,L"[+] New Thread(%X) in Process(%X) with Entrypoint %X:",dwTID,dwPID,dwEP);
+	PBLogInfo();
 
 	return true;
 }
 
-bool clsDebugger::PBProcInfo(DWORD dwPID,wstring sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hSymInfo)
+bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hSymInfo)
 {
 	bool bFound = false;
 
@@ -222,35 +219,21 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,wstring sFileName,DWORD dwEP,DWORD dwEx
 	}
 
 	if(dwOnPID != NULL)
-	{
 		dwOnPID(dwPID,sFileName,dwExitCode,dwEP,bFound);
-	}
 
-	wstringstream sTempLog;
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+
 	if(bFound)
-	{
-		sTempLog << "[-] Exit Process(" << hex << dwPID << ") with Exitcode: " << dwExitCode;
-	}
+		swprintf_s(tcLogString,255,L"[-] Exit Process(%X) with Exitcode: 0x%08X",dwPID,dwExitCode);
 	else
-	{
-		sTempLog << "[+] New Process(" << hex << dwPID << "): " << sFileName << " with Entrypoint: " << dwEP;
-	}
-
-	PBLogInfo(sTempLog.str());
+		swprintf_s(tcLogString,255,L"[+] New Process(%X) with Entrypoint: 0x%08X",dwPID,dwEP);
+	PBLogInfo();
 
 	return true;
 }
 
 bool clsDebugger::PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID)
 {
-	ExceptionStruct newExcept;
-	newExcept.dwExceptionCode = dwExceptionCode;
-	newExcept.dwExceptionOffset = dwExceptionOffset;
-	newExcept.dwPID = dwPID;
-	newExcept.dwTID = dwTID;
-
-	Exceptions.push_back(newExcept);
-
 	wstring sModName,sFuncName;
 
 	_dwCurPID = dwPID;
@@ -258,23 +241,27 @@ bool clsDebugger::PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,
 	_dwCurPID = 0;
 
 	if(dwOnException != NULL)
-	{
 		dwOnException(sFuncName,sModName,dwExceptionOffset,dwExceptionCode,dwPID,dwTID);
-	}
 
-	wstringstream sTempLog;
-	sTempLog << "[!] " << sFuncName << "@" << sModName << " ExceptionCode: " << hex << dwExceptionCode << " ExceptionOffset: " << hex << dwExceptionOffset << " PID: " << hex << dwPID << " TID: " << hex << dwTID;
-	PBLogInfo(sTempLog.str());
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	swprintf_s(tcLogString,255,L"[!] %s@%s ExceptionCode: %08X ExceptionOffset: %08X PID: %X TID: %X",
+		sFuncName.c_str(),
+		sModName.c_str(),
+		dwExceptionCode,
+		dwExceptionOffset,
+		dwPID,
+		dwTID);
 
+	PBLogInfo();
 	return true;
 }
 
-bool clsDebugger::PBDLLInfo(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
+bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 {
 	bool bFound = false;
 	for(size_t i = 0;i < DLLs.size(); i++)
 	{
-		if(DLLs[i].sPath == sDLLPath && DLLs[i].dwPID)
+		if(wcsstr(DLLs[i].sPath,sDLLPath) != 0 && DLLs[i].dwPID)
 		{
 			DLLs[i].bLoaded = bLoaded;
 			bFound = true;
@@ -293,123 +280,121 @@ bool clsDebugger::PBDLLInfo(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded
 	}
 
 	if(dwOnDll != NULL)
-	{
 		dwOnDll(sDLLPath,dwPID,dwEP,bLoaded);
-	}
 
-	wstringstream sTempLog;
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+
 	if(bLoaded)
-	{
-		sTempLog << "[+] PID(" << hex << dwPID << ") - Loaded DLL: " << sDLLPath << " EntryPoint: " << hex << dwEP;
-	}
+		swprintf_s(tcLogString,255,L"[+] PID(%X) - Loaded DLL: %s Entrypoint: %08X",dwPID,sDLLPath,dwEP);
 	else
-	{
-		sTempLog << "[+] PID(" << hex << dwPID << ") - Unloaded DLL: " << sDLLPath;
-	}
-
-	PBLogInfo(sTempLog.str());
+		swprintf_s(tcLogString,255,L"[+] PID(%X) - Unloaded DLL: %s",dwPID,sDLLPath);
+	PBLogInfo();
 
 	return true;
 }
 
-bool clsDebugger::PBDbgString(wstring sMessage,DWORD dwPID)
+bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
 {
 	DbgStrings.push_back(sMessage);
 
 	if(dwOnDbgString != NULL)
-	{
 		dwOnDbgString(sMessage,dwPID);
-	}
-	wstringstream sTempLog;
-	sTempLog << "[+] PID(" << hex << dwPID << ") DbgString: " << sMessage;
-
-	PBLogInfo(sTempLog.str());
+	
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	swprintf_s(tcLogString,255,L"[+] PID(%X) - DbgString: %s",dwPID,sMessage);
+	PBLogInfo();
+	free(sMessage);
 	return true;
 }
 
-bool clsDebugger::PBLogInfo(wstring sLog)
+bool clsDebugger::PBLogInfo()
 {
 	time_t tTime;
 	tm* timeInfo;
+	PTCHAR tcTempLog = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	time(&tTime);
 	timeInfo = localtime(&tTime);
-	wstringstream ss; ss << "[" << timeInfo->tm_hour << ":" << timeInfo->tm_min << ":" << timeInfo->tm_sec << "] " << sLog;
+
+	swprintf_s(tcTempLog,255,L"[%i:%i:%i] %s",timeInfo->tm_hour,timeInfo->tm_min,timeInfo->tm_sec,tcLogString);
 
 	if(dwOnLog != NULL)
-	{
-		dwOnLog(ss.str());
-	}
-	Log.push_back(ss.str());
-
+		dwOnLog(tcTempLog);
+	free(tcTempLog);
 	return true;
 }
 
-wstring clsDebugger::GetFileNameFromHandle(HANDLE hFile) 
+PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile) 
 {
-	BOOL bSuccess = false;
-	TCHAR pszFilename[MAX_PATH+1];
 	HANDLE hFileMap;
+	DWORD dwFileSizeHi = 0,
+		dwFileSizeLo = GetFileSize(hFile, &dwFileSizeHi); 
 
-	wstringstream strFilename;
-
-	DWORD dwFileSizeHi = 0;
-	DWORD dwFileSizeLo = GetFileSize(hFile, &dwFileSizeHi); 
-
-	if( dwFileSizeLo == 0 && dwFileSizeHi == 0 )
-	{     
+	if(dwFileSizeLo == 0 && dwFileSizeHi == 0)
 		return false;
-	}
 
 	hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,0,1,NULL);
-
-	if (hFileMap) 
+	if (hFileMap == INVALID_HANDLE_VALUE) 
 	{
-		LPVOID pMem = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 1);
-
-		if (pMem) 
-		{
-			if (GetMappedFileName(GetCurrentProcess(),pMem,pszFilename,MAX_PATH)) 
-			{
-				TCHAR szTemp[255];
-				szTemp[0] = '\0';
-
-				if (GetLogicalDriveStrings(255-1, szTemp)) 
-				{
-					TCHAR szName[MAX_PATH];
-					TCHAR szDrive[3] = TEXT(" :");
-					BOOL bFound = false;
-					PTCHAR p = szTemp;
-
-					do 
-					{
-						*szDrive = *p;
-
-						if (QueryDosDevice(szDrive, szName, MAX_PATH))
-						{
-							size_t uNameLen = wcslen(szName);
-
-							if (uNameLen < MAX_PATH) 
-							{
-								bFound = _wcsnicmp(pszFilename, szName,	uNameLen) == 0;
-
-								if (bFound) 
-								{
-									strFilename << szDrive << (pszFilename+uNameLen);
-								}
-							}
-						}
-						while (*p++);
-					} while (!bFound && *p);
-				}
-			}
-			bSuccess = true;
-			UnmapViewOfFile(pMem);
-		} 
-
-		CloseHandle(hFileMap);
+		return NULL;
 	}
 
-	return(strFilename.str());
+	LPVOID pMem = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 1);
+	if (pMem == NULL) 
+	{
+		CloseHandle(hFileMap);
+		return NULL;
+	}
+	
+	PTCHAR tcFilename = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	if (!GetMappedFileName(GetCurrentProcess(),pMem,tcFilename,MAX_PATH)) 
+	{
+		UnmapViewOfFile(pMem);
+		CloseHandle(hFileMap);
+		free(tcFilename);
+		return NULL;
+	}
+	
+	PTCHAR tcTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	tcTemp[0] = '\0';
+
+	if (!GetLogicalDriveStrings(255-1, tcTemp)) 
+	{
+		UnmapViewOfFile(pMem);
+		CloseHandle(hFileMap);
+		free(tcFilename);
+		free(tcTemp);
+		return NULL;
+	}
+	
+	PTCHAR tcName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	PTCHAR tcFile = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	TCHAR tcDrive[3] = TEXT(" :");
+	BOOL bFound = false;
+	PTCHAR p = tcTemp;
+
+	do 
+	{
+		*tcDrive = *p;
+
+		if (QueryDosDevice(tcDrive,tcName,MAX_PATH))
+		{
+			size_t uNameLen = wcslen(tcName);
+			if (uNameLen < MAX_PATH) 
+			{
+				bFound = _wcsnicmp(tcFilename,tcName,uNameLen) == 0;
+				if (bFound)
+					swprintf_s(tcFile,255,L"%s%s",tcDrive,(tcFilename + uNameLen));
+			}
+		}
+		while (*p++);
+	} while (!bFound && *p);
+
+	free(tcName);
+	free(tcTemp);
+	free(tcFilename);
+	UnmapViewOfFile(pMem);
+	CloseHandle(hFileMap);
+	return tcFile;
 }
 
 bool clsDebugger::GetDebuggingState()
@@ -457,7 +442,9 @@ void clsDebugger::AttachedDebugging(LPVOID pDebProc)
 	{
 		_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
-		PBLogInfo(L"[+] Attached to Process");
+		memset(tcLogString,0x00,255 * sizeof(TCHAR));
+		swprintf_s(tcLogString,255,L"[+] Attached to Process");
+		PBLogInfo();
 		DebuggingLoop();
 		_NormalDebugging = true;
 		return;
@@ -500,7 +487,8 @@ void clsDebugger::DebuggingLoop()
 		case CREATE_PROCESS_DEBUG_EVENT:
 			{
 				HANDLE hProc = debug_event.u.CreateProcessInfo.hProcess;
-				PBProcInfo(debug_event.dwProcessId,GetFileNameFromHandle(debug_event.u.CreateProcessInfo.hFile),(DWORD)debug_event.u.CreateProcessInfo.lpStartAddress,-1,hProc);
+				PTCHAR tcDllFilepath = GetFileNameFromHandle(debug_event.u.CreateProcessInfo.hFile);
+				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(DWORD)debug_event.u.CreateProcessInfo.lpStartAddress,-1,hProc);
 
 				int iPid = 0;
 				for(size_t i = 0;i < PIDs.size();i++)
@@ -513,7 +501,7 @@ void clsDebugger::DebuggingLoop()
 
 				if(PIDs[iPid].bSymLoad)
 				{
-					DWORD64 dwBase = SymLoadModuleExW(hProc,debug_event.u.CreateProcessInfo.hFile,GetFileNameFromHandle(debug_event.u.CreateProcessInfo.hFile).c_str(),NULL,(DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
+					DWORD64 dwBase = SymLoadModuleExW(hProc,debug_event.u.CreateProcessInfo.hFile,tcDllFilepath,NULL,(DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
 					IMAGEHLP_MODULE64 module_info;
 					module_info.SizeOfStruct = sizeof(module_info);
@@ -521,9 +509,9 @@ void clsDebugger::DebuggingLoop()
 				}
 				else
 				{
-					wstringstream sTempLog;
-					sTempLog << "[!] Could not load symbols for Process(" << hex << debug_event.dwProcessId << ")";
-					PBLogInfo(sTempLog.str());
+					memset(tcLogString,0x00,255 * sizeof(TCHAR));
+					swprintf_s(tcLogString,255,L"[!] Could not load symbols for Process(%X)",debug_event.dwProcessId);
+					PBLogInfo();
 				}
 
 				BPStruct newBP;
@@ -567,7 +555,15 @@ void clsDebugger::DebuggingLoop()
 
 		case LOAD_DLL_DEBUG_EVENT:
 			{
-				wstring sDLLFileName = GetFileNameFromHandle(debug_event.u.LoadDll.hFile); 
+				PTCHAR sDLLFileName = GetFileNameFromHandle(debug_event.u.LoadDll.hFile); 
+				for(int i = 0;i < DLLs.size(); i++)
+				{
+					if(wcscmp(DLLs[i].sPath,sDLLFileName) == NULL)
+					{
+						free(sDLLFileName);
+						sDLLFileName = DLLs[i].sPath;
+					}
+				}
 				PBDLLInfo(sDLLFileName,debug_event.dwProcessId,(DWORD)debug_event.u.LoadDll.lpBaseOfDll,true);
 
 				HANDLE hProc = 0;
@@ -581,7 +577,7 @@ void clsDebugger::DebuggingLoop()
 
 				if(PIDs[iPid].bSymLoad && dbgSettings.bAutoLoadSymbols == true)
 				{
-					DWORD64 dwBase = SymLoadModuleExW(hProc,NULL,sDLLFileName.c_str(),0,(DWORD)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);
+					DWORD64 dwBase = SymLoadModuleExW(hProc,NULL,sDLLFileName,0,(DWORD)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);
 
 					IMAGEHLP_MODULE64 module_info;
 					module_info.SizeOfStruct = sizeof(module_info);
@@ -589,9 +585,9 @@ void clsDebugger::DebuggingLoop()
 				}
 				else
 				{
-					wstringstream sTempLog;
-					sTempLog << "[!] Could not load symbols for DLL: " << sDLLFileName << ")";
-					PBLogInfo(sTempLog.str());
+					memset(tcLogString,0x00,255 * sizeof(TCHAR));
+					swprintf_s(tcLogString,255,L"[!] Could not load symbols for DLL: %s",sDLLFileName);
+					PBLogInfo();
 				}
 			}
 			break;
@@ -630,7 +626,7 @@ void clsDebugger::DebuggingLoop()
 					mbstowcs(wMsg,Msg,debug_event.u.DebugString.nDebugStringLength);
 					free(Msg);
 				}
-				PBDbgString((LPWSTR)wMsg,debug_event.dwProcessId);
+				PBDbgString(wMsg,debug_event.dwProcessId);
 				//free(wMsg);
 				break;
 			}
@@ -872,7 +868,10 @@ void clsDebugger::DebuggingLoop()
 		dwContinueStatus = DBG_CONTINUE;
 	}
 
-	PBLogInfo(L"[-] Debugging finished!");
+
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	swprintf_s(tcLogString,255,L"[-] Debugging finished!");
+	PBLogInfo();
 	_isDebugging = false;
 	PulseEvent(hDebuggingHandle);
 }
@@ -1077,9 +1076,10 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKe
 			}
 		}while(Thread32Next(hProcessSnap,&threadEntry32));
 
-		wstringstream sTemp;
-		sTemp << "[+] New HardwareBP in " << dwThreadCounter << " Threads placed at " << hex << dwOffset << " in Slot Nr.: " << dwSlot;
-		PBLogInfo(sTemp.str());
+
+		memset(tcLogString,0x00,255 * sizeof(TCHAR));
+		swprintf_s(tcLogString,255,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,dwSlot);
+		PBLogInfo();
 
 		CloseHandle(hProcessSnap);
 		return true;
@@ -1090,7 +1090,7 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKe
 
 bool clsDebugger::StepOver(DWORD dwNewOffset)
 {
-	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it!= SoftwareBPs.end(); ++it) {
+	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it!= SoftwareBPs.end(); it++) {
 		if(it->dwHandle == 0x2)
 		{
 			SoftwareBPs.erase(it);
@@ -1153,6 +1153,9 @@ bool clsDebugger::ShowCallStack()
 		return false; //SuspendDebugging();
 
 	HANDLE hProc,hThread = OpenThread(THREAD_ALL_ACCESS,false,_dwCurTID);
+	PSYMBOL_INFOW pSymbol = (SYMBOL_INFOW*)malloc(sizeof(SYMBOL_INFOW)+MAX_SYM_NAME);
+	DWORD64 dwDisplacement;
+	IMAGEHLP_MODULEW64 imgMod = {0};
 
 	int iPid = 0;
 	for(size_t i = 0;i < PIDs.size(); i++)
@@ -1187,13 +1190,10 @@ bool clsDebugger::ShowCallStack()
 		if(!bSuccess)        
 			break;
 
-		IMAGEHLP_MODULEW64 imgMod = {0};
+		memset(&imgMod,0x00,sizeof(imgMod));
 		imgMod.SizeOfStruct = sizeof(imgMod);
 		bSuccess = SymGetModuleInfoW64(hProc,(DWORD)stackFr.AddrPC.Offset, &imgMod);
 
-		SYMBOL_INFOW *pSymbol;
-		DWORD64 dwDisplacement;
-		pSymbol = (SYMBOL_INFOW*)new BYTE[sizeof(SYMBOL_INFOW)+MAX_SYM_NAME];
 		memset(pSymbol, 0, sizeof(PSYMBOL_INFOW) + MAX_SYM_NAME);
 		pSymbol->SizeOfStruct = sizeof(PSYMBOL_INFOW);
 		pSymbol->MaxNameLen = MAX_SYM_NAME;
@@ -1209,7 +1209,7 @@ bool clsDebugger::ShowCallStack()
 		DWORD dwReturnTo = stackFr.AddrReturn.Offset;
 		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
 		wstring sReturnToFunc = pSymbol->Name;
-		bSuccess = SymGetModuleInfoW64(hProc, (DWORD)dwReturnTo, &imgMod);
+		bSuccess = SymGetModuleInfoW64(hProc,(DWORD)dwReturnTo,&imgMod);
 		wstring sReturnToMod = imgMod.ModuleName;
 
 		IMAGEHLP_LINEW64 imgSource;
@@ -1229,6 +1229,7 @@ bool clsDebugger::ShowCallStack()
 		
 	}while ( stackFr.AddrReturn.Offset != 0 );
 
+	free(pSymbol);
 	return false;
 }
 
@@ -1373,6 +1374,8 @@ bool clsDebugger::AttachToProcess(DWORD dwPID)
 bool clsDebugger::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD dwOffset)
 {
 	HANDLE hProcess = INVALID_HANDLE_VALUE;
+	bool bTest = false;
+
 	if(_dwCurPID == 0)
 		_dwCurPID = _pi.dwProcessId;
 
@@ -1386,25 +1389,24 @@ bool clsDebugger::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD d
 	if(!PIDs[iPid].bSymLoad)
 		PIDs[iPid].bSymLoad = SymInitialize(hProcess,NULL,false);
 
-	SymRefreshModuleList(hProcess);
+	bTest = SymRefreshModuleList(hProcess);
 
 	IMAGEHLP_MODULEW imgMod = {0};
 	imgMod.SizeOfStruct = sizeof(imgMod);
-	BOOL bSymMod = SymGetModuleInfoW(hProcess,dwOffset,&imgMod);
-
-	SYMBOL_INFOW *pSymbol;
-	DWORD64 dwDisplacement;
-	pSymbol = (SYMBOL_INFOW*)new BYTE[sizeof(SYMBOL_INFOW)+MAX_SYM_NAME];
+	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 	memset(pSymbol, 0, sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 	pSymbol->MaxNameLen = MAX_SYM_NAME;
+	DWORD64 dwDisplacement;
 
-	bool bSuc = SymFromAddrW(hProcess,dwOffset,&dwDisplacement,pSymbol);
+	bTest = SymGetModuleInfoW(hProcess,dwOffset,&imgMod);
+	bTest = SymFromAddrW(hProcess,dwOffset,&dwDisplacement,pSymbol);
 
 	sFuncName = pSymbol->Name;
 	sModName = imgMod.ModuleName;
 
-	return bSuc;
+	free(pSymbol);
+	return bTest;
 }
 
 bool clsDebugger::RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID)

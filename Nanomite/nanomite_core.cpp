@@ -1521,7 +1521,7 @@ LRESULT CALLBACK AboutDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 		{
 			PTCHAR sTemp = (PTCHAR)malloc(sizeof(TCHAR) * 255);
 
-			wsprintf(sTemp,L"\t\t\t\tNanomite v 0.1\r\n\r\nCoded by: Zer0Flag\r\nCoded in: C++\r\n\r\nGreetz: \r\nContact:\r\n\teMail:\tzer0fl4g@googlemail.com\r\n\tIRC:\tirc.rizion.net #SSTeam");
+			wsprintf(sTemp,L"\t\t\t\tNanomite v 0.1\r\n\r\nCoded by: Zer0Flag\r\nCoded in: C++\r\n\r\nGreetz: \r\nContact:\r\n\teMail:\tzer0fl4g@googlemail.com\r\n");
 			Edit_SetText(GetDlgItem(hWndDlg,IDC_ABOUT),sTemp);
 
 			free(sTemp);
@@ -1694,7 +1694,7 @@ LRESULT CALLBACK StringViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 
 				if(!inputFile.is_open())
 				{
-					MessageBox(hWndDlg,newDebugger.PIDs[i].sFileName.c_str(),L"Error opening File!",MB_OKCANCEL);
+					MessageBox(hWndDlg,newDebugger.PIDs[i].sFileName,L"Error opening File!",MB_OKCANCEL);
 					bNotEndOfFile = false;
 				}
 
@@ -1973,7 +1973,7 @@ LRESULT CALLBACK RessourceDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 			for(int i = iForEntry; i < iForEnd;i++)
 			{
 				EnumInfoStruct eI; eI.dwPID = newDebugger.PIDs[i].dwPID; eI.sFileName = newDebugger.PIDs[i].sFileName;
-				if(EnumResourceTypes(LoadLibrary(newDebugger.PIDs[i].sFileName.c_str()),EnumResTypes,(LPARAM)&eI) == 0)
+				if(EnumResourceTypes(LoadLibrary(newDebugger.PIDs[i].sFileName),EnumResTypes,(LPARAM)&eI) == 0)
 				{
 					DWORD dwError = GetLastError();
 					return false;
@@ -3068,7 +3068,7 @@ bool printPEView(HWND hWndDlg,int i)
 		hwDATADIR = GetDlgItem(hWndDlg,IDC_DATADIRS),
 		hwSTATE = GetDlgItem(hWndDlg,IDC_PEViewState);
 
-	HMODULE hFile = LoadLibrary(newDebugger.PIDs[i].sFileName.c_str());
+	HMODULE hFile = LoadLibrary(newDebugger.PIDs[i].sFileName);
 	if(hFile != 0)
 	{
 		IMAGE_DOS_HEADER* pDOSHeader = (IMAGE_DOS_HEADER*)hFile;
@@ -3078,7 +3078,7 @@ bool printPEView(HWND hWndDlg,int i)
 			if(pNTHeader->Signature == IMAGE_NT_SIGNATURE)
 			{
 				PTCHAR sTemp = (PTCHAR)malloc(255);
-				wsprintf(sTemp,L"[%08X] - File: %s",newDebugger.PIDs[i].dwPID,newDebugger.PIDs[i].sFileName.c_str());
+				wsprintf(sTemp,L"[%08X] - File: %s",newDebugger.PIDs[i].dwPID,newDebugger.PIDs[i].sFileName);
 				Static_SetText(hwSTATE,sTemp);
 				free(sTemp);
 

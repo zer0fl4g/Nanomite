@@ -1,5 +1,12 @@
 #include "../clsDebugger/clsDebugger.h"
 
+// Leak detection
+#include <stdlib.h>
+#include <crtdbg.h>
+
+#define _CRTDBG_MAP_ALLOC
+// Leak detection
+
 // Our callback function which gets triggered if log gets updated
 int OnLog(wstring sLog)
 {
@@ -7,7 +14,7 @@ int OnLog(wstring sLog)
 	return 0;
 }
 
-// Our callback funktion which gets triggered on "clsDebugger.ShowCallstack()"
+// Our callback function which gets triggered on "clsDebugger.ShowCallstack()"
 int OnCallStack(DWORD dwStackAddr,
 	DWORD dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
 	DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
@@ -21,11 +28,12 @@ int _tmain(int argc, PCHAR argv[])
 {
 	bool bDebugIt = true;
 
-	// Creating new Inistance with a Target
-	// Without parameter for Attaching to a running Process ( or set it manual later with .SetTarget(<path>))
-	clsDebugger tempDebugger(L"C:\\Dropbox\\clsDebugger\\Debug\\Debugme.exe");
-	//clsDebugger tempDebugger("C:\\Program Files\\Microsoft Visual Studio 10.0\\Common7\\IDE\\devenv.exe");
-	//clsDebugger tempDebugger("C:\\Programme\\Mozilla Firefox\\firefox.exe");
+	/*
+	| Creating new Instance with a Target
+	| Without parameter for Attaching to a running Process ( or set it manual later with .SetTarget(<path>))
+	*/
+	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
+	clsDebugger tempDebugger(L"C:\\Program Files\\Microsoft Office\\Office14\\WINWORD.EXE");
 	//clsDebugger tempDebugger; // needs manual set of target with .SetTarget(<path>)
 
 	 // Setting Option to enable child process debugging
@@ -50,18 +58,20 @@ int _tmain(int argc, PCHAR argv[])
 	tempDebugger.dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION = 1;
 	tempDebugger.dbgSettings.dwEXCEPTION_BREAKPOINT = 0; // Does not affect Breakpoints ( Attaching INT3 will be ignored and program runs direct after attaching )
 
-	// Enable autoload of symbols
-	// Note: Disable may cause missing function names in callback/exception info but target will load faster
+	/*
+	| Enable autoload of symbols
+	| Note: Disable may cause missing function names in callback/exception info but target will load faster
+	*/
 	tempDebugger.dbgSettings.bAutoLoadSymbols = true;
 
 	/* Set Callbacks 
 	| int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
-	| int (*dwOnPID)(DWORD dwPID,string sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
-	| int (*dwOnException)(string sFuncName,string sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	| int (*dwOnDbgString)(string sMessage,DWORD dwPID);
-	| int (*dwOnLog)(string sLog);
-	| int (*dwOnDll)(string sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
-	| int (*dwOnCallStack)(DWORD dwStackAddr,DWORD dwReturnTo,string sReturnToFunc,string sModuleName,DWORD dwEIP,string sFuncName,string sFuncModule,string sSourceFilePath,int iSourceLineNum);
+	| int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
+	| int (*dwOnException)(wstring sFuncName,string sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	| int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
+	| int (*dwOnLog)(wstring sLog);
+	| int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
+	| int (*dwOnCallStack)(DWORD dwStackAddr,DWORD dwReturnTo,wstring sReturnToFunc,wstring sModuleName,DWORD dwEIP,wstring sFuncName,wstring sFuncModule,wstring sSourceFilePath,int iSourceLineNum);
 	*/
 	tempDebugger.dwOnCallStack = &OnCallStack;
 	tempDebugger.dwOnLog = &OnLog; 
@@ -92,12 +102,10 @@ int _tmain(int argc, PCHAR argv[])
 		WaitForSingleObject(tempDebugger.hDebuggingHandle,INFINITE); // Waiting for Debugevent
 
 		if(!tempDebugger.GetDebuggingState()) // Check if debugging is still running
-		{
 			bDebugIt = false; // if not just quit
-		}
 		else
 		{
-			// if still running print CPU registers and continue debugging
+			// if still running print CPU registers
 			wprintf(L"\nCONTEXT:\n\tEAX: %08X\n\tEBX: %08X\n\tECX: %08X\n\tEDX: %08X\n\tEIP: %08X\n\tESP: %08X\n\tEBP: %08X\n\tESI: %08X\n\tEDI: %08X\n\n",
 				tempDebugger.ProcessContext.Eax,
 				tempDebugger.ProcessContext.Ebx,
@@ -115,5 +123,6 @@ int _tmain(int argc, PCHAR argv[])
 		}
 	}
 	getchar();
+	_CrtDumpMemoryLeaks();
 	return 0;
 }

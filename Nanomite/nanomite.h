@@ -1,8 +1,12 @@
-#pragma once
+#ifndef NanomiteH
+#define NanomiteH
+
+#pragma pack(1)
 
 #include <windows.h>
 #include <WindowsX.h>
 #include <fstream>
+#include <sstream>
 #include <algorithm>
 #include <CommCtrl.h>
 
@@ -166,3 +170,5 @@ typedef struct _OBJECT_TYPE_INFORMATION
 	ULONG PagedPoolUsage;
 	ULONG NonPagedPoolUsage;
 } OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
+
+#endif 
