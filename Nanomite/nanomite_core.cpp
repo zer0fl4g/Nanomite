@@ -276,7 +276,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 		case ID_DEBUG_STEPIN:
 			if(newDebugger.GetDebuggingState())
-				newDebugger.StepOver(CalcNewOffset(newDebugger.ProcessContext.Eip,true));
+				newDebugger.StepIn();
 			return true;
 
 		case ID_FILE_DETACH:
@@ -1521,7 +1521,7 @@ LRESULT CALLBACK AboutDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 		{
 			PTCHAR sTemp = (PTCHAR)malloc(sizeof(TCHAR) * 255);
 
-			wsprintf(sTemp,L"\t\t\t\tNanomite v 0.1\r\n\r\nCoded by: Zer0Flag\r\nCoded in: C++\r\n\r\nGreetz: \r\nContact:\r\n\teMail:\tzer0fl4g@googlemail.com\r\n");
+			wsprintf(sTemp,L"\t\t\tNanomite v 0.1\r\n\r\nCoded by: Zer0Flag\r\n\r\nCoded in: C++\r\n\r\nGreetz: C3lt1c, s0rb, aSh, #coderz.cc and all others ;)\r\n\r\nContact:\tzer0fl4g@googlemail.com\r\n");
 			Edit_SetText(GetDlgItem(hWndDlg,IDC_ABOUT),sTemp);
 
 			free(sTemp);
@@ -2333,7 +2333,7 @@ int OnCallStack(DWORD dwStackAddr,
 				DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
 				wstring sSourceFilePath,int iSourceLineNum)
 {
-	PTCHAR sTemp = (PTCHAR)malloc(256);
+	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	int itemIndex;
 	LVITEM LvItem;
 	memset(&LvItem,0,sizeof(LvItem));
@@ -2523,7 +2523,7 @@ void LoadDisAssView(DWORD dwEIP)
 	int iLen = 0,iVor = 0, iNach = 0;
 
 	HANDLE hProc = NULL;
-	void *pBuffer = malloc(100);
+	LPVOID pBuffer = malloc(100);
 	
 	memset(&newDisAss, 0, sizeof(DISASM));
 
@@ -2682,9 +2682,8 @@ void LoadDisAssView(DWORD dwEIP)
 
 void LoadRegView()
 {
-	PTCHAR sTemp = (PTCHAR)malloc(512 * sizeof(TCHAR));
-
-	DWORD dwEFlags = newDebugger.ProcessContext.EFlags - 0x202; // 0x200 InterruptFlag - must be set since we breaked it , 0x002 - always set
+	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	DWORD dwEFlags = newDebugger.ProcessContext.EFlags;
 	BOOL bCF = false, // Carry Flag
 		bPF = false, // Parity Flag
 		bAF = false, // Auxiliarty carry flag
@@ -2695,59 +2694,14 @@ void LoadRegView()
 		bDF = false, // Direction Flag
 		bOF = false; // Overflow Flag
 
-	if(dwEFlags >= 0x200000)
-		dwEFlags -= 0x200000;
-	if(dwEFlags >= 0x100000)
-		dwEFlags -= 0x100000;
-	if(dwEFlags >= 0x80000)
-		dwEFlags -= 0x80000;
-	if(dwEFlags >= 0x40000)
-		dwEFlags -= 0x40000;
-	if(dwEFlags >= 0x20000)
-		dwEFlags -= 0x20000;
-	if(dwEFlags >= 0x10000)
-		dwEFlags -= 0x10000;
-	if(dwEFlags >= 0x4000)
-		dwEFlags -= 0x4000;
-	if(dwEFlags >= 0x3000)
-		dwEFlags -= 0x3000;
-	if(dwEFlags >= 0x800)
-	{
-		dwEFlags -= 0x800;
-		bOF = true;
-	}
-	if(dwEFlags >= 0x400)
-	{
-		dwEFlags -= 0x400;
-		bDF = true;
-	}
-	if(dwEFlags >= 0x100)
-	{
-		dwEFlags -= 0x100;
-		bTF = true;
-	}
-	if(dwEFlags >= 0x80)
-	{
-		dwEFlags -= 80;
-		bSF = true;
-	}
-	if(dwEFlags >= 0x40)
-	{
-		dwEFlags -= 0x40;
-		bZF = true;
-	}
-	if(dwEFlags >= 0x10)
-	{
-		dwEFlags -= 0x10;
-		bAF = true;
-	}
-	if(dwEFlags >= 0x4)
-	{
-		dwEFlags -= 0x4;
-		bPF = true;
-	}
-	if(dwEFlags >= 1)
-		bCF = true;
+	bOF = (dwEFlags & 0x800) ? true : false;
+	bDF = (dwEFlags & 0x400) ? true : false;
+	bTF = (dwEFlags & 0x100) ? true : false;
+	bSF = (dwEFlags & 0x80) ? true : false;
+	bZF = (dwEFlags & 0x40) ? true : false;
+	bAF = (dwEFlags & 0x10) ? true : false;
+	bPF = (dwEFlags & 0x4) ? true : false;
+	bCF = (dwEFlags & 0x1) ? true : false;
 
 	wsprintf(sTemp,L"EAX\t- 0x%08X\tCF:%X\r\nECX\t- 0x%08X\tPF:%X\r\nEDX\t- 0x%08X\tAF:%X\r\nEBX\t- 0x%08X\tZF:%X\r\nESP\t- 0x%08X\tSF:%X\r\nEBP\t- 0x%08X\tTF:%X\r\nESI\t- 0x%08X\tDF:%X\r\nEDI\t- 0x%08X\tOF:%X\r\nEIP\t- 0x%08X\r\n",
 		newDebugger.ProcessContext.Eax,

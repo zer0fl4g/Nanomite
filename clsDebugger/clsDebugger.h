@@ -22,7 +22,10 @@ using namespace std;
 #define DR_EXECUTE	(0x00)		/* Break on instruction execution.  */
 #define DR_WRITE	(0x01)		/* Break on data writes.			*/
 #define DR_READ		(0x11)		/* Break on data reads or writes.	*/
+//
 
+
+#define THREAD_GETSET_CONTEXT	(0x0018) 
 
 class clsDebugger
 {
@@ -77,9 +80,11 @@ class clsDebugger
 		DWORD dwPID;
 		DWORD dwExitCode;
 		DWORD dwEP;
+		DWORD dwBPRestoreFlag;
 		BOOL bKernelBP;
 		BOOL bRunning;
 		BOOL bSymLoad;
+		BOOL bTrapFlag;
 		HANDLE hSymInfo;
 		PTCHAR sFileName;
 	};
@@ -90,6 +95,7 @@ class clsDebugger
 		DWORD dwSize;
 		DWORD dwSlot;
 		DWORD dwPID;
+		bool bRestoreBP;
 		BYTE bOrgByte;
 		DWORD dwHandle;
 		/*
@@ -134,6 +140,7 @@ public:
 	bool StartDebugging();
 	bool GetDebuggingState();
 	bool StepOver(DWORD dwNewOffset);
+	bool StepIn();
 	bool ShowCallStack();
 	bool DetachFromProcess(bool bAll,DWORD dwPID);
 	bool AttachToProcess(DWORD dwPID);
@@ -170,9 +177,11 @@ private:
 	STARTUPINFO _si;
 	PROCESS_INFORMATION _pi;
 	bool _isDebugging;
-	HANDLE _hDbgEvent;
 	bool _NormalDebugging;
-	DWORD _dwPidToAttach,_dwCurPID,_dwCurTID;
+	HANDLE _hDbgEvent;
+	DWORD _dwPidToAttach;
+	DWORD _dwCurPID;
+	DWORD _dwCurTID;
 
 	void DebuggingLoop();
 	void AttachedDebugging(LPVOID pDebProc);
@@ -195,7 +204,7 @@ private:
 	bool IsValidFile();
 	bool RemoveHWBP(DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
-	bool CheckIfExceptionIsBP(EXCEPTION_DEBUG_INFO exInfo);
+	bool CheckIfExceptionIsBP(DWORD dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
 
 	DWORD CallBreakDebugger(DEBUG_EVENT debug_event,DWORD dwHandle);

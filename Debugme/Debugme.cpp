@@ -18,11 +18,11 @@ int _tmain(int argc,PCHAR argv[])
 
 	//RetTest();
 	if(IsDebuggerPresent())
-		MessageBox(NULL,L"Debugger Found",L"Debugme!",MB_OK);
+		MessageBoxW(NULL,L"Debugger Found",L"Debugme!",MB_OK);
 	else
-		MessageBox(NULL,L"Debugger NOT Found",L"Debugme!",MB_OK);
+		MessageBoxW(NULL,L"Debugger NOT Found",L"Debugme!",MB_OK);
 	
-	MessageBoxA(NULL,"TEXT",NULL,MB_OK);
+	MessageBoxW(NULL,L"TEXT",NULL,MB_OK);
 	return 0;
 }
 
