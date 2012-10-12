@@ -32,8 +32,8 @@ int _tmain(int argc, PCHAR argv[])
 	| Creating new Instance with a Target
 	| Without parameter for Attaching to a running Process ( or set it manual later with .SetTarget(<path>))
 	*/
-	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
-	clsDebugger tempDebugger(L"C:\\Program Files\\Microsoft Office\\Office14\\WINWORD.EXE");
+	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
+	//clsDebugger tempDebugger(L"C:\\Program Files\\Microsoft Office\\Office14\\WINWORD.EXE");
 	//clsDebugger tempDebugger; // needs manual set of target with .SetTarget(<path>)
 
 	 // Setting Option to enable child process debugging
@@ -45,7 +45,7 @@ int _tmain(int argc, PCHAR argv[])
 	| 2 = TLSCallback // Not working right now
 	| 3 = Direkt run
 	*/
-	tempDebugger.dbgSettings.dwBreakOnEPMode = 0;
+	tempDebugger.dbgSettings.dwBreakOnEPMode = 3;
 
 	/* Settings for Exception Handling
 	| 0 = Break and wait for User
@@ -81,13 +81,19 @@ int _tmain(int argc, PCHAR argv[])
 	|		0 = SoftwareBP
 	|	    1 = MemoryBP
 	|		2 = HardwareBP 
+	|	
+	| dwSlot: Only for HW Breakpoints
+	|		0 - Dr0
+	|		1 - Dr1
+	|		2 - Dr2
+	|		3 - Dr3
 	|
 	|	Note:
 	|		If you don´t know the PID ( check public PIDs vector for all running Processes in the debugger ) 
 	|		use -1 to set BP in "Mother" process
 	*/
-	tempDebugger.AddBreakpointToList(0,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringA"),true);
-	tempDebugger.AddBreakpointToList(0,-1,(DWORD)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxA"),true);
+	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
+	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
 
 	// Run Debugging
 	tempDebugger.StartDebugging();

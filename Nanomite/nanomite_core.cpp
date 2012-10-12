@@ -904,15 +904,15 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 					lvItem.iItem = i;
 					lvItem.iSubItem = 0;
 					lvItem.pszText = sTemp;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,0,(LPARAM)&lvItem);
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
 					wstringstream ssdwOffset;ssdwOffset.str(wstring());ssdwOffset << sTemp;ssdwOffset >> hex >> dwOffset;
 					
 					lvItem.iSubItem = 1;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,0,(LPARAM)&lvItem);
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
 					wstringstream ssdwPID;ssdwPID.str(wstring());ssdwPID << sTemp;ssdwPID >> hex >> dwPID;
 
 					lvItem.iSubItem = 2;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,0,(LPARAM)&lvItem);
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
 
 					if(wcscmp(sTemp,L"Software BP ( 0xCC / INT 3)") == 0)
 						dwType = 0;
@@ -923,21 +923,21 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 
 					bool bAdd = false;
 					lvItem.iSubItem = 3;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,0,(LPARAM)&lvItem);
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
 					if(wcscmp(sTemp,L"ENABLED") == 0)
 						bAdd = true;
 					else
 						bAdd = false;
 
 					lvItem.iSubItem = 4;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,0,(LPARAM)&lvItem);
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
 					if(wcscmp(sTemp,L"YES") == 0)
 						bKeep = true;
 					else
 						bKeep = false;
 
 					if(bAdd)
-						newDebugger.AddBreakpointToList(dwType,dwPID,dwOffset,bKeep);
+						newDebugger.AddBreakpointToList(dwType,dwPID,dwOffset,0,bKeep);
 				}
 
 				MessageBox(hDlgBPManager,L"Breakpoint Saved!",L"Nanomite",MB_OK);

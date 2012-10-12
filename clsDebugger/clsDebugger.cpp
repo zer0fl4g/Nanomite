@@ -4,7 +4,7 @@ clsDebugger::clsDebugger()
 {
 	_NormalDebugging = true;
 	_isDebugging = false;
-	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;
+	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;dwOnCallStack = NULL;
 	hDebuggingHandle = CreateEvent(NULL,false,false,L"clsDebugger");
 	tcLogString = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -16,7 +16,7 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_sTarget = sTarget;
 	_NormalDebugging = true;
 	_isDebugging = false;
-	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;
+	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;dwOnCallStack = NULL;
 	hDebuggingHandle = CreateEvent(NULL,false,false,L"clsDebugger");
 	tcLogString = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
@@ -798,7 +798,7 @@ void clsDebugger::DebuggingLoop()
 							{
 								if(HardwareBPs[i].bRestoreBP == true)
 								{
-									wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,true);
+									wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot);
 									HardwareBPs[i].bRestoreBP = false;
 								}
 							}
@@ -812,7 +812,7 @@ void clsDebugger::DebuggingLoop()
 							{
 								if(HardwareBPs[i].dwOffset == (DWORD)debug_event.u.Exception.ExceptionRecord.ExceptionAddress &&
 									(HardwareBPs[i].dwPID == debug_event.dwProcessId || HardwareBPs[i].dwPID == -1) &&
-									RemoveHWBP(debug_event.dwProcessId))
+									dHardwareBP(debug_event.dwProcessId,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSlot))
 								{
 									HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,debug_event.dwThreadId);
 									
@@ -865,10 +865,6 @@ void clsDebugger::DebuggingLoop()
 				}
 			default:
 				{
-					//if(debug_event.u.Exception.dwFirstChance == 1)
-					//{
-					//	dwContinueStatus = CallBreakDebugger(debug_event,0);
-					//}
 					bool bCustomHandler = false;
 					for (int i = 0; i < exCustom.size();i++)
 					{
@@ -969,143 +965,91 @@ bool clsDebugger::wMemoryBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep
 {
 	MEMORY_BASIC_INFORMATION MBI;
 	SYSTEM_INFO sysInfo;
-	DWORD dwOldProtection,dwPageOffset;
+	DWORD dwOldProtection;
 
-	HANDLE hPID;
-	hPID = _pi.hProcess;
+	HANDLE hPID = _pi.hProcess;
 	
 	for(size_t i = 0;i < PIDs.size(); i++)
-	{
 		if(PIDs[i].dwPID == dwPID)
 			hPID = PIDs[i].hSymInfo;
-	}
 
 	GetSystemInfo(&sysInfo);
 	VirtualQueryEx(hPID,(LPVOID)dwOffset,&MBI,sizeof(MBI));
 
 	if(!VirtualProtectEx(hPID,(LPVOID)dwOffset,dwSize,MBI.Protect | PAGE_GUARD,&dwOldProtection))
 		return false;
-
-	//dwPageOffset = (DWORD)MBI.BaseAddress;
-
-	//while(dwPageOffset <= (dwOffset + dwSize))
-	//{
-	//	if(!VirtualProtectEx(hPID,MBI.BaseAddress,dwSize,MBI.Protect | PAGE_GUARD,&dwOldProtection))
-	//		return false;
-	//	dwPageOffset += sysInfo.dwPageSize;
-	//}
 	return true;
 }
 
-bool clsDebugger::wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep)
+bool clsDebugger::wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwSlot)
 {
-	bool bSlot1 = false,bSlot2 = false,bSlot3 = false,bSlot4 = false;
+	int iBP = NULL;
+	DWORD dwThreadCounter = 0;
+	THREADENTRY32 threadEntry32;
+	threadEntry32.dwSize = sizeof(THREADENTRY32);
+	CONTEXT cTT;
+	cTT.ContextFlags = CONTEXT_ALL;
+	HANDLE hThread = INVALID_HANDLE_VALUE;
 
 	if(dwPID == -1)
 		dwPID = _pi.dwProcessId;
 
-	if(dwSize == 1 || dwSize == 2 || dwSize == 4)
+	if(dwSize != 1 && dwSize != 2 && dwSize != 4)
+		return false; 
+
+	for(size_t i = 0;i < HardwareBPs.size();i++)
+		if(HardwareBPs[i].dwOffset == dwOffset)
+			iBP = i;
+
+	HANDLE hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,dwPID);
+	if(hProcessSnap == INVALID_HANDLE_VALUE)
+		return false;
+
+	if(!Thread32First(hProcessSnap,&threadEntry32))
 	{
-		for(size_t i = 0;i < HardwareBPs.size();i++)
-		{
-			switch(HardwareBPs[i].dwSlot)
-			{
-			case 1:
-				bSlot1 = true;
-				break;
-			case 2:
-				bSlot2 = true;
-				break;
-			case 3:
-				bSlot3 = true;
-				break;
-			case 4:
-				bSlot4 = true;
-				break;
-			default:
-				HardwareBPs[i].dwSlot = 1;
-			}
-		}
-
-		DWORD dwSlot;
-
-		if(!bSlot4) dwSlot = 4;
-		if(!bSlot3) dwSlot = 3;
-		if(!bSlot2) dwSlot = 2;
-		if(!bSlot1) dwSlot = 1;
-
-		HANDLE hProcessSnap;
-		THREADENTRY32 threadEntry32;
-
-		hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,dwPID);
-
-		if(hProcessSnap == INVALID_HANDLE_VALUE)
-		{
-			return false;
-		}
-
-		threadEntry32.dwSize = sizeof(THREADENTRY32);
-
-		if(!Thread32First(hProcessSnap,&threadEntry32))
-		{
-			CloseHandle(hProcessSnap);
-			return false;
-		}
-
-		DWORD dwThreadCounter = 0;
-
-		do{
-			CONTEXT cTT;
-			cTT.ContextFlags = CONTEXT_ALL;
-			HANDLE hThread = INVALID_HANDLE_VALUE;
-
-			if(dwPID == threadEntry32.th32OwnerProcessID)
-				hThread = OpenThread(THREAD_ALL_ACCESS,false,threadEntry32.th32ThreadID);
-
-			if(hThread != INVALID_HANDLE_VALUE)
-			{
-				dwThreadCounter++;
-				GetThreadContext(hThread,&cTT);
-
-				switch(dwSlot)
-				{
-				case 1:
-					cTT.Dr0 = dwOffset;
-					break;
-				case 2:
-					cTT.Dr1 = dwOffset;
-					break;
-				case 3:
-					cTT.Dr2 = dwOffset;
-					break;
-				case 4:
-					cTT.Dr3 = dwOffset;
-					break;
-				}
-
-				//cTT.Dr6 = 0;
-				//cTT.Dr7 |= 1 << (dwSlot * 2);
-				//cTT.Dr7 |= DR_EXECUTE << ((dwSlot * 4) + 16 );
-				//cTT.Dr7 |= dwSize << ((dwSlot * 4) + 18 );
-
-				SetDebugBitMask(cTT.Dr7,16 + ((dwSlot - 1)*4),2,DR_EXECUTE); 
-				SetDebugBitMask(cTT.Dr7,18 + ((dwSlot - 1)*4),2,dwSize); 
-				SetDebugBitMask(cTT.Dr7,(dwSlot - 1)*2,1,1);		
-
-				SetThreadContext(hThread,&cTT);
-			}
-		}while(Thread32Next(hProcessSnap,&threadEntry32));
-
-
-		memset(tcLogString,0x00,255 * sizeof(TCHAR));
-		swprintf_s(tcLogString,255,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,dwSlot);
-		PBLogInfo();
-
 		CloseHandle(hProcessSnap);
-		return true;
+		return false;
 	}
 
-	return false;
+	do{
+		if(dwPID == threadEntry32.th32OwnerProcessID)
+			hThread = OpenThread(THREAD_ALL_ACCESS,false,threadEntry32.th32ThreadID);
+
+		if(hThread != INVALID_HANDLE_VALUE)
+		{
+			dwThreadCounter++;
+			GetThreadContext(hThread,&cTT);
+
+			switch(HardwareBPs[iBP].dwSlot)
+			{
+			case 0:
+				cTT.Dr0 = HardwareBPs[iBP].dwOffset;
+				break;
+			case 1:
+				cTT.Dr1 = HardwareBPs[iBP].dwOffset;
+				break;
+			case 2:
+				cTT.Dr2 = HardwareBPs[iBP].dwOffset;
+				break;
+			case 3:
+				cTT.Dr3 = HardwareBPs[iBP].dwOffset;
+				break;
+			}
+
+			cTT.Dr7 |= 1 << (HardwareBPs[iBP].dwSlot * 2);
+			cTT.Dr7 |= DR_EXECUTE << ((HardwareBPs[iBP].dwSlot * 4) + 16);
+			cTT.Dr7 |= (dwSize - 1) << ((HardwareBPs[iBP].dwSlot * 4) + 18);
+
+			SetThreadContext(hThread,&cTT);
+		}
+	}while(Thread32Next(hProcessSnap,&threadEntry32));
+
+	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	swprintf_s(tcLogString,255,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,HardwareBPs[iBP].dwOffset,HardwareBPs[iBP].dwSlot);
+	PBLogInfo();
+
+	CloseHandle(hProcessSnap);
+	return true;
 }
 
 bool clsDebugger::StepOver(DWORD dwNewOffset)
@@ -1259,7 +1203,7 @@ bool clsDebugger::ShowCallStack()
 	return false;
 }
 
-void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,DWORD dwKeep)
+void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,DWORD dwSlot,DWORD dwKeep)
 {
 	bool bExists = false;
 
@@ -1329,13 +1273,37 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,
 					return;
 
 				BPStruct newBP;
-
 				newBP.dwOffset = dwOffset;
 				newBP.dwHandle = dwKeep;
 				newBP.dwSize = 1;
 				newBP.dwPID = dwPID;
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
+
+				bool bSlot1 = false,bSlot2 = false,bSlot3 = false,bSlot4 = false;
+				for(size_t i = 0;i < HardwareBPs.size();i++)
+				{
+					switch(HardwareBPs[i].dwSlot)
+					{
+					case 0:
+						bSlot1 = true;
+						break;
+					case 1:
+						bSlot2 = true;
+						break;
+					case 2:
+						bSlot3 = true;
+						break;
+					case 3:
+						bSlot4 = true;
+						break;
+					}
+				}
+				if(!bSlot4) newBP.dwSlot = 3;
+				if(!bSlot3) newBP.dwSlot = 2;
+				if(!bSlot2) newBP.dwSlot = 1;
+				if(!bSlot1) newBP.dwSlot = 0;
+
 				HardwareBPs.push_back(newBP);
 				break;
 			}
@@ -1346,20 +1314,13 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,
 bool clsDebugger::InitBP()
 {
 	for(size_t i = 0;i < SoftwareBPs.size(); i++)
-	{
 		wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwHandle,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
-	}
 
 	for(size_t i = 0;i < MemoryBPs.size(); i++)
-	{
 		wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwHandle);
-	}
 
 	for(size_t i = 0;i < HardwareBPs.size(); i++)
-	{
-		wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwHandle);
-	}
-
+		wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot);
 	return true;
 }
 
@@ -1473,7 +1434,7 @@ bool clsDebugger::RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID)
 	return true;
 }
 
-bool clsDebugger::RemoveHWBP(DWORD dwPID)
+bool clsDebugger::dHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSlot)
 {
 	HANDLE hProcessSnap;
 	THREADENTRY32 threadEntry32;
@@ -1497,33 +1458,26 @@ bool clsDebugger::RemoveHWBP(DWORD dwPID)
 		HANDLE hThread = INVALID_HANDLE_VALUE;
 
 		if(dwPID == threadEntry32.th32OwnerProcessID)
-			hThread = OpenThread(THREAD_ALL_ACCESS,false,threadEntry32.th32ThreadID);
+			hThread = OpenThread(THREAD_GETSET_CONTEXT,false,threadEntry32.th32ThreadID);
 
 		if(hThread != INVALID_HANDLE_VALUE)
 		{
 			GetThreadContext(hThread,&cTT);
 
-			cTT.Dr7 = 0;
-			cTT.Dr0 = 0x00000000;
-			cTT.Dr1 = 0x00000000;
-			cTT.Dr2 = 0x00000000;
-			cTT.Dr3 = 0x00000000;
+			if(cTT.Dr0 == dwOffset) cTT.Dr0 = 0;
+			if(cTT.Dr1 == dwOffset) cTT.Dr1 = 0;
+			if(cTT.Dr2 == dwOffset) cTT.Dr2 = 0;
+			if(cTT.Dr3 == dwOffset) cTT.Dr3 = 0;
+
+			cTT.Dr7 &= ~(1 << (dwSlot * 2));
+			cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 16));
+			cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 18));
 
 			SetThreadContext(hThread,&cTT);
 		}
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 	CloseHandle(hProcessSnap);
-
-	for(size_t i = 0;i < HardwareBPs.size();i++)
-		HardwareBPs[i].dwSlot = 0;
-
 	return true;
-}
-
-void clsDebugger::SetDebugBitMask(DWORD &dwOld,DWORD dwMask,DWORD dwBits,DWORD dwNewValue)
-{
-	int mask = (1 << dwBits) - 1; 
-	dwOld = (dwOld & ~(mask << dwMask)) | (dwNewValue << dwMask); 
 }
 
 DWORD clsDebugger::GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT debug_event)

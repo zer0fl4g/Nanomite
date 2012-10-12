@@ -153,7 +153,7 @@ public:
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
-	void AddBreakpointToList(DWORD dwTypeOfBreakPoint,DWORD dwPID,DWORD dwOffset,DWORD dwKeep);
+	void AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,DWORD dwSlot,DWORD dwKeep);
 	void SetTarget(wstring sTarget);
 	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction);
 	void CustomExceptionRemove(DWORD dwExceptionType);
@@ -186,7 +186,6 @@ private:
 	void DebuggingLoop();
 	void AttachedDebugging(LPVOID pDebProc);
 	void NormalDebugging(LPVOID pDebProc);
-	void SetDebugBitMask(DWORD &dwOld,DWORD dwMask,DWORD dwBits,DWORD dwNewValue);
 	void CleanWorkSpace();
 
 	static unsigned _stdcall DebuggingEntry(LPVOID pThis);
@@ -199,10 +198,10 @@ private:
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
 	bool wSoftwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
 	bool wMemoryBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep);
-	bool wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep);
+	bool wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwSlot);
+	bool dHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSlot);
 	bool InitBP();
 	bool IsValidFile();
-	bool RemoveHWBP(DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(DWORD dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
