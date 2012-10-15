@@ -20,7 +20,7 @@ int OnCallStack(DWORD dwStackAddr,
 	DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
 	wstring sSourceFilePath,int iSourceLineNum)
 {
-	wprintf(L"\nCurrent:\t%08X - %s.%s\nReturnTo:\t%08X - %s.%s\n",dwEIP,sFuncName.c_str(),sFuncModule.c_str(),dwReturnTo,sReturnToFunc.c_str(),sReturnToModuleName.c_str());
+	wprintf(L"\nCurrent:\t%08X - %s.%s\nReturnTo:\t%08X - %s.%s\n",dwEIP,sFuncModule.c_str(),sFuncName.c_str(),dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
 	return 0;
 }
 
@@ -92,7 +92,7 @@ int _tmain(int argc, PCHAR argv[])
 	|		If you don´t know the PID ( check public PIDs vector for all running Processes in the debugger ) 
 	|		use -1 to set BP in "Mother" process
 	*/
-	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
+	tempDebugger.AddBreakpointToList(0,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
 	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
 
 	// Run Debugging

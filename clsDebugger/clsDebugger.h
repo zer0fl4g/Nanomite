@@ -24,6 +24,8 @@ using namespace std;
 #define DR_READ		(0x11)		/* Break on data reads or writes.	*/
 //
 
+#define LOGBUFFER (512 * sizeof(TCHAR))
+#define LOGBUFFERCHAR (512)
 
 #define THREAD_GETSET_CONTEXT	(0x0018) 
 

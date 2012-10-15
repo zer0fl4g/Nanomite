@@ -30,6 +30,8 @@ HMENU	hMemMapMenu,
 		hResMenu;
 
 clsDebugger newDebugger;
+
+PTCHAR tcLogging;
 //---------------------------------------------------------------------------
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine, int nCmdShow)
@@ -40,7 +42,9 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 	InitCommonControlsEx(&icx);
 
 	HWND hWND = 0;
+	tcLogging = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAINFRAME),hWND, reinterpret_cast<DLGPROC>(MainDLGProc));
+	free(tcLogging);
 
 	_CrtDumpMemoryLeaks();
 	return false;
@@ -664,11 +668,11 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	hDlgSettings = hWndDlg;
 	switch(Msg)
 	{
 	case WM_INITDIALOG:
 		{
+			hDlgSettings = hWndDlg;
 			ReadFromSettingsFile();
 
 			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK1),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.bDebugChilds,NULL);
@@ -746,11 +750,7 @@ LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 
 LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	LVITEM lvBPItem;
-	LVCOLUMN lvBPCol;
-
 	HWND hwBreakPointLC = GetDlgItem(hWndDlg,IDC_LIST1);
-
 	switch(Msg)
 	{
 	case WM_NOTIFY:
@@ -797,6 +797,7 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 		}
 	case WM_INITDIALOG:
 		{
+			LVCOLUMN lvBPCol;
 			SendMessage(hwBreakPointLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 			Edit_SetText(GetDlgItem(hWndDlg,IDC_BPSIZE),L"1");
@@ -896,23 +897,21 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 			
 				for(int i = 0; i <= itemIndex;i++)
 				{
-					LVITEM lvItem;
-					memset(&lvItem,0,sizeof(lvItem));
-
-					lvItem.mask = LVIF_TEXT;
-					lvItem.cchTextMax = 256;
-					lvItem.iItem = i;
-					lvItem.iSubItem = 0;
-					lvItem.pszText = sTemp;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
+					memset(&LvItem,0,sizeof(LvItem));
+					LvItem.mask = LVIF_TEXT;
+					LvItem.cchTextMax = 256;
+					LvItem.iItem = i;
+					LvItem.iSubItem = 0;
+					LvItem.pszText = sTemp;
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&LvItem);
 					wstringstream ssdwOffset;ssdwOffset.str(wstring());ssdwOffset << sTemp;ssdwOffset >> hex >> dwOffset;
 					
-					lvItem.iSubItem = 1;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
+					LvItem.iSubItem = 1;
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&LvItem);
 					wstringstream ssdwPID;ssdwPID.str(wstring());ssdwPID << sTemp;ssdwPID >> hex >> dwPID;
 
-					lvItem.iSubItem = 2;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
+					LvItem.iSubItem = 2;
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&LvItem);
 
 					if(wcscmp(sTemp,L"Software BP ( 0xCC / INT 3)") == 0)
 						dwType = 0;
@@ -922,15 +921,15 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 						dwType = 2;
 
 					bool bAdd = false;
-					lvItem.iSubItem = 3;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
+					LvItem.iSubItem = 3;
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&LvItem);
 					if(wcscmp(sTemp,L"ENABLED") == 0)
 						bAdd = true;
 					else
 						bAdd = false;
 
-					lvItem.iSubItem = 4;
-					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
+					LvItem.iSubItem = 4;
+					SendMessage(hwBreakPointLC,LVM_GETITEMTEXT,i,(LPARAM)&LvItem);
 					if(wcscmp(sTemp,L"YES") == 0)
 						bKeep = true;
 					else
@@ -959,18 +958,18 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 
 LRESULT CALLBACK DetailInfoDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	LVITEM lvDETItem;
-	LVCOLUMN lvDETCol;
-
-	HWND hwPIDLC = GetDlgItem(hWndDlg,ID_DETINFO_PID);
-	HWND hwTIDLC = GetDlgItem(hWndDlg,ID_DETINFO_TID);
-	HWND hwEXCEPTIONLC = GetDlgItem(hWndDlg,ID_DETINFO_EXCEPTIONS);
-	HWND hwDLLLC = GetDlgItem(hWndDlg,ID_DETINFO_DLLs);
-
 	switch(Msg)
 	{
 	case WM_INITDIALOG:
 		{
+			LVITEM lvDETItem;
+			LVCOLUMN lvDETCol;
+
+			HWND hwPIDLC = GetDlgItem(hWndDlg,ID_DETINFO_PID);
+			HWND hwTIDLC = GetDlgItem(hWndDlg,ID_DETINFO_TID);
+			HWND hwEXCEPTIONLC = GetDlgItem(hWndDlg,ID_DETINFO_EXCEPTIONS);
+			HWND hwDLLLC = GetDlgItem(hWndDlg,ID_DETINFO_DLLs);
+
 			SendMessage(hwPIDLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 			SendMessage(hwTIDLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 			SendMessage(hwEXCEPTIONLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
@@ -1044,8 +1043,6 @@ LRESULT CALLBACK DetailInfoDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 			lvDETCol.pszText = L"Path";
 			lvDETCol.cx = 0x140;
 			SendMessage(hwDLLLC,LVM_INSERTCOLUMN,3,(LPARAM)&lvDETCol);
-
-
 			return true;
 		}
 
@@ -1203,15 +1200,13 @@ LRESULT CALLBACK AttachToDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM l
 
 LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	hDlgMemMap = hWndDlg;
-	HWND hwMemMap = GetDlgItem(hDlgMemMap,IDC_MEM);
-	
 	switch(Msg)
 	{
 	case WM_INITDIALOG:
 		{
 			LVCOLUMN LvCol;
-
+			hDlgMemMap = hWndDlg;
+			HWND hwMemMap = GetDlgItem(hDlgMemMap,IDC_MEM);
 			SendMessage(hwMemMap,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 			memset(&LvCol,0,sizeof(LvCol));                  
@@ -1238,16 +1233,18 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			int iForEntry = ((iMemMapPID == newDebugger.PIDs.size()) ? 0 : iMemMapPID); 
 			int iForEnd = ((iMemMapPID != newDebugger.PIDs.size()) ? (iForEntry + 1) : iMemMapPID);
 
+			PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+			LVITEM lvDETITEM;
+			MODULEENTRY32 pModEntry;
+			pModEntry.dwSize = sizeof(MODULEENTRY32);
+			MEMORY_BASIC_INFORMATION mbi;
+
 			for(int i = iForEntry; i < iForEnd;i++)
 			{
-				MEMORY_BASIC_INFORMATION mbi; 
 				DWORD dwAddress = NULL;
-
 				while(VirtualQueryEx(newDebugger.PIDs[i].hSymInfo,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
 				{
-					LVITEM lvDETITEM;
 					memset(&lvDETITEM,0,sizeof(lvDETITEM));
-					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
 					int iItemIndex = ListView_GetItemCount(hwMemMap);
 
 					// PID
@@ -1270,9 +1267,7 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 					SendMessage(hwMemMap,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 					// Path
-					MODULEENTRY32 pModEntry;
 					HANDLE hModules = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,newDebugger.PIDs[i].dwPID);
-					pModEntry.dwSize = sizeof(MODULEENTRY32);
 					wsprintf(sTemp,L"");
 
 					if(hModules != INVALID_HANDLE_VALUE && Module32First(hModules,&pModEntry))
@@ -1327,14 +1322,13 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 					SendMessage(hwMemMap,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 					dwAddress += mbi.RegionSize;
-					free(sTemp);
 				}
 			}
+			free(sTemp);
 			return true;
 		}
-
 	case WM_CLOSE:
-		ListView_DeleteAllItems(hwMemMap);
+		ListView_DeleteAllItems(GetDlgItem(hDlgMemMap,IDC_MEM));
 		EndDialog(hDlgMemMap,0);
 		return true;
 	}
@@ -2069,30 +2063,30 @@ int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode
 	HWND hwTIDLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_TID);
 	wstringstream sLog;
 	int itemIndex = 0;
-	PTCHAR sTemp = (PTCHAR)malloc(255);
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
+	memset(tcLogging,0,255 * sizeof(TCHAR));
 
 	itemIndex = SendMessage(hwTIDLC,LVM_GETITEMCOUNT,0,0);
 
 	if(!bFound)
 	{
 		// PID
-		wsprintf(sTemp,L"0x%08X",dwPID);
+		wsprintf(tcLogging,L"0x%08X",dwPID);
 		lvDETITEM.mask = LVIF_TEXT;
 		lvDETITEM.cchTextMax = 256;
 		lvDETITEM.iItem = itemIndex;
 		lvDETITEM.iSubItem = 0;
-		lvDETITEM.pszText = sTemp;
+		lvDETITEM.pszText = tcLogging;
 		SendMessage(hwTIDLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 		// TID
-		wsprintf(sTemp,L"0x%08X",dwTID);
+		wsprintf(tcLogging,L"0x%08X",dwTID);
 		lvDETITEM.iSubItem = 1;
 		SendMessage(hwTIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		// EP
-		wsprintf(sTemp,L"0x%08X",dwEP);
+		wsprintf(tcLogging,L"0x%08X",dwEP);
 		lvDETITEM.iSubItem = 2;
 		SendMessage(hwTIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
@@ -2102,7 +2096,7 @@ int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode
 		//SendMessage(hwTIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		//ExitCode
-		wsprintf(sTemp,L"%s",L"Running");
+		wsprintf(tcLogging,L"%s",L"Running");
 		lvDETITEM.iSubItem = 4;
 		SendMessage(hwTIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 	}
@@ -2118,37 +2112,36 @@ int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode
 			lvItem.cchTextMax = 256;
 			lvItem.iItem = i;
 			lvItem.iSubItem = 0;
-			lvItem.pszText = sTemp;
+			lvItem.pszText = tcLogging;
 			SendMessage(hwTIDLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
-			wstringstream ss;ss.str(wstring());ss << sTemp;ss >> hex >> dwThread_PID;
+			wstringstream ss;ss.str(wstring());ss << tcLogging;ss >> hex >> dwThread_PID;
 
 			lvItem.iSubItem = 1;
 			SendMessage(hwTIDLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
-			wstringstream sd;sd.str(wstring());sd << sTemp;sd >> hex >> dwThread_TID;
+			wstringstream sd;sd.str(wstring());sd << tcLogging;sd >> hex >> dwThread_TID;
 			
 			if(dwPID == dwThread_PID && dwTID == dwThread_TID)
 			{
 				// Change ExitCode
-				wsprintf(sTemp,L"0x%08X",dwExitCode);
+				wsprintf(tcLogging,L"0x%08X",dwExitCode);
 				lvItem.iSubItem = 3;
 				SendMessage(hwTIDLC,LVM_SETITEMTEXT,i,(LPARAM)&lvItem);
 
 				// Change State
-				wsprintf(sTemp,L"%s",L"Terminated");
+				wsprintf(tcLogging,L"%s",L"Terminated");
 				lvItem.iSubItem = 4;
 				SendMessage(hwTIDLC,LVM_SETITEM,i,(LPARAM)&lvItem);
 			}
 		}
 	}
-	free(sTemp);
 	return 0;
 }
 
 int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound)
 {
 	HWND hwPIDLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_PID);
-	PTCHAR sTemp = (PTCHAR)malloc(256);
 	
+	memset(tcLogging,0,255 * sizeof(TCHAR));
 	int itemIndex = SendMessage(hwPIDLC,LVM_GETITEMCOUNT,0,0);
 	if(!bFound)
 	{
@@ -2157,26 +2150,26 @@ int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound)
 		memset(&lvDETITEM,0,sizeof(lvDETITEM));
 
 		// PID
-		wsprintf(sTemp,L"0x%08X",dwPID);
+		wsprintf(tcLogging,L"0x%08X",dwPID);
 		lvDETITEM.mask = LVIF_TEXT;
 		lvDETITEM.cchTextMax = 256;
 		lvDETITEM.iItem = itemIndex;
 		lvDETITEM.iSubItem = 0;
-		lvDETITEM.pszText = sTemp;
+		lvDETITEM.pszText = tcLogging;
 		SendMessage(hwPIDLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 		// EntryPoint
-		wsprintf(sTemp,L"0x%08X",dwEP);
+		wsprintf(tcLogging,L"0x%08X",dwEP);
 		lvDETITEM.iSubItem = 1;
 		SendMessage(hwPIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		//// ExitCode
-		//wsprintf(sTemp,"0x%08X",dwExitCode);
+		//wsprintf(tcLogging,"0x%08X",dwExitCode);
 		//lvDETITEM.iSubItem = 2;
 		//SendMessage(hwPIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		// File
-		wsprintf(sTemp,L"%s",sFile.c_str());
+		wsprintf(tcLogging,L"%s",sFile.c_str());
 		lvDETITEM.iSubItem = 3;
 		SendMessage(hwPIDLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 	}
@@ -2192,20 +2185,19 @@ int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound)
 			lvItem.cchTextMax = 256;
 			lvItem.iItem = i;
 			lvItem.iSubItem = 0;
-			lvItem.pszText = sTemp;
+			lvItem.pszText = tcLogging;
 			SendMessage(hwPIDLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
-			wstringstream ss;ss.str(wstring());ss << sTemp;ss >> hex >> dwThread_PID;
+			wstringstream ss;ss.str(wstring());ss << tcLogging;ss >> hex >> dwThread_PID;
 
 			if(dwPID == dwThread_PID)
 			{
 				// Change ExitCode
-				wsprintf(sTemp,L"0x%08X",dwExitCode);
+				wsprintf(tcLogging,L"0x%08X",dwExitCode);
 				lvItem.iSubItem = 2;
 				SendMessage(hwPIDLC,LVM_SETITEMTEXT,i,(LPARAM)&lvItem);
 			}
 		}
 	}
-	free(sTemp);
 	return 0;
 }
 
@@ -2263,35 +2255,35 @@ int OnLog(wstring sLog)
 int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 {
 	HWND hwDLLLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs);
-	PTCHAR sTemp = (PTCHAR)malloc(256);
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
+	memset(tcLogging,0,255 * sizeof(TCHAR));
 
 	int itemIndex = SendMessage(hwDLLLC,LVM_GETITEMCOUNT,0,0);
 
 	if(bLoaded)
 	{
 		// PID
-		wsprintf(sTemp,L"0x%08X",dwPID);
+		wsprintf(tcLogging,L"0x%08X",dwPID);
 		lvDETITEM.mask = LVIF_TEXT;
 		lvDETITEM.cchTextMax = 256;
 		lvDETITEM.iItem = itemIndex;
 		lvDETITEM.iSubItem = 0;
-		lvDETITEM.pszText = sTemp;
+		lvDETITEM.pszText = tcLogging;
 		SendMessage(hwDLLLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 		// EntryPoint
-		wsprintf(sTemp,L"0x%08X",dwEP);
+		wsprintf(tcLogging,L"0x%08X",dwEP);
 		lvDETITEM.iSubItem = 1;
 		SendMessage(hwDLLLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		// State
-		wsprintf(sTemp,L"%s",(bLoaded ? L"LOADED" : L"UNLOADED"));
+		wsprintf(tcLogging,L"%s",(bLoaded ? L"LOADED" : L"UNLOADED"));
 		lvDETITEM.iSubItem = 2;
 		SendMessage(hwDLLLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		// Path
-		wsprintf(sTemp,L"%s",sDLLPath.c_str());
+		wsprintf(tcLogging,L"%s",sDLLPath.c_str());
 		lvDETITEM.iSubItem = 3;
 		SendMessage(hwDLLLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 	}
@@ -2307,24 +2299,23 @@ int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 			lvItem.cchTextMax = 256;
 			lvItem.iItem = i;
 			lvItem.iSubItem = 0;
-			lvItem.pszText = sTemp;
+			lvItem.pszText = tcLogging;
 			SendMessage(hwDLLLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
-			wstringstream ss;ss.str(wstring());ss << sTemp;ss >> hex >> dwThread_PID;
+			wstringstream ss;ss.str(wstring());ss << tcLogging;ss >> hex >> dwThread_PID;
 
 			lvItem.iSubItem = 1;
 			SendMessage(hwDLLLC,LVM_GETITEMTEXT,i,(LPARAM)&lvItem);
-			wstringstream sss;sss.str(wstring());sss << sTemp;sss >> hex >> dwEntryPoint;
+			wstringstream sss;sss.str(wstring());sss << tcLogging;sss >> hex >> dwEntryPoint;
 
 			if(dwPID == dwThread_PID && dwEntryPoint == dwEP)
 			{
 				// State
-				wsprintf(sTemp,L"%s",L"UNLOADED");
+				wsprintf(tcLogging,L"%s",L"UNLOADED");
 				lvItem.iSubItem = 2;
 				SendMessage(hwDLLLC,LVM_SETITEM,i,(LPARAM)&lvItem);
 			}
 		}
 	}
-	free(sTemp);
 	return 0;
 }
 
@@ -2333,55 +2324,55 @@ int OnCallStack(DWORD dwStackAddr,
 				DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
 				wstring sSourceFilePath,int iSourceLineNum)
 {
-	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	int itemIndex;
 	LVITEM LvItem;
 	memset(&LvItem,0,sizeof(LvItem));
+	memset(tcLogging,0,255 * sizeof(TCHAR));
 
 	itemIndex = SendMessage(hwLBCallStack,LVM_GETITEMCOUNT,0,0);
 	
 	// Current Stack Addr
-	wsprintf(sTemp,L"0x%08X",dwStackAddr);
+	wsprintf(tcLogging,L"0x%08X",dwStackAddr);
 	LvItem.mask=LVIF_TEXT;
 	LvItem.cchTextMax = 256;
 	LvItem.iItem = itemIndex;
 	LvItem.iSubItem = 0;
-	LvItem.pszText = sTemp;
+	LvItem.pszText = tcLogging;
 	SendMessage(hwLBCallStack,LVM_INSERTITEM,0,(LPARAM)&LvItem);
 
 	// Current Addr
-	wsprintf(sTemp,L"0x%08X",dwEIP);
+	wsprintf(tcLogging,L"0x%08X",dwEIP);
 	LvItem.iSubItem = 1;
 	SendMessage(hwLBCallStack,LVM_SETITEM,0,(LPARAM)&LvItem);
 
 	// current module.function
 	if(sFuncName.length() > 0)
-		wsprintf(sTemp,L"%s.%s",sFuncModule.c_str(),sFuncName.c_str());
+		wsprintf(tcLogging,L"%s.%s",sFuncModule.c_str(),sFuncName.c_str());
 	else
-		wsprintf(sTemp,L"%s.0x%08X",sFuncModule.c_str(),dwEIP);
+		wsprintf(tcLogging,L"%s.0x%08X",sFuncModule.c_str(),dwEIP);
 	LvItem.iSubItem = 2;
 	SendMessage(hwLBCallStack,LVM_SETITEM,0,(LPARAM)&LvItem);
 	
 	// Return Addr
-	wsprintf(sTemp,L"0x%08X",dwReturnTo);
+	wsprintf(tcLogging,L"0x%08X",dwReturnTo);
 	LvItem.iSubItem = 3;
 	SendMessage(hwLBCallStack,LVM_SETITEM,0,(LPARAM)&LvItem);
 
 	// return to module.function
 	if(sReturnToFunc.length() > 0)
-		wsprintf(sTemp,L"%s.%s",sReturnToModuleName.c_str(),sReturnToFunc.c_str());
+		wsprintf(tcLogging,L"%s.%s",sReturnToModuleName.c_str(),sReturnToFunc.c_str());
 	else
-		wsprintf(sTemp,L"%s.0x%08X",sReturnToModuleName.c_str(),dwReturnTo);
+		wsprintf(tcLogging,L"%s.0x%08X",sReturnToModuleName.c_str(),dwReturnTo);
 	LvItem.iSubItem = 4;
 	SendMessage(hwLBCallStack,LVM_SETITEM,0,(LPARAM)&LvItem);
 
 	// SourceLine
-	wsprintf(sTemp,L"%d",iSourceLineNum);
+	wsprintf(tcLogging,L"%d",iSourceLineNum);
 	LvItem.iSubItem = 5;
 	SendMessage(hwLBCallStack,LVM_SETITEM,0,(LPARAM)&LvItem);
 
 	// SourcePath
-	wsprintf(sTemp,L"%s",sSourceFilePath.c_str());
+	wsprintf(tcLogging,L"%s",sSourceFilePath.c_str());
 	LvItem.iSubItem = 6;
 	SendMessage(hwLBCallStack,LVM_SETITEM,0,(LPARAM)&LvItem);
 
@@ -2682,7 +2673,6 @@ void LoadDisAssView(DWORD dwEIP)
 
 void LoadRegView()
 {
-	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
 	DWORD dwEFlags = newDebugger.ProcessContext.EFlags;
 	BOOL bCF = false, // Carry Flag
 		bPF = false, // Parity Flag
@@ -2703,7 +2693,8 @@ void LoadRegView()
 	bPF = (dwEFlags & 0x4) ? true : false;
 	bCF = (dwEFlags & 0x1) ? true : false;
 
-	wsprintf(sTemp,L"EAX\t- 0x%08X\tCF:%X\r\nECX\t- 0x%08X\tPF:%X\r\nEDX\t- 0x%08X\tAF:%X\r\nEBX\t- 0x%08X\tZF:%X\r\nESP\t- 0x%08X\tSF:%X\r\nEBP\t- 0x%08X\tTF:%X\r\nESI\t- 0x%08X\tDF:%X\r\nEDI\t- 0x%08X\tOF:%X\r\nEIP\t- 0x%08X\r\n",
+	memset(tcLogging,0,255 * sizeof(TCHAR));
+	wsprintf(tcLogging,L"EAX\t- 0x%08X\tCF:%X\r\nECX\t- 0x%08X\tPF:%X\r\nEDX\t- 0x%08X\tAF:%X\r\nEBX\t- 0x%08X\tZF:%X\r\nESP\t- 0x%08X\tSF:%X\r\nEBP\t- 0x%08X\tTF:%X\r\nESI\t- 0x%08X\tDF:%X\r\nEDI\t- 0x%08X\tOF:%X\r\nEIP\t- 0x%08X\r\n",
 		newDebugger.ProcessContext.Eax,
 		bCF,
 		newDebugger.ProcessContext.Ecx,
@@ -2722,8 +2713,7 @@ void LoadRegView()
 		bOF,
 		newDebugger.ProcessContext.Eip);
 
-	Edit_SetText(GetDlgItem(hDlgMain,ID_REGVIEW),sTemp);
-	free(sTemp);
+	Edit_SetText(GetDlgItem(hDlgMain,ID_REGVIEW),tcLogging);
 }
 
 bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView)

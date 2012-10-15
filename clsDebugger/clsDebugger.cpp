@@ -6,7 +6,7 @@ clsDebugger::clsDebugger()
 	_isDebugging = false;
 	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;dwOnCallStack = NULL;
 	hDebuggingHandle = CreateEvent(NULL,false,false,L"clsDebugger");
-	tcLogString = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	tcLogString = (PTCHAR)malloc(LOGBUFFER);
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	dbgSettings = tempSet;
 }
@@ -18,7 +18,7 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_isDebugging = false;
 	dwOnThread = NULL;dwOnPID = NULL;dwOnDll = NULL;dwOnException = NULL;dwOnLog = NULL;dwOnDbgString = NULL;dwOnCallStack = NULL;
 	hDebuggingHandle = CreateEvent(NULL,false,false,L"clsDebugger");
-	tcLogString = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	tcLogString = (PTCHAR)malloc(LOGBUFFER);
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	dbgSettings = tempSet;
 }
@@ -47,22 +47,23 @@ wstring clsDebugger::GetTarget()
 
 void clsDebugger::CleanWorkSpace()
 {
-	for(int i = 0; i < DLLs.size(); i++)
+	for(size_t i = 0;i < PIDs.size();i++)
+		for(size_t s = 0;s < DLLs.size();s++)
+			if(PIDs[i].dwPID == DLLs[i].dwPID)
+				SymUnloadModule64(PIDs[i].hSymInfo,DLLs[i].dwBaseAdr);
+
+	for(size_t i = 0; i < DLLs.size(); i++)
 		free(DLLs[i].sPath);
-	DLLs.clear();
-	Threads.clear();
-	for(int i = 0; i < PIDs.size(); i++)
-		PIDs[i].sFileName;
 	PIDs.clear();
 	DbgStrings.clear();
+	DLLs.clear();
+	Threads.clear();
 }
 
 bool clsDebugger::SuspendDebuggingAll()
 {
 	for(size_t i = 0;i < PIDs.size();i++)
-	{
 		SuspendDebugging(PIDs[i].dwPID);
-	}
 	return true;
 }
 
@@ -81,8 +82,8 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 
 			if(DebugBreakProcess(hProcess))
 			{
-				memset(tcLogString,0x00,255 * sizeof(TCHAR));
-				swprintf_s(tcLogString,255,L"[!] %X Debugging suspended!",dwPID);
+				memset(tcLogString,0x00,LOGBUFFER);
+				swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %X Debugging suspended!",dwPID);
 				PBLogInfo();
 				return true;
 			}
@@ -91,8 +92,8 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 		{
 			if(SuspendProcess(dwPID,true))
 			{
-				memset(tcLogString,0x00,255 * sizeof(TCHAR));
-				swprintf_s(tcLogString,255,L"[!] %X Debugging suspended!",dwPID);
+				memset(tcLogString,0x00,LOGBUFFER);
+				swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %X Debugging suspended!",dwPID);
 				PBLogInfo();
 				return true;
 			}
@@ -145,7 +146,6 @@ bool clsDebugger::RestartDebugging()
 {
 	StopDebugging(true);
 	StartDebugging();
-	//PulseEvent(_hDbgEvent);
 	return true;
 }
 
@@ -178,12 +178,12 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspende
 	if(dwOnThread != NULL)
 		dwOnThread(dwPID,dwTID,dwEP,bSuspended,dwExitCode,bFound);
 
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	memset(tcLogString,0x00,LOGBUFFER);
 
 	if(bFound)
-		swprintf_s(tcLogString,255,L"[-] Exit Thread(%X) in Process(%X) with Exitcode: %X",dwTID,dwPID,dwExitCode);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Exit Thread(%X) in Process(%X) with Exitcode: %X",dwTID,dwPID,dwExitCode);
 	else
-		swprintf_s(tcLogString,255,L"[+] New Thread(%X) in Process(%X) with Entrypoint %X:",dwTID,dwPID,dwEP);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] New Thread(%X) in Process(%X) with Entrypoint: %X",dwTID,dwPID,dwEP);
 	PBLogInfo();
 
 	return true;
@@ -221,12 +221,12 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExi
 	if(dwOnPID != NULL)
 		dwOnPID(dwPID,sFileName,dwExitCode,dwEP,bFound);
 
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	memset(tcLogString,0x00,LOGBUFFER);
 
 	if(bFound)
-		swprintf_s(tcLogString,255,L"[-] Exit Process(%X) with Exitcode: 0x%08X",dwPID,dwExitCode);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Exit Process(%X) with Exitcode: 0x%08X",dwPID,dwExitCode);
 	else
-		swprintf_s(tcLogString,255,L"[+] New Process(%X) with Entrypoint: 0x%08X",dwPID,dwEP);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] New Process(%X) with Entrypoint: 0x%08X",dwPID,dwEP);
 	PBLogInfo();
 
 	return true;
@@ -243,8 +243,8 @@ bool clsDebugger::PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,
 	if(dwOnException != NULL)
 		dwOnException(sFuncName,sModName,dwExceptionOffset,dwExceptionCode,dwPID,dwTID);
 
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
-	swprintf_s(tcLogString,255,L"[!] %s@%s ExceptionCode: %08X ExceptionOffset: %08X PID: %X TID: %X",
+	memset(tcLogString,0x00,LOGBUFFER);
+	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %s@%s ExceptionCode: %08X ExceptionOffset: %08X PID: %X TID: %X",
 		sFuncName.c_str(),
 		sModName.c_str(),
 		dwExceptionCode,
@@ -261,7 +261,7 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 	bool bFound = false;
 	for(size_t i = 0;i < DLLs.size(); i++)
 	{
-		if(wcscmp(DLLs[i].sPath,sDLLPath) == NULL && DLLs[i].dwPID)
+		if(wcscmp(DLLs[i].sPath,sDLLPath) == NULL && DLLs[i].dwPID == dwPID)
 		{
 			DLLs[i].bLoaded = bLoaded;
 			bFound = true;
@@ -282,11 +282,19 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 	if(dwOnDll != NULL)
 		dwOnDll(sDLLPath,dwPID,dwEP,bLoaded);
 
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
+	memset(tcLogString,0x00,LOGBUFFER);
 	if(bLoaded)
-		swprintf_s(tcLogString,255,L"[+] PID(%X) - Loaded DLL: %s Entrypoint: %08X",dwPID,sDLLPath,dwEP);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] PID(%X) - Loaded DLL: %s Entrypoint: %08X",dwPID,sDLLPath,dwEP);
 	else
-		swprintf_s(tcLogString,255,L"[+] PID(%X) - Unloaded DLL: %s",dwPID,sDLLPath);
+	{
+		HANDLE hProc = NULL;
+		for(size_t i = 0;i < PIDs.size();i++)
+			if(PIDs[i].dwPID == dwPID)
+				hProc = PIDs[i].hSymInfo;
+
+		SymUnloadModule64(hProc,dwEP);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] PID(%X) - Unloaded DLL: %s",dwPID,sDLLPath);
+	}
 	PBLogInfo();
 
 	return true;
@@ -299,8 +307,8 @@ bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
 	if(dwOnDbgString != NULL)
 		dwOnDbgString(sMessage,dwPID);
 	
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
-	swprintf_s(tcLogString,255,L"[+] PID(%X) - DbgString: %s",dwPID,sMessage);
+	memset(tcLogString,0x00,LOGBUFFER);
+	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] PID(%X) - DbgString: %s",dwPID,sMessage);
 	PBLogInfo();
 	free(sMessage);
 	return true;
@@ -310,11 +318,11 @@ bool clsDebugger::PBLogInfo()
 {
 	time_t tTime;
 	tm* timeInfo;
-	PTCHAR tcTempLog = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	PTCHAR tcTempLog = (PTCHAR)malloc(LOGBUFFER + 128);
 	time(&tTime);
 	timeInfo = localtime(&tTime);
 
-	swprintf_s(tcTempLog,255,L"[%i:%i:%i] %s",timeInfo->tm_hour,timeInfo->tm_min,timeInfo->tm_sec,tcLogString);
+	swprintf_s(tcTempLog,LOGBUFFERCHAR + 64,L"[%i:%i:%i] %s",timeInfo->tm_hour,timeInfo->tm_min,timeInfo->tm_sec,tcLogString);
 
 	if(dwOnLog != NULL)
 		dwOnLog(tcTempLog);
@@ -333,9 +341,7 @@ PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile)
 
 	hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,0,1,NULL);
 	if (hFileMap == INVALID_HANDLE_VALUE) 
-	{
 		return NULL;
-	}
 
 	LPVOID pMem = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 1);
 	if (pMem == NULL) 
@@ -393,6 +399,7 @@ PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile)
 	free(tcFilename);
 	UnmapViewOfFile(pMem);
 	CloseHandle(hFileMap);
+
 	return tcFile;
 }
 
@@ -441,8 +448,8 @@ void clsDebugger::AttachedDebugging(LPVOID pDebProc)
 	{
 		_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
-		memset(tcLogString,0x00,255 * sizeof(TCHAR));
-		swprintf_s(tcLogString,255,L"[+] Attached to Process");
+		memset(tcLogString,0x00,LOGBUFFER);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] Attached to Process");
 		PBLogInfo();
 		DebuggingLoop();
 		_NormalDebugging = true;
@@ -497,19 +504,10 @@ void clsDebugger::DebuggingLoop()
 				}
 
 				PIDs[iPid].bSymLoad = SymInitialize(hProc,NULL,false);
-
-				if(PIDs[iPid].bSymLoad)
+				if(!PIDs[iPid].bSymLoad)
 				{
-					DWORD64 dwBase = SymLoadModuleExW(hProc,debug_event.u.CreateProcessInfo.hFile,tcDllFilepath,NULL,(DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
-
-					IMAGEHLP_MODULE64 module_info;
-					module_info.SizeOfStruct = sizeof(module_info);
-					BOOL bSuccess = SymGetModuleInfo64(hProc,dwBase, &module_info);
-				}
-				else
-				{
-					memset(tcLogString,0x00,255 * sizeof(TCHAR));
-					swprintf_s(tcLogString,255,L"[!] Could not load symbols for Process(%X)",debug_event.dwProcessId);
+					memset(tcLogString,0x00,LOGBUFFER);
+					swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Could not load symbols for Process(%X)",debug_event.dwProcessId);
 					PBLogInfo();
 				}
 
@@ -556,14 +554,6 @@ void clsDebugger::DebuggingLoop()
 		case LOAD_DLL_DEBUG_EVENT:
 			{
 				PTCHAR sDLLFileName = GetFileNameFromHandle(debug_event.u.LoadDll.hFile); 
-				for(int i = 0;i < DLLs.size(); i++)
-				{
-					if(wcscmp(DLLs[i].sPath,sDLLFileName) == NULL)
-					{
-						free(sDLLFileName);
-						sDLLFileName = DLLs[i].sPath;
-					}
-				}
 				PBDLLInfo(sDLLFileName,debug_event.dwProcessId,(DWORD)debug_event.u.LoadDll.lpBaseOfDll,true);
 
 				HANDLE hProc = 0;
@@ -576,17 +566,11 @@ void clsDebugger::DebuggingLoop()
 				}
 
 				if(PIDs[iPid].bSymLoad && dbgSettings.bAutoLoadSymbols == true)
-				{
-					DWORD64 dwBase = SymLoadModuleExW(hProc,NULL,sDLLFileName,0,(DWORD)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);
-
-					IMAGEHLP_MODULE64 module_info;
-					module_info.SizeOfStruct = sizeof(module_info);
-					BOOL bSuccess = SymGetModuleInfo64(hProc,dwBase, &module_info);
-				}
+					SymLoadModuleExW(hProc,NULL,sDLLFileName,0,(DWORD)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);
 				else
 				{
-					memset(tcLogString,0x00,255 * sizeof(TCHAR));
-					swprintf_s(tcLogString,255,L"[!] Could not load symbols for DLL: %s",sDLLFileName);
+					memset(tcLogString,0x00,LOGBUFFER);
+					swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Could not load symbols for DLL: %s",sDLLFileName);
 					PBLogInfo();
 				}
 			}
@@ -684,11 +668,11 @@ void clsDebugger::DebuggingLoop()
 								dwContinueStatus = CallBreakDebugger(debug_event,2);
 							else
 							{
-								memset(tcLogString,0x00,255 * sizeof(TCHAR));
+								memset(tcLogString,0x00,LOGBUFFER);
 								if(bIsEP)
-									swprintf_s(tcLogString,255,L"[!] Break on EP at 0x%08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on EP at 0x%08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
 								else
-									swprintf_s(tcLogString,255,L"[!] Break on Software BP at 0x%08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Software BP at 0x%08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
 								PBLogInfo();
 								dwContinueStatus = CallBreakDebugger(debug_event,0);
 							}
@@ -767,14 +751,15 @@ void clsDebugger::DebuggingLoop()
 						{
 							for(size_t i = 0;i < SoftwareBPs.size(); i++)
 							{
-								if( SoftwareBPs[i].dwHandle == 0x1 && SoftwareBPs[i].bRestoreBP && 
+								if(SoftwareBPs[i].dwHandle == 0x1 && 
+									SoftwareBPs[i].bRestoreBP && 
 									(SoftwareBPs[i].dwPID == debug_event.dwProcessId || SoftwareBPs[i].dwPID == -1))
 								{
 									wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwHandle,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
 									SoftwareBPs[i].bRestoreBP = false;
 
-									memset(tcLogString,0x00,255 * sizeof(TCHAR));
-									swprintf_s(tcLogString,255,L"[!] Restored BP at 0x%08X",SoftwareBPs[i].dwOffset);
+									memset(tcLogString,0x00,LOGBUFFER);
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Restored BP at 0x%08X",SoftwareBPs[i].dwOffset);
 									PBLogInfo();
 								}
 							}
@@ -785,7 +770,9 @@ void clsDebugger::DebuggingLoop()
 						{
 							for(size_t i = 0;i < MemoryBPs.size(); i++)
 							{
-								if(MemoryBPs[i].dwPID == debug_event.dwProcessId || MemoryBPs[i].dwPID == -1)
+								if(MemoryBPs[i].bRestoreBP &&
+									MemoryBPs[i].dwHandle == 0x1 &&
+									(MemoryBPs[i].dwPID == debug_event.dwProcessId || MemoryBPs[i].dwPID == -1))
 									wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwHandle);
 								MemoryBPs[i].bRestoreBP = false;
 							}
@@ -796,7 +783,9 @@ void clsDebugger::DebuggingLoop()
 						{
 							for(size_t i = 0;i < HardwareBPs.size();i++)
 							{
-								if(HardwareBPs[i].bRestoreBP == true)
+								if(HardwareBPs[i].bRestoreBP &&
+									HardwareBPs[i].dwHandle == 0x1 &&
+									(HardwareBPs[i].dwPID == debug_event.dwProcessId || HardwareBPs[i].dwPID == -1))
 								{
 									wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot);
 									HardwareBPs[i].bRestoreBP = false;
@@ -816,8 +805,8 @@ void clsDebugger::DebuggingLoop()
 								{
 									HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,debug_event.dwThreadId);
 									
-									memset(tcLogString,0x00,255 * sizeof(TCHAR));
-									swprintf_s(tcLogString,255,L"[!] Break on Hardware BP at 0x%08X",HardwareBPs[i].dwOffset);
+									memset(tcLogString,0x00,LOGBUFFER);
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Hardware BP at 0x%08X",HardwareBPs[i].dwOffset);
 									PBLogInfo();
 
 									dwContinueStatus = CallBreakDebugger(debug_event,0);
@@ -857,6 +846,10 @@ void clsDebugger::DebuggingLoop()
 						PIDs[iPID].dwBPRestoreFlag = 0x4;
 						PIDs[iPID].bTrapFlag = true;
 
+						for(size_t i = 0;i < MemoryBPs.size();i++)
+							if(MemoryBPs[i].dwOffset == (DWORD)exInfo.ExceptionRecord.ExceptionAddress)
+								MemoryBPs[i].bRestoreBP = true;
+
 						dwContinueStatus = CallBreakDebugger(debug_event,0);
 					}
 					else
@@ -885,8 +878,8 @@ void clsDebugger::DebuggingLoop()
 		ContinueDebugEvent(debug_event.dwProcessId,debug_event.dwThreadId,dwContinueStatus);
 		dwContinueStatus = DBG_CONTINUE;
 	}
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
-	swprintf_s(tcLogString,255,L"[-] Debugging finished!");
+	memset(tcLogString,0x00,LOGBUFFER);
+	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Debugging finished!");
 	PBLogInfo();
 	_isDebugging = false;
 	PulseEvent(hDebuggingHandle);
@@ -994,7 +987,7 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwSl
 	if(dwPID == -1)
 		dwPID = _pi.dwProcessId;
 
-	if(dwSize != 1 && dwSize != 2 && dwSize != 4)
+	if(!(dwSize == 1 || dwSize == 2 || dwSize == 4))
 		return false; 
 
 	for(size_t i = 0;i < HardwareBPs.size();i++)
@@ -1044,8 +1037,8 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwSl
 		}
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
-	memset(tcLogString,0x00,255 * sizeof(TCHAR));
-	swprintf_s(tcLogString,255,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,HardwareBPs[iBP].dwOffset,HardwareBPs[iBP].dwSlot);
+	memset(tcLogString,0x00,LOGBUFFER);
+	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,HardwareBPs[iBP].dwOffset,HardwareBPs[iBP].dwSlot);
 	PBLogInfo();
 
 	CloseHandle(hProcessSnap);
@@ -1122,8 +1115,8 @@ bool clsDebugger::ShowCallStack()
 	if(_dwCurTID == 0 || _dwCurPID == 0)
 		return false; //SuspendDebugging();
 
-	HANDLE hProc,hThread = OpenThread(THREAD_ALL_ACCESS,false,_dwCurTID);
-	PSYMBOL_INFOW pSymbol = (SYMBOL_INFOW*)malloc(sizeof(SYMBOL_INFOW)+MAX_SYM_NAME);
+	HANDLE hProc,hThread = OpenThread(THREAD_GETSET_CONTEXT,false,_dwCurTID);
+	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 	DWORD64 dwDisplacement;
 	IMAGEHLP_MODULEW64 imgMod = {0};
 
@@ -1135,9 +1128,9 @@ bool clsDebugger::ShowCallStack()
 	}
 
 	if(!PIDs[iPid].bSymLoad)
-		PIDs[iPid].bSymLoad = SymInitialize(hProc,NULL,true);
-	else
-		SymRefreshModuleList(hProc);
+		PIDs[iPid].bSymLoad = SymInitialize(hProc,NULL,false);
+
+	SymRefreshModuleList(hProc);
 
 	STACKFRAME64 stackFr = {0};
 
@@ -1155,7 +1148,7 @@ bool clsDebugger::ShowCallStack()
 	BOOL bSuccess;
 	do
 	{
-		bSuccess = StackWalk64(IMAGE_FILE_MACHINE_I386,hProc,hThread, &stackFr,&context,NULL,SymFunctionTableAccess64,SymGetModuleBase64, 0);
+		bSuccess = StackWalk64(IMAGE_FILE_MACHINE_I386,hProc,hThread,&stackFr,&context,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0);
 
 		if(!bSuccess)        
 			break;
@@ -1164,8 +1157,8 @@ bool clsDebugger::ShowCallStack()
 		imgMod.SizeOfStruct = sizeof(imgMod);
 		bSuccess = SymGetModuleInfoW64(hProc,(DWORD)stackFr.AddrPC.Offset, &imgMod);
 
-		memset(pSymbol, 0, sizeof(PSYMBOL_INFOW) + MAX_SYM_NAME);
-		pSymbol->SizeOfStruct = sizeof(PSYMBOL_INFOW);
+		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 		pSymbol->MaxNameLen = MAX_SYM_NAME;
 
 		DWORD dwStackAddr = stackFr.AddrStack.Offset;
@@ -1173,7 +1166,7 @@ bool clsDebugger::ShowCallStack()
 		DWORD dwEIP = stackFr.AddrPC.Offset;
 		bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
 		wstring sFuncName = pSymbol->Name;
-		bSuccess = SymGetModuleInfoW64(hProc, (DWORD)dwEIP, &imgMod);
+		bSuccess = SymGetModuleInfoW64(hProc,(DWORD)dwEIP, &imgMod);
 		wstring sFuncMod = imgMod.ModuleName;
 
 		DWORD dwReturnTo = stackFr.AddrReturn.Offset;
@@ -1197,7 +1190,7 @@ bool clsDebugger::ShowCallStack()
 			dwEIP,sFuncName,sFuncMod,
 			L"",0);
 		
-	}while ( stackFr.AddrReturn.Offset != 0 );
+	}while(stackFr.AddrReturn.Offset != 0);
 
 	free(pSymbol);
 	return false;
@@ -1402,7 +1395,8 @@ bool clsDebugger::RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID)
 	switch(dwType)
 	{
 	case 0:
-		for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end(); ++it) {
+		for (vector<BPStruct>::iterator it = SoftwareBPs.begin();it != SoftwareBPs.end();++it)
+		{
 			if(it->dwOffset == dwOffset && it->dwPID == dwPID)
 			{
 				SoftwareBPs.erase(it);
@@ -1412,7 +1406,8 @@ bool clsDebugger::RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID)
 		break;
 
 	case 1:
-		for (vector<BPStruct>::iterator it = MemoryBPs.begin(); it != MemoryBPs.end(); ++it) {
+		for (vector<BPStruct>::iterator it = MemoryBPs.begin();it != MemoryBPs.end(); ++it)
+		{
 			if(it->dwOffset == dwOffset && it->dwPID == dwPID)
 			{
 				MemoryBPs.erase(it);
@@ -1422,7 +1417,8 @@ bool clsDebugger::RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID)
 		break;
 
 	case 2:
-		for (vector<BPStruct>::iterator it = HardwareBPs.begin(); it != HardwareBPs.end(); ++it) {
+		for (vector<BPStruct>::iterator it = HardwareBPs.begin();it != HardwareBPs.end(); ++it)
+		{
 			if(it->dwOffset == dwOffset && it->dwPID == dwPID)
 			{
 				HardwareBPs.erase(it);
