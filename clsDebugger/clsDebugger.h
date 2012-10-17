@@ -10,8 +10,9 @@
 #include <process.h>
 #include <Psapi.h>
 #include <TlHelp32.h>
-#include <DbgHelp.h>
 #include <time.h>
+
+#include "dbghelp.h"
 
 #pragma comment(lib,"psapi.lib")
 #pragma comment(lib,"dbghelp.lib")
@@ -144,7 +145,7 @@ public:
 	bool StepOver(DWORD dwNewOffset);
 	bool StepIn();
 	bool ShowCallStack();
-	bool DetachFromProcess(bool bAll,DWORD dwPID);
+	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
 	bool RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID);
@@ -180,6 +181,7 @@ private:
 	PROCESS_INFORMATION _pi;
 	bool _isDebugging;
 	bool _NormalDebugging;
+	bool _bStopDebugging;
 	HANDLE _hDbgEvent;
 	DWORD _dwPidToAttach;
 	DWORD _dwCurPID;
@@ -189,7 +191,7 @@ private:
 	void AttachedDebugging(LPVOID pDebProc);
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
-
+	
 	static unsigned _stdcall DebuggingEntry(LPVOID pThis);
 
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
@@ -207,9 +209,10 @@ private:
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(DWORD dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
+	bool EnableDebugFlag();
 
-	DWORD CallBreakDebugger(DEBUG_EVENT debug_event,DWORD dwHandle);
-	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT debug_event);
+	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle);
+	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event);
 
 	PTCHAR GetFileNameFromHandle(HANDLE hFile);
 };

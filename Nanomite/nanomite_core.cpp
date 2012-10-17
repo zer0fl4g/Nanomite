@@ -52,11 +52,11 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 
 LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	hDlgMain = hWndDlg;
 	switch(Msg)
 	{
 	case WM_INITDIALOG:
 		{
+			hDlgMain = hWndDlg;
 			ReadFromSettingsFile();
 
 			HICON hIconMain = LoadIcon(GetModuleHandle(NULL),MAKEINTRESOURCE(IDI_MAIN));
@@ -286,7 +286,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 		case ID_FILE_DETACH:
 			if(newDebugger.GetDebuggingState())
 			{
-				if(newDebugger.DetachFromProcess(true,NULL))
+				if(!newDebugger.DetachFromProcess())
 					MessageBox(hDlgMain,L"Failed to detach from Process!",L"Nanomite",MB_OK);
 			}
 			return true;
@@ -1752,12 +1752,11 @@ LRESULT CALLBACK StringViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 
 LRESULT CALLBACK WndListDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	HWND hwWndList = GetDlgItem(hDlgWndList = hWndDlg,IDC_WNDLIST);
-
 	switch(Msg)
 	{
 	case WM_INITDIALOG:
 		{
+			HWND hwWndList = GetDlgItem(hDlgWndList = hWndDlg,IDC_WNDLIST);
 			LVCOLUMN LvCol;
 
 			SendMessage(hwWndList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
@@ -1791,7 +1790,7 @@ LRESULT CALLBACK WndListDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 		}
 
 	case WM_CLOSE:
-		ListView_DeleteAllItems(hwWndList);
+		ListView_DeleteAllItems(GetDlgItem(hDlgWndList = hWndDlg,IDC_WNDLIST));
 		EndDialog(hWndDlg,0);
 		return true;
 	}
@@ -1931,13 +1930,12 @@ LRESULT CALLBACK HandleViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 
 LRESULT CALLBACK RessourceDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
 {
-	hDlgResList = hWndDlg;
-	HWND hwRestList = GetDlgItem(hDlgResList,IDC_RES);
-
 	switch(Msg)
 	{
 	case WM_INITDIALOG:
 		{
+			hDlgResList = hWndDlg;
+			HWND hwRestList = GetDlgItem(hDlgResList,IDC_RES);
 			LVCOLUMN LvCol;
 			SendMessage(hwRestList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 			SendMessage(hwRestList,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
@@ -1966,18 +1964,15 @@ LRESULT CALLBACK RessourceDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 
 			for(int i = iForEntry; i < iForEnd;i++)
 			{
-				EnumInfoStruct eI; eI.dwPID = newDebugger.PIDs[i].dwPID; eI.sFileName = newDebugger.PIDs[i].sFileName;
-				if(EnumResourceTypes(LoadLibrary(newDebugger.PIDs[i].sFileName),EnumResTypes,(LPARAM)&eI) == 0)
-				{
-					DWORD dwError = GetLastError();
-					return false;
-				}
+				HMODULE hFile = LoadLibrary(newDebugger.PIDs[i].sFileName);
+				EnumResourceTypes(hFile,EnumResTypes,NULL);
+				FreeLibrary(hFile);
 			}
 			return true;
 		}
 
 	case WM_CLOSE:
-		ListView_DeleteAllItems(hwRestList);
+		ListView_DeleteAllItems(GetDlgItem(hDlgResList,IDC_RES));
 		EndDialog(hDlgResList,0);
 		return true;
 	}
@@ -3339,7 +3334,7 @@ bool InsertHandleIntoLC(HWND hwLC,DWORD dwPID,DWORD dwHandleID,PTCHAR sType,PTCH
 	return true;
 }
 
-BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG_PTR lParam)
+BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG lParam)
 {
 	if(EnumResourceNames(hModule,lpszType,EnumResNames,lParam) == 0)
 	{
@@ -3349,7 +3344,7 @@ BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG_PTR lParam)
 	return true;
 }
 
-BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG_PTR lParam)
+BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG lParam)
 {
 	HWND hwResList = GetDlgItem(hDlgResList,IDC_RES);
 	int iItemIndex = ListView_GetItemCount(hwResList);

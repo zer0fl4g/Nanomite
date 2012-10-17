@@ -9,6 +9,7 @@ clsDebugger::clsDebugger()
 	tcLogString = (PTCHAR)malloc(LOGBUFFER);
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	dbgSettings = tempSet;
+	EnableDebugFlag();
 }
 
 clsDebugger::clsDebugger(wstring sTarget)
@@ -21,6 +22,7 @@ clsDebugger::clsDebugger(wstring sTarget)
 	tcLogString = (PTCHAR)malloc(LOGBUFFER);
 	clsDebuggerSettings tempSet = {false,false,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0};
 	dbgSettings = tempSet;
+	EnableDebugFlag();
 }
 
 clsDebugger::~clsDebugger(void)
@@ -48,10 +50,7 @@ wstring clsDebugger::GetTarget()
 void clsDebugger::CleanWorkSpace()
 {
 	for(size_t i = 0;i < PIDs.size();i++)
-		for(size_t s = 0;s < DLLs.size();s++)
-			if(PIDs[i].dwPID == DLLs[i].dwPID)
-				SymUnloadModule64(PIDs[i].hSymInfo,DLLs[i].dwBaseAdr);
-
+		SymCleanup(PIDs[i].hSymInfo);
 	for(size_t i = 0; i < DLLs.size(); i++)
 		free(DLLs[i].sPath);
 	PIDs.clear();
@@ -488,6 +487,14 @@ void clsDebugger::DebuggingLoop()
 		if (!WaitForDebugEvent(&debug_event, INFINITE))
 			bContinueDebugging = false;
 
+		if(_bStopDebugging && !_isDebugging)
+		{
+			_bStopDebugging = false;
+			DebugActiveProcessStop(debug_event.dwProcessId);
+			ContinueDebugEvent(debug_event.dwProcessId,debug_event.dwThreadId,DBG_CONTINUE);
+			break;
+		}
+		
 		switch(debug_event.dwDebugEventCode)
 		{
 		case CREATE_PROCESS_DEBUG_EVENT:
@@ -510,6 +517,8 @@ void clsDebugger::DebuggingLoop()
 					swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Could not load symbols for Process(%X)",debug_event.dwProcessId);
 					PBLogInfo();
 				}
+				else
+					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(DWORD)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
 				BPStruct newBP;
 				newBP.dwHandle = 0x1;
@@ -534,6 +543,7 @@ void clsDebugger::DebuggingLoop()
 		case EXIT_PROCESS_DEBUG_EVENT:
 			{
 				PBProcInfo(debug_event.dwProcessId,L"",(DWORD)debug_event.u.CreateProcessInfo.lpStartAddress,debug_event.u.ExitProcess.dwExitCode,NULL);
+				SymCleanup(debug_event.u.CreateProcessInfo.hProcess);
 
 				BOOL bStillOneRunning = false;
 
@@ -629,7 +639,7 @@ void clsDebugger::DebuggingLoop()
 					}
 
 					if(PIDs[iPid].bKernelBP == false && dbgSettings.dwBreakOnEPMode == 1)
-						dwContinueStatus = CallBreakDebugger(debug_event,0);
+						dwContinueStatus = CallBreakDebugger(&debug_event,0);
 					else if(PIDs[iPid].bKernelBP)
 					{
 						if((DWORD)exInfo.ExceptionRecord.ExceptionAddress == PIDs[iPid].dwEP)
@@ -665,7 +675,7 @@ void clsDebugger::DebuggingLoop()
 							SetThreadContext(hThread,&cTT);
 
 							if(bIsEP && dbgSettings.dwBreakOnEPMode == 3)
-								dwContinueStatus = CallBreakDebugger(debug_event,2);
+								dwContinueStatus = CallBreakDebugger(&debug_event,2);
 							else
 							{
 								memset(tcLogString,0x00,LOGBUFFER);
@@ -674,68 +684,68 @@ void clsDebugger::DebuggingLoop()
 								else
 									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Software BP at 0x%08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
 								PBLogInfo();
-								dwContinueStatus = CallBreakDebugger(debug_event,0);
+								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							}
 						}
 						else
-							dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_BREAKPOINT);
+							dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_BREAKPOINT);
 					}
 					PIDs[iPid].bKernelBP = true;
 					break;
 				}
 			case EXCEPTION_ACCESS_VIOLATION:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_ACCESS_VIOLATION);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_ACCESS_VIOLATION);
 				break;
 			case EXCEPTION_ARRAY_BOUNDS_EXCEEDED:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_ARRAY_BOUNDS_EXCEEDED);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_ARRAY_BOUNDS_EXCEEDED);
 				break;
 			case EXCEPTION_DATATYPE_MISALIGNMENT:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_DATATYPE_MISALIGNMENT);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_DATATYPE_MISALIGNMENT);
 				break;
 			case EXCEPTION_FLT_DENORMAL_OPERAND:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_DENORMAL_OPERAND);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_DENORMAL_OPERAND);
 				break;
 			case EXCEPTION_FLT_DIVIDE_BY_ZERO:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_DIVIDE_BY_ZERO);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_DIVIDE_BY_ZERO);
 				break;
 			case EXCEPTION_FLT_INEXACT_RESULT:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_INEXACT_RESULT);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_INEXACT_RESULT);
 				break;
 			case EXCEPTION_FLT_INVALID_OPERATION:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_INVALID_OPERATION);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_INVALID_OPERATION);
 				break;
 			case EXCEPTION_FLT_OVERFLOW:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_OVERFLOW);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_OVERFLOW);
 				break;
 			case EXCEPTION_FLT_STACK_CHECK:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_STACK_CHECK);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_STACK_CHECK);
 				break;
 			case EXCEPTION_FLT_UNDERFLOW:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_FLT_UNDERFLOW);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_FLT_UNDERFLOW);
 				break;
 			case EXCEPTION_ILLEGAL_INSTRUCTION:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION);
 				break;
 			case EXCEPTION_IN_PAGE_ERROR:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_IN_PAGE_ERROR);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_IN_PAGE_ERROR);
 				break;
 			case EXCEPTION_INT_DIVIDE_BY_ZERO:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_INT_DIVIDE_BY_ZERO);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_INT_DIVIDE_BY_ZERO);
 				break;
 			case EXCEPTION_INT_OVERFLOW:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_INT_OVERFLOW);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_INT_OVERFLOW);
 				break;
 			case EXCEPTION_INVALID_DISPOSITION:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_INVALID_DISPOSITION);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_INVALID_DISPOSITION);
 				break;
 			case EXCEPTION_NONCONTINUABLE_EXCEPTION:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_NONCONTINUABLE_EXCEPTION);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_NONCONTINUABLE_EXCEPTION);
 				break;
 			case EXCEPTION_PRIV_INSTRUCTION:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION);
 				break;
 			case EXCEPTION_STACK_OVERFLOW:
-				dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_STACK_OVERFLOW);
+				dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_STACK_OVERFLOW);
 				break;
 			case EXCEPTION_SINGLE_STEP:
 				{
@@ -809,7 +819,7 @@ void clsDebugger::DebuggingLoop()
 									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Hardware BP at 0x%08X",HardwareBPs[i].dwOffset);
 									PBLogInfo();
 
-									dwContinueStatus = CallBreakDebugger(debug_event,0);
+									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 									HardwareBPs[i].bRestoreBP = true;
 									PIDs[iPID].dwBPRestoreFlag = 0x8;
 									PIDs[iPID].bTrapFlag = true;
@@ -825,7 +835,7 @@ void clsDebugger::DebuggingLoop()
 							dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
 					}
 					else
-						dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_SINGLE_STEP);
+						dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_SINGLE_STEP);
 					break;
 				}
 			case EXCEPTION_GUARD_PAGE:
@@ -850,10 +860,10 @@ void clsDebugger::DebuggingLoop()
 							if(MemoryBPs[i].dwOffset == (DWORD)exInfo.ExceptionRecord.ExceptionAddress)
 								MemoryBPs[i].bRestoreBP = true;
 
-						dwContinueStatus = CallBreakDebugger(debug_event,0);
+						dwContinueStatus = CallBreakDebugger(&debug_event,0);
 					}
 					else
-						dwContinueStatus = CallBreakDebugger(debug_event,dbgSettings.dwEXCEPTION_GUARD_PAGE);
+						dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_GUARD_PAGE);
 					break;
 				}
 			default:
@@ -863,12 +873,12 @@ void clsDebugger::DebuggingLoop()
 					{
 						if(debug_event.u.Exception.ExceptionRecord.ExceptionCode == exCustom[i].dwExceptionType)
 						{
-							dwContinueStatus = CallBreakDebugger(debug_event,exCustom[i].dwAction);
+							dwContinueStatus = CallBreakDebugger(&debug_event,exCustom[i].dwAction);
 							bCustomHandler = true;
 						}
 					}
 					if(!bCustomHandler)
-						dwContinueStatus = CallBreakDebugger(debug_event,1); // NOT_HANDLED
+						dwContinueStatus = CallBreakDebugger(&debug_event,1); // NOT_HANDLED
 
 					break;
 				}
@@ -881,36 +891,39 @@ void clsDebugger::DebuggingLoop()
 	memset(tcLogString,0x00,LOGBUFFER);
 	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Debugging finished!");
 	PBLogInfo();
+	CleanWorkSpace();
 	_isDebugging = false;
 	PulseEvent(hDebuggingHandle);
 }
 
-DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT debug_event,DWORD dwHandle)
+DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 {
 	switch (dwHandle)
 	{
 	case 0:
-		_dwCurPID = debug_event.dwProcessId;
-		_dwCurTID = debug_event.dwThreadId;
+		{
+			HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,debug_event->dwThreadId);
+			_dwCurPID = debug_event->dwProcessId;
+			_dwCurTID = debug_event->dwThreadId;
 
-		ProcessContext.ContextFlags = CONTEXT_ALL;
-		GetThreadContext(OpenThread(THREAD_GET_CONTEXT,false,debug_event.dwThreadId),&ProcessContext);
+			ProcessContext.ContextFlags = CONTEXT_ALL;
+			GetThreadContext(hThread,&ProcessContext);
 
-		PulseEvent(hDebuggingHandle);
-		WaitForSingleObject(_hDbgEvent,INFINITE);
-		SetThreadContext(OpenThread(THREAD_SET_CONTEXT,false,debug_event.dwThreadId),&ProcessContext);
-
-		_dwCurPID = 0;_dwCurTID = 0;
-		return DBG_EXCEPTION_HANDLED;
+			PulseEvent(hDebuggingHandle);
+			WaitForSingleObject(_hDbgEvent,INFINITE);
+			SetThreadContext(hThread,&ProcessContext);
+			_dwCurPID = 0;_dwCurTID = 0;
+			return DBG_EXCEPTION_HANDLED;
+		}
 	case 1:
 		return DBG_EXCEPTION_NOT_HANDLED;
 	case 2:
 		return DBG_CONTINUE;
 	case 3:
 		ProcessContext.ContextFlags = CONTEXT_ALL;
-		GetThreadContext(OpenThread(THREAD_GET_CONTEXT,false,debug_event.dwThreadId),&ProcessContext);
+		GetThreadContext(OpenThread(THREAD_GET_CONTEXT,false,debug_event->dwThreadId),&ProcessContext);
 		ProcessContext.Eip = GetReturnAdressFromStackFrame(ProcessContext.Ebp + 0x04,debug_event);
-		SetThreadContext(OpenThread(THREAD_SET_CONTEXT,false,debug_event.dwThreadId),&ProcessContext);
+		SetThreadContext(OpenThread(THREAD_SET_CONTEXT,false,debug_event->dwThreadId),&ProcessContext);
 		return DBG_EXCEPTION_HANDLED;
 	default:
 		return DBG_EXCEPTION_NOT_HANDLED;
@@ -1130,7 +1143,7 @@ bool clsDebugger::ShowCallStack()
 	if(!PIDs[iPid].bSymLoad)
 		PIDs[iPid].bSymLoad = SymInitialize(hProc,NULL,false);
 
-	SymRefreshModuleList(hProc);
+	//SymRefreshModuleList(hProc);
 
 	STACKFRAME64 stackFr = {0};
 
@@ -1317,33 +1330,13 @@ bool clsDebugger::InitBP()
 	return true;
 }
 
-bool clsDebugger::DetachFromProcess(bool bAll,DWORD dwPID)
+bool clsDebugger::DetachFromProcess()
 {
-	DWORD dw = NULL;
-
-	if(bAll)
-	{
-		for(size_t i = 0;i < PIDs.size(); i++)
-		{
-			if(CheckProcessState(PIDs[i].dwPID) && PIDs[i].bRunning)
-			{
-				_NormalDebugging = true;
-				if(!DebugActiveProcessStop(PIDs[i].dwPID))
-				{
-					dw = GetLastError();
-				}
-			}
-		}
-	}
-	else
-	{
-		if(dwPID != NULL && CheckProcessState(dwPID))
-		{
-			_NormalDebugging = true;
-			return DebugActiveProcessStop(dwPID);
-		}
-	}
-	return false;
+	_NormalDebugging = true;
+	_isDebugging = false;
+	_bStopDebugging = true;
+	DebugBreakProcess(_pi.hProcess);
+	return true;
 }
 
 bool clsDebugger::AttachToProcess(DWORD dwPID)
@@ -1370,7 +1363,7 @@ bool clsDebugger::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD d
 	if(!PIDs[iPid].bSymLoad)
 		PIDs[iPid].bSymLoad = SymInitialize(hProcess,NULL,false);
 
-	bTest = SymRefreshModuleList(hProcess);
+	//bTest = SymRefreshModuleList(hProcess);
 
 	IMAGEHLP_MODULEW imgMod = {0};
 	imgMod.SizeOfStruct = sizeof(imgMod);
@@ -1476,7 +1469,7 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSlot)
 	return true;
 }
 
-DWORD clsDebugger::GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT debug_event)
+DWORD clsDebugger::GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event)
 {
 	DWORD dwRetAdr = NULL,
 		dwBytesRead;
@@ -1485,7 +1478,7 @@ DWORD clsDebugger::GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT debug_e
 	int iPid = 0;
 	for(size_t i = 0;i < PIDs.size(); i++)
 	{
-		if(PIDs[i].dwPID == debug_event.dwProcessId)
+		if(PIDs[i].dwPID == debug_event->dwProcessId)
 			hProcess = PIDs[i].hSymInfo;iPid = i;
 	}
 
@@ -1600,4 +1593,25 @@ void clsDebugger::CustomExceptionRemove(DWORD dwExceptionType)
 			it = exCustom.begin();
 		}
 	}
+}
+
+bool clsDebugger::EnableDebugFlag()
+{
+	TOKEN_PRIVILEGES tkpNewPriv;
+	LUID luid;
+	HANDLE hToken = NULL;
+	
+	if(!OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES,&hToken))
+		return false;
+	
+	if (!LookupPrivilegeValue(NULL,SE_DEBUG_NAME,&luid))
+		return false;
+	
+	tkpNewPriv.PrivilegeCount = 1;
+	tkpNewPriv.Privileges[0].Luid = luid;
+	tkpNewPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+	if(!AdjustTokenPrivileges(hToken,0,&tkpNewPriv,0,0,0))
+		return false;
+	return true;
 }

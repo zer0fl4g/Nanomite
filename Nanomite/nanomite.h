@@ -50,8 +50,8 @@ bool printPEView(HWND hWndDlg,int i);
 bool InsertPEPartIntoLC(wstring sPEStructName,DWORD dwData,HWND hwLC);
 bool InsertHandleIntoLC(HWND hwLC,DWORD dwPID,DWORD dwHandleID,PTCHAR sType,PTCHAR sName);
 bool CALLBACK EnumWindowCallBack(HWND hWnd, LPARAM lParam);
-BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG_PTR lParam);
-BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG_PTR lParam);
+BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG lParam);
+BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG lParam);
 
 DWORD CalcNewOffset(DWORD dwCurrentOffset,BOOL bStepIn);
 
