@@ -9,7 +9,8 @@ HWND	hwLBCallStack,
 		hDlgMemMap,
 		hDlgHeapMap,
 		hDlgWndList,
-		hDlgResList;
+		hDlgResList,
+		hDlgDbgStringInfo;
 
 int iMemMapPID = 0,
 	iHeapMapPID = 0,
@@ -31,7 +32,10 @@ HMENU	hMemMapMenu,
 
 clsDebugger newDebugger;
 
-PTCHAR tcLogging;
+PTCHAR	tcLogging,
+		tcTempState;
+
+DWORD dwExceptionCount;
 //---------------------------------------------------------------------------
 
 INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine, int nCmdShow)
@@ -42,9 +46,14 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 	InitCommonControlsEx(&icx);
 
 	HWND hWND = 0;
+
 	tcLogging = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	tcTempState = (PTCHAR)malloc(255 * sizeof(TCHAR));
+
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAINFRAME),hWND, reinterpret_cast<DLGPROC>(MainDLGProc));
+
 	free(tcLogging);
+	free(tcTempState);
 
 	_CrtDumpMemoryLeaks();
 	return false;
@@ -154,6 +163,10 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			hDlgDetInfo = CreateDialog(GetModuleHandle(NULL),MAKEINTRESOURCE(IDD_DETINFO),hDlgMain,reinterpret_cast<DLGPROC>(DetailInfoDLGProc));
 			//----------------- Loading Detail Info ------------------------
 		
+			//----------------- Loading DebugString Info ------------------------
+			hDlgDbgStringInfo = CreateDialog(GetModuleHandle(NULL),MAKEINTRESOURCE(IDD_DBGSTR),hDlgMain,reinterpret_cast<DLGPROC>(DebugStringDLGProc));
+			//----------------- Loading DebugString Info ------------------------
+
 			//HFONT hFont = CreateFont(0, 0, 0, 0, FW_BOLD, 0, 0, 0, SYMBOL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DECORATIVE, "Terminal");
 			//SendMessage(GetDlgItem(hDlgMain,IDC_LIST1),WM_SETFONT,(WPARAM)hFont,NULL);
 
@@ -205,6 +218,15 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			{
 				newDebugger.StopDebuggingAll();
 				ListBox_ResetContent(GetDlgItem(hDlgMain,IDC_LIST1));
+				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_PID));
+				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_TID));
+				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs));
+				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS));
+				ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
+				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
+				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
+				ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
+				dwExceptionCount = 0;
 			}
 			if(newDebugger.IsTargetSet())
 				StartDebugging(&newDebugger);
@@ -228,6 +250,8 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
 			ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
 			ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
+			ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
+			dwExceptionCount = 0;
 
 			MenuLoadNewFile(&newDebugger);
 			return true;
@@ -248,18 +272,20 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
 				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
 				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
+				ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
+				dwExceptionCount = 0;
 
 				if(!newDebugger.IsTargetSet())
 					if(!MenuLoadNewFile(&newDebugger))
 						return true;
 
 				StartDebugging(&newDebugger);
-				Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Started");
+				UpdateStateLable(0x1);
 			}
 			else
 			{
 				newDebugger.ResumeDebugging();
-				Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Resumed");
+				UpdateStateLable(0x1);
 			}
 			return true;
 
@@ -288,6 +314,8 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			{
 				if(!newDebugger.DetachFromProcess())
 					MessageBox(hDlgMain,L"Failed to detach from Process!",L"Nanomite",MB_OK);
+				else
+					UpdateStateLable(0x3);
 			}
 			return true;
 			
@@ -313,6 +341,10 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				HWND hAttachTo = CreateDialog(GetModuleHandle(NULL),MAKEINTRESOURCE(IDD_ATTACH),hDlgMain,reinterpret_cast<DLGPROC>(AttachToDLGProc));
 				ShowWindow(hAttachTo,SW_SHOW);
 			}
+			return true;
+
+		case ID_DEBUGSTRINGS:
+			ShowWindow(hDlgDbgStringInfo,SW_SHOW);
 			return true;
 
 		case ID_WNDLIST:
@@ -402,7 +434,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 					if(wcsstr(sTemp,L"ALL") != 0 || wcscmp(sTemp,L"") == 0)
 					{
 						newDebugger.SuspendDebuggingAll();
-						Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Suspended");				
+						UpdateStateLable(0x2);			
 					}
 					else
 					{
@@ -427,7 +459,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 					if(wcsstr(sTemp,L"ALL") != 0 || wcscmp(sTemp,L"") == 0)
 					{
 						newDebugger.StopDebuggingAll();
-						Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Stopped");	
+						UpdateStateLable(0x3);
 					}
 					else
 					{
@@ -1173,7 +1205,7 @@ LRESULT CALLBACK AttachToDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM l
 					ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
 
 					StartDebugging(&newDebugger);
-					Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Started");
+					UpdateStateLable(0x1);
 					EndDialog(hWndDlg,0);
 					return true;
 				}
@@ -1979,6 +2011,34 @@ LRESULT CALLBACK RessourceDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 	return false;
 }
 
+LRESULT CALLBACK DebugStringDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam)
+{
+	switch(Msg)
+	{
+	case WM_INITDIALOG:
+		{
+			LVCOLUMN LvCol;
+			HWND hwDebugStringLC = GetDlgItem(hWndDlg,IDC_DBGSTR);
+			SendMessage(hwDebugStringLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+			memset(&LvCol,0,sizeof(LvCol));                  
+			LvCol.mask=LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
+			LvCol.pszText = L"PID";                         
+			LvCol.cx = 0x50;                               
+			SendMessage(hwDebugStringLC,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
+			LvCol.pszText = L"Debug String";                         
+			LvCol.cx = 0x200;        
+			SendMessage(hwDebugStringLC,LVM_INSERTCOLUMN,1,(LPARAM)&LvCol);
+
+			break;
+		}
+	case WM_CLOSE:
+		ShowWindow(hWndDlg,SW_HIDE);
+		return true;
+	}
+	return false;
+}
+
 void DebuggingLoop(clsDebugger *tempDebugger)
 {
 	BOOL bDebugIt = true;
@@ -2002,10 +2062,10 @@ void DebuggingLoop(clsDebugger *tempDebugger)
 			LoadStackView(newDebugger.ProcessContext.Esp);
 			LoadDisAssView(newDebugger.ProcessContext.Eip);
 			
-			Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Suspended");
+			UpdateStateLable(0x2);
 		}
 	}
-	Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),L"State: Terminated");
+	UpdateStateLable(0x3);
 }
 
 bool MenuLoadNewFile(clsDebugger *newDebugger)
@@ -2045,7 +2105,7 @@ void StartDebugging(clsDebugger *tempDebugger)
 void LoadCallBacks(clsDebugger *newDebugger)
 {
 	newDebugger->dwOnCallStack = &OnCallStack;
-	//newDebugger->dwOnDbgString = &OnDbgString;
+	newDebugger->dwOnDbgString = &OnDbgString;
 	newDebugger->dwOnDll = &OnDll;
 	newDebugger->dwOnLog = &OnLog;
 	newDebugger->dwOnThread = &OnThread;
@@ -2129,6 +2189,8 @@ int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode
 			}
 		}
 	}
+
+	UpdateStateLable(0x1);
 	return 0;
 }
 
@@ -2193,12 +2255,15 @@ int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound)
 			}
 		}
 	}
+
+	UpdateStateLable(0x1);
 	return 0;
 }
 
 int OnException(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID)
 {
 	HWND hwExceptionLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS);
+	dwExceptionCount++;
 
 	wstringstream sLog;
 	int itemIndex = 0;
@@ -2231,11 +2296,37 @@ int OnException(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExcept
 	wsprintf(sTemp,L"%s.%s",sModName.c_str(),sFuncName.c_str());
 	lvDETITEM.iSubItem = 3;
 	SendMessage(hwExceptionLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
+
+	UpdateStateLable(0x1);
 	return 0;
 }
 
 int OnDbgString(wstring sMessage,DWORD dwPID)
 {
+	HWND hwDebugStringLC = GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR);
+	int itemIndex = 0;
+	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	LVITEM lvDETITEM;
+	memset(&lvDETITEM,0,sizeof(lvDETITEM));
+
+	itemIndex = SendMessage(hwDebugStringLC,LVM_GETITEMCOUNT,0,0);
+
+	// PID
+	wsprintf(sTemp,L"0x%08X",dwPID);
+	lvDETITEM.mask = LVIF_TEXT;
+	lvDETITEM.cchTextMax = 256;
+	lvDETITEM.iItem = itemIndex;
+	lvDETITEM.iSubItem = 0;
+	lvDETITEM.pszText = sTemp;
+	SendMessage(hwDebugStringLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
+
+	// DebugString
+	wsprintf(sTemp,L"%s",sMessage.c_str());
+	lvDETITEM.iSubItem = 1;
+	SendMessage(hwDebugStringLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
+	memset(sTemp,0,sMessage.length() * sizeof(TCHAR));
+
+	free(sTemp);
 	return 0;
 }
 
@@ -2311,6 +2402,8 @@ int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 			}
 		}
 	}
+
+	UpdateStateLable(0x1);
 	return 0;
 }
 
@@ -2520,13 +2613,13 @@ void LoadDisAssView(DWORD dwEIP)
 	}
 
 	bool bUnProtect = VirtualProtectEx(hProc,(LPVOID)dwStartOffset,100,dwNewProtection,&dwOldProtection);
-
 	if(ReadProcessMemory(hProc,(LPVOID)dwStartOffset,pBuffer,100,NULL))
 	{
 		newDisAss.EIP = (int)pBuffer;
 		newDisAss.VirtualAddr = dwStartOffset;
 		newDisAss.Archi = 0;
 
+		PTCHAR sTemp = (PTCHAR)malloc(256 * sizeof(TCHAR));
 		while(bContinueDisAs)
 		{
 			newDisAss.SecurityBlock = (int)dwEndOffset - newDisAss.VirtualAddr;
@@ -2538,7 +2631,7 @@ void LoadDisAssView(DWORD dwEIP)
 			else
 			{			
 				int itemIndex = 0;
-				PTCHAR sTemp = (PTCHAR)malloc(256 * sizeof(TCHAR));
+				memset(sTemp,0,256 *  sizeof(TCHAR));
 				LVITEM lvDETITEM;
 				memset(&lvDETITEM,0,sizeof(lvDETITEM));
 
@@ -2559,7 +2652,7 @@ void LoadDisAssView(DWORD dwEIP)
 				DWORD dwBytesRead = NULL;
 					
 				memset(sTemp,0,256);
-				int iTempLen = ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : iLen);
+				int iTempLen = ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : ((iLen == UNKNOWN_OPCODE) ? 0 : iLen));
 				for(size_t i = 0;i < iTempLen;i++)
 				{
 					DWORD dwOffset = newDisAss.VirtualAddr + i;
@@ -2589,33 +2682,15 @@ void LoadDisAssView(DWORD dwEIP)
 				{
 					wstring sFuncName,sModName;
 					newDebugger.LoadSymbolForAddr(sFuncName,sModName,newDisAss.Instruction.AddrValue);
-					if(sFuncName != L"" && sModName != L"")
+					if(sFuncName.length() > 0 && sModName.length() > 0)
 						wsprintf(sTemp,L"%s.%s",sModName.c_str(),sFuncName.c_str());
-				}
-				//else if(strstr(newDisAss.CompleteInstr,"mov dword ptr") != 0 ||
-				//	strstr(newDisAss.CompleteInstr,"mov byte ptr") != 0)
-				//{
-				//	string sFuncName,sModName;
-				//	//newDebugger.LoadSymbolForAddr(sFuncName,sModName,newDisAss.Argument1.ArgMnemonic);
-				//	if(sFuncName != "")
-				//		wsprintf(sTemp,"%s.%s",sModName.c_str(),sFuncName.c_str());
-				//	else
-				//		wsprintf(sTemp,"%s.<%08X>",sModName.c_str(),newDisAss.Instruction.Immediat);
-				//}
-				else if(strstr(newDisAss.Instruction.Mnemonic,"mov") != 0 ||
-					strstr(newDisAss.Instruction.Mnemonic,"cmp") != 0)
-				{
-					wstring sFuncName,sModName;
-					newDebugger.LoadSymbolForAddr(sFuncName,sModName,newDisAss.Instruction.Immediat);
-					if(sFuncName != L"" && sModName != L"")
-						wsprintf(sTemp,L"%s.%s",sModName.c_str(),sFuncName.c_str());
+					else if(sModName.length() > 0 && sFuncName.length() == 0)
+						wsprintf(sTemp,L"%s.0x%08X",sModName.c_str(),newDisAss.VirtualAddr);
 				}
 				else
 					wsprintf(sTemp,L"%s",L"");
 				lvDETITEM.iSubItem = 3;
 				SendMessage(hwDisAs,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
-
-				free(sTemp);
 			}
 
 			newDisAss.EIP = newDisAss.EIP + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
@@ -2623,6 +2698,7 @@ void LoadDisAssView(DWORD dwEIP)
 			if (newDisAss.VirtualAddr >= (int)dwEndOffset)
 				bContinueDisAs = false;
 		}
+		free(sTemp);
 	}
 
 	bool bProtect = VirtualProtectEx(hProc,(LPVOID)dwStartOffset,100,dwOldProtection,NULL);
@@ -2898,7 +2974,7 @@ void LoadStackView(DWORD dwESP)
 		dwStartOffset = dwESP - 4*3,
 		dwEndOffset = dwESP + 4*4;
 	bool bCheckVar = false;
-	byte* bBuffer;
+	LPBYTE bBuffer;
 	PTCHAR sTemp;
 	HANDLE hProcess = NULL;
 	HWND hwStackViewLC = GetDlgItem(hDlgMain,ID_STACKVIEW);
@@ -2917,7 +2993,7 @@ void LoadStackView(DWORD dwESP)
 	if(!VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwNewProtect,&dwOldProtect))
 		return;
 
-	bBuffer = (byte*)malloc(dwSize);
+	bBuffer = (LPBYTE)malloc(dwSize);
 	if(bBuffer == NULL)
 		return;
 
@@ -3389,4 +3465,33 @@ BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG
 
 	free(sTemp);
 	return true;
+}
+
+void UpdateStateLable(DWORD dwState)
+{
+	PTCHAR tcStateString = (PTCHAR)malloc(128);
+	memset(tcTempState,0,sizeof(255 * sizeof(TCHAR)));
+
+	switch(dwState)
+	{
+	case 0x1: // Running
+		swprintf_s(tcStateString,64,L"Running");
+		break;
+	case 0x2: // Suspended
+		swprintf_s(tcStateString,64,L"Suspended");
+		break;
+	case 0x3: // Terminated
+		swprintf_s(tcStateString,64,L"Terminated");
+		break;
+	}
+	swprintf_s(tcTempState,255,L"\t\tPIDs: %d  TIDs: %d  DLLs: %d  Exceptions: %d State: %s",
+		newDebugger.PIDs.size(),
+		newDebugger.Threads.size(),
+		newDebugger.DLLs.size(),
+		dwExceptionCount,
+		tcStateString);
+
+	Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),tcTempState);
+
+	free(tcStateString);
 }

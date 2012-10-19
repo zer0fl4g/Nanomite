@@ -87,7 +87,7 @@
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>comctl32.lib;BeaEngine.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <IgnoreSpecificDefaultLibraries>crt.lib</IgnoreSpecificDefaultLibraries>
-      <Profile>true</Profile>
+      <Profile>false</Profile>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -152,6 +152,13 @@
   <ItemGroup>
     <None Include="..\clsDebugger_tester\notes.txt" />
     <None Include="..\Icons\450x150.bmp" />
+    <None Include="..\Icons\IDI_MAIN.ico" />
+    <None Include="..\Icons\IDI_RESTART.ico" />
+    <None Include="..\Icons\IDI_START.ico" />
+    <None Include="..\Icons\IDI_STEPIN.ico" />
+    <None Include="..\Icons\IDI_STEPOVER.ico" />
+    <None Include="..\Icons\IDI_STOP.ico" />
+    <None Include="..\Icons\IDI_SUSPEND.ico" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

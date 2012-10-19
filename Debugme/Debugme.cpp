@@ -23,6 +23,9 @@ int _tmain(int argc,PCHAR argv[])
 		MessageBoxW(NULL,L"Debugger NOT Found",L"Debugme!",MB_OK);
 	
 	MessageBoxW(NULL,L"TEXT",NULL,MB_OK);
+
+	for(int i = 0; i < 99; i++)
+		OutputDebugStringW(L"Little Test!");
 	return 0;
 }
 

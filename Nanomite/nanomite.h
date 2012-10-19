@@ -30,11 +30,12 @@ void DebuggingLoop(clsDebugger *newDebugger);
 void LoadDisAssView(DWORD dwEIP);
 void LoadRegView();
 void LoadStackView(DWORD dwESP);
+void UpdateStateLable(DWORD dwState);
 
 int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
 int OnException(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
-int OnDbgstring(wstring sMessage,DWORD dwPID);
+int OnDbgString(wstring sMessage,DWORD dwPID);
 int OnLog(wstring sLog);
 int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 int OnCallStack(DWORD dwStackAddr,
@@ -70,6 +71,7 @@ LRESULT CALLBACK StringViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 LRESULT CALLBACK WndListDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK HandleViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK RessourceDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
+LRESULT CALLBACK DebugStringDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
 
 HMENU GenerateRunningPIDMenu(bool bWithAll);
 

@@ -40,5 +40,26 @@
     <None Include="..\Icons\450x150.bmp">
       <Filter>Ressourcendateien</Filter>
     </None>
+    <None Include="..\Icons\IDI_MAIN.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_START.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STOP.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_RESTART.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STEPOVER.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STEPIN.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_SUSPEND.ico">
+      <Filter>Ressourcendateien</Filter>
+    </None>
   </ItemGroup>
 </Project>

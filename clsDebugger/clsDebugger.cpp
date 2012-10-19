@@ -54,7 +54,6 @@ void clsDebugger::CleanWorkSpace()
 	for(size_t i = 0; i < DLLs.size(); i++)
 		free(DLLs[i].sPath);
 	PIDs.clear();
-	DbgStrings.clear();
 	DLLs.clear();
 	Threads.clear();
 }
@@ -250,8 +249,8 @@ bool clsDebugger::PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,
 		dwExceptionOffset,
 		dwPID,
 		dwTID);
-
 	PBLogInfo();
+
 	return true;
 }
 
@@ -301,14 +300,13 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 
 bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
 {
-	DbgStrings.push_back(sMessage);
-
 	if(dwOnDbgString != NULL)
 		dwOnDbgString(sMessage,dwPID);
 	
-	memset(tcLogString,0x00,LOGBUFFER);
-	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] PID(%X) - DbgString: %s",dwPID,sMessage);
-	PBLogInfo();
+	//memset(tcLogString,0x00,LOGBUFFER);
+	//swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] PID(%X) - DbgString: %s",dwPID,sMessage);
+	//PBLogInfo();
+
 	free(sMessage);
 	return true;
 }
@@ -471,9 +469,7 @@ void clsDebugger::NormalDebugging(LPVOID pDebProc)
 		dwCreationFlag = 0x1;
 
 	if(CreateProcess(_sTarget.c_str(),NULL,NULL,NULL,false,dwCreationFlag,NULL,NULL,&_si,&_pi))
-	{
 		DebuggingLoop();
-	}
 }
 
 void clsDebugger::DebuggingLoop()
@@ -481,6 +477,8 @@ void clsDebugger::DebuggingLoop()
 	DEBUG_EVENT debug_event = {0};
 	bool bContinueDebugging = true;
 	DWORD dwContinueStatus = DBG_CONTINUE;
+
+	DebugSetProcessKillOnExit(false);
 
 	while(bContinueDebugging && _isDebugging)
 	{ 
@@ -521,7 +519,7 @@ void clsDebugger::DebuggingLoop()
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(DWORD)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
 				BPStruct newBP;
-				newBP.dwHandle = 0x1;
+				newBP.dwHandle = 0x2;
 				newBP.dwSize = 0x1;
 				newBP.dwPID = (DWORD)debug_event.dwProcessId;
 				newBP.dwOffset = (DWORD)debug_event.u.CreateProcessInfo.lpStartAddress;
@@ -623,7 +621,8 @@ void clsDebugger::DebuggingLoop()
 		case EXCEPTION_DEBUG_EVENT:
 			EXCEPTION_DEBUG_INFO exInfo = debug_event.u.Exception;
 
-			if(!CheckIfExceptionIsBP((DWORD)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,false))
+			if(!CheckIfExceptionIsBP((DWORD)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,false) &&
+				!(debug_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP && _bSingleStepFlag))
 				PBExceptionInfo((DWORD)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
 
 			switch (exInfo.ExceptionRecord.ExceptionCode)
@@ -774,7 +773,7 @@ void clsDebugger::DebuggingLoop()
 								}
 							}
 							PIDs[iPID].dwBPRestoreFlag = NULL;
-							dwContinueStatus = DBG_CONTINUE;
+							//dwContinueStatus = DBG_CONTINUE;
 						}
 						else if(PIDs[iPID].dwBPRestoreFlag == 0x4) // Restore MemBP
 						{
@@ -787,7 +786,7 @@ void clsDebugger::DebuggingLoop()
 								MemoryBPs[i].bRestoreBP = false;
 							}
 							PIDs[iPID].dwBPRestoreFlag = NULL;
-							dwContinueStatus = DBG_CONTINUE;
+							//dwContinueStatus = DBG_CONTINUE;
 						}
 						else if(PIDs[iPID].dwBPRestoreFlag == 0x8) // Restore HwBp
 						{
@@ -803,7 +802,7 @@ void clsDebugger::DebuggingLoop()
 							}
 							PIDs[iPID].bTrapFlag = false;
 							PIDs[iPID].dwBPRestoreFlag = NULL;
-							dwContinueStatus = DBG_CONTINUE;
+							//dwContinueStatus = DBG_CONTINUE;
 						}
 						else if(PIDs[iPID].dwBPRestoreFlag == NULL) // First time hit HwBP
 						{
@@ -833,9 +832,23 @@ void clsDebugger::DebuggingLoop()
 						}
 						else
 							dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
+
+						if(_bSingleStepFlag)
+						{
+							_bSingleStepFlag = false;
+							dwContinueStatus = CallBreakDebugger(&debug_event,0);
+						}
 					}
 					else
-						dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_SINGLE_STEP);
+					{
+						if(_bSingleStepFlag)
+						{
+							_bSingleStepFlag = false;
+							dwContinueStatus = CallBreakDebugger(&debug_event,0);
+						}
+						else
+							dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwEXCEPTION_SINGLE_STEP);
+					}
 					break;
 				}
 			case EXCEPTION_GUARD_PAGE:
@@ -888,6 +901,7 @@ void clsDebugger::DebuggingLoop()
 		ContinueDebugEvent(debug_event.dwProcessId,debug_event.dwThreadId,dwContinueStatus);
 		dwContinueStatus = DBG_CONTINUE;
 	}
+
 	memset(tcLogString,0x00,LOGBUFFER);
 	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Debugging finished!");
 	PBLogInfo();
@@ -1087,6 +1101,7 @@ bool clsDebugger::StepOver(DWORD dwNewOffset)
 
 bool clsDebugger::StepIn()
 {
+	_bSingleStepFlag = true;
 	ProcessContext.EFlags |= 0x100;
 	return PulseEvent(_hDbgEvent);
 }
@@ -1336,11 +1351,21 @@ bool clsDebugger::DetachFromProcess()
 	_isDebugging = false;
 	_bStopDebugging = true;
 	DebugBreakProcess(_pi.hProcess);
+
+	for(size_t d = 0;d < PIDs.size();d++)
+	{
+		for(size_t i = 0;i < SoftwareBPs.size();i++)
+		{
+			WriteProcessMemory(PIDs[i].hSymInfo,(LPVOID)SoftwareBPs[i].dwOffset,(LPVOID)&SoftwareBPs[i].bOrgByte,SoftwareBPs[i].dwSize,NULL);
+			FlushInstructionCache(PIDs[i].hSymInfo,(LPVOID)SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize);
+		}
+	}
 	return true;
 }
 
 bool clsDebugger::AttachToProcess(DWORD dwPID)
 {
+	CleanWorkSpace();
 	_NormalDebugging = false;_dwPidToAttach = dwPID;
 	return true;//StartDebugging();
 }

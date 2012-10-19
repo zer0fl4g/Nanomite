@@ -125,6 +125,7 @@ int _tmain(int argc, PCHAR argv[])
 			);
 			tempDebugger.ShowCallStack(); // Call our registered callback
 			getchar(); // Wait for User
+			//tempDebugger.StepIn();
 			tempDebugger.ResumeDebugging(); // Continue debugging
 		}
 	}

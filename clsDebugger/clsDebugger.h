@@ -118,7 +118,6 @@ public:
 	vector<DLLStruct> DLLs;
 	vector<ThreadStruct> Threads;
 	vector<PIDStruct> PIDs;
-	vector<PTCHAR>DbgStrings;
 	vector<BPStruct>SoftwareBPs;
 	vector<BPStruct>MemoryBPs;
 	vector<BPStruct>HardwareBPs;
@@ -164,7 +163,7 @@ public:
 	int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 	int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
 	int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	int (*dwOnDbgString)(PTCHAR sMessage,DWORD dwPID);
+	int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
 	int (*dwOnLog)(wstring sLog);
 	int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 	int (*dwOnCallStack)(DWORD dwStackAddr,
@@ -182,6 +181,7 @@ private:
 	bool _isDebugging;
 	bool _NormalDebugging;
 	bool _bStopDebugging;
+	bool _bSingleStepFlag;
 	HANDLE _hDbgEvent;
 	DWORD _dwPidToAttach;
 	DWORD _dwCurPID;
