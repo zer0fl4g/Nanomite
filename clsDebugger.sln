@@ -16,6 +16,8 @@ Project("{2150E333-8FDC-42A3-9474-1A3956D46DE8}") = "Solution Items", "Solution 
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebuggingDriver", "DebuggingDriver\DebuggingDriver.vcxproj", "{648C1BDA-8D6C-459B-8934-67E0C64FCD6F}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clsDebuggerLIB", "clsDebuggerLIB\clsDebuggerLIB.vcxproj", "{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -48,6 +50,12 @@ Global
 		{B6F76D6A-946E-40FE-8FE6-E69F664539E6}.Release|Win32.Build.0 = Release|Win32
 		{B6F76D6A-946E-40FE-8FE6-E69F664539E6}.Release|x64.ActiveCfg = Release|x64
 		{B6F76D6A-946E-40FE-8FE6-E69F664539E6}.Release|x64.Build.0 = Release|x64
+		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Debug|Win32.ActiveCfg = Debug|Win32
+		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Debug|Win32.Build.0 = Debug|Win32
+		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Debug|x64.ActiveCfg = Debug|Win32
+		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Release|Win32.ActiveCfg = Release|Win32
+		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Release|Win32.Build.0 = Release|Win32
+		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

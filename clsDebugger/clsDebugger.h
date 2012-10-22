@@ -38,27 +38,6 @@ class clsDebugger
 		bool bAutoLoadSymbols;
 		DWORD dwSuspendType;
 		DWORD dwBreakOnEPMode;
-		DWORD dwEXCEPTION_ACCESS_VIOLATION;
-		DWORD dwEXCEPTION_ARRAY_BOUNDS_EXCEEDED;
-		DWORD dwEXCEPTION_BREAKPOINT;
-		DWORD dwEXCEPTION_DATATYPE_MISALIGNMENT;
-		DWORD dwEXCEPTION_FLT_DENORMAL_OPERAND;
-		DWORD dwEXCEPTION_FLT_DIVIDE_BY_ZERO;
-		DWORD dwEXCEPTION_FLT_INEXACT_RESULT;
-		DWORD dwEXCEPTION_FLT_INVALID_OPERATION;
-		DWORD dwEXCEPTION_FLT_OVERFLOW;
-		DWORD dwEXCEPTION_FLT_STACK_CHECK;
-		DWORD dwEXCEPTION_FLT_UNDERFLOW;
-		DWORD dwEXCEPTION_ILLEGAL_INSTRUCTION;
-		DWORD dwEXCEPTION_IN_PAGE_ERROR;
-		DWORD dwEXCEPTION_INT_DIVIDE_BY_ZERO;
-		DWORD dwEXCEPTION_INT_OVERFLOW;
-		DWORD dwEXCEPTION_INVALID_DISPOSITION;
-		DWORD dwEXCEPTION_NONCONTINUABLE_EXCEPTION;
-		DWORD dwEXCEPTION_PRIV_INSTRUCTION;
-		DWORD dwEXCEPTION_SINGLE_STEP;
-		DWORD dwEXCEPTION_STACK_OVERFLOW;
-		DWORD dwEXCEPTION_GUARD_PAGE;
 	};
 
 	struct DLLStruct
@@ -88,7 +67,7 @@ class clsDebugger
 		BOOL bRunning;
 		BOOL bSymLoad;
 		BOOL bTrapFlag;
-		HANDLE hSymInfo;
+		HANDLE hProc;
 		PTCHAR sFileName;
 	};
 
@@ -111,17 +90,19 @@ class clsDebugger
 	struct customException
 	{
 		DWORD dwExceptionType;
+		DWORD dwHandler;
 		DWORD dwAction;
 	};
+
 public:
 
 	vector<DLLStruct> DLLs;
 	vector<ThreadStruct> Threads;
 	vector<PIDStruct> PIDs;
-	vector<BPStruct>SoftwareBPs;
-	vector<BPStruct>MemoryBPs;
-	vector<BPStruct>HardwareBPs;
-	vector<customException>exCustom;
+	vector<BPStruct> SoftwareBPs;
+	vector<BPStruct> MemoryBPs;
+	vector<BPStruct> HardwareBPs;
+	vector<customException> ExceptionHandler;
 
 	CONTEXT ProcessContext;
 
@@ -150,21 +131,23 @@ public:
 	bool RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID);
 	bool RemoveBPs();
 	bool LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD dwOffset);
-
+	bool ReadMemoryFromDebugee(DWORD dwPID,DWORD dwAddress,DWORD dwSize,LPVOID lpBuffer);
+	bool WriteMemoryFromDebugee(DWORD dwPID,DWORD dwAddress,DWORD dwSize,LPVOID lpBuffer);
 
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
 	void AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,DWORD dwSlot,DWORD dwKeep);
 	void SetTarget(wstring sTarget);
-	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction);
+	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,DWORD dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
+	void CustomExceptionRemoveAll();
 
 	int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 	int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
 	int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
-	int (*dwOnLog)(wstring sLog);
+	int (*dwOnLog)(tm timeInfo,wstring sLog);
 	int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 	int (*dwOnCallStack)(DWORD dwStackAddr,
 						 DWORD dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
@@ -195,7 +178,7 @@ private:
 	static unsigned _stdcall DebuggingEntry(LPVOID pThis);
 
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
-	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hSymInfo);
+	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hProc);
 	bool PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 	bool PBLogInfo();
@@ -215,6 +198,8 @@ private:
 	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event);
 
 	PTCHAR GetFileNameFromHandle(HANDLE hFile);
+
+	typedef DWORD (__stdcall *CustomHandler)(DEBUG_EVENT *debug_event);
 };
 
 #endif

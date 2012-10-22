@@ -84,16 +84,15 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			SendMessage(GetDlgItem(hDlgMain,ID_DEBUG_STEPIN),BM_SETIMAGE,ICON_BIG,(LPARAM)hIconStepIn);
 			SendMessage(GetDlgItem(hDlgMain,ID_DEBUG_SUSPEND),BM_SETIMAGE,ICON_BIG,(LPARAM)hIconSuspend);
 
-			LoadCallBacks(&newDebugger);
+			LoadCallBacks();
 
 			//------------------- Init. ListC. ----------
 			LVCOLUMN LvCol;
-
 			hwLBCallStack = GetDlgItem(hDlgMain,IDC_LIST2);
 			SendMessage(hwLBCallStack,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 			memset(&LvCol,0,sizeof(LvCol));                  
-			LvCol.mask=LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
+			LvCol.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
 			LvCol.pszText = L"Stack Offset";                         
 			LvCol.cx = 0x50;                               
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
@@ -123,7 +122,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			SendMessage(hwDisAssLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 			memset(&LvCol,0,sizeof(LvCol));                  
-			LvCol.mask=LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
+			LvCol.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
 			LvCol.pszText = L"Offset";                         
 			LvCol.cx = 0x60;                               
 			SendMessage(hwDisAssLC,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
@@ -143,7 +142,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			SendMessage(hwStackViewLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
 
 			memset(&LvCol,0,sizeof(LvCol));                  
-			LvCol.mask=LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
+			LvCol.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
 			LvCol.pszText = L"Offset";                         
 			LvCol.cx = 0x50;                               
 			SendMessage(hwStackViewLC,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
@@ -153,6 +152,20 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			LvCol.pszText = L"Comment"; 
 			LvCol.cx = 0x93;
 			SendMessage(hwStackViewLC,LVM_INSERTCOLUMN,2,(LPARAM)&LvCol);
+			//-------------------------------------------
+
+			//------------------- Init. Log ----------
+			HWND hwLogLC = GetDlgItem(hDlgMain,IDC_LOG);
+			SendMessage(hwLogLC,LVM_SETEXTENDEDLISTVIEWSTYLE,0,LVS_EX_FULLROWSELECT | LVS_EX_GRIDLINES);
+
+			memset(&LvCol,0,sizeof(LvCol));                  
+			LvCol.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
+			LvCol.pszText = L"Time";                         
+			LvCol.cx = 0x40;                               
+			SendMessage(hwLogLC,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
+			LvCol.pszText = L"Log";
+			LvCol.cx = 0x150;
+			SendMessage(hwLogLC,LVM_INSERTCOLUMN,1,(LPARAM)&LvCol);
 			//-------------------------------------------
 
 			//----------------- Loading BreakPoint Manager -----------------
@@ -166,10 +179,6 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			//----------------- Loading DebugString Info ------------------------
 			hDlgDbgStringInfo = CreateDialog(GetModuleHandle(NULL),MAKEINTRESOURCE(IDD_DBGSTR),hDlgMain,reinterpret_cast<DLGPROC>(DebugStringDLGProc));
 			//----------------- Loading DebugString Info ------------------------
-
-			//HFONT hFont = CreateFont(0, 0, 0, 0, FW_BOLD, 0, 0, 0, SYMBOL_CHARSET, OUT_DEFAULT_PRECIS, CLIP_DEFAULT_PRECIS, DEFAULT_QUALITY, FF_DECORATIVE, "Terminal");
-			//SendMessage(GetDlgItem(hDlgMain,IDC_LIST1),WM_SETFONT,(WPARAM)hFont,NULL);
-
 			return true;
 		}
 
@@ -215,25 +224,16 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 		{
 		case ID_DEBUG_RESTART:
 			if(newDebugger.GetDebuggingState())
-			{
 				newDebugger.StopDebuggingAll();
-				ListBox_ResetContent(GetDlgItem(hDlgMain,IDC_LIST1));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_PID));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_TID));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS));
-				ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
-				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
-				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
-				dwExceptionCount = 0;
-			}
+
+			CleanUpGUI();
 			if(newDebugger.IsTargetSet())
-				StartDebugging(&newDebugger);
+				StartDebugging();
 			return true;
 
 		case IDC_BPMANAGER:
 			ShowWindow(hDlgBPManager,SW_SHOW);
+			_CrtDumpMemoryLeaks();
 			return true;
 
 		case ID_FILE_OPENA:
@@ -242,18 +242,8 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 			newDebugger.RemoveBPs();
 			ReadFromSettingsFile();
-			ListBox_ResetContent(GetDlgItem(hDlgMain,IDC_LIST1));
-			ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_PID));
-			ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_TID));
-			ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs));
-			ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS));
-			ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
-			ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
-			ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
-			ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
-			dwExceptionCount = 0;
-
-			MenuLoadNewFile(&newDebugger);
+			CleanUpGUI();
+			MenuLoadNewFile();
 			return true;
 
 		case ID_DEBUG_SUSPEND:
@@ -264,22 +254,13 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			if(!newDebugger.GetDebuggingState())
 			{
 				ReadFromSettingsFile();
-				ListBox_ResetContent(GetDlgItem(hDlgMain,IDC_LIST1));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_PID));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_TID));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS));
-				ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
-				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
-				ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
-				ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
-				dwExceptionCount = 0;
+				CleanUpGUI();
 
 				if(!newDebugger.IsTargetSet())
-					if(!MenuLoadNewFile(&newDebugger))
+					if(!MenuLoadNewFile())
 						return true;
 
-				StartDebugging(&newDebugger);
+				StartDebugging();
 				UpdateStateLable(0x1);
 			}
 			else
@@ -301,7 +282,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 		case ID_DEBUG_STEPOVER:
 			if(newDebugger.GetDebuggingState())
-				newDebugger.StepOver(CalcNewOffset(newDebugger.ProcessContext.Eip,false));
+				newDebugger.StepOver(CalcNewOffset(newDebugger.ProcessContext.Eip));
 			return true;
 
 		case ID_DEBUG_STEPIN:
@@ -727,12 +708,21 @@ LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 				break;
 			}
 
-			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK3),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwEXCEPTION_BREAKPOINT,NULL);
-			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK4),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwEXCEPTION_SINGLE_STEP,NULL);
-			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK5),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwEXCEPTION_ACCESS_VIOLATION,NULL);
-			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION,NULL);
-			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION,NULL);
-			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK6),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwEXCEPTION_INT_DIVIDE_BY_ZERO,NULL);
+			for(size_t i = 0;i < newDebugger.ExceptionHandler.size();i++)
+			{
+				/*if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_BREAKPOINT)
+					SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK3),BM_SETCHECK,(WPARAM)newDebugger.ExceptionHandler[i].dwAction,NULL);
+				else if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_SINGLE_STEP)
+					SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK4),BM_SETCHECK,(WPARAM)newDebugger.ExceptionHandler[i].dwAction,NULL);
+				else */if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_ACCESS_VIOLATION)
+					SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK5),BM_SETCHECK,(WPARAM)newDebugger.ExceptionHandler[i].dwAction,NULL);
+				if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_PRIV_INSTRUCTION)
+					SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_SETCHECK,(WPARAM)newDebugger.ExceptionHandler[i].dwAction,NULL);
+				if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_ILLEGAL_INSTRUCTION)
+					SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_SETCHECK,(WPARAM)newDebugger.ExceptionHandler[i].dwAction,NULL);
+				if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_INT_DIVIDE_BY_ZERO)
+					SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK6),BM_SETCHECK,(WPARAM)newDebugger.ExceptionHandler[i].dwAction,NULL);
+			}
 
 			return true;
 		}
@@ -744,12 +734,13 @@ LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			newDebugger.dbgSettings.bAutoLoadSymbols = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK2),BM_GETCHECK,NULL,NULL);
 			newDebugger.dbgSettings.dwSuspendType = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK8),BM_GETCHECK,NULL,NULL);
 
-			newDebugger.dbgSettings.dwEXCEPTION_BREAKPOINT = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK3),BM_GETCHECK,NULL,NULL);
-			newDebugger.dbgSettings.dwEXCEPTION_SINGLE_STEP = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK4),BM_GETCHECK,NULL,NULL);
-			newDebugger.dbgSettings.dwEXCEPTION_ACCESS_VIOLATION = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK5),BM_GETCHECK,NULL,NULL);
-			newDebugger.dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_GETCHECK,NULL,NULL);
-			newDebugger.dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_GETCHECK,NULL,NULL);
-			newDebugger.dbgSettings.dwEXCEPTION_INT_DIVIDE_BY_ZERO = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK6),BM_GETCHECK,NULL,NULL);
+			newDebugger.CustomExceptionRemoveAll();
+			//newDebugger.CustomExceptionAdd(EXCEPTION_BREAKPOINT,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK3),BM_GETCHECK,NULL,NULL),NULL);
+			//newDebugger.CustomExceptionAdd(EXCEPTION_SINGLE_STEP,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK4),BM_GETCHECK,NULL,NULL),NULL);
+			newDebugger.CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK5),BM_GETCHECK,NULL,NULL),NULL);
+			newDebugger.CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_GETCHECK,NULL,NULL),NULL);
+			newDebugger.CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK7),BM_GETCHECK,NULL,NULL),NULL);
+			newDebugger.CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK6),BM_GETCHECK,NULL,NULL),NULL);
 
 			if(SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO1),BM_GETCHECK,NULL,NULL) == BST_CHECKED)
 				newDebugger.dbgSettings.dwBreakOnEPMode = 1;
@@ -1204,7 +1195,7 @@ LRESULT CALLBACK AttachToDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM l
 					ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
 					ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
 
-					StartDebugging(&newDebugger);
+					StartDebugging();
 					UpdateStateLable(0x1);
 					EndDialog(hWndDlg,0);
 					return true;
@@ -1274,7 +1265,7 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			for(int i = iForEntry; i < iForEnd;i++)
 			{
 				DWORD dwAddress = NULL;
-				while(VirtualQueryEx(newDebugger.PIDs[i].hSymInfo,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
+				while(VirtualQueryEx(newDebugger.PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
 				{
 					memset(&lvDETITEM,0,sizeof(lvDETITEM));
 					int iItemIndex = ListView_GetItemCount(hwMemMap);
@@ -1868,7 +1859,7 @@ LRESULT CALLBACK HandleViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 				NTSTATUS status;
 				ULONG handleInfoSize = 0x10000;
 				DWORD dwPID = newDebugger.PIDs[i].dwPID;
-				HANDLE hProc = newDebugger.PIDs[i].hSymInfo;
+				HANDLE hProc = newDebugger.PIDs[i].hProc;
 
 				PSYSTEM_HANDLE_INFORMATION handleInfo = (PSYSTEM_HANDLE_INFORMATION)malloc(handleInfoSize);
 
@@ -2068,7 +2059,7 @@ void DebuggingLoop(clsDebugger *tempDebugger)
 	UpdateStateLable(0x3);
 }
 
-bool MenuLoadNewFile(clsDebugger *newDebugger)
+bool MenuLoadNewFile()
 {
 	TCHAR cFile[MAX_PATH];
 
@@ -2088,7 +2079,7 @@ bool MenuLoadNewFile(clsDebugger *newDebugger)
 	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
 
 	if(GetOpenFileName(&ofn) == true)
-		newDebugger->SetTarget(ofn.lpstrFile);
+		newDebugger.SetTarget(ofn.lpstrFile);
 	else
 	{
 		MessageBox(NULL,L"No valid file!",L"Nanomite",MB_OK);
@@ -2097,20 +2088,20 @@ bool MenuLoadNewFile(clsDebugger *newDebugger)
 	return true;
 }
 
-void StartDebugging(clsDebugger *tempDebugger)
+void StartDebugging()
 {
-	HANDLE hThread = CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)&DebuggingLoop,tempDebugger,NULL,NULL);
+	HANDLE hThread = CreateThread(NULL,NULL,(LPTHREAD_START_ROUTINE)&DebuggingLoop,&newDebugger,NULL,NULL);
 }
 
-void LoadCallBacks(clsDebugger *newDebugger)
+void LoadCallBacks()
 {
-	newDebugger->dwOnCallStack = &OnCallStack;
-	newDebugger->dwOnDbgString = &OnDbgString;
-	newDebugger->dwOnDll = &OnDll;
-	newDebugger->dwOnLog = &OnLog;
-	newDebugger->dwOnThread = &OnThread;
-	newDebugger->dwOnException = &OnException;
-	newDebugger->dwOnPID = &OnPID;
+	newDebugger.dwOnCallStack = &OnCallStack;
+	newDebugger.dwOnDbgString = &OnDbgString;
+	newDebugger.dwOnDll = &OnDll;
+	newDebugger.dwOnLog = &OnLog;
+	newDebugger.dwOnThread = &OnThread;
+	newDebugger.dwOnException = &OnException;
+	newDebugger.dwOnPID = &OnPID;
 }
 
 int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
@@ -2324,17 +2315,34 @@ int OnDbgString(wstring sMessage,DWORD dwPID)
 	wsprintf(sTemp,L"%s",sMessage.c_str());
 	lvDETITEM.iSubItem = 1;
 	SendMessage(hwDebugStringLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
-	memset(sTemp,0,sMessage.length() * sizeof(TCHAR));
 
 	free(sTemp);
 	return 0;
 }
 
-int OnLog(wstring sLog)
+int OnLog(tm timeInfo,wstring sLog)
 {
-	HWND hwLBLog = GetDlgItem(hDlgMain,IDC_LIST1);
-	int i = ListBox_AddString(hwLBLog,sLog.c_str());
-	SendMessage(hwLBLog,WM_VSCROLL,SB_BOTTOM,NULL);
+	HWND hwLogLC = GetDlgItem(hDlgMain,IDC_LOG);
+	int itemIndex = SendMessage(hwLogLC,LVM_GETITEMCOUNT,0,0);
+	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	LVITEM lvDETITEM;
+	memset(&lvDETITEM,0,sizeof(lvDETITEM));
+	
+	// time stamp
+	wsprintf(sTemp,L"[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec);
+	lvDETITEM.mask = LVIF_TEXT;
+	lvDETITEM.cchTextMax = 256;
+	lvDETITEM.iItem = itemIndex;
+	lvDETITEM.iSubItem = 0;
+	lvDETITEM.pszText = sTemp;
+	SendMessage(hwLogLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
+
+	// DebugString
+	wsprintf(sTemp,L"%s",sLog.c_str());
+	lvDETITEM.iSubItem = 1;
+	SendMessage(hwLogLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
+	SendMessage(hwLogLC,WM_VSCROLL,SB_BOTTOM,NULL);
+	free(sTemp);
 	return 0;
 }
 
@@ -2483,18 +2491,40 @@ bool WriteToSettingsFile()
 
 	wsprintf(cTemp,L"%s=%d\n",L"SUSPENDTYPE",newDebugger.dbgSettings.dwSuspendType);
 	outfile.write(cTemp,wcslen(cTemp));
-	wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_BREAKPOINT",newDebugger.dbgSettings.dwEXCEPTION_BREAKPOINT);
-	outfile.write(cTemp,wcslen(cTemp));
-	wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_SINGLE_STEP",newDebugger.dbgSettings.dwEXCEPTION_SINGLE_STEP);
-	outfile.write(cTemp,wcslen(cTemp));
-	wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_ACCESS_VIOLATION",newDebugger.dbgSettings.dwEXCEPTION_ACCESS_VIOLATION);
-	outfile.write(cTemp,wcslen(cTemp));
-	wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_PRIV_INSTRUCTION",newDebugger.dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION);
-	outfile.write(cTemp,wcslen(cTemp));
-	wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_ILLEGAL_INSTRUCTION",newDebugger.dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION);
-	outfile.write(cTemp,wcslen(cTemp));
-	wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_INT_DIVIDE_BY_ZERO",newDebugger.dbgSettings.dwEXCEPTION_INT_DIVIDE_BY_ZERO);
-	outfile.write(cTemp,wcslen(cTemp));
+
+	for(size_t i = 0;i < newDebugger.ExceptionHandler.size();i++)
+	{
+		if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_BREAKPOINT)
+		{
+			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_BREAKPOINT",newDebugger.ExceptionHandler[i].dwAction);
+			outfile.write(cTemp,wcslen(cTemp));
+		}
+		else if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_SINGLE_STEP)
+		{
+			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_SINGLE_STEP",newDebugger.ExceptionHandler[i].dwAction);
+			outfile.write(cTemp,wcslen(cTemp));
+		}
+		else if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_ACCESS_VIOLATION)
+		{
+			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_ACCESS_VIOLATION",newDebugger.ExceptionHandler[i].dwAction);
+			outfile.write(cTemp,wcslen(cTemp));
+		}
+		else if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_PRIV_INSTRUCTION)
+		{
+			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_PRIV_INSTRUCTION",newDebugger.ExceptionHandler[i].dwAction);
+			outfile.write(cTemp,wcslen(cTemp));
+		}
+		else if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_ILLEGAL_INSTRUCTION)
+		{
+			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_ILLEGAL_INSTRUCTION",newDebugger.ExceptionHandler[i].dwAction);
+			outfile.write(cTemp,wcslen(cTemp));
+		}
+		else if(newDebugger.ExceptionHandler[i].dwExceptionType == EXCEPTION_INT_DIVIDE_BY_ZERO)
+		{
+			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_INT_DIVIDE_BY_ZERO",newDebugger.ExceptionHandler[i].dwAction);
+			outfile.write(cTemp,wcslen(cTemp));
+		}
+	}
 
 	wsprintf(cTemp,L"%s=%d\n",L"BreakOnEPMode",newDebugger.dbgSettings.dwBreakOnEPMode);
 	outfile.write(cTemp,wcslen(cTemp));
@@ -2512,6 +2542,7 @@ bool ReadFromSettingsFile()
 	if(!infile.is_open())
 		return false;
 
+	newDebugger.CustomExceptionRemoveAll();
 	while(!infile.eof())
 	{
 		getline(infile,sLine); // Saves the line in STRING.
@@ -2532,38 +2563,22 @@ bool ReadFromSettingsFile()
 			else
 				newDebugger.dbgSettings.bAutoLoadSymbols = false;
 		}
-		else if(sSettingLine[0] == L"EXCEPTION_BREAKPOINT")
-		{
-			newDebugger.dbgSettings.dwEXCEPTION_BREAKPOINT = _wtoi(sSettingLine[1].c_str());
-		}
+/*		else if(sSettingLine[0] == L"EXCEPTION_BREAKPOINT")
+			newDebugger.CustomExceptionAdd(EXCEPTION_BREAKPOINT,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"EXCEPTION_SINGLE_STEP")
-		{
-			newDebugger.dbgSettings.dwEXCEPTION_SINGLE_STEP = _wtoi(sSettingLine[1].c_str());
-		}
-		else if(sSettingLine[0] == L"EXCEPTION_ACCESS_VIOLATION")
-		{
-			newDebugger.dbgSettings.dwEXCEPTION_ACCESS_VIOLATION = _wtoi(sSettingLine[1].c_str());
-		}
+			newDebugger.CustomExceptionAdd(EXCEPTION_SINGLE_STEP,_wtoi(sSettingLine[1].c_str()),NULL);
+		else */if(sSettingLine[0] == L"EXCEPTION_ACCESS_VIOLATION")
+			newDebugger.CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"EXCEPTION_PRIV_INSTRUCTION")
-		{
-			newDebugger.dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION = _wtoi(sSettingLine[1].c_str());
-		}
+			newDebugger.CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"EXCEPTION_ILLEGAL_INSTRUCTION")
-		{
-			newDebugger.dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION = _wtoi(sSettingLine[1].c_str());
-		}
+			newDebugger.CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"EXCEPTION_INT_DIVIDE_BY_ZERO")
-		{
-			newDebugger.dbgSettings.dwEXCEPTION_INT_DIVIDE_BY_ZERO = _wtoi(sSettingLine[1].c_str());
-		}
+			newDebugger.CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"BreakOnEPMode")
-		{
 			newDebugger.dbgSettings.dwBreakOnEPMode = _wtoi(sSettingLine[1].c_str());
-		}
 		else if(sSettingLine[0] == L"SUSPENDTYPE")
-		{
 			newDebugger.dbgSettings.dwSuspendType = _wtoi(sSettingLine[1].c_str());
-		}
 	}
 	infile.close();
 	return true;
@@ -2609,7 +2624,7 @@ void LoadDisAssView(DWORD dwEIP)
 	for(size_t i = 0;i < newDebugger.PIDs.size(); i++)
 	{
 		if(newDebugger.PIDs[i].dwPID == newDebugger.GetCurrentPID())
-			hProc = newDebugger.PIDs[i].hSymInfo;
+			hProc = newDebugger.PIDs[i].hProc;
 	}
 
 	bool bUnProtect = VirtualProtectEx(hProc,(LPVOID)dwStartOffset,100,dwNewProtection,&dwOldProtection);
@@ -2806,7 +2821,7 @@ bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView)
 	for(size_t i = 0;i < newDebugger.PIDs.size();i++)
 	{
 		if(dwPID == newDebugger.PIDs[i].dwPID)
-			hProcess = newDebugger.PIDs[i].hSymInfo;
+			hProcess = newDebugger.PIDs[i].hProc;
 	}
 
 	if(hProcess == INVALID_HANDLE_VALUE)
@@ -2887,7 +2902,7 @@ bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView)
 	return true;
 }
 
-DWORD CalcNewOffset(DWORD dwCurrentOffset,BOOL bStepIn)
+DWORD CalcNewOffset(DWORD dwCurrentOffset)
 {
 	if(newDebugger.GetCurrentPID() == 0)
 		return 0;
@@ -2901,14 +2916,14 @@ DWORD CalcNewOffset(DWORD dwCurrentOffset,BOOL bStepIn)
 		dwNewOffset = NULL;
 	int iLen = 0;
 	HANDLE hProc = NULL;
-	void *pBuffer = malloc(70);
+	LPVOID pBuffer = malloc(70);
 
 	memset(&newDisAss, 0, sizeof(DISASM));
 
 	for(size_t i = 0;i < newDebugger.PIDs.size(); i++)
 	{
 		if(newDebugger.PIDs[i].dwPID == newDebugger.GetCurrentPID())
-			hProc = newDebugger.PIDs[i].hSymInfo;
+			hProc = newDebugger.PIDs[i].hProc;
 	}
 
 	bool bUnProtect = VirtualProtectEx(hProc,(LPVOID)dwStartOffset,70,dwNewProtection,&dwOldProtection);
@@ -2938,18 +2953,7 @@ DWORD CalcNewOffset(DWORD dwCurrentOffset,BOOL bStepIn)
 				}
 
 				if(newDisAss.VirtualAddr == dwCurrentOffset)
-				{
-					if(strstr(newDisAss.Instruction.Mnemonic,"call") != 0 ||
-						strstr(newDisAss.Instruction.Mnemonic,"jmp") != 0 ||
-						/*strstr(newDisAss.Instruction.Mnemonic,"push") != 0 ||*/
-						strstr(newDisAss.Instruction.Mnemonic,"jnz") != 0 ||
-						strstr(newDisAss.Instruction.Mnemonic,"jne") != 0)
-					{
-						dwNewOffset = newDisAss.Instruction.AddrValue;
-						bContinueDisAs = false;
-					}
 					bOneMore = true;
-				}
 			}
 
 			newDisAss.EIP = newDisAss.EIP + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
@@ -2984,7 +2988,7 @@ void LoadStackView(DWORD dwESP)
 	for(size_t i = 0;i < newDebugger.PIDs.size();i++)
 	{
 		if(newDebugger.PIDs[i].dwPID == newDebugger.GetCurrentPID())
-			hProcess = newDebugger.PIDs[i].hSymInfo;
+			hProcess = newDebugger.PIDs[i].hProc;
 	}
 
 	if(hProcess == INVALID_HANDLE_VALUE)
@@ -3494,4 +3498,18 @@ void UpdateStateLable(DWORD dwState)
 	Static_SetText(GetDlgItem(hDlgMain,IDC_STATE),tcTempState);
 
 	free(tcStateString);
+}
+
+void CleanUpGUI()
+{
+	ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_PID));
+	ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_TID));
+	ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs));
+	ListView_DeleteAllItems(GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS));
+	ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LIST2));
+	ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_DISASS));
+	ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
+	ListView_DeleteAllItems(GetDlgItem(hDlgMain,IDC_LOG));
+	ListView_DeleteAllItems(GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR));
+	dwExceptionCount = 0;
 }

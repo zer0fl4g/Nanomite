@@ -24,26 +24,27 @@
 #define _CRTDBG_MAP_ALLOC
 // Leak detection
 
-void LoadCallBacks(clsDebugger *newDebugger);
-void StartDebugging(clsDebugger *newDebugger);
+void LoadCallBacks();
+void StartDebugging();
 void DebuggingLoop(clsDebugger *newDebugger);
 void LoadDisAssView(DWORD dwEIP);
 void LoadRegView();
 void LoadStackView(DWORD dwESP);
 void UpdateStateLable(DWORD dwState);
+void CleanUpGUI();
 
 int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
 int OnException(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
 int OnDbgString(wstring sMessage,DWORD dwPID);
-int OnLog(wstring sLog);
+int OnLog(tm timeInfo,wstring sLog);
 int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 int OnCallStack(DWORD dwStackAddr,
 				DWORD dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
 				DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
 				wstring sSourceFilePath,int iSourceLineNum);
 
-bool MenuLoadNewFile(clsDebugger *newDebugger);
+bool MenuLoadNewFile();
 bool WriteToSettingsFile();
 bool ReadFromSettingsFile();
 bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView);
@@ -54,7 +55,7 @@ bool CALLBACK EnumWindowCallBack(HWND hWnd, LPARAM lParam);
 BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG lParam);
 BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG lParam);
 
-DWORD CalcNewOffset(DWORD dwCurrentOffset,BOOL bStepIn);
+DWORD CalcNewOffset(DWORD dwCurrentOffset);
 
 vector<wstring> split(const wstring& s,const wstring& f );
 

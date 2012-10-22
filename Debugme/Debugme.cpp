@@ -15,7 +15,7 @@ int _tmain(int argc,PCHAR argv[])
 {
 	OutputDebugString(L"This is a DBG");
 	//__asm { int 3 };
-
+	RaiseException(0x1337,NULL,NULL,NULL);
 	//RetTest();
 	if(IsDebuggerPresent())
 		MessageBoxW(NULL,L"Debugger Found",L"Debugme!",MB_OK);

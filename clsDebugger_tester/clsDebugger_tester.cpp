@@ -8,7 +8,7 @@
 // Leak detection
 
 // Our callback function which gets triggered if log gets updated
-int OnLog(wstring sLog)
+int OnLog(tm timeInfo,wstring sLog)
 {
 	wprintf(L"%s\n",sLog.c_str()); // Just print the new string to console
 	return 0;
@@ -22,6 +22,12 @@ int OnCallStack(DWORD dwStackAddr,
 {
 	wprintf(L"\nCurrent:\t%08X - %s.%s\nReturnTo:\t%08X - %s.%s\n",dwEIP,sFuncModule.c_str(),sFuncName.c_str(),dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
 	return 0;
+}
+
+DWORD __stdcall On1337Exception(DEBUG_EVENT *debug_event)
+{
+	MessageBoxW(NULL,L"You got a 1337 exception!",L"Nanomite!",MB_OK);
+	return DBG_CONTINUE;
 }
 
 int _tmain(int argc, PCHAR argv[])
@@ -46,17 +52,6 @@ int _tmain(int argc, PCHAR argv[])
 	| 3 = Direkt run
 	*/
 	tempDebugger.dbgSettings.dwBreakOnEPMode = 3;
-
-	/* Settings for Exception Handling
-	| 0 = Break and wait for User
-	| 1 = pass to App/Os
-	| 2 = Ignore
-	| 3 = automatic workaround ( jumping to the return addr which is on the stack )
-	*/
-	tempDebugger.dbgSettings.dwEXCEPTION_ACCESS_VIOLATION = 1;
-	tempDebugger.dbgSettings.dwEXCEPTION_ILLEGAL_INSTRUCTION = 1;
-	tempDebugger.dbgSettings.dwEXCEPTION_PRIV_INSTRUCTION = 1;
-	tempDebugger.dbgSettings.dwEXCEPTION_BREAKPOINT = 0; // Does not affect Breakpoints ( Attaching INT3 will be ignored and program runs direct after attaching )
 
 	/*
 	| Enable autoload of symbols
@@ -94,6 +89,25 @@ int _tmain(int argc, PCHAR argv[])
 	*/
 	tempDebugger.AddBreakpointToList(0,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
 	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
+
+	/* Add a Exception Handler / Action
+	|
+	| dwExceptionType:	- The value of the exception e.g. 0xC0000005L for AccessViolation
+	|					- can´t be EXCEPTION_BREAKPOINT or EXCEPTION_SINGLE_STEP
+	|
+	| dwAction:	0 = Break and wait for User
+	|			1 = pass to App/Os
+	|			2 = Ignore
+	|			3 = automatic workaround ( jumping to the return addr which is on the stack )
+	|
+	| dwHandler: Optional! The Address of your custom handler - DWORD (__stdcall *CustomHandler)(DEBUG_EVENT *debug_event);
+	|
+	*/
+	tempDebugger.CustomExceptionAdd(0x1337,0,(DWORD)&On1337Exception);
+	tempDebugger.CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,1,NULL);
+	tempDebugger.CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,1,NULL);
+	tempDebugger.CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,1,NULL);
+
 
 	// Run Debugging
 	tempDebugger.StartDebugging();
