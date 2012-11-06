@@ -50,12 +50,15 @@ wstring clsDebugger::GetTarget()
 void clsDebugger::CleanWorkSpace()
 {
 	for(size_t i = 0;i < PIDs.size();i++)
+	{
 		SymCleanup(PIDs[i].hProc);
+		free(PIDs[i].sFileName);
+	}
 	for(size_t i = 0; i < DLLs.size(); i++)
 		free(DLLs[i].sPath);
 	PIDs.clear();
 	DLLs.clear();
-	Threads.clear();
+	TIDs.clear();
 }
 
 bool clsDebugger::SuspendDebuggingAll()
@@ -105,6 +108,7 @@ bool clsDebugger::StopDebuggingAll()
 	_isDebugging = false;
 	for(size_t i = 0;i < PIDs.size();i++)
 		StopDebugging(PIDs[i].dwPID);
+	CleanWorkSpace();
 	return PulseEvent(_hDbgEvent);
 }
 
@@ -142,7 +146,7 @@ bool clsDebugger::ResumeDebugging()
 
 bool clsDebugger::RestartDebugging()
 {
-	StopDebugging(true);
+	StopDebuggingAll();
 	StartDebugging();
 	return true;
 }
@@ -151,11 +155,11 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspende
 {
 	bool bFound = false;
 
-	for(size_t i = 0;i < Threads.size();i++)
+	for(size_t i = 0;i < TIDs.size();i++)
 	{
-		if(Threads[i].dwTID == dwTID && Threads[i].dwPID == dwPID)
+		if(TIDs[i].dwTID == dwTID && TIDs[i].dwPID == dwPID)
 		{
-			Threads[i].dwExitCode = dwExitCode;
+			TIDs[i].dwExitCode = dwExitCode;
 			bFound = true;
 			break;
 		}
@@ -170,7 +174,7 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspende
 		newTID.dwPID = dwPID;
 		newTID.dwExitCode = dwExitCode;
 
-		Threads.push_back(newTID);
+		TIDs.push_back(newTID);
 	}
 
 	if(dwOnThread != NULL)
@@ -423,7 +427,7 @@ bool clsDebugger::StartDebugging()
 	return true;
 }
 
-unsigned _stdcall clsDebugger::DebuggingEntry(LPVOID pThis)
+unsigned clsDebugger::DebuggingEntry(LPVOID pThis)
 {
 	clsDebugger* pThat = (clsDebugger*)pThis;
 
@@ -514,7 +518,7 @@ void clsDebugger::DebuggingLoop()
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(DWORD)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
 				BPStruct newBP;
-				newBP.dwHandle = 0x2;
+				newBP.dwHandle = 0x0;
 				newBP.dwSize = 0x1;
 				newBP.dwPID = (DWORD)debug_event.dwProcessId;
 				newBP.dwOffset = (DWORD)debug_event.u.CreateProcessInfo.lpStartAddress;
@@ -538,8 +542,7 @@ void clsDebugger::DebuggingLoop()
 				PBProcInfo(debug_event.dwProcessId,L"",(DWORD)debug_event.u.CreateProcessInfo.lpStartAddress,debug_event.u.ExitProcess.dwExitCode,NULL);
 				SymCleanup(debug_event.u.CreateProcessInfo.hProcess);
 
-				BOOL bStillOneRunning = false;
-
+				bool bStillOneRunning = false;
 				for(size_t i = 0;i < PIDs.size();i++)
 				{
 					if(PIDs[i].bRunning && debug_event.dwProcessId != PIDs[i].dwPID)
@@ -604,7 +607,7 @@ void clsDebugger::DebuggingLoop()
 					ReadProcessMemory(hProcess,debug_event.u.DebugString.lpDebugStringData,wMsg,debug_event.u.DebugString.nDebugStringLength,NULL);
 				else
 				{
-					PCHAR Msg = (PCHAR)malloc(debug_event.u.DebugString.nDebugStringLength  * sizeof(CHAR));
+					PCHAR Msg = (PCHAR)malloc(debug_event.u.DebugString.nDebugStringLength * sizeof(CHAR));
 					ReadProcessMemory(hProcess,debug_event.u.DebugString.lpDebugStringData,Msg,debug_event.u.DebugString.nDebugStringLength,NULL);	
 					mbstowcs(wMsg,Msg,debug_event.u.DebugString.nDebugStringLength);
 					free(Msg);
@@ -656,7 +659,9 @@ void clsDebugger::DebuggingLoop()
 									{
 										WriteProcessMemory(hProc,(LPVOID)SoftwareBPs[i].dwOffset,(LPVOID)&SoftwareBPs[i].bOrgByte,SoftwareBPs[i].dwSize,NULL);
 										FlushInstructionCache(hProc,(LPVOID)SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize);
-										SoftwareBPs[i].bRestoreBP = true;
+										
+										if(SoftwareBPs[i].dwHandle != 0x2)
+											SoftwareBPs[i].bRestoreBP = true;
 									}
 								}
 
@@ -777,6 +782,7 @@ void clsDebugger::DebuggingLoop()
 							if(_bSingleStepFlag)
 							{
 								_bSingleStepFlag = false;
+								bIsBP = true;
 								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							}
 						}
@@ -785,6 +791,7 @@ void clsDebugger::DebuggingLoop()
 							if(_bSingleStepFlag)
 							{
 								_bSingleStepFlag = false;
+								bIsBP = true;
 								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							}
 						}
@@ -1330,8 +1337,6 @@ bool clsDebugger::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD d
 
 	if(!PIDs[iPid].bSymLoad)
 		PIDs[iPid].bSymLoad = SymInitialize(hProcess,NULL,false);
-
-	//bTest = SymRefreshModuleList(hProcess);
 
 	IMAGEHLP_MODULEW imgMod = {0};
 	imgMod.SizeOfStruct = sizeof(imgMod);

@@ -82,6 +82,7 @@
       <Optimization>Disabled</Optimization>
       <ExceptionHandling>Async</ExceptionHandling>
       <RuntimeLibrary>MultiThreadedDebug</RuntimeLibrary>
+      <CallingConvention>StdCall</CallingConvention>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -109,6 +110,7 @@
       <InlineFunctionExpansion>Disabled</InlineFunctionExpansion>
       <FavorSizeOrSpeed>Size</FavorSizeOrSpeed>
       <RuntimeLibrary>MultiThreaded</RuntimeLibrary>
+      <CallingConvention>StdCall</CallingConvention>
     </ClCompile>
     <Link>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -140,7 +142,9 @@
       <Optimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Full</Optimization>
       <FavorSizeOrSpeed Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Speed</FavorSizeOrSpeed>
     </ClCompile>
-    <ClCompile Include="nanomite_core.cpp" />
+    <ClCompile Include="nanomite_core.cpp">
+      <CallingConvention Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">StdCall</CallingConvention>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="nanomite.h" />

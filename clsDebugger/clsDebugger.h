@@ -97,7 +97,7 @@ class clsDebugger
 public:
 
 	vector<DLLStruct> DLLs;
-	vector<ThreadStruct> Threads;
+	vector<ThreadStruct> TIDs;
 	vector<PIDStruct> PIDs;
 	vector<BPStruct> SoftwareBPs;
 	vector<BPStruct> MemoryBPs;
@@ -175,7 +175,7 @@ private:
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
 	
-	static unsigned _stdcall DebuggingEntry(LPVOID pThis);
+	static unsigned DebuggingEntry(LPVOID pThis);
 
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
 	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hProc);

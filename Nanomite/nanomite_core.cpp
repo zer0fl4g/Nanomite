@@ -94,22 +94,22 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			memset(&LvCol,0,sizeof(LvCol));                  
 			LvCol.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
 			LvCol.pszText = L"Stack Offset";                         
-			LvCol.cx = 0x50;                               
+			LvCol.cx = 0x60;                               
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
 			LvCol.pszText = L"Func. Addr";
-			LvCol.cx = 0x50;
+			LvCol.cx = 0x55;
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,1,(LPARAM)&LvCol);
 			LvCol.pszText = L"<mod.func>"; 
 			LvCol.cx = 0x100;
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,2,(LPARAM)&LvCol);
 			LvCol.pszText = L"Return To";
-			LvCol.cx = 0x50;
+			LvCol.cx = 0x60;
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,3,(LPARAM)&LvCol);
 			LvCol.pszText = L"Return To - <mod.func>"; 
 			LvCol.cx = 0x100; 
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,4,(LPARAM)&LvCol);
 			LvCol.pszText = L"SourceLine"; 
-			LvCol.cx = 0x50; 
+			LvCol.cx = 0x60; 
 			SendMessage(hwLBCallStack,LVM_INSERTCOLUMN,5,(LPARAM)&LvCol);
 			LvCol.pszText = L"SourceFile"; 
 			LvCol.cx = 0x80;
@@ -127,13 +127,13 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			LvCol.cx = 0x60;                               
 			SendMessage(hwDisAssLC,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
 			LvCol.pszText = L"OpCodes";
-			LvCol.cx = 0x70;
+			LvCol.cx = 0xAA;
 			SendMessage(hwDisAssLC,LVM_INSERTCOLUMN,1,(LPARAM)&LvCol);
 			LvCol.pszText = L"Mnemonics"; 
-			LvCol.cx = 0x100;
+			LvCol.cx = 0xDD;
 			SendMessage(hwDisAssLC,LVM_INSERTCOLUMN,2,(LPARAM)&LvCol);
 			LvCol.pszText = L"Comment";
-			LvCol.cx = 0x89;
+			LvCol.cx = 0xAA;
 			SendMessage(hwDisAssLC,LVM_INSERTCOLUMN,3,(LPARAM)&LvCol);
 			//-------------------------------------------
 
@@ -161,7 +161,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			memset(&LvCol,0,sizeof(LvCol));                  
 			LvCol.mask = LVCF_TEXT|LVCF_WIDTH|LVCF_SUBITEM;                                     
 			LvCol.pszText = L"Time";                         
-			LvCol.cx = 0x40;                               
+			LvCol.cx = 0x50;                               
 			SendMessage(hwLogLC,LVM_INSERTCOLUMN,0,(LPARAM)&LvCol);
 			LvCol.pszText = L"Log";
 			LvCol.cx = 0x150;
@@ -179,6 +179,16 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			//----------------- Loading DebugString Info ------------------------
 			hDlgDbgStringInfo = CreateDialog(GetModuleHandle(NULL),MAKEINTRESOURCE(IDD_DBGSTR),hDlgMain,reinterpret_cast<DLGPROC>(DebugStringDLGProc));
 			//----------------- Loading DebugString Info ------------------------
+
+
+			//----------------- Init. Font ------------------------------
+			HFONT hFont = CreateFont(11,0,0,0,FW_MEDIUM,FALSE,FALSE,FALSE,ANSI_CHARSET,OUT_TT_PRECIS,CLIP_DEFAULT_PRECIS,DEFAULT_QUALITY,DEFAULT_PITCH | FF_DONTCARE,L"Lucida Console");
+			SendMessage(hwDisAssLC,WM_SETFONT,(WPARAM)hFont,TRUE);
+			SendMessage(hwLBCallStack,WM_SETFONT,(WPARAM)hFont,TRUE);
+			SendMessage(hwLogLC,WM_SETFONT,(WPARAM)hFont,TRUE);
+			SendMessage(hwStackViewLC,WM_SETFONT,(WPARAM)hFont,TRUE);
+			//----------------- Init. Font ------------------------------
+
 			return true;
 		}
 
@@ -600,7 +610,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 					free(sTemp);
 					break;
 				}
-				if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
+				else if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
 				{
 					DWORD dwOffset = 0;
 					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
@@ -648,7 +658,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 					free(sTemp);
 					break;
 				}
-				if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
+				else if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
 				{
 					DWORD dwOffset = 0;
 					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
@@ -667,7 +677,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 					ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
 					if(dwOffset == 0x0)
 						dwOffset = newDebugger.ProcessContext.Esp;
-					LoadStackView(dwOffset + (7*4));
+					LoadStackView(dwOffset + (4*9));
 					free(sTemp);
 					break;
 				}
@@ -1291,7 +1301,7 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 
 					// Path
 					HANDLE hModules = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,newDebugger.PIDs[i].dwPID);
-					wsprintf(sTemp,L"");
+					memset(sTemp,0,255 * sizeof(TCHAR));
 
 					if(hModules != INVALID_HANDLE_VALUE && Module32First(hModules,&pModEntry))
 					{
@@ -2610,14 +2620,14 @@ void LoadDisAssView(DWORD dwEIP)
 	HWND hwDisAs = GetDlgItem(hDlgMain,ID_DISASS);
 	DISASM newDisAss;
 	bool bContinueDisAs = true;
-	DWORD dwEndOffset = dwEIP + 70,
-		dwStartOffset = dwEIP - 30,
+	DWORD dwEndOffset = dwEIP + 100,
+		dwStartOffset = dwEIP - 50,
 		dwOldProtection = 0,
 		dwNewProtection = PAGE_EXECUTE_READWRITE;
 	int iLen = 0,iVor = 0, iNach = 0;
 
 	HANDLE hProc = NULL;
-	LPVOID pBuffer = malloc(100);
+	LPVOID pBuffer = malloc(150);
 	
 	memset(&newDisAss, 0, sizeof(DISASM));
 
@@ -2627,8 +2637,8 @@ void LoadDisAssView(DWORD dwEIP)
 			hProc = newDebugger.PIDs[i].hProc;
 	}
 
-	bool bUnProtect = VirtualProtectEx(hProc,(LPVOID)dwStartOffset,100,dwNewProtection,&dwOldProtection);
-	if(ReadProcessMemory(hProc,(LPVOID)dwStartOffset,pBuffer,100,NULL))
+	bool bUnProtect = VirtualProtectEx(hProc,(LPVOID)dwStartOffset,150,dwNewProtection,&dwOldProtection);
+	if(ReadProcessMemory(hProc,(LPVOID)dwStartOffset,pBuffer,150,NULL))
 	{
 		newDisAss.EIP = (int)pBuffer;
 		newDisAss.VirtualAddr = dwStartOffset;
@@ -2693,6 +2703,7 @@ void LoadDisAssView(DWORD dwEIP)
 					strstr(newDisAss.Instruction.Mnemonic,"jnz") != 0 ||
 					strstr(newDisAss.Instruction.Mnemonic,"je") != 0 ||
 					strstr(newDisAss.Instruction.Mnemonic,"jl") != 0 ||
+					strstr(newDisAss.Instruction.Mnemonic,"jng") != 0 ||
 					strstr(newDisAss.Instruction.Mnemonic,"jne") != 0)
 				{
 					wstring sFuncName,sModName;
@@ -2974,9 +2985,9 @@ void LoadStackView(DWORD dwESP)
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
 		dwBytesRead = NULL,
-		dwSize = 4*7,
-		dwStartOffset = dwESP - 4*3,
-		dwEndOffset = dwESP + 4*4;
+		dwSize = 9*4,
+		dwStartOffset = dwESP - 4*4,
+		dwEndOffset = dwESP + 4*5;
 	bool bCheckVar = false;
 	LPBYTE bBuffer;
 	PTCHAR sTemp;
@@ -3406,7 +3417,6 @@ bool InsertHandleIntoLC(HWND hwLC,DWORD dwPID,DWORD dwHandleID,PTCHAR sType,PTCH
 	lvDETITEM.iSubItem = 1;
 	SendMessage(hwLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 	wsprintf(sTemp,L"%s",sName);
-	//memcpy(sTemp,sName,strlen(sName));
 	lvDETITEM.iSubItem = 3;
 	SendMessage(hwLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
@@ -3490,7 +3500,7 @@ void UpdateStateLable(DWORD dwState)
 	}
 	swprintf_s(tcTempState,255,L"\t\tPIDs: %d  TIDs: %d  DLLs: %d  Exceptions: %d State: %s",
 		newDebugger.PIDs.size(),
-		newDebugger.Threads.size(),
+		newDebugger.TIDs.size(),
 		newDebugger.DLLs.size(),
 		dwExceptionCount,
 		tcStateString);

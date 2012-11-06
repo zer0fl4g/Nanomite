@@ -24,6 +24,8 @@ int OnCallStack(DWORD dwStackAddr,
 	return 0;
 }
 
+// Our callback for a 0x1337 exception
+// needs to be a stdcall else stack gets corrupted
 DWORD __stdcall On1337Exception(DEBUG_EVENT *debug_event)
 {
 	MessageBoxW(NULL,L"You got a 1337 exception!",L"Nanomite!",MB_OK);
@@ -49,12 +51,12 @@ int _tmain(int argc, PCHAR argv[])
 	| 0 = default application EP
 	| 1 = SystemEP 
 	| 2 = TLSCallback // Not working right now
-	| 3 = Direkt run
+	| 3 = Direct run
 	*/
 	tempDebugger.dbgSettings.dwBreakOnEPMode = 3;
 
 	/*
-	| Enable autoload of symbols
+	| Enable auto load of symbols
 	| Note: Disable may cause missing function names in callback/exception info but target will load faster
 	*/
 	tempDebugger.dbgSettings.bAutoLoadSymbols = true;
@@ -64,7 +66,7 @@ int _tmain(int argc, PCHAR argv[])
 	| int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
 	| int (*dwOnException)(wstring sFuncName,string sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	| int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
-	| int (*dwOnLog)(wstring sLog);
+	| int (*dwOnLog)(tm timeInfo,wstring sLog);
 	| int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
 	| int (*dwOnCallStack)(DWORD dwStackAddr,DWORD dwReturnTo,wstring sReturnToFunc,wstring sModuleName,DWORD dwEIP,wstring sFuncName,wstring sFuncModule,wstring sSourceFilePath,int iSourceLineNum);
 	*/
@@ -76,16 +78,20 @@ int _tmain(int argc, PCHAR argv[])
 	|		0 = SoftwareBP
 	|	    1 = MemoryBP
 	|		2 = HardwareBP 
+	|
+	| dwPID: ProcessID where you want to place the BP ( must be a process that is debugged )
+	|	     Can be -1 for mother process if you have different child processes
+	|
+	| dwOffset: Address where the BP will be placed
 	|	
 	| dwSlot: Only for HW Breakpoints
 	|		0 - Dr0
 	|		1 - Dr1
 	|		2 - Dr2
-	|		3 - Dr3
+	|		3 - Dr3	
 	|
-	|	Note:
-	|		If you don´t know the PID ( check public PIDs vector for all running Processes in the debugger ) 
-	|		use -1 to set BP in "Mother" process
+	| dwKeep: set true if the BP should be placed again after one hit
+	|
 	*/
 	tempDebugger.AddBreakpointToList(0,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
 	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);

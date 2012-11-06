@@ -57,7 +57,7 @@ BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG
 
 DWORD CalcNewOffset(DWORD dwCurrentOffset);
 
-vector<wstring> split(const wstring& s,const wstring& f );
+vector<wstring> split(const wstring& s,const wstring& f);
 
 LRESULT CALLBACK MainDLGProc(HWND hWnd, UINT Msg, WPARAM wParam, LPARAM lParam);
 LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lParam);
