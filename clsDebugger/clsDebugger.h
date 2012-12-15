@@ -1,7 +1,7 @@
 #ifndef CLSDEBUGGER
 #define CLSDEBUGGER
 
-#pragma pack(1)
+//#pragma pack(1)
 
 #include <string>
 #include <vector>
@@ -27,7 +27,6 @@ using namespace std;
 
 #define LOGBUFFER (512 * sizeof(TCHAR))
 #define LOGBUFFERCHAR (512)
-
 #define THREAD_GETSET_CONTEXT	(0x0018) 
 
 class clsDebugger
@@ -44,41 +43,42 @@ class clsDebugger
 	{
 		PTCHAR sPath;
 		bool bLoaded;
-		DWORD dwBaseAdr;
 		DWORD dwPID;
+		DWORD64 dwBaseAdr;
 	};
 
 	struct ThreadStruct
 	{
 		DWORD dwTID;
-		DWORD dwEP;
 		DWORD dwPID;
-		bool bSuspended;
 		DWORD dwExitCode;
+		DWORD64 dwEP;
+		bool bSuspended;
 	};
 
 	struct PIDStruct
 	{
 		DWORD dwPID;
 		DWORD dwExitCode;
-		DWORD dwEP;
 		DWORD dwBPRestoreFlag;
-		BOOL bKernelBP;
-		BOOL bRunning;
-		BOOL bSymLoad;
-		BOOL bTrapFlag;
+		DWORD64 dwEP;
+		bool bKernelBP;
+		bool bRunning;
+		bool bSymLoad;
+		bool bTrapFlag;
 		HANDLE hProc;
 		PTCHAR sFileName;
 	};
 
 	struct BPStruct
 	{
-		DWORD dwOffset;
+		bool bRestoreBP;
+		BYTE bOrgByte;
+		DWORD64 dwOffset;
 		DWORD dwSize;
 		DWORD dwSlot;
 		DWORD dwPID;
-		bool bRestoreBP;
-		BYTE bOrgByte;
+		DWORD dwTypeFlag;
 		DWORD dwHandle;
 		/*
 		|	0x0 - don´t keep
@@ -90,8 +90,8 @@ class clsDebugger
 	struct customException
 	{
 		DWORD dwExceptionType;
-		DWORD dwHandler;
 		DWORD dwAction;
+		DWORD64 dwHandler;
 	};
 
 public:
@@ -137,21 +137,21 @@ public:
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
-	void AddBreakpointToList(DWORD dwBPType,DWORD dwPID,DWORD dwOffset,DWORD dwSlot,DWORD dwKeep);
+	void AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,DWORD dwOffset,DWORD dwSlot,DWORD dwKeep);
 	void SetTarget(wstring sTarget);
-	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,DWORD dwHandler);
+	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,DWORD64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
 	void CustomExceptionRemoveAll();
 
-	int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
-	int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
-	int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
+	int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound);
+	int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
 	int (*dwOnLog)(tm timeInfo,wstring sLog);
-	int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
-	int (*dwOnCallStack)(DWORD dwStackAddr,
-						 DWORD dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
-						 DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
+	int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded);
+	int (*dwOnCallStack)(DWORD64 dwStackAddr,
+						 DWORD64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
+						 DWORD64 dwEIP,wstring sFuncName,wstring sFuncModule,
 						 wstring sSourceFilePath,int iSourceLineNum);
 
 	wstring GetTarget();
@@ -177,16 +177,18 @@ private:
 	
 	static unsigned DebuggingEntry(LPVOID pThis);
 
-	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
-	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD dwEP,DWORD dwExitCode,HANDLE hProc);
-	bool PBExceptionInfo(DWORD dwExceptionOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
+	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
+	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD64 dwEP,DWORD dwExitCode,HANDLE hProc);
+	bool PBExceptionInfo(DWORD64 dwExceptionOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded);
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
-	bool wSoftwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
-	bool wMemoryBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwKeep);
-	bool wHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSize,DWORD dwSlot);
-	bool dHardwareBP(DWORD dwPID,DWORD dwOffset,DWORD dwSlot);
+	bool wSoftwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
+	bool dSoftwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,BYTE btOrgByte);
+	bool wMemoryBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,DWORD dwKeep);
+	bool dMemoryBP(DWORD dwPID,DWORD64 dwOffset);
+	bool wHardwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
+	bool dHardwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSlot);
 	bool InitBP();
 	bool IsValidFile();
 	bool CheckProcessState(DWORD dwPID);

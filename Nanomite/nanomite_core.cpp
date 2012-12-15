@@ -243,7 +243,6 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 		case IDC_BPMANAGER:
 			ShowWindow(hDlgBPManager,SW_SHOW);
-			_CrtDumpMemoryLeaks();
 			return true;
 
 		case ID_FILE_OPENA:
@@ -292,7 +291,11 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 		case ID_DEBUG_STEPOVER:
 			if(newDebugger.GetDebuggingState())
+#ifdef _AMD64_
+				newDebugger.StepOver(CalcNewOffset(newDebugger.ProcessContext.Rip));
+#else
 				newDebugger.StepOver(CalcNewOffset(newDebugger.ProcessContext.Eip));
+#endif
 			return true;
 
 		case ID_DEBUG_STEPIN:
@@ -628,7 +631,11 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 
 					ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
 					if(dwOffset == 0x0)
+#ifdef _AMD64_
+						dwOffset = newDebugger.ProcessContext.Rsp;
+#else
 						dwOffset = newDebugger.ProcessContext.Esp;
+#endif
 					LoadStackView(dwOffset);
 					free(sTemp);
 					break;
@@ -676,7 +683,11 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 					
 					ListView_DeleteAllItems(GetDlgItem(hDlgMain,ID_STACKVIEW));
 					if(dwOffset == 0x0)
+#ifdef _AMD64_
+						dwOffset = newDebugger.ProcessContext.Rsp;
+#else
 						dwOffset = newDebugger.ProcessContext.Esp;
+#endif
 					LoadStackView(dwOffset + (4*9));
 					free(sTemp);
 					break;
@@ -969,7 +980,7 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 						bKeep = false;
 
 					if(bAdd)
-						newDebugger.AddBreakpointToList(dwType,dwPID,dwOffset,0,bKeep);
+						newDebugger.AddBreakpointToList(dwType,DR_EXECUTE,dwPID,dwOffset,0,bKeep);
 				}
 
 				MessageBox(hDlgBPManager,L"Breakpoint Saved!",L"Nanomite",MB_OK);
@@ -1997,9 +2008,11 @@ LRESULT CALLBACK RessourceDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 
 			for(int i = iForEntry; i < iForEnd;i++)
 			{
+#ifndef _AMD64_
 				HMODULE hFile = LoadLibrary(newDebugger.PIDs[i].sFileName);
 				EnumResourceTypes(hFile,EnumResTypes,NULL);
 				FreeLibrary(hFile);
+#endif
 			}
 			return true;
 		}
@@ -2060,9 +2073,13 @@ void DebuggingLoop(clsDebugger *tempDebugger)
 
 			tempDebugger->ShowCallStack();
 			LoadRegView();
+#ifdef _AMD64_
+			LoadStackView(newDebugger.ProcessContext.Rsp);
+			LoadDisAssView(newDebugger.ProcessContext.Rip);
+#else
 			LoadStackView(newDebugger.ProcessContext.Esp);
 			LoadDisAssView(newDebugger.ProcessContext.Eip);
-			
+#endif			
 			UpdateStateLable(0x2);
 		}
 	}
@@ -2114,7 +2131,7 @@ void LoadCallBacks()
 	newDebugger.dwOnPID = &OnPID;
 }
 
-int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
+int OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
 {
 	HWND hwTIDLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_TID);
 	wstringstream sLog;
@@ -2195,7 +2212,7 @@ int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode
 	return 0;
 }
 
-int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound)
+int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound)
 {
 	HWND hwPIDLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_PID);
 	
@@ -2261,7 +2278,7 @@ int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound)
 	return 0;
 }
 
-int OnException(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID)
+int OnException(wstring sFuncName,wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
 {
 	HWND hwExceptionLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_EXCEPTIONS);
 	dwExceptionCount++;
@@ -2356,7 +2373,7 @@ int OnLog(tm timeInfo,wstring sLog)
 	return 0;
 }
 
-int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
+int OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded)
 {
 	HWND hwDLLLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs);
 	LVITEM lvDETITEM;
@@ -2425,9 +2442,9 @@ int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded)
 	return 0;
 }
 
-int OnCallStack(DWORD dwStackAddr,
-				DWORD dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
-				DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
+int OnCallStack(DWORD64 dwStackAddr,
+				DWORD64 dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
+				DWORD64 dwEIP,wstring sFuncName,wstring sFuncModule,
 				wstring sSourceFilePath,int iSourceLineNum)
 {
 	int itemIndex;
@@ -2674,7 +2691,7 @@ void LoadDisAssView(DWORD dwEIP)
 				// OpCodez
 				BYTE bBuffer;
 				bool bReaded = false;
-				DWORD dwBytesRead = NULL;
+				SIZE_T dwBytesRead = NULL;
 					
 				memset(sTemp,0,256);
 				int iTempLen = ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : ((iLen == UNKNOWN_OPCODE) ? 0 : iLen));
@@ -2791,6 +2808,26 @@ void LoadRegView()
 	bCF = (dwEFlags & 0x1) ? true : false;
 
 	memset(tcLogging,0,255 * sizeof(TCHAR));
+#ifdef _AMD64_
+	wsprintf(tcLogging,L"RAX\t- 0x%08X\tCF:%X\r\nRCX\t- 0x%08X\tPF:%X\r\nRDX\t- 0x%08X\tAF:%X\r\nRBX\t- 0x%08X\tZF:%X\r\nRSP\t- 0x%08X\tSF:%X\r\nRBP\t- 0x%08X\tTF:%X\r\nRSI\t- 0x%08X\tDF:%X\r\nRDI\t- 0x%08X\tOF:%X\r\nRIP\t- 0x%08X\r\n",
+		newDebugger.ProcessContext.Rax,
+		bCF,
+		newDebugger.ProcessContext.Rcx,
+		bPF,
+		newDebugger.ProcessContext.Rdx,
+		bAF,
+		newDebugger.ProcessContext.Rbx,
+		bZF,
+		newDebugger.ProcessContext.Rsp,
+		bSF,
+		newDebugger.ProcessContext.Rbp,
+		bTF,
+		newDebugger.ProcessContext.Rsi,
+		bDF,
+		newDebugger.ProcessContext.Rdi,
+		bOF,
+		newDebugger.ProcessContext.Rip);
+#else
 	wsprintf(tcLogging,L"EAX\t- 0x%08X\tCF:%X\r\nECX\t- 0x%08X\tPF:%X\r\nEDX\t- 0x%08X\tAF:%X\r\nEBX\t- 0x%08X\tZF:%X\r\nESP\t- 0x%08X\tSF:%X\r\nEBP\t- 0x%08X\tTF:%X\r\nESI\t- 0x%08X\tDF:%X\r\nEDI\t- 0x%08X\tOF:%X\r\nEIP\t- 0x%08X\r\n",
 		newDebugger.ProcessContext.Eax,
 		bCF,
@@ -2809,14 +2846,14 @@ void LoadRegView()
 		newDebugger.ProcessContext.Edi,
 		bOF,
 		newDebugger.ProcessContext.Eip);
-
+#endif
 	Edit_SetText(GetDlgItem(hDlgMain,ID_REGVIEW),tcLogging);
 }
 
 bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView)
 {
-	DWORD dwBytesRead = NULL,
-		dwCounter = NULL,
+	SIZE_T dwBytesRead = NULL;
+	DWORD dwCounter = NULL,
 		dwProtection = NULL,
 		dwStepSize = 0x10,
 		dwBaseOffset = dwOffset;
@@ -2984,11 +3021,11 @@ void LoadStackView(DWORD dwESP)
 {
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwBytesRead = NULL,
 		dwSize = 9*4,
 		dwStartOffset = dwESP - 4*4,
 		dwEndOffset = dwESP + 4*5;
 	bool bCheckVar = false;
+	SIZE_T dwBytesRead = NULL;
 	LPBYTE bBuffer;
 	PTCHAR sTemp;
 	HANDLE hProcess = NULL;
@@ -3149,7 +3186,9 @@ bool printPEView(HWND hWndDlg,int i)
 				InsertPEPartIntoLC(L"SizeOfUninitializedData",pNTHeader->OptionalHeader.SizeOfUninitializedData,hwIOH);
 				InsertPEPartIntoLC(L"AddressOfEntryPoint",pNTHeader->OptionalHeader.AddressOfEntryPoint,hwIOH);
 				InsertPEPartIntoLC(L"BaseOfCode",pNTHeader->OptionalHeader.BaseOfCode,hwIOH);
+#ifndef _AMD64_
 				InsertPEPartIntoLC(L"BaseOfData",pNTHeader->OptionalHeader.BaseOfData,hwIOH);
+#endif
 				InsertPEPartIntoLC(L"ImageBase",pNTHeader->OptionalHeader.ImageBase,hwIOH);
 				InsertPEPartIntoLC(L"SectionAlignment",pNTHeader->OptionalHeader.SectionAlignment,hwIOH);
 				InsertPEPartIntoLC(L"FileAlignment",pNTHeader->OptionalHeader.FileAlignment,hwIOH);
@@ -3426,11 +3465,13 @@ bool InsertHandleIntoLC(HWND hwLC,DWORD dwPID,DWORD dwHandleID,PTCHAR sType,PTCH
 
 BOOL CALLBACK EnumResTypes(HMODULE hModule,LPTSTR lpszType,LONG lParam)
 {
+#ifndef _AMD64_
 	if(EnumResourceNames(hModule,lpszType,EnumResNames,lParam) == 0)
 	{
 		DWORD dwError = GetLastError();
 		return false;
 	}
+#endif
 	return true;
 }
 

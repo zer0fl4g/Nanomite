@@ -15,12 +15,16 @@ int OnLog(tm timeInfo,wstring sLog)
 }
 
 // Our callback function which gets triggered on "clsDebugger.ShowCallstack()"
-int OnCallStack(DWORD dwStackAddr,
-	DWORD dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
-	DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
+int OnCallStack(DWORD64 dwStackAddr,
+	DWORD64 dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
+	DWORD64 dwEIP,wstring sFuncName,wstring sFuncModule,
 	wstring sSourceFilePath,int iSourceLineNum)
 {
-	wprintf(L"\nCurrent:\t%08X - %s.%s\nReturnTo:\t%08X - %s.%s\n",dwEIP,sFuncModule.c_str(),sFuncName.c_str(),dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
+#ifdef _AMD64_
+	wprintf(L"\nCurrent:\t%016X - %s.%s\nReturnTo:\t%016X - %s.%s\n",dwEIP,sFuncModule.c_str(),sFuncName.c_str(),dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
+#else
+	wprintf(L"\nCurrent:\t%08X - %s.%s\nReturnTo:\t%08X - %s.%s\n",(DWORD)dwEIP,sFuncModule.c_str(),sFuncName.c_str(),(DWORD)dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
+#endif
 	return 0;
 }
 
@@ -32,16 +36,21 @@ DWORD __stdcall On1337Exception(DEBUG_EVENT *debug_event)
 	return DBG_CONTINUE;
 }
 
-int _tmain(int argc, PCHAR argv[])
+/* 
+| This is only in a extra function because it simplifies the process of memory leak fixing 
+*/
+DWORD TheDebuggingFunction()
 {
 	bool bDebugIt = true;
 
-	/*
-	| Creating new Instance with a Target
+	/* Creating new Instance with a Target
 	| Without parameter for Attaching to a running Process ( or set it manual later with .SetTarget(<path>))
 	*/
+#ifdef _AMD64_
+	clsDebugger tempDebugger(L"C:\\DropBox\\Projects\\clsDebugger\\x64\\Debug\\Debugme.exe");
+#else
 	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
-	//clsDebugger tempDebugger(L"C:\\Program Files\\Microsoft Office\\Office14\\WINWORD.EXE");
+#endif
 	//clsDebugger tempDebugger; // needs manual set of target with .SetTarget(<path>)
 
 	 // Setting Option to enable child process debugging
@@ -55,32 +64,37 @@ int _tmain(int argc, PCHAR argv[])
 	*/
 	tempDebugger.dbgSettings.dwBreakOnEPMode = 3;
 
-	/*
-	| Enable auto load of symbols
+	/* Enable auto load of symbols
 	| Note: Disable may cause missing function names in callback/exception info but target will load faster
 	*/
 	tempDebugger.dbgSettings.bAutoLoadSymbols = true;
 
 	/* Set Callbacks 
-	| int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
-	| int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
-	| int (*dwOnException)(wstring sFuncName,string sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	| int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
+	| int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound);
+	| int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	| int (*dwOnDbgString)(wstring sMessage,DWORD dwPID);
 	| int (*dwOnLog)(tm timeInfo,wstring sLog);
-	| int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
-	| int (*dwOnCallStack)(DWORD dwStackAddr,DWORD dwReturnTo,wstring sReturnToFunc,wstring sModuleName,DWORD dwEIP,wstring sFuncName,wstring sFuncModule,wstring sSourceFilePath,int iSourceLineNum);
+	| int (*dwOnDll)(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded);
+	| int (*dwOnCallStack)(DWORD64 dwStackAddr,DWORD64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,DWORD64 dwEIP,wstring sFuncName,wstring sFuncModule,wstring sSourceFilePath,int iSourceLineNum);
 	*/
 	tempDebugger.dwOnCallStack = &OnCallStack;
 	tempDebugger.dwOnLog = &OnLog; 
 	
 	/* Set manual BPs
+	|
 	| dwType:
 	|		0 = SoftwareBP
 	|	    1 = MemoryBP
 	|		2 = HardwareBP 
 	|
+	| dwTypeFlag: Only for HardwareBP currently
+	|		DR_EXECUTE	(0x00) - Break on execute
+	|		DR_WRITE	(0x01) - Break on data writes
+	|		DR_READ		(0x11) - Break on data reads or writes.
+	|
 	| dwPID: ProcessID where you want to place the BP ( must be a process that is debugged )
-	|	     Can be -1 for mother process if you have different child processes
+	|		 Can be -1 for mother process if you have different child processes
 	|
 	| dwOffset: Address where the BP will be placed
 	|	
@@ -92,9 +106,11 @@ int _tmain(int argc, PCHAR argv[])
 	|
 	| dwKeep: set true if the BP should be placed again after one hit
 	|
+	| Notes: - For HardwareBPs you will need admin rights, else they will not work properly...
+	|
 	*/
-	tempDebugger.AddBreakpointToList(0,-1,(DWORD)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
-	tempDebugger.AddBreakpointToList(2,-1,(DWORD)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
+	tempDebugger.AddBreakpointToList(0,NULL,-1,(DWORD64)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
+	tempDebugger.AddBreakpointToList(0,DR_EXECUTE,-1,(DWORD64)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
 
 	/* Add a Exception Handler / Action
 	|
@@ -109,7 +125,7 @@ int _tmain(int argc, PCHAR argv[])
 	| dwHandler: Optional! The Address of your custom handler - DWORD (__stdcall *CustomHandler)(DEBUG_EVENT *debug_event);
 	|
 	*/
-	tempDebugger.CustomExceptionAdd(0x1337,0,(DWORD)&On1337Exception);
+	tempDebugger.CustomExceptionAdd(0x1337,0,(DWORD64)&On1337Exception);
 	tempDebugger.CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,1,NULL);
 	tempDebugger.CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,1,NULL);
 	tempDebugger.CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,1,NULL);
@@ -122,7 +138,7 @@ int _tmain(int argc, PCHAR argv[])
 	//tempDebugger.StartDebugging();
 
 	// Our debugging loop which handles the events
-	// There you can do all things you want to have be done when the targets breaks cause of a error / manual suspend
+	// There you can do all things you want to have be done when the targets breaks cause of a error, manual suspend or breakpoints
 	while(bDebugIt)
 	{
 		WaitForSingleObject(tempDebugger.hDebuggingHandle,INFINITE); // Waiting for Debugevent
@@ -132,6 +148,19 @@ int _tmain(int argc, PCHAR argv[])
 		else
 		{
 			// if still running print CPU registers
+#ifdef _AMD64_
+			wprintf(L"\nCONTEXT:\n\tRAX: %016X\n\tRBX: %016X\n\tRCX: %016X\n\tRDX: %016X\n\tRIP: %016X\n\tRSP: %016X\n\tRBP: %016X\n\tRSI: %016X\n\tRDI: %016X\n\n",
+				tempDebugger.ProcessContext.Rax,
+				tempDebugger.ProcessContext.Rbx,
+				tempDebugger.ProcessContext.Rcx,
+				tempDebugger.ProcessContext.Rdx,
+				tempDebugger.ProcessContext.Rip,
+				tempDebugger.ProcessContext.Rsp,
+				tempDebugger.ProcessContext.Rbp,
+				tempDebugger.ProcessContext.Rsi,
+				tempDebugger.ProcessContext.Rdi		
+				);
+#else
 			wprintf(L"\nCONTEXT:\n\tEAX: %08X\n\tEBX: %08X\n\tECX: %08X\n\tEDX: %08X\n\tEIP: %08X\n\tESP: %08X\n\tEBP: %08X\n\tESI: %08X\n\tEDI: %08X\n\n",
 				tempDebugger.ProcessContext.Eax,
 				tempDebugger.ProcessContext.Ebx,
@@ -143,6 +172,7 @@ int _tmain(int argc, PCHAR argv[])
 				tempDebugger.ProcessContext.Esi,
 				tempDebugger.ProcessContext.Edi		
 			);
+#endif
 			tempDebugger.ShowCallStack(); // Call our registered callback
 			getchar(); // Wait for User
 			//tempDebugger.StepIn();
@@ -150,6 +180,17 @@ int _tmain(int argc, PCHAR argv[])
 		}
 	}
 	getchar();
+
+	OutputDebugString(L"------------- Before .class gets destroyed ------------\r\n");
 	_CrtDumpMemoryLeaks();
 	return 0;
+}
+
+int _tmain(int argc, PCHAR argv[])
+{
+	TheDebuggingFunction();
+	
+	// Test if the class leaked some memory after it finished.
+	OutputDebugString(L"------------- After .class gets destroyed ------------\r\n");
+	return _CrtDumpMemoryLeaks();
 }

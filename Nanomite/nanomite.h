@@ -1,7 +1,7 @@
 #ifndef NanomiteH
 #define NanomiteH
 
-#pragma pack(1)
+//#pragma pack(1)
 
 #include <windows.h>
 #include <WindowsX.h>
@@ -33,16 +33,16 @@ void LoadStackView(DWORD dwESP);
 void UpdateStateLable(DWORD dwState);
 void CleanUpGUI();
 
-int OnThread(DWORD dwPID,DWORD dwTID,DWORD dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
-int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD dwEP,bool bFound);
-int OnException(wstring sFuncName,wstring sModName,DWORD dwOffset,DWORD dwExceptionCode,DWORD dwPID,DWORD dwTID);
+int OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
+int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound);
+int OnException(wstring sFuncName,wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
 int OnDbgString(wstring sMessage,DWORD dwPID);
 int OnLog(tm timeInfo,wstring sLog);
-int OnDll(wstring sDLLPath,DWORD dwPID,DWORD dwEP,bool bLoaded);
-int OnCallStack(DWORD dwStackAddr,
-				DWORD dwReturnTo,wstring sReturnToFunc,wstring sReturnToModuleName,
-				DWORD dwEIP,wstring sFuncName,wstring sFuncModule,
-				wstring sSourceFilePath,int iSourceLineNum);
+int OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded);
+int OnCallStack(DWORD64 dwStackAddr,
+			DWORD64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
+			DWORD64 dwEIP,wstring sFuncName,wstring sFuncModule,
+			wstring sSourceFilePath,int iSourceLineNum);
 
 bool MenuLoadNewFile();
 bool WriteToSettingsFile();
