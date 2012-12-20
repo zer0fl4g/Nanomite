@@ -18,18 +18,18 @@
 #include "Resource.h"
 
 // Leak detection
+#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
 #include <crtdbg.h>
-
-#define _CRTDBG_MAP_ALLOC
 // Leak detection
 
 void LoadCallBacks();
 void StartDebugging();
 void DebuggingLoop(clsDebugger *newDebugger);
-void LoadDisAssView(DWORD dwEIP);
+void LoadDisAssView(DWORD64 dwEIP);
 void LoadRegView();
-void LoadStackView(DWORD dwESP);
+void LoadStackView(DWORD64 dwESP);
 void UpdateStateLable(DWORD dwState);
 void CleanUpGUI();
 

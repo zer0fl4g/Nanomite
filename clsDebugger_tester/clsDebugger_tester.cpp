@@ -1,10 +1,10 @@
 #include "../clsDebugger/clsDebugger.h"
 
 // Leak detection
+#define _CRTDBG_MAP_ALLOC
+
 #include <stdlib.h>
 #include <crtdbg.h>
-
-#define _CRTDBG_MAP_ALLOC
 // Leak detection
 
 // Our callback function which gets triggered if log gets updated
@@ -21,7 +21,7 @@ int OnCallStack(DWORD64 dwStackAddr,
 	wstring sSourceFilePath,int iSourceLineNum)
 {
 #ifdef _AMD64_
-	wprintf(L"\nCurrent:\t%016X - %s.%s\nReturnTo:\t%016X - %s.%s\n",dwEIP,sFuncModule.c_str(),sFuncName.c_str(),dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
+	wprintf(L"\nCurrent:\t%016I64X - %s.%s\nReturnTo:\t%016I64X - %s.%s\n",dwEIP,sFuncModule.c_str(),sFuncName.c_str(),dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
 #else
 	wprintf(L"\nCurrent:\t%08X - %s.%s\nReturnTo:\t%08X - %s.%s\n",(DWORD)dwEIP,sFuncModule.c_str(),sFuncName.c_str(),(DWORD)dwReturnTo,sReturnToModuleName.c_str(),sReturnToFunc.c_str());
 #endif
@@ -29,8 +29,7 @@ int OnCallStack(DWORD64 dwStackAddr,
 }
 
 // Our callback for a 0x1337 exception
-// needs to be a stdcall else stack gets corrupted
-DWORD __stdcall On1337Exception(DEBUG_EVENT *debug_event)
+DWORD On1337Exception(DEBUG_EVENT *debug_event)
 {
 	MessageBoxW(NULL,L"You got a 1337 exception!",L"Nanomite!",MB_OK);
 	return DBG_CONTINUE;
@@ -44,10 +43,12 @@ DWORD TheDebuggingFunction()
 	bool bDebugIt = true;
 
 	/* Creating new Instance with a Target
-	| Without parameter for Attaching to a running Process ( or set it manual later with .SetTarget(<path>))
+	| Without parameter for Attaching to a running Process (or set it manual later with tempDebugger.SetTarget(<path>))
 	*/
+
 #ifdef _AMD64_
 	clsDebugger tempDebugger(L"C:\\DropBox\\Projects\\clsDebugger\\x64\\Debug\\Debugme.exe");
+	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #else
 	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #endif
@@ -149,17 +150,43 @@ DWORD TheDebuggingFunction()
 		{
 			// if still running print CPU registers
 #ifdef _AMD64_
-			wprintf(L"\nCONTEXT:\n\tRAX: %016X\n\tRBX: %016X\n\tRCX: %016X\n\tRDX: %016X\n\tRIP: %016X\n\tRSP: %016X\n\tRBP: %016X\n\tRSI: %016X\n\tRDI: %016X\n\n",
-				tempDebugger.ProcessContext.Rax,
-				tempDebugger.ProcessContext.Rbx,
-				tempDebugger.ProcessContext.Rcx,
-				tempDebugger.ProcessContext.Rdx,
-				tempDebugger.ProcessContext.Rip,
-				tempDebugger.ProcessContext.Rsp,
-				tempDebugger.ProcessContext.Rbp,
-				tempDebugger.ProcessContext.Rsi,
-				tempDebugger.ProcessContext.Rdi		
-				);
+			BOOL bIsWow64Process = false;
+			HANDLE hProcess = NULL;
+
+			for(size_t i = 0; i < tempDebugger.PIDs.size(); i++)
+				if(tempDebugger.PIDs[i].dwPID == tempDebugger.GetCurrentPID())
+					hProcess = tempDebugger.PIDs[i].hProc;
+
+			IsWow64Process(hProcess,&bIsWow64Process);
+			if(bIsWow64Process)
+			{
+				wprintf(L"\nCONTEXT:\n\tEAX: %016X\n\tEBX: %016X\n\tECX: %016X\n\tEDX: %016X\n\tEIP: %016X\n\tESP: %016X\n\tEBP: %016X\n\tESI: %016X\n\tEDI: %016X\n\n",
+					tempDebugger.wowProcessContext.Eax,
+					tempDebugger.wowProcessContext.Ebx,
+					tempDebugger.wowProcessContext.Ecx,
+					tempDebugger.wowProcessContext.Edx,
+					tempDebugger.wowProcessContext.Eip,
+					tempDebugger.wowProcessContext.Esp,
+					tempDebugger.wowProcessContext.Ebp,
+					tempDebugger.wowProcessContext.Esi,
+					tempDebugger.wowProcessContext.Edi
+					);
+			}
+			else
+			{
+				wprintf(L"\nCONTEXT:\n\tRAX: %016I64X\n\tRBX: %016I64X\n\tRCX: %016I64X\n\tRDX: %016I64X\n\tRIP: %016I64X\n\tRSP: %016I64X\n\tRBP: %016I64X\n\tRSI: %016I64X\n\tRDI: %016I64X\n\n",
+					tempDebugger.ProcessContext.Rax,
+					tempDebugger.ProcessContext.Rbx,
+					tempDebugger.ProcessContext.Rcx,
+					tempDebugger.ProcessContext.Rdx,
+					tempDebugger.ProcessContext.Rip,
+					tempDebugger.ProcessContext.Rsp,
+					tempDebugger.ProcessContext.Rbp,
+					tempDebugger.ProcessContext.Rsi,
+					tempDebugger.ProcessContext.Rdi
+					);
+			}
+
 #else
 			wprintf(L"\nCONTEXT:\n\tEAX: %08X\n\tEBX: %08X\n\tECX: %08X\n\tEDX: %08X\n\tEIP: %08X\n\tESP: %08X\n\tEBP: %08X\n\tESI: %08X\n\tEDI: %08X\n\n",
 				tempDebugger.ProcessContext.Eax,

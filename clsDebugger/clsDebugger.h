@@ -12,10 +12,15 @@
 #include <TlHelp32.h>
 #include <time.h>
 
+#pragma comment(lib,"psapi.lib")
+
 #include "dbghelp.h"
 
-#pragma comment(lib,"psapi.lib")
-#pragma comment(lib,"dbghelp.lib")
+#ifdef _AMD64_
+#pragma comment(lib,"../clsDebugger/dbghelp_x64.lib")
+#else
+#pragma comment(lib,"../clsDebugger/dbghelp_x86.lib")
+#endif
 
 using namespace std;
 
@@ -105,6 +110,7 @@ public:
 	vector<customException> ExceptionHandler;
 
 	CONTEXT ProcessContext;
+	WOW64_CONTEXT wowProcessContext;
 
 	clsDebuggerSettings dbgSettings;
 
@@ -122,22 +128,22 @@ public:
 	bool RestartDebugging();
 	bool StartDebugging();
 	bool GetDebuggingState();
-	bool StepOver(DWORD dwNewOffset);
+	bool StepOver(DWORD64 dwNewOffset);
 	bool StepIn();
 	bool ShowCallStack();
 	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
-	bool RemoveBPFromList(DWORD dwOffset,DWORD dwType,DWORD dwPID);
+	bool RemoveBPFromList(DWORD64 dwOffset,DWORD dwType,DWORD dwPID);
 	bool RemoveBPs();
-	bool LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD dwOffset);
-	bool ReadMemoryFromDebugee(DWORD dwPID,DWORD dwAddress,DWORD dwSize,LPVOID lpBuffer);
-	bool WriteMemoryFromDebugee(DWORD dwPID,DWORD dwAddress,DWORD dwSize,LPVOID lpBuffer);
+	bool LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,DWORD64 dwOffset);
+	bool ReadMemoryFromDebugee(DWORD dwPID,DWORD64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
+	bool WriteMemoryFromDebugee(DWORD dwPID,DWORD64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
 
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
-	void AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,DWORD dwOffset,DWORD dwSlot,DWORD dwKeep);
+	void AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,DWORD64 dwOffset,DWORD dwSlot,DWORD dwKeep);
 	void SetTarget(wstring sTarget);
 	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,DWORD64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
@@ -186,15 +192,16 @@ private:
 	bool wSoftwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
 	bool dSoftwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,BYTE btOrgByte);
 	bool wMemoryBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,DWORD dwKeep);
-	bool dMemoryBP(DWORD dwPID,DWORD64 dwOffset);
+	bool dMemoryBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize);
 	bool wHardwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
 	bool dHardwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSlot);
 	bool InitBP();
 	bool IsValidFile();
 	bool CheckProcessState(DWORD dwPID);
-	bool CheckIfExceptionIsBP(DWORD dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
+	bool CheckIfExceptionIsBP(DWORD64 dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
 	bool EnableDebugFlag();
+	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);
 
 	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle);
 	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event);
