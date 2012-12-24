@@ -69,6 +69,7 @@ class clsDebugger
 		DWORD dwBPRestoreFlag;
 		DWORD64 dwEP;
 		bool bKernelBP;
+		bool bWOW64KernelBP;
 		bool bRunning;
 		bool bSymLoad;
 		bool bTrapFlag;
@@ -150,6 +151,8 @@ public:
 	void CustomExceptionRemove(DWORD dwExceptionType);
 	void CustomExceptionRemoveAll();
 
+	HANDLE GetCurrentProcessHandle();
+
 	int (*dwOnThread)(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 	int (*dwOnPID)(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound);
 	int (*dwOnException)(wstring sFuncName,wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
@@ -173,6 +176,7 @@ private:
 	bool _bStopDebugging;
 	bool _bSingleStepFlag;
 	HANDLE _hDbgEvent;
+	HANDLE _hCurProc;
 	DWORD _dwPidToAttach;
 	DWORD _dwCurPID;
 	DWORD _dwCurTID;
@@ -203,6 +207,8 @@ private:
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
 	bool EnableDebugFlag();
 	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);
+
+	HANDLE GetCurrentProcessHandle(DWORD dwPID);
 
 	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle);
 	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event);

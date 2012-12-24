@@ -29,7 +29,7 @@ void StartDebugging();
 void DebuggingLoop(clsDebugger *newDebugger);
 void LoadDisAssView(DWORD64 dwEIP);
 void LoadRegView();
-void LoadStackView(DWORD64 dwESP);
+void LoadStackView(DWORD64 dwESP,DWORD dwStackSize);
 void UpdateStateLable(DWORD dwState);
 void CleanUpGUI();
 

@@ -48,7 +48,7 @@ INT WINAPI WinMain(HINSTANCE hInstance, HINSTANCE hPrevInstance,LPSTR lpCmdLine,
 	HWND hWND = 0;
 
 	tcLogging = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
-	tcTempState = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	tcTempState = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 	DialogBox(hInstance, MAKEINTRESOURCE(IDD_MAINFRAME),hWND, reinterpret_cast<DLGPROC>(MainDLGProc));
 
@@ -596,7 +596,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER))
 				{
 					DWORD64 dwOffset = 0;
-					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+					PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 					LVITEM lvItem;
 					memset(&lvItem,0,sizeof(lvItem));
@@ -616,8 +616,20 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				}
 				else if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
 				{
-					DWORD64 dwOffset = 0;
-					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+					DWORD dwStackSize = NULL;
+					DWORD64 dwOffset = NULL;
+
+#ifdef _AMD64_
+					BOOL bIsWOW64 = false;
+					IsWow64Process(newDebugger.GetCurrentProcessHandle(),&bIsWOW64);
+
+					if(bIsWOW64) dwStackSize = 4;	
+					else dwStackSize = 8;
+#else
+					dwStackSize = 4;
+#endif
+
+					PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 					LVITEM lvItem;
 					memset(&lvItem,0,sizeof(lvItem));
@@ -637,7 +649,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 #else
 						dwOffset = newDebugger.ProcessContext.Esp;
 #endif
-					LoadStackView(dwOffset);
+					LoadStackView(dwOffset,dwStackSize);
 					free(sTemp);
 					break;
 				}
@@ -648,7 +660,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER))
 				{
 					DWORD64 dwOffset = 0;
-					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+					PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 					LVITEM lvItem;
 					memset(&lvItem,0,sizeof(lvItem));
@@ -668,13 +680,20 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				}
 				else if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
 				{
+					DWORD dwStackSize = NULL;
+					DWORD64 dwOffset = NULL;
+
 #ifdef _AMD64_
-					DWORD dwStackSize = 8;
+					BOOL bIsWOW64 = false;
+					IsWow64Process(newDebugger.GetCurrentProcessHandle(),&bIsWOW64);
+
+					if(bIsWOW64) dwStackSize = 4;	
+					else dwStackSize = 8;
 #else
-					DWORD dwStackSize = 4;
+					dwStackSize = 4;
 #endif
-					DWORD64 dwOffset = 0;
-					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+
+					PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 					LVITEM lvItem;
 					memset(&lvItem,0,sizeof(lvItem));
@@ -694,7 +713,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 #else
 						dwOffset = newDebugger.ProcessContext.Esp;
 #endif
-					LoadStackView(dwOffset + (dwStackSize * 12));
+					LoadStackView(dwOffset + (dwStackSize * 12),dwStackSize);
 					free(sTemp);
 					break;
 				}
@@ -885,7 +904,7 @@ LRESULT CALLBACK BPManagerDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM 
 			{
 				DWORD dwType = 0,dwOffset = 0,dwPID = 0;
 				wstringstream ss;
-				PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+				PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 				int itemIndex;
 				LVITEM LvItem;
 				LVCOLUMN LvCol;
@@ -1145,7 +1164,7 @@ LRESULT CALLBACK AttachToDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM l
 						if(hProc != INVALID_HANDLE_VALUE)
 						{
 							int itemIndex = 0;
-							PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+							PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 							LVITEM lvDETITEM;
 							memset(&lvDETITEM,0,sizeof(lvDETITEM));
 
@@ -1197,7 +1216,7 @@ LRESULT CALLBACK AttachToDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM l
 		case ID_ATTACH:
 			{
 				DWORD dwPID = 0;
-				PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+				PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 				LVITEM lvItem;
 				memset(&lvItem,0,sizeof(lvItem));
 
@@ -1285,7 +1304,9 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			int iForEntry = ((iMemMapPID == newDebugger.PIDs.size()) ? 0 : iMemMapPID); 
 			int iForEnd = ((iMemMapPID != newDebugger.PIDs.size()) ? (iForEntry + 1) : iMemMapPID);
 
-			PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+			PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+			PTCHAR sTemp2 = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+
 			LVITEM lvDETITEM;
 
 			MODULEENTRY32 pModEntry;
@@ -1324,24 +1345,32 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 					SendMessage(hwMemMap,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 					// Path
-					HANDLE hModules = CreateToolhelp32Snapshot(TH32CS_SNAPMODULE,newDebugger.PIDs[i].dwPID);
-					memset(sTemp,0,255 * sizeof(TCHAR));
+					int iModPos = NULL,
+						iModLen = NULL;
 
-					if(hModules != INVALID_HANDLE_VALUE && Module32First(hModules,&pModEntry))
+					memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
+					memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
+					GetMappedFileName(newDebugger.PIDs[i].hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH * sizeof(TCHAR));
+
+					iModLen = wcslen(sTemp2);
+					if(iModLen > 0)
 					{
-						do 
+						for(int i = iModLen; i > 0 ; i--)
 						{
-							if(mbi.BaseAddress >= pModEntry.modBaseAddr && mbi.BaseAddress <= (pModEntry.modBaseAddr + pModEntry.modBaseSize))
+							if(sTemp2[i] == '\\')
 							{
-								wsprintf(sTemp,L"%s",pModEntry.szModule);
+								iModPos = i;
 								break;
 							}
-						} while (Module32Next(hModules,&pModEntry));
-					}
-					lvDETITEM.iSubItem = 3;
-					SendMessage(hwMemMap,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
+						}
+						
+						memcpy(sTemp,(LPVOID)&sTemp2[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
 
-					// Mem Tyep
+						lvDETITEM.iSubItem = 3;
+						SendMessage(hwMemMap,LVM_SETITEM,0,(LPARAM)&lvDETITEM);					
+					}
+
+					// Mem Type
 					switch (mbi.State)
 					{
 					case MEM_FREE:			wsprintf(sTemp,L"%s",L"Free");		break;
@@ -1381,6 +1410,7 @@ LRESULT CALLBACK MemMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 					dwAddress += mbi.RegionSize;
 				}
 			}
+			free(sTemp2);
 			free(sTemp);
 			return true;
 		}
@@ -1464,7 +1494,7 @@ LRESULT CALLBACK HeapMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 								{
 									LVITEM lvDETITEM;
 									memset(&lvDETITEM,0,sizeof(lvDETITEM));
-									PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+									PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 									int iItemIndex = ListView_GetItemCount(hwHeapMap);
 
 									// PID
@@ -1527,7 +1557,7 @@ LRESULT CALLBACK HeapMapDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lP
 							dwPID = NULL;
 						LPNMITEMACTIVATE lpItem = (LPNMITEMACTIVATE) lParam;
 						int iITem = lpItem->iItem;
-						PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+						PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 						LVITEM lvItem;
 						memset(&lvItem,0,sizeof(lvItem));
@@ -1915,8 +1945,8 @@ LRESULT CALLBACK HandleViewDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM
 					UNICODE_STRING objectName,
 						objectTypeName;
 					ULONG returnLength;
-					TCHAR *sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR)),
-						*sTemp2 = (PTCHAR)malloc(255 * sizeof(TCHAR));
+					TCHAR *sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
+						*sTemp2 = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 					BOOL bWideBool = false;
 
 					if (handle.ProcessId != dwPID)
@@ -2097,16 +2127,16 @@ void DebuggingLoop(clsDebugger *tempDebugger)
 			IsWow64Process(hProcess,&bIsWOW64);
 			if(bIsWOW64)
 			{
-				LoadStackView(newDebugger.wowProcessContext.Esp);
+				LoadStackView(newDebugger.wowProcessContext.Esp,4);
 				LoadDisAssView(newDebugger.wowProcessContext.Eip);
 			}
 			else
 			{
-				LoadStackView(newDebugger.ProcessContext.Rsp);
+				LoadStackView(newDebugger.ProcessContext.Rsp,8);
 				LoadDisAssView(newDebugger.ProcessContext.Rip);
 			}
 #else
-			LoadStackView(newDebugger.ProcessContext.Esp);
+			LoadStackView(newDebugger.ProcessContext.Esp,4);
 			LoadDisAssView(newDebugger.ProcessContext.Eip);
 #endif			
 			UpdateStateLable(0x2);
@@ -2167,7 +2197,7 @@ int OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCo
 	int itemIndex = 0;
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
-	memset(tcLogging,0,255 * sizeof(TCHAR));
+	memset(tcLogging,0,MAX_PATH * sizeof(TCHAR));
 
 	itemIndex = SendMessage(hwTIDLC,LVM_GETITEMCOUNT,0,0);
 
@@ -2245,7 +2275,7 @@ int OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound)
 {
 	HWND hwPIDLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_PID);
 	
-	memset(tcLogging,0,255 * sizeof(TCHAR));
+	memset(tcLogging,0,MAX_PATH * sizeof(TCHAR));
 	int itemIndex = SendMessage(hwPIDLC,LVM_GETITEMCOUNT,0,0);
 	if(!bFound)
 	{
@@ -2352,7 +2382,7 @@ int OnDbgString(wstring sMessage,DWORD dwPID)
 {
 	HWND hwDebugStringLC = GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR);
 	int itemIndex = 0;
-	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	PTCHAR sTemp = (PTCHAR)malloc(sizeof(TCHAR) * wcslen(sMessage.c_str()));
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
 
@@ -2368,7 +2398,8 @@ int OnDbgString(wstring sMessage,DWORD dwPID)
 	SendMessage(hwDebugStringLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 	// DebugString
-	wsprintf(sTemp,L"%s",sMessage.c_str());
+	memcpy(sTemp,sMessage.c_str(),wcslen(sMessage.c_str()) * sizeof(TCHAR));
+	//wsprintf(sTemp,L"%s",sMessage.c_str());
 	lvDETITEM.iSubItem = 1;
 	SendMessage(hwDebugStringLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
@@ -2380,7 +2411,7 @@ int OnLog(tm timeInfo,wstring sLog)
 {
 	HWND hwLogLC = GetDlgItem(hDlgMain,IDC_LOG);
 	int itemIndex = SendMessage(hwLogLC,LVM_GETITEMCOUNT,0,0);
-	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
 	
@@ -2407,7 +2438,7 @@ int OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded)
 	HWND hwDLLLC = GetDlgItem(hDlgDetInfo,ID_DETINFO_DLLs);
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
-	memset(tcLogging,0,255 * sizeof(TCHAR));
+	memset(tcLogging,0,MAX_PATH * sizeof(TCHAR));
 
 	int itemIndex = SendMessage(hwDLLLC,LVM_GETITEMCOUNT,0,0);
 
@@ -2480,7 +2511,7 @@ int OnCallStack(DWORD64 dwStackAddr,
 	int itemIndex;
 	LVITEM LvItem;
 	memset(&LvItem,0,sizeof(LvItem));
-	memset(tcLogging,0,255 * sizeof(TCHAR));
+	memset(tcLogging,0,MAX_PATH * sizeof(TCHAR));
 
 	itemIndex = SendMessage(hwLBCallStack,LVM_GETITEMCOUNT,0,0);
 	
@@ -2700,7 +2731,7 @@ void LoadDisAssView(DWORD64 dwEIP)
 		newDisAss.Archi = 0;
 #endif
 
-		PTCHAR sTemp = (PTCHAR)malloc(256 * sizeof(TCHAR));
+		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 		while(bContinueDisAs)
 		{
 			newDisAss.SecurityBlock = (int)dwEndOffset - newDisAss.VirtualAddr;
@@ -2712,7 +2743,7 @@ void LoadDisAssView(DWORD64 dwEIP)
 			else
 			{			
 				int itemIndex = 0;
-				memset(sTemp,0,256 *  sizeof(TCHAR));
+				memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
 				LVITEM lvDETITEM;
 				memset(&lvDETITEM,0,sizeof(lvDETITEM));
 
@@ -2732,7 +2763,7 @@ void LoadDisAssView(DWORD64 dwEIP)
 				bool bReaded = false;
 				SIZE_T dwBytesRead = NULL;
 					
-				memset(sTemp,0,256);
+				memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
 				int iTempLen = ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : ((iLen == UNKNOWN_OPCODE) ? 0 : iLen));
 				for(size_t i = 0;i < iTempLen;i++)
 				{
@@ -2752,7 +2783,7 @@ void LoadDisAssView(DWORD64 dwEIP)
 				SendMessage(hwDisAs,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 				// Comment
-				memset(sTemp,NULL,256 * sizeof(TCHAR));
+				memset(sTemp,NULL,MAX_PATH * sizeof(TCHAR));
 				if(strstr(newDisAss.Instruction.Mnemonic,"call") != 0 ||
 					strstr(newDisAss.Instruction.Mnemonic,"jmp") != 0 ||
 					strstr(newDisAss.Instruction.Mnemonic,"push") != 0 ||
@@ -2787,7 +2818,7 @@ void LoadDisAssView(DWORD64 dwEIP)
 
 	int iItemIndex = ListView_GetItemCount(hwDisAs),
 		iSearchedIndex = 0;
-	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 	for(size_t i = 0;i < iItemIndex;i++)
 	{
@@ -2847,7 +2878,7 @@ void LoadRegView()
 	bPF = (dwEFlags & 0x4) ? true : false;
 	bCF = (dwEFlags & 0x1) ? true : false;
 
-	memset(tcLogging,0,255 * sizeof(TCHAR));
+	memset(tcLogging,0,MAX_PATH * sizeof(TCHAR));
 #ifdef _AMD64_
 	BOOL bIsWow64Process = false;
 	HANDLE hProcess = NULL;
@@ -2980,7 +3011,7 @@ bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView)
 		SendMessage(hwHexView,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 		// Hexiss
-		memset(tcTempBuffer,0,sizeof(255 * sizeof(TCHAR)));
+		memset(tcTempBuffer,0,sizeof(MAX_PATH * sizeof(TCHAR)));
 		for(size_t i = 0;i < dwStepSize;i++)
 		{
 			wsprintf(tcAsciiHexTemp,L"%02X ",*(PCHAR)((DWORD)pBuffer + dwCounter + i));
@@ -2993,7 +3024,7 @@ bool PrintMemToHexView(DWORD dwPID,DWORD dwOffset,DWORD dwSize,HWND hwHexView)
 		SendMessage(hwHexView,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		//Acsii
-		memset(tcTempBuffer,0,sizeof(255 * sizeof(TCHAR)));
+		memset(tcTempBuffer,0,sizeof(MAX_PATH * sizeof(TCHAR)));
 		for(size_t i = 0;i < dwStepSize;i++)
 		{
 			wsprintf(tcAsciiHexTemp,L"%c ",*(PCHAR)((DWORD)pBuffer + dwCounter + i));
@@ -3091,32 +3122,21 @@ DWORD CalcNewOffset(DWORD dwCurrentOffset)
 	return dwNewOffset;
 }
 
-void LoadStackView(DWORD64 dwESP)
+void LoadStackView(DWORD64 dwESP, DWORD dwStackSize)
 {
-	DWORD dwOldProtect = NULL,
-		dwNewProtect = PAGE_EXECUTE_READWRITE,
-#ifdef _AMD64_
-		dwStackSize = 8,
-#else
-		dwStackSize = 4,
-#endif
-		dwSize = 12 * dwStackSize;
-	DWORD64	dwStartOffset = dwESP - dwStackSize * 6,
-		dwEndOffset = dwESP + dwStackSize * 6;
 	bool bCheckVar = false;
 	SIZE_T dwBytesRead = NULL;
 	LPBYTE bBuffer;
 	PTCHAR sTemp;
-	HANDLE hProcess = NULL;
+	HANDLE hProcess = newDebugger.GetCurrentProcessHandle();
 	HWND hwStackViewLC = GetDlgItem(hDlgMain,ID_STACKVIEW);
-	
+	DWORD dwOldProtect = NULL,
+		dwNewProtect = PAGE_EXECUTE_READWRITE,
+		dwSize = 12 * dwStackSize;
+	DWORD64	dwStartOffset = dwESP - dwStackSize * 6,
+		dwEndOffset = dwESP + dwStackSize * 6;
+
 	ListView_DeleteAllItems(hwStackViewLC);
-	
-	for(size_t i = 0;i < newDebugger.PIDs.size();i++)
-	{
-		if(newDebugger.PIDs[i].dwPID == newDebugger.GetCurrentPID())
-			hProcess = newDebugger.PIDs[i].hProc;
-	}
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 		return;
@@ -3131,7 +3151,7 @@ void LoadStackView(DWORD64 dwESP)
 	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,&dwBytesRead))
 		return;
 
-	sTemp = (PTCHAR)malloc(255);
+	sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 	for(size_t i = 0;i < (dwSize / dwStackSize); i++)
 	{
@@ -3150,17 +3170,21 @@ void LoadStackView(DWORD64 dwESP)
 		SendMessage(hwStackViewLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 		// Value
-		memset(sTemp,0,255);
+		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 #ifdef _AMD64_
-		for(int id = 7;id != -1;id--)
-		{
-			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
-		}
+		BOOL bIsWOW64 = false;
+		IsWow64Process(newDebugger.GetCurrentProcessHandle(),&bIsWOW64);
+
+		if(bIsWOW64)
+			for(int id = 3;id != -1;id--)
+				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
+		else
+			for(int id = 7;id != -1;id--)
+				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
+
 #else
 		for(int id = 3;id != -1;id--)
-		{
 			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
-		}
 #endif
 		lvDETITEM.iSubItem = 1;
 		SendMessage(hwStackViewLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
@@ -3480,7 +3504,7 @@ bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 	{
 		LVITEM lvDETITEM;
 		memset(&lvDETITEM,0,sizeof(lvDETITEM));
-		PTCHAR sTemp = (PTCHAR)malloc(255);
+		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 		// PID
 		wsprintf(sTemp,L"0x%08X",dwHwPID);
@@ -3492,7 +3516,7 @@ bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		SendMessage(hwWndList,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 		// GetWindowName
-		GetWindowText(hWnd,sTemp,255);
+		GetWindowText(hWnd,sTemp,MAX_PATH);
 		lvDETITEM.iSubItem = 1;
 		SendMessage(hwWndList,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
@@ -3507,8 +3531,8 @@ bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		SendMessage(hwWndList,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
 		// GetModuleName
-		memset(sTemp,0,255);
-		GetWindowModuleFileName(hWnd,sTemp,255);
+		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
+		GetWindowModuleFileName(hWnd,sTemp,MAX_PATH);
 		lvDETITEM.iSubItem = 4;
 		SendMessage(hwWndList,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
@@ -3523,7 +3547,7 @@ bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 
 bool InsertHandleIntoLC(HWND hwLC,DWORD dwPID,DWORD dwHandleID,PTCHAR sType,PTCHAR sName)
 {
-	PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
+	PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 	int itemIndex = ListView_GetItemCount(hwLC);
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
@@ -3611,7 +3635,7 @@ BOOL CALLBACK EnumResNames(HMODULE hModule,LPCTSTR lpszType,LPTSTR lpszName,LONG
 void UpdateStateLable(DWORD dwState)
 {
 	PTCHAR tcStateString = (PTCHAR)malloc(128);
-	memset(tcTempState,0,sizeof(255 * sizeof(TCHAR)));
+	memset(tcTempState,0,sizeof(MAX_PATH * sizeof(TCHAR)));
 
 	switch(dwState)
 	{

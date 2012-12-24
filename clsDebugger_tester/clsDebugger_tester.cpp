@@ -47,10 +47,10 @@ DWORD TheDebuggingFunction()
 	*/
 
 #ifdef _AMD64_
-	clsDebugger tempDebugger(L"C:\\DropBox\\Projects\\clsDebugger\\x64\\Debug\\Debugme.exe");
-	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
+	//clsDebugger tempDebugger(L"C:\\DropBox\\Projects\\clsDebugger\\x64\\Debug\\Debugme.exe");
+	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #else
-	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
+	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #endif
 	//clsDebugger tempDebugger; // needs manual set of target with .SetTarget(<path>)
 
@@ -65,13 +65,13 @@ DWORD TheDebuggingFunction()
 	*/
 	tempDebugger.dbgSettings.dwBreakOnEPMode = 3;
 
-	/* DefaultExceptionMode
-	|	0 = Break and wait for User
+	/* DefaultExceptionMode *becarefull this can fuckup the programm*
+	|	0 = Break and wait for User *DEFAULT*
 	|	1 = pass to App/Os
 	|	2 = Ignore
 	|	3 = automatic workaround ( jumping to the return addr which is on the stack )
 	*/
-	tempDebugger.dbgSettings.dwDefaultExceptionMode = 1;
+	tempDebugger.dbgSettings.dwDefaultExceptionMode = 0;
 
 	/* Enable auto load of symbols
 	| Note: Disable may cause missing function names in callback/exception info but target will load faster
