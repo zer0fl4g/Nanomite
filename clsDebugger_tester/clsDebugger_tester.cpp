@@ -50,7 +50,7 @@ DWORD TheDebuggingFunction()
 	clsDebugger tempDebugger(L"C:\\DropBox\\Projects\\clsDebugger\\x64\\Debug\\Debugme.exe");
 	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #else
-	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
+	//clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #endif
 	//clsDebugger tempDebugger; // needs manual set of target with .SetTarget(<path>)
 
@@ -64,6 +64,14 @@ DWORD TheDebuggingFunction()
 	| 3 = Direct run
 	*/
 	tempDebugger.dbgSettings.dwBreakOnEPMode = 3;
+
+	/* DefaultExceptionMode
+	|	0 = Break and wait for User
+	|	1 = pass to App/Os
+	|	2 = Ignore
+	|	3 = automatic workaround ( jumping to the return addr which is on the stack )
+	*/
+	tempDebugger.dbgSettings.dwDefaultExceptionMode = 1;
 
 	/* Enable auto load of symbols
 	| Note: Disable may cause missing function names in callback/exception info but target will load faster

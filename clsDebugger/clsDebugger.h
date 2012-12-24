@@ -42,6 +42,7 @@ class clsDebugger
 		bool bAutoLoadSymbols;
 		DWORD dwSuspendType;
 		DWORD dwBreakOnEPMode;
+		DWORD dwDefaultExceptionMode;
 	};
 
 	struct DLLStruct

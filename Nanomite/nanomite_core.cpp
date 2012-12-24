@@ -253,6 +253,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 			ReadFromSettingsFile();
 			CleanUpGUI();
 			MenuLoadNewFile();
+			UpdateStateLable(0x3);
 			return true;
 
 		case ID_DEBUG_SUSPEND:
@@ -667,6 +668,11 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 				}
 				else if((HWND)lParam == GetDlgItem(hDlgMain,ID_SCROLLER2))
 				{
+#ifdef _AMD64_
+					DWORD dwStackSize = 8;
+#else
+					DWORD dwStackSize = 4;
+#endif
 					DWORD64 dwOffset = 0;
 					PTCHAR sTemp = (PTCHAR)malloc(255 * sizeof(TCHAR));
 
@@ -688,7 +694,7 @@ LRESULT CALLBACK MainDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPara
 #else
 						dwOffset = newDebugger.ProcessContext.Esp;
 #endif
-					LoadStackView(dwOffset + (4*12));
+					LoadStackView(dwOffset + (dwStackSize * 12));
 					free(sTemp);
 					break;
 				}
@@ -712,19 +718,20 @@ LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK1),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.bDebugChilds,NULL);
 			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK2),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.bAutoLoadSymbols,NULL);
 			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK8),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwSuspendType,NULL);
+			SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK9),BM_SETCHECK,(WPARAM)newDebugger.dbgSettings.dwDefaultExceptionMode,NULL);
 
 			switch (newDebugger.dbgSettings.dwBreakOnEPMode)
 			{
-			case 0:
-				SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO1),BM_SETCHECK,(WPARAM)BST_CHECKED,NULL);
-				break;
-			case 1:
-				SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO2),BM_SETCHECK,(WPARAM)BST_CHECKED,NULL);
-				break;
-			case 2:
+			case 0: // 0 = Default EP
 				SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO3),BM_SETCHECK,(WPARAM)BST_CHECKED,NULL);
 				break;
-			case 3:
+			case 1: // 1 = Kernel EP
+				SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO1),BM_SETCHECK,(WPARAM)BST_CHECKED,NULL);
+				break;
+			case 2: // 2 = TLS Callback
+				SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO2),BM_SETCHECK,(WPARAM)BST_CHECKED,NULL);
+				break;
+			case 3: // 3= Direct Run
 				SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO4),BM_SETCHECK,(WPARAM)BST_CHECKED,NULL);
 				break;
 			}
@@ -754,6 +761,7 @@ LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			newDebugger.dbgSettings.bDebugChilds = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK1),BM_GETCHECK,NULL,NULL);
 			newDebugger.dbgSettings.bAutoLoadSymbols = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK2),BM_GETCHECK,NULL,NULL);
 			newDebugger.dbgSettings.dwSuspendType = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK8),BM_GETCHECK,NULL,NULL);
+			newDebugger.dbgSettings.dwDefaultExceptionMode = SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK9),BM_GETCHECK,NULL,NULL);
 
 			newDebugger.CustomExceptionRemoveAll();
 			//newDebugger.CustomExceptionAdd(EXCEPTION_BREAKPOINT,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK3),BM_GETCHECK,NULL,NULL),NULL);
@@ -764,13 +772,13 @@ LRESULT CALLBACK OptionDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPa
 			newDebugger.CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,SendMessage(GetDlgItem(hDlgSettings,IDC_CHECK6),BM_GETCHECK,NULL,NULL),NULL);
 
 			if(SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO1),BM_GETCHECK,NULL,NULL) == BST_CHECKED)
-				newDebugger.dbgSettings.dwBreakOnEPMode = 1;
-			if(SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO2),BM_GETCHECK,NULL,NULL) == BST_CHECKED)
-				newDebugger.dbgSettings.dwBreakOnEPMode = 0;
+				newDebugger.dbgSettings.dwBreakOnEPMode = 1; // system ep
 			if(SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO3),BM_GETCHECK,NULL,NULL) == BST_CHECKED)
-				newDebugger.dbgSettings.dwBreakOnEPMode = 2;
+				newDebugger.dbgSettings.dwBreakOnEPMode = 0; // def ep
+			if(SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO2),BM_GETCHECK,NULL,NULL) == BST_CHECKED)
+				newDebugger.dbgSettings.dwBreakOnEPMode = 2; // tls
 			if(SendMessage(GetDlgItem(hDlgSettings,IDC_RADIO4),BM_GETCHECK,NULL,NULL) == BST_CHECKED)
-				newDebugger.dbgSettings.dwBreakOnEPMode = 3;
+				newDebugger.dbgSettings.dwBreakOnEPMode = 3; // direct
 
 
 			if(WriteToSettingsFile())
@@ -2575,6 +2583,9 @@ bool WriteToSettingsFile()
 		}
 	}
 
+	wsprintf(cTemp,L"%s=%d\n",L"dwDefaultExceptionMode",newDebugger.dbgSettings.dwDefaultExceptionMode);
+	outfile.write(cTemp,wcslen(cTemp));
+
 	wsprintf(cTemp,L"%s=%d\n",L"BreakOnEPMode",newDebugger.dbgSettings.dwBreakOnEPMode);
 	outfile.write(cTemp,wcslen(cTemp));
 
@@ -2626,6 +2637,8 @@ bool ReadFromSettingsFile()
 			newDebugger.CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"BreakOnEPMode")
 			newDebugger.dbgSettings.dwBreakOnEPMode = _wtoi(sSettingLine[1].c_str());
+		else if(sSettingLine[0] == L"dwDefaultExceptionMode")
+			newDebugger.dbgSettings.dwDefaultExceptionMode = _wtoi(sSettingLine[1].c_str());
 		else if(sSettingLine[0] == L"SUSPENDTYPE")
 			newDebugger.dbgSettings.dwSuspendType = _wtoi(sSettingLine[1].c_str());
 	}
@@ -3082,9 +3095,14 @@ void LoadStackView(DWORD64 dwESP)
 {
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwSize = 12*4;
-	DWORD64	dwStartOffset = dwESP - 4*6,
-		dwEndOffset = dwESP + 4*6;
+#ifdef _AMD64_
+		dwStackSize = 8,
+#else
+		dwStackSize = 4,
+#endif
+		dwSize = 12 * dwStackSize;
+	DWORD64	dwStartOffset = dwESP - dwStackSize * 6,
+		dwEndOffset = dwESP + dwStackSize * 6;
 	bool bCheckVar = false;
 	SIZE_T dwBytesRead = NULL;
 	LPBYTE bBuffer;
@@ -3115,7 +3133,7 @@ void LoadStackView(DWORD64 dwESP)
 
 	sTemp = (PTCHAR)malloc(255);
 
-	for(size_t i = 0;i < (dwSize / 4); i++)
+	for(size_t i = 0;i < (dwSize / dwStackSize); i++)
 	{
 		LVITEM lvDETITEM;
 		memset(&lvDETITEM,0,sizeof(lvDETITEM));
@@ -3123,7 +3141,7 @@ void LoadStackView(DWORD64 dwESP)
 		int itemIndex = SendMessage(hwStackViewLC,LVM_GETITEMCOUNT,0,0);
 
 		// Current Offset
-		wsprintf(sTemp,L"0x%016I64X",(dwStartOffset + i * 4));
+		wsprintf(sTemp,L"0x%016I64X",(dwStartOffset + i * dwStackSize));
 		lvDETITEM.mask = LVIF_TEXT;
 		lvDETITEM.cchTextMax = 255;
 		lvDETITEM.iItem = itemIndex;
@@ -3133,10 +3151,17 @@ void LoadStackView(DWORD64 dwESP)
 
 		// Value
 		memset(sTemp,0,255);
+#ifdef _AMD64_
+		for(int id = 7;id != -1;id--)
+		{
+			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
+		}
+#else
 		for(int id = 3;id != -1;id--)
 		{
-			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * 4 + id)));
+			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
 		}
+#endif
 		lvDETITEM.iSubItem = 1;
 		SendMessage(hwStackViewLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 

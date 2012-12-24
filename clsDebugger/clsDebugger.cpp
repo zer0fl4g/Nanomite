@@ -222,6 +222,7 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD64 dwEP,DWORD dwE
 		newPID.bKernelBP = false;
 		newPID.bSymLoad = false;
 		newPID.bRunning = true;
+		newPID.bTrapFlag = false;
 		newPID.dwBPRestoreFlag = NULL;
 		PIDs.push_back(newPID);
 	}
@@ -654,7 +655,7 @@ void clsDebugger::DebuggingLoop()
 
 				switch (exInfo.ExceptionRecord.ExceptionCode)
 				{
-				//case 0x4000001f: 
+				case 0x4000001f: 
 				//	// Breakpoint in x86 Process which got executed in a x64 environment
 				//	// We return unhandled and the kernel dispatches the exception as known EXCEPTION_BREAKPOINT
 				//	dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
@@ -727,6 +728,7 @@ void clsDebugger::DebuggingLoop()
 						}
 						break;
 					}
+				case 0x4000001E:
 				case EXCEPTION_SINGLE_STEP:
 					{
 						bIsBP = CheckIfExceptionIsBP((DWORD64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,true);
@@ -757,6 +759,7 @@ void clsDebugger::DebuggingLoop()
 										PBLogInfo();
 									}
 								}
+								PIDs[iPID].bTrapFlag = false;
 								PIDs[iPID].dwBPRestoreFlag = NULL;
 							}
 							else if(PIDs[iPID].dwBPRestoreFlag == 0x4) // Restore MemBP
@@ -769,6 +772,7 @@ void clsDebugger::DebuggingLoop()
 										wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwHandle);
 									MemoryBPs[i].bRestoreBP = false;
 								}
+								PIDs[iPID].bTrapFlag = false;
 								PIDs[iPID].dwBPRestoreFlag = NULL;
 							}
 							else if(PIDs[iPID].dwBPRestoreFlag == 0x8) // Restore HwBp
@@ -875,7 +879,7 @@ void clsDebugger::DebuggingLoop()
 				}
 
 				if(!bExceptionHandler && !bIsBP && !bIsEP && !bIsKernelBP)
-					dwContinueStatus = CallBreakDebugger(&debug_event,0);
+					dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwDefaultExceptionMode);
 			}			
 			break;
 		}
