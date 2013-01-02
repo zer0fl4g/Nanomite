@@ -90,7 +90,7 @@ DWORD TheDebuggingFunction()
 	tempDebugger.dwOnCallStack = &OnCallStack;
 	tempDebugger.dwOnLog = &OnLog; 
 	
-	/* Set manual BPs
+	/* Set BPs
 	|
 	| dwType:
 	|		0 = SoftwareBP
@@ -115,7 +115,7 @@ DWORD TheDebuggingFunction()
 	|
 	| dwKeep: set true if the BP should be placed again after one hit
 	|
-	| Notes: - For HardwareBPs you will need admin rights, else they will not work properly...
+	| Notes: - For HardwareBPs you will need admin rights, else they will not work...
 	|
 	*/
 	tempDebugger.AddBreakpointToList(0,NULL,-1,(DWORD64)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);

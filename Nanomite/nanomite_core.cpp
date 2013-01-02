@@ -2382,7 +2382,7 @@ int OnDbgString(wstring sMessage,DWORD dwPID)
 {
 	HWND hwDebugStringLC = GetDlgItem(hDlgDbgStringInfo,IDC_DBGSTR);
 	int itemIndex = 0;
-	PTCHAR sTemp = (PTCHAR)malloc(sizeof(TCHAR) * wcslen(sMessage.c_str()));
+	PTCHAR sTemp = (PTCHAR)malloc((wcslen(sMessage.c_str()) + 20) * sizeof(TCHAR));
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
 
@@ -2391,15 +2391,14 @@ int OnDbgString(wstring sMessage,DWORD dwPID)
 	// PID
 	wsprintf(sTemp,L"0x%08X",dwPID);
 	lvDETITEM.mask = LVIF_TEXT;
-	lvDETITEM.cchTextMax = 256;
+	lvDETITEM.cchTextMax = wcslen(sMessage.c_str()) + 20;
 	lvDETITEM.iItem = itemIndex;
 	lvDETITEM.iSubItem = 0;
 	lvDETITEM.pszText = sTemp;
 	SendMessage(hwDebugStringLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 	// DebugString
-	memcpy(sTemp,sMessage.c_str(),wcslen(sMessage.c_str()) * sizeof(TCHAR));
-	//wsprintf(sTemp,L"%s",sMessage.c_str());
+	memcpy(sTemp,sMessage.c_str(),(wcslen(sMessage.c_str()) + 20) * sizeof(TCHAR));
 	lvDETITEM.iSubItem = 1;
 	SendMessage(hwDebugStringLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 
@@ -2411,24 +2410,25 @@ int OnLog(tm timeInfo,wstring sLog)
 {
 	HWND hwLogLC = GetDlgItem(hDlgMain,IDC_LOG);
 	int itemIndex = SendMessage(hwLogLC,LVM_GETITEMCOUNT,0,0);
-	PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	PTCHAR sTemp = (PTCHAR)malloc((wcslen(sLog.c_str()) + 20) * sizeof(TCHAR));
 	LVITEM lvDETITEM;
 	memset(&lvDETITEM,0,sizeof(lvDETITEM));
 	
 	// time stamp
 	wsprintf(sTemp,L"[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec);
 	lvDETITEM.mask = LVIF_TEXT;
-	lvDETITEM.cchTextMax = 256;
+	lvDETITEM.cchTextMax = wcslen(sLog.c_str()) + 20;
 	lvDETITEM.iItem = itemIndex;
 	lvDETITEM.iSubItem = 0;
 	lvDETITEM.pszText = sTemp;
 	SendMessage(hwLogLC,LVM_INSERTITEM,0,(LPARAM)&lvDETITEM);
 
 	// DebugString
-	wsprintf(sTemp,L"%s",sLog.c_str());
+	memcpy(sTemp,sLog.c_str(),(wcslen(sLog.c_str()) + 20) * sizeof(TCHAR));
 	lvDETITEM.iSubItem = 1;
 	SendMessage(hwLogLC,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 	SendMessage(hwLogLC,WM_VSCROLL,SB_BOTTOM,NULL);
+
 	free(sTemp);
 	return 0;
 }
@@ -2801,7 +2801,21 @@ void LoadDisAssView(DWORD64 dwEIP)
 						wsprintf(sTemp,L"%s.0x%08X",sModName.c_str(),newDisAss.VirtualAddr);
 				}
 				else
-					wsprintf(sTemp,L"%s",L"");
+				{
+					if(newDisAss.Instruction.Opcode != 0xCC &&
+						newDisAss.Instruction.Opcode != 0x90)
+					{
+						wstring sFuncName,sModName;
+						newDebugger.LoadSymbolForAddr(sFuncName,sModName,newDisAss.VirtualAddr);
+						if(sFuncName.length() > 0)
+							wsprintf(sTemp,L"%s",sFuncName.c_str());
+						else 
+							wsprintf(sTemp,L"%s",L"");
+					}
+					else
+						wsprintf(sTemp,L"%s",L"");
+				}
+					
 				lvDETITEM.iSubItem = 3;
 				SendMessage(hwDisAs,LVM_SETITEM,0,(LPARAM)&lvDETITEM);
 			}
