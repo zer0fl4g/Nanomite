@@ -1602,7 +1602,7 @@ LRESULT CALLBACK AboutDLGProc(HWND hWndDlg, UINT Msg, WPARAM wParam, LPARAM lPar
 		{
 			PTCHAR sTemp = (PTCHAR)malloc(sizeof(TCHAR) * 255);
 
-			wsprintf(sTemp,L"\t\t\tNanomite v 0.1\r\n\r\nCoded by: Zer0Flag\r\n\r\nCoded in: C++\r\n\r\nGreetz: C3lt1c, s0rb, aSh, #coderz.cc and all others ;)\r\n\r\nContact:\tzer0fl4g@googlemail.com\r\n");
+			wsprintf(sTemp,L"\t\t\tNanomite v 0.1\r\n\r\nCoded by: Zer0Flag\r\n\r\nCoded in: C++\r\n\r\nContact:\tzer0fl4g@gmail.com\r\n");
 			Edit_SetText(GetDlgItem(hWndDlg,IDC_ABOUT),sTemp);
 
 			free(sTemp);
