@@ -18,6 +18,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebuggingDriver", "Debuggin
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "clsDebuggerLIB", "clsDebuggerLIB\clsDebuggerLIB.vcxproj", "{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qtNanomite", "qtNanomite\qtNanomite.vcxproj", "{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -71,6 +73,16 @@ Global
 		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Release|Win32.ActiveCfg = Release|Win32
 		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Release|Win32.Build.0 = Release|Win32
 		{9B90205C-FF5B-4D49-B1CA-02CAB5D16C51}.Release|x64.ActiveCfg = Release|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|Win32.ActiveCfg = Debug|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|Win32.Build.0 = Debug|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|x64.ActiveCfg = Debug|x64
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|x64.Build.0 = Debug|x64
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Intel_SSA|Win32.ActiveCfg = Release|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Intel_SSA|Win32.Build.0 = Release|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Intel_SSA|x64.ActiveCfg = Release|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Release|Win32.ActiveCfg = Release|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Release|Win32.Build.0 = Release|Win32
+		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Release|x64.ActiveCfg = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

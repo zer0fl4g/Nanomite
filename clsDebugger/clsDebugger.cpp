@@ -455,7 +455,7 @@ bool clsDebugger::StartDebugging()
 	return true;
 }
 
-unsigned clsDebugger::DebuggingEntry(LPVOID pThis)
+unsigned __stdcall clsDebugger::DebuggingEntry(LPVOID pThis)
 {
 	clsDebugger* pThat = (clsDebugger*)pThis;
 

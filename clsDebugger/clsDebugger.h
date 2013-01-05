@@ -186,7 +186,7 @@ private:
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
 	
-	static unsigned DebuggingEntry(LPVOID pThis);
+	static unsigned __stdcall DebuggingEntry(LPVOID pThis);
 
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
 	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD64 dwEP,DWORD dwExitCode,HANDLE hProc);
