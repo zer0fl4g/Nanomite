@@ -1,0 +1,248 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>qtDLGDetailInfoClass</class>
+ <widget class="QWidget" name="qtDLGDetailInfoClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>799</width>
+    <height>610</height>
+   </rect>
+  </property>
+  <property name="sizePolicy">
+   <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+    <horstretch>0</horstretch>
+    <verstretch>0</verstretch>
+   </sizepolicy>
+  </property>
+  <property name="windowTitle">
+   <string>[ Nanomite ] - Detail Information - Processes / Threads / Exceptions / Modules</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/qtDLGNanomite/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/IDI_MAIN.ico</iconset>
+  </property>
+  <widget class="QTableWidget" name="tblPIDs">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>800</width>
+     <height>110</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Lucida Console</family>
+    </font>
+   </property>
+   <attribute name="horizontalHeaderMinimumSectionSize">
+    <number>15</number>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>PID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>EntryPoint</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>ExitCode</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>FilePath</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="tblTIDs">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>110</y>
+     <width>800</width>
+     <height>150</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Lucida Console</family>
+    </font>
+   </property>
+   <attribute name="horizontalHeaderMinimumSectionSize">
+    <number>15</number>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>PID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>TID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>EntryPoint</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>ExitCode</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>State</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="tblExceptions">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>260</y>
+     <width>800</width>
+     <height>150</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Lucida Console</family>
+    </font>
+   </property>
+   <attribute name="horizontalHeaderMinimumSectionSize">
+    <number>15</number>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Offset</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Exc. Code</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>PID / TID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Module.Function</string>
+    </property>
+   </column>
+  </widget>
+  <widget class="QTableWidget" name="tblModules">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>410</y>
+     <width>800</width>
+     <height>200</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+     <horstretch>0</horstretch>
+     <verstretch>0</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="font">
+    <font>
+     <family>Lucida Console</family>
+    </font>
+   </property>
+   <attribute name="horizontalHeaderMinimumSectionSize">
+    <number>15</number>
+   </attribute>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>PID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>EntryPoint</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>State</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Path</string>
+    </property>
+   </column>
+  </widget>
+ </widget>
+ <resources>
+  <include location="qtDLGNanomite.qrc"/>
+ </resources>
+ <connections/>
+</ui>

@@ -1,0 +1,83 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>qtDLGMemoryViewClass</class>
+ <widget class="QWidget" name="qtDLGMemoryViewClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>861</width>
+    <height>541</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>[ Nanomite ] - Memory View</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/qtDLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/Icons/IDI_MAIN.ico</iconset>
+  </property>
+  <widget class="QTableWidget" name="tblMemoryView">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>861</width>
+     <height>541</height>
+    </rect>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <attribute name="verticalHeaderMinimumSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>PID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Base Address</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Size</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Module</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Type</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Access</string>
+    </property>
+   </column>
+  </widget>
+ </widget>
+ <resources>
+  <include location="qtDLGNanomite.qrc"/>
+ </resources>
+ <connections/>
+</ui>

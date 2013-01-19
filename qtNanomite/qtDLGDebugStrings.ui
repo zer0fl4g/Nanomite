@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>qtDLGDebugStringsClass</class>
+ <widget class="QWidget" name="qtDLGDebugStringsClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>627</width>
+    <height>317</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>[ Nanomite ] - Debug Strings</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/qtDLGNanomite/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/IDI_MAIN.ico</iconset>
+  </property>
+  <widget class="QTableWidget" name="tblDebugStrings">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>629</width>
+     <height>319</height>
+    </rect>
+   </property>
+   <property name="sizePolicy">
+    <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+     <horstretch>1</horstretch>
+     <verstretch>1</verstretch>
+    </sizepolicy>
+   </property>
+   <property name="layoutDirection">
+    <enum>Qt::LeftToRight</enum>
+   </property>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>PID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Debug String</string>
+    </property>
+   </column>
+  </widget>
+ </widget>
+ <resources>
+  <include location="qtDLGNanomite.qrc"/>
+ </resources>
+ <connections/>
+</ui>

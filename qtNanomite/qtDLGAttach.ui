@@ -1,0 +1,74 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>qtDLGAttachClass</class>
+ <widget class="QDialog" name="qtDLGAttachClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>471</width>
+    <height>468</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>[ Nanomite ] - AttachTo</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/qtDLGNanomite/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/IDI_MAIN.ico</iconset>
+  </property>
+  <widget class="QTableWidget" name="tblProcList">
+   <property name="geometry">
+    <rect>
+     <x>10</x>
+     <y>10</y>
+     <width>450</width>
+     <height>450</height>
+    </rect>
+   </property>
+   <property name="editTriggers">
+    <set>QAbstractItemView::NoEditTriggers</set>
+   </property>
+   <property name="selectionMode">
+    <enum>QAbstractItemView::ExtendedSelection</enum>
+   </property>
+   <property name="selectionBehavior">
+    <enum>QAbstractItemView::SelectRows</enum>
+   </property>
+   <property name="sortingEnabled">
+    <bool>true</bool>
+   </property>
+   <attribute name="horizontalHeaderStretchLastSection">
+    <bool>true</bool>
+   </attribute>
+   <attribute name="verticalHeaderVisible">
+    <bool>false</bool>
+   </attribute>
+   <attribute name="verticalHeaderDefaultSectionSize">
+    <number>15</number>
+   </attribute>
+   <attribute name="verticalHeaderMinimumSectionSize">
+    <number>15</number>
+   </attribute>
+   <column>
+    <property name="text">
+     <string>Process Name</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>PID</string>
+    </property>
+   </column>
+   <column>
+    <property name="text">
+     <string>Path</string>
+    </property>
+   </column>
+  </widget>
+ </widget>
+ <resources>
+  <include location="qtDLGNanomite.qrc"/>
+ </resources>
+ <connections/>
+</ui>

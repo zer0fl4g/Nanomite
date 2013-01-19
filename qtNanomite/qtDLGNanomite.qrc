@@ -1,0 +1,20 @@
+<RCC>
+  <qresource prefix="qtDLGNanomite">
+    <file>../Icons/450x150.bmp</file>
+    <file>../Icons/ID_BPManager.ico</file>
+    <file>../Icons/ID_Handles.ico</file>
+    <file>../Icons/ID_Heap.ico</file>
+    <file>../Icons/ID_Memory.ico</file>
+    <file>../Icons/ID_Strings.ico</file>
+    <file>../Icons/ID_showInfo.ico</file>
+    <file>../Icons/ID_DebugString.ico</file>
+    <file>../Icons/ID_Windows.ico</file>
+    <file>../Icons/IDI_MAIN.ico</file>
+    <file>../Icons/IDI_RESTART.ico</file>
+    <file>../Icons/IDI_START.ico</file>
+    <file>../Icons/IDI_STEPIN.ico</file>
+    <file>../Icons/IDI_STEPOVER.ico</file>
+    <file>../Icons/IDI_STOP.ico</file>
+    <file>../Icons/IDI_SUSPEND.ico</file>
+  </qresource>
+</RCC>

@@ -50,7 +50,7 @@ DWORD TheDebuggingFunction()
 	//clsDebugger tempDebugger(L"C:\\DropBox\\Projects\\clsDebugger\\x64\\Debug\\Debugme.exe");
 	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
 #else
-	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Debug\\Debugme.exe");
+	clsDebugger tempDebugger(L"C:\\Dropbox\\Projects\\clsDebugger\\Build\\Win32\\Debug\\Debugme.exe");
 #endif
 	//clsDebugger tempDebugger; // needs manual set of target with .SetTarget(<path>)
 
@@ -119,7 +119,7 @@ DWORD TheDebuggingFunction()
 	|
 	*/
 	tempDebugger.AddBreakpointToList(0,NULL,-1,(DWORD64)GetProcAddress(LoadLibrary(L"Kernel32.dll"),"OutputDebugStringW"),0,true);
-	tempDebugger.AddBreakpointToList(0,DR_EXECUTE,-1,(DWORD64)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
+	tempDebugger.AddBreakpointToList(2,DR_EXECUTE,-1,(DWORD64)GetProcAddress(LoadLibrary(L"User32.dll"),"MessageBoxW"),0,true);
 
 	/* Add a Exception Handler / Action
 	|
