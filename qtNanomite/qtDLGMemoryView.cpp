@@ -1,5 +1,6 @@
 #include "qtDLGMemoryView.h"
 #include "qtDLGNanomite.h"
+#include "qtDLGHexView.h"
 
 #include <Psapi.h>
 #include <TlHelp32.h>
@@ -9,8 +10,11 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
+	this->setLayout(verticalLayout);
+
 	_iPID = iPID;
-	this->setFixedSize(this->width(),this->height());
+
+	connect(tblMemoryView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 
 	// Init List
 	tblMemoryView->horizontalHeader()->resizeSection(0,75);
@@ -138,4 +142,29 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 qtDLGMemoryView::~qtDLGMemoryView()
 {
 
+}
+
+void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
+{
+	QAction *qAction;
+	QMenu menu;
+
+	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
+
+	qAction = new QAction("Send Offset To HexView",this);
+	menu.addAction(qAction);
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGMemoryView::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Send Offset To HexView") == 0)
+	{
+		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16),
+			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
+			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
+		newView->show();
+	}
 }

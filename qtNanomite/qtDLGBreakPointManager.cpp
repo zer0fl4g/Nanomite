@@ -1,6 +1,10 @@
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGNanomite.h"
 
+#include <string>
+
+using namespace std;
+
 qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
@@ -30,17 +34,22 @@ void qtDLGBreakPointManager::OnAddUpdate()
 
 	if(leOffset->text().contains("::"))
 	{
-		// Resolve API
-		DWORD64 dwOffset = (DWORD64)GetProcAddress(GetModuleHandle(leOffset->text().split("::")[0].toStdWString().c_str()),
-			leOffset->text().split("::")[1].toStdString().c_str());
+		QStringList SplitAPIList = leOffset->text().split("::");
 
-		if(dwOffset <= 0)
+		if(SplitAPIList.count() >= 2)
 		{
-			MessageBoxW(NULL,L"Please use a correct API Name!",L"Nanomite - Breakpoint Manager",MB_OK);
-			return;
+	
+			DWORD64 dwOffset = (DWORD64)GetProcAddress(GetModuleHandleA(SplitAPIList[0].toUtf8().data()),
+				SplitAPIList[1].toUtf8().data());
+
+			if(dwOffset <= 0)
+			{
+				MessageBoxW(NULL,L"Please use a correct API Name!",L"Nanomite - Breakpoint Manager",MB_OK);
+				return;
+			}
+			else
+				leOffset->setText(QString("%1").arg(dwOffset,16,16,QChar('0')));
 		}
-		else
-			leOffset->setText(QString().sprintf("%016X",dwOffset));
 	}
 
 	for(int i = 0; i < tblBPs->rowCount(); i++)

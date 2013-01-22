@@ -1,5 +1,6 @@
 #include "qtDLGHeapView.h"
 #include "qtDLGNanomite.h"
+#include "qtDLGHexView.h"
 
 #include <TlHelp32.h>
 
@@ -8,9 +9,12 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
+	this->setLayout(verticalLayout);
+
 	_iPID = iPID;
 
-	this->setFixedSize(this->width(),this->height());
+
+	connect(tblHeapView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
@@ -78,4 +82,30 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 qtDLGHeapView::~qtDLGHeapView()
 {
 
+}
+
+void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
+{
+	QAction *qAction;
+	QMenu menu;
+
+	_iSelectedRow = tblHeapView->indexAt(qPoint).row();
+
+	qAction = new QAction("Send Offset To HexView",this);
+	menu.addAction(qAction);
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGHeapView::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Send Offset To HexView") == 0)
+	{
+		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblHeapView->item(_iSelectedRow,0)->text().toULongLong(0,16),
+			tblHeapView->item(_iSelectedRow,2)->text().toULongLong(0,16),
+			tblHeapView->item(_iSelectedRow,3)->text().toULongLong(0,16));
+		newView->show();
+	}
 }

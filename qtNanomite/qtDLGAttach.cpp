@@ -8,8 +8,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
 {
 	setupUi(this);
-	this->setAttribute(Qt::WA_DeleteOnClose,true);
-	this->setFixedSize(this->width(),this->height());
+	this->setLayout(verticalLayout);
 
 	tblProcList->horizontalHeader()->resizeSection(0,135);
 	tblProcList->horizontalHeader()->resizeSection(1,50);

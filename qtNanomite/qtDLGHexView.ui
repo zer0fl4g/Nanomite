@@ -1,13 +1,13 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qtDLGAttachClass</class>
- <widget class="QDialog" name="qtDLGAttachClass">
+ <class>qtDLGHexViewClass</class>
+ <widget class="QWidget" name="qtDLGHexViewClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>551</width>
-    <height>510</height>
+    <width>850</width>
+    <height>410</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -17,35 +17,34 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>[ Nanomite ] - AttachTo</string>
+   <string>[ Nanomite ] - HexDump</string>
   </property>
   <property name="windowIcon">
-   <iconset>
-    <normaloff>:/qtDLGNanomite/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/IDI_MAIN.ico</iconset>
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/qtDLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>551</width>
-     <height>511</height>
+     <width>851</width>
+     <height>411</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QTableWidget" name="tblProcList">
+     <widget class="QTableWidget" name="tblHexView">
+      <property name="font">
+       <font>
+        <family>Lucida Console</family>
+       </font>
+      </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
       </property>
-      <property name="selectionMode">
-       <enum>QAbstractItemView::ExtendedSelection</enum>
-      </property>
       <property name="selectionBehavior">
        <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <property name="sortingEnabled">
-       <bool>true</bool>
       </property>
       <attribute name="horizontalHeaderStretchLastSection">
        <bool>true</bool>
@@ -61,17 +60,22 @@
       </attribute>
       <column>
        <property name="text">
-        <string>Process Name</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
         <string>PID</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>Path</string>
+        <string>Offset</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Data</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Ascii / Unicode</string>
        </property>
       </column>
      </widget>

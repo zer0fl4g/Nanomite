@@ -12,7 +12,12 @@ public:
 	~qtDLGHeapView();
 
 private:
-	int _iPID;
+	int _iPID,
+		_iSelectedRow;
+
+	private slots:
+		void MenuCallback(QAction*);
+		void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
 #endif

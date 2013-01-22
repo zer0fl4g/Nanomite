@@ -7,9 +7,9 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
+	this->setLayout(verticalLayout);
 
 	_iPID = iPID;
-	this->setFixedSize(this->width(),this->height());
 
 	// Init List
 	tblHandleView->horizontalHeader()->resizeSection(0,75);

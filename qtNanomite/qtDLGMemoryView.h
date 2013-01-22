@@ -12,7 +12,12 @@ public:
 	~qtDLGMemoryView();
 
 private:
-	qint32 _iPID;
+	qint32	_iPID,
+			_iSelectedRow;
+
+	private slots:
+		void MenuCallback(QAction*);
+		void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
 #endif

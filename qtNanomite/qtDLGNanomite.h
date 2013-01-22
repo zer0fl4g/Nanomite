@@ -5,6 +5,7 @@
 #include "qtDLGDebugStrings.h"
 #include "qtDLGBreakPointManager.h"
 
+#include "clsDisassambler.h"
 #include "clsDebugger/clsDebugger.h"
 
 #include "ui_qtDLGNanomite.h"
@@ -18,10 +19,19 @@ class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
 	Q_OBJECT
 
 public:
+	struct DisAsDataRow
+	{
+		QString Offset;
+		QString OpCodes;
+		QString ASM;
+		QString Comment;
+	};
+
 	static qtDLGNanomite* GetInstance();
 
 	long lExceptionCount;
 	clsDebugger *coreDebugger;
+	clsDisassambler *coreDisAs;
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;
 	qtDLGBreakPointManager *dlgBPManager;
@@ -52,6 +62,7 @@ private slots:
 	void action_WindowShowHandles();
 	void action_WindowShowWindows();
 
+	void OnDisplayDisassambly(DWORD64 dwEIP);
 	void OnDisAsScroll(int iValue);
 	void OnStackScroll(int iValue);
 	void OnDebuggerBreak();
@@ -63,14 +74,13 @@ private:
 	DWORD _iMenuPID;
 
 	static qtDLGNanomite *qtDLGMyWindow;
-
+	
 	void InitListSizes();
 	void CleanGUI();
 	void GenerateMenu();
 	void UpdateStateBar(DWORD dwAction);
 	void LoadRegView();
 	void LoadStackView(DWORD64 dwESP, DWORD dwStackSize);	
-	void LoadDisAssView(DWORD64 dwEIP);
 };
 
 #endif // QTDLGNANOMITE_H

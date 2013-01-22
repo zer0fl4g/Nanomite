@@ -1,5 +1,6 @@
 #include "clsDebugger.h"
 #include "dbghelp.h"
+#include "clsAPIImport.h"
 
 #include <process.h>
 #include <Psapi.h>
@@ -915,15 +916,17 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 
 #ifdef _AMD64_
 			BOOL bIsWOW64 = false;
-			IsWow64Process(_hCurProc,&bIsWOW64);
+
+			if(clsAPIImport::pIsWow64Process)
+				clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
 			if(bIsWOW64)
 			{
 				wowProcessContext.ContextFlags = WOW64_CONTEXT_ALL;
-				Wow64GetThreadContext(hThread,&wowProcessContext);
+				clsAPIImport::pWow64GetThreadContext(hThread,&wowProcessContext);
 
 				emit OnDebuggerBreak();
 				WaitForSingleObject(_hDbgEvent,INFINITE);
-				Wow64SetThreadContext(hThread,&wowProcessContext);
+				clsAPIImport::pWow64SetThreadContext(hThread,&wowProcessContext);
 			}
 			else
 			{
@@ -1191,20 +1194,16 @@ bool clsDebugger::ShowCallStack()
 	BOOL bIsWOW64 = false;
 	HANDLE hProcess = NULL;
 
-	for(size_t i = 0; i < PIDs.size(); i++)
-	{
-		if(PIDs[i].dwPID == _dwCurPID)
-			hProcess = PIDs[i].hProc;
-	}
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
 
-	IsWow64Process(hProcess,&bIsWOW64);
 	if(bIsWOW64)
 	{
 		dwMaschineMode = IMAGE_FILE_MACHINE_I386;
 		WOW64_CONTEXT wowContext;
 		pContext = &wowContext;
 		wowContext.ContextFlags = WOW64_CONTEXT_ALL;
-		Wow64GetThreadContext(hThread,&wowContext);
+		clsAPIImport::pWow64GetThreadContext(hThread,&wowContext);
 
 		stackFr.AddrPC.Mode = AddrModeFlat;
 		stackFr.AddrFrame.Mode = AddrModeFlat;
@@ -1807,18 +1806,14 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 	BOOL bIsWOW64 = false;
 	HANDLE hProcess = NULL;
 
-	for(size_t i = 0; i < PIDs.size(); i++)
-	{
-		if(PIDs[i].dwPID == dwPID)
-			hProcess = PIDs[i].hProc;
-	}
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
 
-	IsWow64Process(hProcess,&bIsWOW64);
 	if(bIsWOW64)
 	{
 		WOW64_CONTEXT wowcTT;
 		wowcTT.ContextFlags = WOW64_CONTEXT_ALL;
-		Wow64GetThreadContext(hThread,&wowcTT);
+		clsAPIImport::pWow64GetThreadContext(hThread,&wowcTT);
 
 		if(bDecIP)
 			wowcTT.Eip--;
@@ -1826,7 +1821,7 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 		if(bSetTrapFlag)
 			wowcTT.EFlags |= 0x100;
 
-		Wow64SetThreadContext(hThread,&wowcTT);
+		clsAPIImport::pWow64SetThreadContext(hThread,&wowcTT);
 	}
 	else
 	{

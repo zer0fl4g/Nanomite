@@ -4,7 +4,7 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
 	setupUi(this);
-	this->setFixedSize(this->width(),this->height());
+	this->setLayout(verticalLayout);
 }
 
 qtDLGDetailInfo::~qtDLGDetailInfo()

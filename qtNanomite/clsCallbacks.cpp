@@ -32,13 +32,13 @@ int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,
 		myMainWindow->dlgDetInfo->tblTIDs->insertRow(myMainWindow->dlgDetInfo->tblTIDs->rowCount());
 		
 		myMainWindow->dlgDetInfo->tblTIDs->setItem(myMainWindow->dlgDetInfo->tblTIDs->rowCount() - 1,0,
-			new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
 		
 		myMainWindow->dlgDetInfo->tblTIDs->setItem(myMainWindow->dlgDetInfo->tblTIDs->rowCount() - 1,1,
-			new QTableWidgetItem(QString().sprintf("%08X",dwTID)));
+			new QTableWidgetItem(QString("%1").arg(dwTID,8,16,QChar('0'))));
 	
 		myMainWindow->dlgDetInfo->tblTIDs->setItem(myMainWindow->dlgDetInfo->tblTIDs->rowCount() - 1,2,
-			new QTableWidgetItem(QString().sprintf("%016X",dwEP)));
+			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
 
 		myMainWindow->dlgDetInfo->tblTIDs->setItem(myMainWindow->dlgDetInfo->tblTIDs->rowCount() - 1,4,
 			new QTableWidgetItem("Running"));
@@ -52,7 +52,7 @@ int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,
 				QString().compare(myMainWindow->dlgDetInfo->tblTIDs->item(i,1)->text(),QString().sprintf("%08X",dwTID)) == 0)
 			{
 				myMainWindow->dlgDetInfo->tblTIDs->item(i,4)->setText("Terminated");
-				myMainWindow->dlgDetInfo->tblTIDs->item(i,2)->setText(QString().sprintf("%08X",dwExitCode));
+				myMainWindow->dlgDetInfo->tblTIDs->item(i,2)->setText(QString("%1").arg(dwExitCode,8,16,QChar('0')));
 			}
 	}
 
@@ -68,10 +68,10 @@ int clsCallbacks::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,
 		myMainWindow->dlgDetInfo->tblPIDs->insertRow(myMainWindow->dlgDetInfo->tblPIDs->rowCount());
 		
 		myMainWindow->dlgDetInfo->tblPIDs->setItem(myMainWindow->dlgDetInfo->tblPIDs->rowCount() - 1,0,
-			new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
 		
 		myMainWindow->dlgDetInfo->tblPIDs->setItem(myMainWindow->dlgDetInfo->tblPIDs->rowCount() - 1,1,
-			new QTableWidgetItem(QString().sprintf("%016X",dwEP)));
+			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
 
 		myMainWindow->dlgDetInfo->tblPIDs->setItem(myMainWindow->dlgDetInfo->tblPIDs->rowCount() - 1,3,
 			new QTableWidgetItem(QString::fromStdWString(sFile)));
@@ -82,7 +82,7 @@ int clsCallbacks::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,
 	{
 		for(int i = 0; i < myMainWindow->dlgDetInfo->tblPIDs->rowCount();i++)
 			if(QString().compare(myMainWindow->dlgDetInfo->tblPIDs->item(i,0)->text(),QString().sprintf("%08X",dwPID)) == 0)
-				myMainWindow->dlgDetInfo->tblPIDs->setItem(i,2, new QTableWidgetItem(QString().sprintf("%08X",dwExitCode)));
+				myMainWindow->dlgDetInfo->tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
 	}
 	return 0;
 }
@@ -95,10 +95,10 @@ int clsCallbacks::OnException(wstring sFuncName,wstring sModName,DWORD64 dwOffse
 	myMainWindow->dlgDetInfo->tblExceptions->insertRow(myMainWindow->dlgDetInfo->tblExceptions->rowCount());
 		
 	myMainWindow->dlgDetInfo->tblExceptions->setItem(myMainWindow->dlgDetInfo->tblExceptions->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("%016X",dwOffset)));
+		new QTableWidgetItem(QString("%1").arg(dwOffset,16,16,QChar('0'))));
 		
 	myMainWindow->dlgDetInfo->tblExceptions->setItem(myMainWindow->dlgDetInfo->tblExceptions->rowCount() - 1,1,
-		new QTableWidgetItem(QString().sprintf("%016X",dwExceptionCode)));
+		new QTableWidgetItem(QString("%1").arg(dwExceptionCode,16,16,QChar('0'))));
 
 	myMainWindow->dlgDetInfo->tblExceptions->setItem(myMainWindow->dlgDetInfo->tblExceptions->rowCount() - 1,2,
 		new QTableWidgetItem(QString().sprintf("%08X / %08X",dwPID,dwTID)));
@@ -138,10 +138,10 @@ int clsCallbacks::OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded)
 		myMainWindow->dlgDetInfo->tblModules->insertRow(myMainWindow->dlgDetInfo->tblModules->rowCount());
 		
 		myMainWindow->dlgDetInfo->tblModules->setItem(myMainWindow->dlgDetInfo->tblModules->rowCount() - 1,0,
-			new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
 		
 		myMainWindow->dlgDetInfo->tblModules->setItem(myMainWindow->dlgDetInfo->tblModules->rowCount() - 1,1,
-			new QTableWidgetItem(QString().sprintf("%016X",dwEP)));
+			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
 
 		myMainWindow->dlgDetInfo->tblModules->setItem(myMainWindow->dlgDetInfo->tblModules->rowCount() - 1,2,
 			new QTableWidgetItem("Loaded"));
@@ -154,8 +154,8 @@ int clsCallbacks::OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded)
 	else
 	{
 		for(int i = 0; i < myMainWindow->dlgDetInfo->tblModules->rowCount();i++)
-			if(QString().compare(myMainWindow->dlgDetInfo->tblModules->item(i,0)->text(),QString().sprintf("%08X",dwPID)) == 0 &&
-				QString().compare(myMainWindow->dlgDetInfo->tblModules->item(i,1)->text(),QString().sprintf("%016X",dwEP)) == 0)
+			if(QString().compare(myMainWindow->dlgDetInfo->tblModules->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0 &&
+				QString().compare(myMainWindow->dlgDetInfo->tblModules->item(i,1)->text(),QString("%1").arg(dwEP,16,16,QChar('0'))) == 0)
 				myMainWindow->dlgDetInfo->tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
 	}
 	return 0;
@@ -220,7 +220,7 @@ bool CALLBACK clsCallbacks::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 		// PID
 		qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,0,
-			new QTableWidgetItem(QString().sprintf("%08X",dwHwPID)));
+			new QTableWidgetItem(QString("%1").arg(dwHwPID,8,16,QChar('0'))));
 
 		// GetWindowName
 		GetWindowText(hWnd,sTemp,MAX_PATH);
@@ -233,7 +233,7 @@ bool CALLBACK clsCallbacks::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 
 		// hWnd
 		qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,3,
-			new QTableWidgetItem(QString().sprintf("%08X",hWnd)));
+			new QTableWidgetItem(QString("%1").arg((int)hWnd,8,16,QChar('0'))));
 
 		// GetModuleName
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
