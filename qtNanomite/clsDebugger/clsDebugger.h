@@ -40,7 +40,7 @@ public:
 		PTCHAR sPath;
 		bool bLoaded;
 		DWORD dwPID;
-		DWORD64 dwBaseAdr;
+		quint64 dwBaseAdr;
 	};
 
 	struct ThreadStruct
@@ -48,7 +48,7 @@ public:
 		DWORD dwTID;
 		DWORD dwPID;
 		DWORD dwExitCode;
-		DWORD64 dwEP;
+		quint64 dwEP;
 		bool bSuspended;
 	};
 
@@ -57,7 +57,7 @@ public:
 		DWORD dwPID;
 		DWORD dwExitCode;
 		DWORD dwBPRestoreFlag;
-		DWORD64 dwEP;
+		quint64 dwEP;
 		bool bKernelBP;
 		bool bWOW64KernelBP;
 		bool bRunning;
@@ -71,7 +71,7 @@ public:
 	{
 		bool bRestoreBP;
 		BYTE bOrgByte;
-		DWORD64 dwOffset;
+		quint64 dwOffset;
 		DWORD dwSize;
 		DWORD dwSlot;
 		DWORD dwPID;
@@ -88,7 +88,7 @@ public:
 	{
 		DWORD dwExceptionType;
 		DWORD dwAction;
-		DWORD64 dwHandler;
+		quint64 dwHandler;
 	};
 
 	std::vector<DLLStruct> DLLs;
@@ -116,24 +116,23 @@ public:
 	bool RestartDebugging();
 	bool StartDebugging();
 	bool GetDebuggingState();
-	bool StepOver(DWORD64 dwNewOffset);
+	bool StepOver(quint64 dwNewOffset);
 	bool StepIn();
 	bool ShowCallStack();
 	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
-	bool RemoveBPFromList(DWORD64 dwOffset,DWORD dwType,DWORD dwPID);
+	bool RemoveBPFromList(quint64 dwOffset,DWORD dwType,DWORD dwPID);
 	bool RemoveBPs();
-	bool LoadSymbolForAddr(std::wstring& sFuncName,std::wstring& sModName,DWORD64 dwOffset);
-	bool ReadMemoryFromDebugee(DWORD dwPID,DWORD64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
-	bool WriteMemoryFromDebugee(DWORD dwPID,DWORD64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
+	bool ReadMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
+	bool WriteMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
 
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
-	void AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,DWORD64 dwOffset,DWORD dwSlot,DWORD dwKeep);
+	void AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep);
 	void SetTarget(std::wstring sTarget);
-	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,DWORD64 dwHandler);
+	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,quint64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
 	void CustomExceptionRemoveAll();
 
@@ -145,15 +144,15 @@ signals:
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
 
-	void OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
-	void OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound);
-	void OnException(std::wstring sFuncName,std::wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	void OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
+	void OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
+	void OnException(std::wstring sFuncName,std::wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	void OnDbgString(std::wstring sMessage,DWORD dwPID);
 	void OnLog(tm *timeInfo,std::wstring sLog);
-	void OnDll(std::wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded);
-	void OnCallStack(DWORD64 dwStackAddr,
-						 DWORD64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
-						 DWORD64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
+	void OnDll(std::wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
+	void OnCallStack(quint64 dwStackAddr,
+						 quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
+						 quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
 						 std::wstring sSourceFilePath,int iSourceLineNum);
 
 private:
@@ -178,22 +177,22 @@ private:
 	
 	static unsigned __stdcall DebuggingEntry(LPVOID pThis);
 
-	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
-	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,DWORD64 dwEP,DWORD dwExitCode,HANDLE hProc);
-	bool PBExceptionInfo(DWORD64 dwExceptionOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded);
+	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
+	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwExitCode,HANDLE hProc);
+	bool PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
-	bool wSoftwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
-	bool dSoftwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,BYTE btOrgByte);
-	bool wMemoryBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,DWORD dwKeep);
-	bool dMemoryBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize);
-	bool wHardwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
-	bool dHardwareBP(DWORD dwPID,DWORD64 dwOffset,DWORD dwSlot);
+	bool wSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
+	bool dSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,BYTE btOrgByte);
+	bool wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwKeep);
+	bool dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize);
+	bool wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
+	bool dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot);
 	bool InitBP();
-	bool IsValidFile();
+	bool IsValidFile(DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
-	bool CheckIfExceptionIsBP(DWORD64 dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
+	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
 	bool EnableDebugFlag();
 	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);

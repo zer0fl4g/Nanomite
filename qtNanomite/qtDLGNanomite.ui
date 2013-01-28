@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>1194</width>
-    <height>800</height>
+    <height>826</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -36,9 +36,9 @@
   </property>
   <property name="windowIcon">
    <iconset resource="qtDLGNanomite.qrc">
-    <normaloff>:/qtDLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/Icons/IDI_MAIN.ico</iconset>
+    <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
-  <widget class="QWidget" name="centralWidget">
+  <widget class="QWidget" name="midWid">
    <property name="sizePolicy">
     <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
      <horstretch>0</horstretch>
@@ -51,39 +51,192 @@
       <x>0</x>
       <y>0</y>
       <width>1191</width>
-      <height>731</height>
+      <height>751</height>
      </rect>
     </property>
-    <layout class="QVBoxLayout" name="MainLayout">
-     <property name="spacing">
-      <number>1</number>
-     </property>
-     <property name="sizeConstraint">
-      <enum>QLayout::SetNoConstraint</enum>
-     </property>
+    <layout class="QVBoxLayout" name="mainLayout">
      <item>
-      <layout class="QHBoxLayout" name="horizontalLayout">
-       <property name="spacing">
-        <number>1</number>
+      <widget class="QSplitter" name="splitter_4">
+       <property name="orientation">
+        <enum>Qt::Vertical</enum>
        </property>
-       <item>
-        <widget class="QTableWidget" name="tblDisAs">
+       <widget class="QSplitter" name="splitter_2">
+        <property name="orientation">
+         <enum>Qt::Vertical</enum>
+        </property>
+        <widget class="QSplitter" name="splitter">
+         <property name="orientation">
+          <enum>Qt::Horizontal</enum>
+         </property>
+         <widget class="QTableWidget" name="tblDisAs">
+          <property name="minimumSize">
+           <size>
+            <width>800</width>
+            <height>405</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Lucida Console</family>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>14</number>
+          </attribute>
+          <attribute name="verticalHeaderMinimumSectionSize">
+           <number>14</number>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Offset</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>OpCodes</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Mnemonics</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Comment</string>
+           </property>
+          </column>
+         </widget>
+         <widget class="QScrollBar" name="scrollDisAs">
+          <property name="sizePolicy">
+           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+            <horstretch>0</horstretch>
+            <verstretch>0</verstretch>
+           </sizepolicy>
+          </property>
+          <property name="minimumSize">
+           <size>
+            <width>0</width>
+            <height>405</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>17</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="maximum">
+           <number>10</number>
+          </property>
+          <property name="pageStep">
+           <number>1</number>
+          </property>
+          <property name="value">
+           <number>5</number>
+          </property>
+          <property name="orientation">
+           <enum>Qt::Vertical</enum>
+          </property>
+         </widget>
+         <widget class="QTableWidget" name="tblRegView">
+          <property name="minimumSize">
+           <size>
+            <width>358</width>
+            <height>405</height>
+           </size>
+          </property>
+          <property name="maximumSize">
+           <size>
+            <width>16777215</width>
+            <height>16777215</height>
+           </size>
+          </property>
+          <property name="font">
+           <font>
+            <family>Lucida Console</family>
+           </font>
+          </property>
+          <property name="contextMenuPolicy">
+           <enum>Qt::CustomContextMenu</enum>
+          </property>
+          <property name="editTriggers">
+           <set>QAbstractItemView::NoEditTriggers</set>
+          </property>
+          <property name="selectionBehavior">
+           <enum>QAbstractItemView::SelectRows</enum>
+          </property>
+          <attribute name="horizontalHeaderStretchLastSection">
+           <bool>true</bool>
+          </attribute>
+          <attribute name="verticalHeaderVisible">
+           <bool>false</bool>
+          </attribute>
+          <attribute name="verticalHeaderDefaultSectionSize">
+           <number>15</number>
+          </attribute>
+          <attribute name="verticalHeaderMinimumSectionSize">
+           <number>15</number>
+          </attribute>
+          <column>
+           <property name="text">
+            <string>Register</string>
+           </property>
+          </column>
+          <column>
+           <property name="text">
+            <string>Value</string>
+           </property>
+          </column>
+         </widget>
+        </widget>
+        <widget class="QTableWidget" name="tblCallstack">
+         <property name="sizePolicy">
+          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <horstretch>0</horstretch>
+           <verstretch>0</verstretch>
+          </sizepolicy>
+         </property>
          <property name="minimumSize">
           <size>
-           <width>800</width>
-           <height>405</height>
+           <width>1189</width>
+           <height>160</height>
           </size>
          </property>
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>405</height>
+           <height>16777215</height>
           </size>
          </property>
          <property name="font">
           <font>
            <family>Lucida Console</family>
           </font>
+         </property>
+         <property name="frameShadow">
+          <enum>QFrame::Sunken</enum>
          </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
@@ -105,194 +258,45 @@
          </attribute>
          <column>
           <property name="text">
-           <string>Offset</string>
+           <string>Stack Offset</string>
           </property>
          </column>
          <column>
           <property name="text">
-           <string>OpCodes</string>
+           <string>Func. Addr</string>
           </property>
          </column>
          <column>
           <property name="text">
-           <string>Mnemonics</string>
+           <string>&lt;mod.func&gt;</string>
           </property>
          </column>
          <column>
           <property name="text">
-           <string>Comment</string>
+           <string>Return To</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Return To - &lt;mod.func&gt;</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Source Line</string>
+          </property>
+         </column>
+         <column>
+          <property name="text">
+           <string>Source File</string>
           </property>
          </column>
         </widget>
-       </item>
-       <item>
-        <widget class="QScrollBar" name="scrollDisAs">
-         <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-           <horstretch>0</horstretch>
-           <verstretch>0</verstretch>
-          </sizepolicy>
-         </property>
-         <property name="minimumSize">
-          <size>
-           <width>0</width>
-           <height>405</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>17</width>
-           <height>400</height>
-          </size>
-         </property>
-         <property name="maximum">
-          <number>10</number>
-         </property>
-         <property name="value">
-          <number>5</number>
-         </property>
-         <property name="orientation">
-          <enum>Qt::Vertical</enum>
-         </property>
-        </widget>
-       </item>
-       <item>
-        <widget class="QTableWidget" name="tblRegView">
-         <property name="minimumSize">
-          <size>
-           <width>358</width>
-           <height>405</height>
-          </size>
-         </property>
-         <property name="maximumSize">
-          <size>
-           <width>16777215</width>
-           <height>405</height>
-          </size>
-         </property>
-         <property name="font">
-          <font>
-           <family>Lucida Console</family>
-          </font>
-         </property>
-         <property name="editTriggers">
-          <set>QAbstractItemView::NoEditTriggers</set>
-         </property>
-         <property name="selectionBehavior">
-          <enum>QAbstractItemView::SelectRows</enum>
-         </property>
-         <attribute name="horizontalHeaderStretchLastSection">
-          <bool>true</bool>
-         </attribute>
-         <attribute name="verticalHeaderDefaultSectionSize">
-          <number>15</number>
-         </attribute>
-         <attribute name="verticalHeaderMinimumSectionSize">
-          <number>15</number>
-         </attribute>
-         <column>
-          <property name="text">
-           <string>Register</string>
-          </property>
-         </column>
-         <column>
-          <property name="text">
-           <string>Value</string>
-          </property>
-         </column>
-        </widget>
-       </item>
-      </layout>
-     </item>
-     <item>
-      <widget class="QTableWidget" name="tblCallstack">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="minimumSize">
-        <size>
-         <width>1189</width>
-         <height>160</height>
-        </size>
-       </property>
-       <property name="maximumSize">
-        <size>
-         <width>16777215</width>
-         <height>160</height>
-        </size>
-       </property>
-       <property name="font">
-        <font>
-         <family>Lucida Console</family>
-        </font>
-       </property>
-       <property name="frameShadow">
-        <enum>QFrame::Sunken</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>14</number>
-       </attribute>
-       <attribute name="verticalHeaderMinimumSectionSize">
-        <number>14</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>Stack Offset</string>
+       </widget>
+       <widget class="QSplitter" name="splitter_3">
+        <property name="orientation">
+         <enum>Qt::Horizontal</enum>
         </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Func. Addr</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>&lt;mod.func&gt;</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Return To</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Return To - &lt;mod.func&gt;</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Source Line</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Source File</string>
-        </property>
-       </column>
-      </widget>
-     </item>
-     <item>
-      <layout class="QHBoxLayout" name="horizontalLayout_4" stretch="0,0,0">
-       <property name="spacing">
-        <number>1</number>
-       </property>
-       <item>
         <widget class="QTableWidget" name="tblStack">
          <property name="minimumSize">
           <size>
@@ -303,7 +307,7 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>150</height>
+           <height>16777215</height>
           </size>
          </property>
          <property name="font">
@@ -351,8 +355,6 @@
           </property>
          </column>
         </widget>
-       </item>
-       <item>
         <widget class="QScrollBar" name="scrollStackView">
          <property name="sizePolicy">
           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
@@ -369,7 +371,7 @@
          <property name="maximumSize">
           <size>
            <width>17</width>
-           <height>150</height>
+           <height>16777215</height>
           </size>
          </property>
          <property name="maximum">
@@ -382,8 +384,6 @@
           <enum>Qt::Vertical</enum>
          </property>
         </widget>
-       </item>
-       <item>
         <widget class="QTableWidget" name="tblLogBox">
          <property name="minimumSize">
           <size>
@@ -394,7 +394,7 @@
          <property name="maximumSize">
           <size>
            <width>16777215</width>
-           <height>150</height>
+           <height>16777215</height>
           </size>
          </property>
          <property name="font">
@@ -431,8 +431,8 @@
           </property>
          </column>
         </widget>
-       </item>
-      </layout>
+       </widget>
+      </widget>
      </item>
     </layout>
    </widget>
@@ -443,7 +443,7 @@
      <x>0</x>
      <y>0</y>
      <width>1194</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -585,9 +585,8 @@
   </action>
   <action name="actionDebug_Start">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/IDI_START.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/IDI_START.ico</normalon>:/qtDLGNanomite/IDI_START.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_START.ico</normaloff>:/DLGNanomite/Icons/IDI_START.ico</iconset>
    </property>
    <property name="text">
     <string>Start</string>
@@ -595,9 +594,8 @@
   </action>
   <action name="actionDebug_Stop">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/IDI_STOP.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/IDI_STOP.ico</normalon>:/qtDLGNanomite/IDI_STOP.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_STOP.ico</normaloff>:/DLGNanomite/Icons/IDI_STOP.ico</iconset>
    </property>
    <property name="text">
     <string>Stop</string>
@@ -605,9 +603,8 @@
   </action>
   <action name="actionDebug_Suspend">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/IDI_SUSPEND.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/IDI_SUSPEND.ico</normalon>:/qtDLGNanomite/IDI_SUSPEND.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_SUSPEND.ico</normaloff>:/DLGNanomite/Icons/IDI_SUSPEND.ico</iconset>
    </property>
    <property name="text">
     <string>Suspend</string>
@@ -615,9 +612,8 @@
   </action>
   <action name="actionDebug_Restart">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/IDI_RESTART.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/IDI_RESTART.ico</normalon>:/qtDLGNanomite/IDI_RESTART.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_RESTART.ico</normaloff>:/DLGNanomite/Icons/IDI_RESTART.ico</iconset>
    </property>
    <property name="text">
     <string>Restart</string>
@@ -625,9 +621,8 @@
   </action>
   <action name="actionDebug_Step_In">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/IDI_STEPIN.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/IDI_STEPIN.ico</normalon>:/qtDLGNanomite/IDI_STEPIN.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_STEPIN.ico</normaloff>:/DLGNanomite/Icons/IDI_STEPIN.ico</iconset>
    </property>
    <property name="text">
     <string>Step In</string>
@@ -635,9 +630,8 @@
   </action>
   <action name="actionDebug_Step_Over">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/IDI_STEPOVER.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/IDI_STEPOVER.ico</normalon>:/qtDLGNanomite/IDI_STEPOVER.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_STOP.ico</normaloff>:/DLGNanomite/Icons/IDI_STOP.ico</iconset>
    </property>
    <property name="text">
     <string>Step Over</string>
@@ -655,9 +649,8 @@
   </action>
   <action name="actionWindow_Detail_Information">
    <property name="icon">
-    <iconset>
-     <normaloff>:/qtDLGNanomite/ID_showInfo.ico</normaloff>
-     <normalon>:/qtDLGNanomite/Icons/ID_showInfo.ico</normalon>:/qtDLGNanomite/ID_showInfo.ico</iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_showInfo.ico</normaloff>:/DLGNanomite/Icons/ID_showInfo.ico</iconset>
    </property>
    <property name="text">
     <string>Detail Information</string>
@@ -665,9 +658,8 @@
   </action>
   <action name="actionWindow_Breakpoint_Manager">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_BPManager.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_BPManager.ico</normaloff>:/DLGNanomite/Icons/ID_BPManager.ico</iconset>
    </property>
    <property name="text">
     <string>Breakpoint Manager</string>
@@ -675,9 +667,8 @@
   </action>
   <action name="actionWindow_Show_Memory">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_Memory.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Memory.ico</normaloff>:/DLGNanomite/Icons/ID_Memory.ico</iconset>
    </property>
    <property name="text">
     <string>Show Memory</string>
@@ -685,9 +676,8 @@
   </action>
   <action name="actionWindow_Show_Heap">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_Heap.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Heap.ico</normaloff>:/DLGNanomite/Icons/ID_Heap.ico</iconset>
    </property>
    <property name="text">
     <string>Show Heap</string>
@@ -695,9 +685,8 @@
   </action>
   <action name="actionWindow_Show_Strings">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_Strings.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Strings.ico</normaloff>:/DLGNanomite/Icons/ID_Strings.ico</iconset>
    </property>
    <property name="text">
     <string>Show Strings</string>
@@ -705,9 +694,8 @@
   </action>
   <action name="actionWindow_Show_Debug_Output">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_DebugString.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_DebugString.ico</normaloff>:/DLGNanomite/Icons/ID_DebugString.ico</iconset>
    </property>
    <property name="text">
     <string>Show Debug Output</string>
@@ -715,9 +703,8 @@
   </action>
   <action name="actionWindow_Show_Handles">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_Handles.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Handles.ico</normaloff>:/DLGNanomite/Icons/ID_Handles.ico</iconset>
    </property>
    <property name="text">
     <string>Show Handles</string>
@@ -725,9 +712,8 @@
   </action>
   <action name="actionWindow_Show_Windows">
    <property name="icon">
-    <iconset>
-     <normalon>:/qtDLGNanomite/Icons/ID_Windows.ico</normalon>
-    </iconset>
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Windows.ico</normaloff>:/DLGNanomite/Icons/ID_Windows.ico</iconset>
    </property>
    <property name="text">
     <string>Show Windows</string>

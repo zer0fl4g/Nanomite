@@ -11,7 +11,6 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
-
 	_iPID = iPID;
 
 	connect(tblMemoryView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
@@ -45,7 +44,7 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 	for(int i = iForEntry; i < iForEnd;i++)
 	{
-		DWORD64 dwAddress = NULL;
+		quint64 dwAddress = NULL;
 		while(VirtualQueryEx(myMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
 		{
 			tblMemoryView->insertRow(tblMemoryView->rowCount());

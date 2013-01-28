@@ -5,13 +5,13 @@
 #include "qtDLGDebugStrings.h"
 #include "qtDLGBreakPointManager.h"
 
-#include "clsDisassambler.h"
+#include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
 
 #include "ui_qtDLGNanomite.h"
 
 Q_DECLARE_METATYPE (DWORD)
-Q_DECLARE_METATYPE (DWORD64)
+Q_DECLARE_METATYPE (quint64)
 Q_DECLARE_METATYPE (std::wstring)
 
 class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
@@ -31,7 +31,7 @@ public:
 
 	long lExceptionCount;
 	clsDebugger *coreDebugger;
-	clsDisassambler *coreDisAs;
+	clsDisassembler *coreDisAs;
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;
 	qtDLGBreakPointManager *dlgBPManager;
@@ -62,16 +62,20 @@ private slots:
 	void action_WindowShowHandles();
 	void action_WindowShowWindows();
 
-	void OnDisplayDisassambly(DWORD64 dwEIP);
+	void OnDisplayDisassembly(quint64 dwEIP);
 	void OnDisAsScroll(int iValue);
 	void OnStackScroll(int iValue);
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
+	void OnCustomRegViewContextMenu(QPoint qPoint);
+	void OnCustomDisassemblerContextMenu(QPoint qPoint);
 
 	void GenerateMenuCallback(QAction *qAction);
-
+	void MenuCallback(QAction*);
+	
 private:
 	DWORD _iMenuPID;
+	int _iSelectedRow;
 
 	static qtDLGNanomite *qtDLGMyWindow;
 	
@@ -80,7 +84,7 @@ private:
 	void GenerateMenu();
 	void UpdateStateBar(DWORD dwAction);
 	void LoadRegView();
-	void LoadStackView(DWORD64 dwESP, DWORD dwStackSize);	
+	void LoadStackView(quint64 dwESP, DWORD dwStackSize);	
 };
 
 #endif // QTDLGNANOMITE_H

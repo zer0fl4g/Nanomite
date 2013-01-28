@@ -39,7 +39,7 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		if(SplitAPIList.count() >= 2)
 		{
 	
-			DWORD64 dwOffset = (DWORD64)GetProcAddress(GetModuleHandleA(SplitAPIList[0].toUtf8().data()),
+			quint64 dwOffset = (quint64)GetProcAddress(GetModuleHandleA(SplitAPIList[0].toUtf8().data()),
 				SplitAPIList[1].toUtf8().data());
 
 			if(dwOffset <= 0)

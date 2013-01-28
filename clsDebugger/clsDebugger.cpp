@@ -439,6 +439,7 @@ bool clsDebugger::StartDebugging()
 {
 	if(_dwPidToAttach != 0 && !_NormalDebugging)
 	{
+		if(!IsValidFile(_dwPidToAttach)) return false;
 		CleanWorkSpace();
 		_isDebugging = true;
 		_beginthreadex(NULL,NULL,clsDebugger::DebuggingEntry,this,NULL,NULL);

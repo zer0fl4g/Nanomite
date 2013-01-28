@@ -23,7 +23,7 @@ int clsCallbacks::OnLog(tm *timeInfo,wstring sLog)
 	return 0;
 }
 
-int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
+int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
@@ -59,7 +59,7 @@ int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,DWORD64 dwEP,bool bSuspended,
 	return 0;
 }
 
-int clsCallbacks::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,bool bFound)
+int clsCallbacks::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound)
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
@@ -87,7 +87,7 @@ int clsCallbacks::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,DWORD64 dwEP,
 	return 0;
 }
 
-int clsCallbacks::OnException(wstring sFuncName,wstring sModName,DWORD64 dwOffset,DWORD64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
+int clsCallbacks::OnException(wstring sFuncName,wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 	myMainWindow->lExceptionCount++;
@@ -129,7 +129,7 @@ int clsCallbacks::OnDbgString(wstring sMessage,DWORD dwPID)
 	return 0;
 }
 
-int clsCallbacks::OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded)
+int clsCallbacks::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded)
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
@@ -161,9 +161,9 @@ int clsCallbacks::OnDll(wstring sDLLPath,DWORD dwPID,DWORD64 dwEP,bool bLoaded)
 	return 0;
 }
 
-int clsCallbacks::OnCallStack(DWORD64 dwStackAddr,
-						 DWORD64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
-						 DWORD64 dwEIP,wstring sFuncName,wstring sFuncModule,
+int clsCallbacks::OnCallStack(quint64 dwStackAddr,
+						 quint64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
+						 quint64 dwEIP,wstring sFuncName,wstring sFuncModule,
 						 wstring sSourceFilePath,int iSourceLineNum)
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();

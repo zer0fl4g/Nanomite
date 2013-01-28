@@ -19,6 +19,10 @@
   <property name="windowTitle">
    <string>[ Nanomite ] - About</string>
   </property>
+  <property name="windowIcon">
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
+  </property>
   <widget class="QGroupBox" name="groupBox">
    <property name="geometry">
     <rect>
@@ -55,7 +59,7 @@
     <string/>
    </property>
    <property name="pixmap">
-    <pixmap resource="qtDLGNanomite.qrc">:/qtDLGNanomite/Icons/450x150.bmp</pixmap>
+    <pixmap resource="qtDLGNanomite.qrc">:/DLGNanomite/Icons/450x150.bmp</pixmap>
    </property>
    <property name="scaledContents">
     <bool>true</bool>

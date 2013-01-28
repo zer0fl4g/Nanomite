@@ -21,7 +21,7 @@
   </property>
   <property name="windowIcon">
    <iconset resource="qtDLGNanomite.qrc">
-    <normaloff>:/qtDLGNanomite/IDI_MAIN.ico</normaloff>:/qtDLGNanomite/IDI_MAIN.ico</iconset>
+    <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
   <widget class="QTableWidget" name="tblBPs">
    <property name="geometry">

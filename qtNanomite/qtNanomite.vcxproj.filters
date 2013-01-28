@@ -188,14 +188,14 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qtDLGHexView.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
-    <ClCompile Include="clsDisassambler.cpp">
-      <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsDisassambler.cpp">
+    <ClCompile Include="GeneratedFiles\Debug\moc_clsDisassembler.cpp">
       <Filter>Generierte Dateien\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsDisassambler.cpp">
+    <ClCompile Include="GeneratedFiles\Release\moc_clsDisassembler.cpp">
       <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="clsDisassembler.cpp">
+      <Filter>Source Dateien</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -289,7 +289,7 @@
     <CustomBuild Include="qtDLGHexView.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="clsDisassambler.h">
+    <CustomBuild Include="clsDisassembler.h">
       <Filter>Header Dateien</Filter>
     </CustomBuild>
   </ItemGroup>
@@ -341,6 +341,6 @@
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="Changelog.txt" />
+    <None Include="readme.md" />
   </ItemGroup>
 </Project>

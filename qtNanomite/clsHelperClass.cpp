@@ -1,4 +1,5 @@
 #include "clsHelperClass.h"
+#include "dbghelp.h"
 
 #include <fstream>
 #include <algorithm>
@@ -178,5 +179,27 @@ vector<wstring> clsHelperClass::split(const wstring& s,const wstring& f ){
 	}
 	temp.push_back( wstring( i, s.end() ) );
 	return temp;
+}
+
+bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quint64 dwOffset,HANDLE hProc)
+{
+	bool bTest = false;
+
+	IMAGEHLP_MODULEW64 imgMod = {0};
+	imgMod.SizeOfStruct = sizeof(imgMod);
+	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+	memset(pSymbol, 0, sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
+	pSymbol->MaxNameLen = MAX_SYM_NAME;
+	quint64 dwDisplacement;
+
+	bTest = SymGetModuleInfoW64(hProc,dwOffset,&imgMod);
+	bTest = SymFromAddrW(hProc,dwOffset,&dwDisplacement,pSymbol);
+
+	sFuncName = pSymbol->Name;
+	sModName = imgMod.ModuleName;
+
+	free(pSymbol);
+	return bTest;
 }
 

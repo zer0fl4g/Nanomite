@@ -1,13 +1,13 @@
 <RCC>
-  <qresource prefix="qtDLGNanomite">
+  <qresource prefix="DLGNanomite">
     <file>../Icons/450x150.bmp</file>
     <file>../Icons/ID_BPManager.ico</file>
+    <file>../Icons/ID_DebugString.ico</file>
     <file>../Icons/ID_Handles.ico</file>
     <file>../Icons/ID_Heap.ico</file>
     <file>../Icons/ID_Memory.ico</file>
-    <file>../Icons/ID_Strings.ico</file>
     <file>../Icons/ID_showInfo.ico</file>
-    <file>../Icons/ID_DebugString.ico</file>
+    <file>../Icons/ID_Strings.ico</file>
     <file>../Icons/ID_Windows.ico</file>
     <file>../Icons/IDI_MAIN.ico</file>
     <file>../Icons/IDI_RESTART.ico</file>
