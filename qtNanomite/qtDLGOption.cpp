@@ -201,21 +201,21 @@ void qtDLGOption::OnLoad()
 		}
 	}
 
-	int itemIndex = NULL;
-	itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP);
+	//int itemIndex = NULL;
+	//itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP);
 
-	if((itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
-		comboBP->setCurrentIndex(itemIndex);
-	
-	if((itemIndex = comboCall->findText(myMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
-		comboCall->setCurrentIndex(itemIndex);
+	//if((itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
+	//	comboBP->setCurrentIndex(itemIndex);
+	//
+	//if((itemIndex = comboCall->findText(myMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
+	//	comboCall->setCurrentIndex(itemIndex);
 
-	if((itemIndex = comboStack->findText(myMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
-		comboStack->setCurrentIndex(itemIndex);
+	//if((itemIndex = comboStack->findText(myMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
+	//	comboStack->setCurrentIndex(itemIndex);
 
-	if((itemIndex = comboJump->findText(myMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
-		comboJump->setCurrentIndex(itemIndex);
+	//if((itemIndex = comboJump->findText(myMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
+	//	comboJump->setCurrentIndex(itemIndex);
 
-	if((itemIndex = comboMove->findText(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
-		comboMove->setCurrentIndex(itemIndex);
+	//if((itemIndex = comboMove->findText(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
+	//	comboMove->setCurrentIndex(itemIndex);
 }
