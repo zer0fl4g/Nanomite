@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>821</width>
-    <height>740</height>
+    <width>817</width>
+    <height>738</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -26,231 +26,227 @@
   <widget class="QWidget" name="verticalLayoutWidget">
    <property name="geometry">
     <rect>
-     <x>0</x>
-     <y>0</y>
+     <x>-1</x>
+     <y>-2</y>
      <width>821</width>
      <height>741</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="sizeConstraint">
-     <enum>QLayout::SetNoConstraint</enum>
-    </property>
     <item>
-     <widget class="QTableWidget" name="tblPIDs">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
+     <widget class="QSplitter" name="splitter">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
       </property>
-      <property name="font">
-       <font>
-        <family>Lucida Console</family>
-       </font>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>15</number>
-      </attribute>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>15</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>PID</string>
+      <widget class="QTableWidget" name="tblPIDs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>EntryPoint</string>
+       <property name="font">
+        <font>
+         <family>Lucida Console</family>
+        </font>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ExitCode</string>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>FilePath</string>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
-      </column>
-     </widget>
-    </item>
-    <item>
-     <widget class="QTableWidget" name="tblTIDs">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Lucida Console</family>
-       </font>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>15</number>
-      </attribute>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>15</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>PID</string>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>15</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderDefaultSectionSize">
+        <number>15</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>PID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>EntryPoint</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>ExitCode</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>FilePath</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QTableWidget" name="tblTIDs">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>TID</string>
+       <property name="font">
+        <font>
+         <family>Lucida Console</family>
+        </font>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>EntryPoint</string>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>ExitCode</string>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>State</string>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>15</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderDefaultSectionSize">
+        <number>15</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>PID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>TID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>EntryPoint</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>ExitCode</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>State</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QTableWidget" name="tblExceptions">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </column>
-     </widget>
-    </item>
-    <item>
-     <widget class="QTableWidget" name="tblExceptions">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Lucida Console</family>
-       </font>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>15</number>
-      </attribute>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>15</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>Offset</string>
+       <property name="font">
+        <font>
+         <family>Lucida Console</family>
+        </font>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Exc. Code</string>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>PID / TID</string>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Module.Function</string>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>15</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderDefaultSectionSize">
+        <number>15</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>Offset</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Exc. Code</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>PID / TID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Module.Function</string>
+        </property>
+       </column>
+      </widget>
+      <widget class="QTableWidget" name="tblModules">
+       <property name="sizePolicy">
+        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+         <horstretch>0</horstretch>
+         <verstretch>0</verstretch>
+        </sizepolicy>
        </property>
-      </column>
-     </widget>
-    </item>
-    <item>
-     <widget class="QTableWidget" name="tblModules">
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="font">
-       <font>
-        <family>Lucida Console</family>
-       </font>
-      </property>
-      <property name="editTriggers">
-       <set>QAbstractItemView::NoEditTriggers</set>
-      </property>
-      <property name="selectionBehavior">
-       <enum>QAbstractItemView::SelectRows</enum>
-      </property>
-      <attribute name="horizontalHeaderMinimumSectionSize">
-       <number>15</number>
-      </attribute>
-      <attribute name="horizontalHeaderStretchLastSection">
-       <bool>true</bool>
-      </attribute>
-      <attribute name="verticalHeaderVisible">
-       <bool>false</bool>
-      </attribute>
-      <attribute name="verticalHeaderDefaultSectionSize">
-       <number>15</number>
-      </attribute>
-      <column>
-       <property name="text">
-        <string>PID</string>
+       <property name="font">
+        <font>
+         <family>Lucida Console</family>
+        </font>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>EntryPoint</string>
+       <property name="editTriggers">
+        <set>QAbstractItemView::NoEditTriggers</set>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>State</string>
+       <property name="selectionBehavior">
+        <enum>QAbstractItemView::SelectRows</enum>
        </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>Path</string>
-       </property>
-      </column>
+       <attribute name="horizontalHeaderMinimumSectionSize">
+        <number>15</number>
+       </attribute>
+       <attribute name="horizontalHeaderStretchLastSection">
+        <bool>true</bool>
+       </attribute>
+       <attribute name="verticalHeaderVisible">
+        <bool>false</bool>
+       </attribute>
+       <attribute name="verticalHeaderDefaultSectionSize">
+        <number>15</number>
+       </attribute>
+       <column>
+        <property name="text">
+         <string>PID</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>EntryPoint</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>State</string>
+        </property>
+       </column>
+       <column>
+        <property name="text">
+         <string>Path</string>
+        </property>
+       </column>
+      </widget>
      </widget>
     </item>
    </layout>

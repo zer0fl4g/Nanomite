@@ -170,40 +170,40 @@ int clsCallbacks::OnCallStack(quint64 dwStackAddr,
 	myMainWindow->tblCallstack->insertRow(myMainWindow->tblCallstack->rowCount());
 
 	// Stack Address
-	QString strTemp = QString().sprintf("0x%016X",dwStackAddr);
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,0,new QTableWidgetItem(strTemp));
+	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,0,
+		new QTableWidgetItem(QString("%1").arg(dwStackAddr,16,16,QChar('0'))));
 
 	// Func Addr
-	strTemp = QString().sprintf("0x%016X",dwEIP);
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,1,new QTableWidgetItem(strTemp));
+	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,1,
+		new QTableWidgetItem(QString("%1").arg(dwEIP,16,16,QChar('0'))));
 
 	// <mod.func>
 	if(sFuncName.length() > 0)
-		strTemp = QString::fromStdWString(sFuncModule).append(".").append(QString::fromStdWString(sFuncName));
+		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
+			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString::fromStdWString(sFuncName))));
 	else
-		strTemp = QString::fromStdWString(sFuncModule).append(".").append(QString().sprintf("0x%016X",dwStackAddr));
-
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,new QTableWidgetItem(strTemp));
+		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
+			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString("%1").arg(dwStackAddr,16,16,QChar('0')))));
 
 	// Return To
-	strTemp = QString().sprintf("0x%016X",dwReturnTo);
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,3,new QTableWidgetItem(strTemp));
+	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,3,
+		new QTableWidgetItem(QString("%1").arg(dwReturnTo,16,16,QChar('0'))));
 
 	// Return To <mod.func>
-		if(sFuncName.length() > 0)
-		strTemp = QString::fromStdWString(sModuleName).append(".").append(QString::fromStdWString(sReturnToFunc));
+	if(sFuncName.length() > 0)
+		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
+			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString::fromStdWString(sReturnToFunc))));
 	else
-		strTemp = QString::fromStdWString(sModuleName).append(".").append(QString().sprintf("0x%016X",dwStackAddr));
-
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,new QTableWidgetItem(strTemp));
+		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
+			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString("%1").arg(dwStackAddr,16,16,QChar('0')))));
 
 	// Source Line
-	strTemp = QString().sprintf("%d",iSourceLineNum);
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,5,new QTableWidgetItem(strTemp));
+	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,5,
+		new QTableWidgetItem(QString().sprintf("%d",iSourceLineNum)));
 	
 	// Source File
-	strTemp = QString::fromStdWString(sSourceFilePath);
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,6,new QTableWidgetItem(strTemp));
+	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,6,
+		new QTableWidgetItem(QString::fromStdWString(sSourceFilePath)));
 
 	return 0;
 }

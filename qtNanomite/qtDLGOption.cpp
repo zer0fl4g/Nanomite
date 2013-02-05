@@ -1,5 +1,4 @@
 #include "qtDLGOption.h"
-#include "qtDLGNanomite.h"
 
 #include "clsHelperClass.h"
 
@@ -8,6 +7,8 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
+	this->setStyleSheet("background: rgb(230, 235, 230)");
+	//this->setAttribute(Qt::WA_DeleteOnClose,true);
 
 	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,new QTableWidgetItem(""));
@@ -67,7 +68,20 @@ void qtDLGOption::OnReload()
 	cbInvPriv->setChecked(true);
 	cbDivZero->setChecked(true);
 
-	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger);
+	myMainWindow->qtNanomiteDisAsColor->colorBP = "Red";
+	myMainWindow->qtNanomiteDisAsColor->colorCall = "Green";
+	myMainWindow->qtNanomiteDisAsColor->colorStack = "Dark green";
+	myMainWindow->qtNanomiteDisAsColor->colorJump = "Blue";
+	myMainWindow->qtNanomiteDisAsColor->colorMove = "Gray";
+
+	comboBP->setCurrentIndex(2);
+	comboCall->setCurrentIndex(3);
+	comboJump->setCurrentIndex(5);
+	comboMove->setCurrentIndex(13);
+	comboStack->setCurrentIndex(4);
+
+
+	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
 
 	OnLoad();
 }
@@ -125,14 +139,20 @@ void qtDLGOption::OnSave()
 		}
 	}
 
-	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger);
+	myMainWindow->qtNanomiteDisAsColor->colorBP = comboBP->currentText();
+	myMainWindow->qtNanomiteDisAsColor->colorCall = comboCall->currentText();
+	myMainWindow->qtNanomiteDisAsColor->colorStack = comboStack->currentText();
+	myMainWindow->qtNanomiteDisAsColor->colorJump = comboJump->currentText();
+	myMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
+	
+	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
 	MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
 }
 
 void qtDLGOption::OnLoad()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger);
+	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
 
 	switch(myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode)
 	{
@@ -149,7 +169,7 @@ void qtDLGOption::OnLoad()
 		rbDirect->setChecked(true);
 		break;
 	}
-
+	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds);
@@ -180,4 +200,22 @@ void qtDLGOption::OnLoad()
 				new QTableWidgetItem(QString().sprintf("%d",myMainWindow->coreDebugger->ExceptionHandler[i].dwAction)));
 		}
 	}
+
+	int itemIndex = NULL;
+	itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP);
+
+	if((itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
+		comboBP->setCurrentIndex(itemIndex);
+	
+	if((itemIndex = comboCall->findText(myMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
+		comboCall->setCurrentIndex(itemIndex);
+
+	if((itemIndex = comboStack->findText(myMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
+		comboStack->setCurrentIndex(itemIndex);
+
+	if((itemIndex = comboJump->findText(myMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
+		comboJump->setCurrentIndex(itemIndex);
+
+	if((itemIndex = comboMove->findText(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
+		comboMove->setCurrentIndex(itemIndex);
 }

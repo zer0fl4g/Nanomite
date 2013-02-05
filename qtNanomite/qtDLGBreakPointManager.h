@@ -1,6 +1,8 @@
 #ifndef QTDLGBPMANAGER_H
 #define QTDLGBPMANAGER_H
 
+#include "clsDebugger\clsDebugger.h"
+
 #include "ui_qtDLGBreakPointManager.h"
 
 class qtDLGBreakPointManager : public QWidget, public Ui_qtDLGBreakPointManagerClass
@@ -10,6 +12,9 @@ class qtDLGBreakPointManager : public QWidget, public Ui_qtDLGBreakPointManagerC
 public:
 	qtDLGBreakPointManager(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGBreakPointManager();
+
+	public slots:
+		void OnUpdate(BPStruct newBP,int iType);
 
 	private slots:
 		void OnClose();

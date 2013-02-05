@@ -3,6 +3,8 @@
 
 #include "ui_qtDLGOption.h"
 
+#include "qtDLGNanomite.h"
+
 class qtDLGOption : public QDialog, public Ui_qtDLGOptionClass
 {
 	Q_OBJECT

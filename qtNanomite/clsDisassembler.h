@@ -6,19 +6,20 @@
 #include <QtCore>
 #include <QtGui>
 
+struct DisAsDataRow
+{
+	QString Offset;
+	QString OpCodes;
+	QString ASM;
+	QString Comment;
+	quint64 itemStyle;
+};
+
 class clsDisassembler: public QThread
 {
 	Q_OBJECT
 
 public:
-	struct DisAsDataRow
-	{
-		QString Offset;
-		QString OpCodes;
-		QString ASM;
-		QString Comment;
-	};
-
 	QMap<QString,DisAsDataRow> SectionDisAs;
 
 	clsDisassembler();
@@ -40,8 +41,6 @@ private:
 	bool IsNewInsertNeeded();
 	bool IsNewInsertPossible();
 	
-	void SyntaxHighLight(QTableWidgetItem *newItem);
-
 protected:
 	void run();
 };

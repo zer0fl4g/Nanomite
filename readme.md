@@ -1,6 +1,30 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 5
+
++ fixed missing registers in x64 RegView
++ improved entrypoint handling
++ improved the BPManager
++ added some hotkeys
++ added Step Over
++ added refill on mainwindow resize to match size
++ added RegEdit
++ added basic coloring
+
+####Notes:
+	- Hotkeys:	STRG + O = open new file
+				STRG + B = breakpoint manager
+				STRG + F4 = stop debugging
+				F12 = options
+				F9 = start debugging / continue
+				F8 = step over
+				F7 = step in
+				F2 = set software breakpoint on selected row (a row must be selected in Disassembler)
+	
+	- RegEdit:	Double click on the regview to open it
+	- Colors:	Can be edited via Options Dialog (F12)
+
 ###Version 0.1 beta 4:
 
 + fixed different crashs in disassembler

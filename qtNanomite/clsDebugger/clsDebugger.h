@@ -1,8 +1,6 @@
 #ifndef CLSDEBUGGER
 #define CLSDEBUGGER
 
-//#pragma pack(1)
-
 #include <string>
 #include <vector>
 
@@ -20,77 +18,82 @@
 #define LOGBUFFERCHAR (512)
 #define THREAD_GETSET_CONTEXT	(0x0018) 
 
+
+struct clsDebuggerSettings
+{
+	bool bDebugChilds;
+	bool bAutoLoadSymbols;
+	DWORD dwSuspendType;
+	DWORD dwBreakOnEPMode;
+	DWORD dwDefaultExceptionMode;
+};
+
+struct DLLStruct
+{
+	PTCHAR sPath;
+	bool bLoaded;
+	DWORD dwPID;
+	quint64 dwBaseAdr;
+};
+
+struct ThreadStruct
+{
+	DWORD dwTID;
+	DWORD dwPID;
+	DWORD dwExitCode;
+	quint64 dwEP;
+	bool bSuspended;
+};
+
+struct PIDStruct
+{
+	DWORD dwPID;
+	DWORD dwExitCode;
+	DWORD dwBPRestoreFlag;
+	quint64 dwEP;
+	bool bKernelBP;
+	bool bWOW64KernelBP;
+	bool bRunning;
+	bool bSymLoad;
+	bool bTrapFlag;
+	HANDLE hProc;
+	PTCHAR sFileName;
+};
+
+struct BPStruct
+{
+	bool bRestoreBP;
+	BYTE bOrgByte;
+	quint64 dwOffset;
+	DWORD dwSize;
+	DWORD dwSlot;
+	DWORD dwPID;
+	DWORD dwTypeFlag;
+	/*
+	|	DR_EXECUTE
+	|	DR_WRITE
+	|	DR_READ
+	*/
+	DWORD dwHandle;
+	/*
+	|	0x0 - don´t keep
+	|   0x1 - keep
+	|   0x2 - step , remove it
+	*/
+};
+
+struct customException
+{
+	DWORD dwExceptionType;
+	DWORD dwAction;
+	quint64 dwHandler;
+};
+
 class clsDebugger : public QThread
 {
 	Q_OBJECT
 
 public:
-
-	struct clsDebuggerSettings
-	{
-		bool bDebugChilds;
-		bool bAutoLoadSymbols;
-		DWORD dwSuspendType;
-		DWORD dwBreakOnEPMode;
-		DWORD dwDefaultExceptionMode;
-	};
-
-	struct DLLStruct
-	{
-		PTCHAR sPath;
-		bool bLoaded;
-		DWORD dwPID;
-		quint64 dwBaseAdr;
-	};
-
-	struct ThreadStruct
-	{
-		DWORD dwTID;
-		DWORD dwPID;
-		DWORD dwExitCode;
-		quint64 dwEP;
-		bool bSuspended;
-	};
-
-	struct PIDStruct
-	{
-		DWORD dwPID;
-		DWORD dwExitCode;
-		DWORD dwBPRestoreFlag;
-		quint64 dwEP;
-		bool bKernelBP;
-		bool bWOW64KernelBP;
-		bool bRunning;
-		bool bSymLoad;
-		bool bTrapFlag;
-		HANDLE hProc;
-		PTCHAR sFileName;
-	};
-
-	struct BPStruct
-	{
-		bool bRestoreBP;
-		BYTE bOrgByte;
-		quint64 dwOffset;
-		DWORD dwSize;
-		DWORD dwSlot;
-		DWORD dwPID;
-		DWORD dwTypeFlag;
-		DWORD dwHandle;
-		/*
-		|	0x0 - don´t keep
-		|   0x1 - keep
-		|   0x2 - step , remove it
-		*/
-	};
-
-	struct customException
-	{
-		DWORD dwExceptionType;
-		DWORD dwAction;
-		quint64 dwHandler;
-	};
-
 	std::vector<DLLStruct> DLLs;
 	std::vector<ThreadStruct> TIDs;
 	std::vector<PIDStruct> PIDs;
@@ -122,15 +125,15 @@ public:
 	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
-	bool RemoveBPFromList(quint64 dwOffset,DWORD dwType,DWORD dwPID);
+	bool RemoveBPFromList(quint64 dwOffset,DWORD dwType); //,DWORD dwPID);
 	bool RemoveBPs();
 	bool ReadMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
 	bool WriteMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
+	bool AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep);
 
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
-	void AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep);
 	void SetTarget(std::wstring sTarget);
 	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,quint64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
@@ -154,6 +157,7 @@ signals:
 						 quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
 						 quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
 						 std::wstring sSourceFilePath,int iSourceLineNum);
+	void OnNewBreakpointAdded(BPStruct newBP,int iType);
 
 private:
 	PTCHAR tcLogString;
@@ -200,7 +204,6 @@ private:
 	HANDLE GetCurrentProcessHandle(DWORD dwPID);
 
 	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle);
-	DWORD GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event);
 
 	PTCHAR GetFileNameFromHandle(HANDLE hFile);
 

@@ -52,6 +52,7 @@ bool clsDebugger::IsValidFile(DWORD dwPID)
 		// Attaching Mode
 		// get file from PID
 		// hFile = CreateFileW(sFile,GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
+		return true;
 	}
 	else
 		hFile = CreateFileW(_sTarget.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
@@ -115,11 +116,8 @@ wstring clsDebugger::GetTarget()
 
 void clsDebugger::CleanWorkSpace()
 {
-	//for(size_t i = 0;i < PIDs.size();i++)
-	//	free(PIDs[i].sFileName);
-
-	//	for(size_t i = 0; i < DLLs.size(); i++)
-	//		free(DLLs[i].sPath);
+	for(size_t i = 0;i < PIDs.size();++i)
+		SymCleanup(PIDs[i].hProc);
 
 	PIDs.clear();
 	DLLs.clear();
@@ -173,7 +171,6 @@ bool clsDebugger::StopDebuggingAll()
 	_isDebugging = false;
 	for(size_t i = 0;i < PIDs.size();i++)
 		StopDebugging(PIDs[i].dwPID);
-	CleanWorkSpace();
 	return PulseEvent(_hDbgEvent);
 }
 
@@ -194,7 +191,7 @@ bool clsDebugger::StopDebugging(DWORD dwPID)
 			if(PIDs.size() == 1)
 			{
 				_isDebugging = false;
-				PulseEvent(_hDbgEvent);
+				//PulseEvent(_hDbgEvent);
 			}
 			return true;
 		}
@@ -507,6 +504,7 @@ bool clsDebugger::StartDebugging()
 
 		CleanWorkSpace();
 		_isDebugging = true;
+		_bSingleStepFlag = false;
 		_beginthreadex(NULL,NULL,clsDebugger::DebuggingEntry,this,NULL,NULL);
 	}	
 	else
@@ -519,6 +517,7 @@ bool clsDebugger::StartDebugging()
 
 		CleanWorkSpace();
 		_isDebugging = true;
+		_bSingleStepFlag = false;
 		_beginthreadex(NULL,NULL,clsDebugger::DebuggingEntry,this,NULL,NULL);
 	}
 	return true;
@@ -614,14 +613,7 @@ void clsDebugger::DebuggingLoop()
 				else
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
-				BPStruct newBP;
-				newBP.dwHandle = 0x0;
-				newBP.dwSize = 0x1;
-				newBP.dwPID = (DWORD)debug_event.dwProcessId;
-				newBP.dwOffset = (quint64)debug_event.u.CreateProcessInfo.lpStartAddress;
-
-				wSoftwareBP(newBP.dwPID,newBP.dwOffset,newBP.dwHandle,newBP.dwSize,newBP.bOrgByte);
-				SoftwareBPs.push_back(newBP);
+				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
 
 				break;
 			}
@@ -746,7 +738,8 @@ void clsDebugger::DebuggingLoop()
 						if(!PIDs[iPid].bKernelBP && dbgSettings.dwBreakOnEPMode == 1)
 						{
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
-							PIDs[iPid].bKernelBP = true;
+							//if(PIDs.size() > 0)
+								PIDs[iPid].bKernelBP = true;
 							bIsKernelBP = true;
 						}
 						else if(PIDs[iPid].bKernelBP)
@@ -780,6 +773,8 @@ void clsDebugger::DebuggingLoop()
 								PIDs[iPid].dwBPRestoreFlag = 0x2;
 
 								if(bIsEP && dbgSettings.dwBreakOnEPMode == 3)
+									dwContinueStatus = CallBreakDebugger(&debug_event,2);
+								else if(bIsEP && dbgSettings.dwBreakOnEPMode == 1)
 									dwContinueStatus = CallBreakDebugger(&debug_event,2);
 								else
 								{
@@ -1019,17 +1014,6 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 		return DBG_EXCEPTION_NOT_HANDLED;
 	case 2:
 		return DBG_CONTINUE;
-	case 3:
-		ProcessContext.ContextFlags = CONTEXT_ALL;
-		GetThreadContext(OpenThread(THREAD_GET_CONTEXT,false,debug_event->dwThreadId),&ProcessContext);
-#ifdef _AMD64_
-		ProcessContext.Rip = GetReturnAdressFromStackFrame(ProcessContext.Rbp + 0x04,debug_event);
-#else
-		ProcessContext.Eip = GetReturnAdressFromStackFrame(ProcessContext.Ebp + 0x04,debug_event);
-#endif
-		SetThreadContext(OpenThread(THREAD_SET_CONTEXT,false,debug_event->dwThreadId),&ProcessContext);
-
-		return DBG_EXCEPTION_HANDLED;
 	default:
 		return DBG_EXCEPTION_NOT_HANDLED;
 	}
@@ -1190,8 +1174,9 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 	{
 		SoftwareBPs.push_back(newBP);
 		PulseEvent(_hDbgEvent);
+		return true;
 	}
-	return true;
+	return false;
 }
 
 bool clsDebugger::StepIn()
@@ -1356,13 +1341,14 @@ bool clsDebugger::ShowCallStack()
 	return false;
 }
 
-void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep)
+bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep)
 {
-	bool bExists = false;
+	bool	bExists = false,
+			bRetValue = false;
 
 	for(size_t i = 0;i < SoftwareBPs.size();i++)
 	{
-		if(SoftwareBPs[i].dwOffset == dwOffset && SoftwareBPs[i].dwPID == dwPID)
+		if(SoftwareBPs[i].dwOffset == dwOffset/* && SoftwareBPs[i].dwPID == dwPID */)
 		{
 			bExists = true;
 			break;
@@ -1370,7 +1356,7 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 	}
 	for(size_t i = 0;i < MemoryBPs.size();i++)
 	{
-		if(MemoryBPs[i].dwOffset == dwOffset && MemoryBPs[i].dwPID == dwPID)
+		if(MemoryBPs[i].dwOffset == dwOffset /* && MemoryBPs[i].dwPID == dwPID*/)
 		{
 			bExists = true;
 			break;
@@ -1378,7 +1364,7 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 	}
 	for(size_t i = 0;i < HardwareBPs.size();i++)
 	{
-		if(HardwareBPs[i].dwOffset == dwOffset && HardwareBPs[i].dwPID == dwPID)
+		if(HardwareBPs[i].dwOffset == dwOffset /* && HardwareBPs[i].dwPID == dwPID */)
 		{
 			bExists = true;
 			break;
@@ -1400,7 +1386,11 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.bOrgByte = NULL;
 				newBP.dwPID = dwPID;
 				newBP.bRestoreBP = false;
+				newBP.dwTypeFlag = dwTypeFlag;
+
 				SoftwareBPs.push_back(newBP);
+				emit OnNewBreakpointAdded(newBP,0);
+				bRetValue = true;
 
 				break;
 			}
@@ -1415,7 +1405,11 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.dwPID = dwPID;
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
+				newBP.dwTypeFlag = dwTypeFlag;
+			
 				MemoryBPs.push_back(newBP);
+				emit OnNewBreakpointAdded(newBP,1);
+				bRetValue = true;
 
 				break;
 			}
@@ -1423,7 +1417,7 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 			{
 				//HardwareBP
 				if(HardwareBPs.size() == 4)
-					return;
+					break;
 
 				BPStruct newBP;
 				newBP.dwOffset = dwOffset;
@@ -1459,12 +1453,17 @@ void clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				if(!bSlot1) newBP.dwSlot = 0;
 
 				HardwareBPs.push_back(newBP);
+				emit OnNewBreakpointAdded(newBP,2);
+				bRetValue = true;
+
 				break;
 			}
 		}
-		if(_isDebugging)
-			InitBP();
 	}
+	if(_isDebugging)
+		InitBP();
+
+	return bRetValue;
 }
 
 bool clsDebugger::InitBP()
@@ -1505,18 +1504,21 @@ bool clsDebugger::AttachToProcess(DWORD dwPID)
 	return true;
 }
 
-bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType,DWORD dwPID)
+bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID)
 { 
 	switch(dwType)
 	{
 	case 0:
 		for (vector<BPStruct>::iterator it = SoftwareBPs.begin();it != SoftwareBPs.end();++it)
 		{
-			if(it->dwOffset == dwOffset && it->dwPID == dwPID)
+			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
 				SoftwareBPs.erase(it);
 				it = SoftwareBPs.begin();
+
+				if(it == SoftwareBPs.end())
+					break;
 			}
 		}
 		break;
@@ -1524,11 +1526,14 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType,DWORD dwPID)
 	case 1:
 		for (vector<BPStruct>::iterator it = MemoryBPs.begin();it != MemoryBPs.end(); ++it)
 		{
-			if(it->dwOffset == dwOffset && it->dwPID == dwPID)
+			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dMemoryBP(it->dwPID,it->dwOffset,it->dwSize);
 				MemoryBPs.erase(it);
 				it = MemoryBPs.begin();
+
+				if(it == MemoryBPs.end())
+					break;
 			}
 		}
 		break;
@@ -1536,11 +1541,14 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType,DWORD dwPID)
 	case 2:
 		for (vector<BPStruct>::iterator it = HardwareBPs.begin();it != HardwareBPs.end(); ++it)
 		{
-			if(it->dwOffset == dwOffset && it->dwPID == dwPID)
+			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dHardwareBP(it->dwPID,it->dwOffset,it->dwSlot);
 				HardwareBPs.erase(it);
 				it = HardwareBPs.begin();
+
+				if(it == HardwareBPs.end())
+					break;
 			}
 		}
 		break;
@@ -1634,27 +1642,6 @@ bool clsDebugger::dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize)
 	if(!VirtualProtectEx(hPID,(LPVOID)dwOffset,dwSize,MBI.Protect & PAGE_GUARD,&dwOldProtection))
 		return false;
 	return true;
-}
-
-DWORD clsDebugger::GetReturnAdressFromStackFrame(DWORD dwEbp,DEBUG_EVENT *debug_event)
-{
-	DWORD dwRetAdr = NULL;
-	SIZE_T	dwBytesRead;
-	HANDLE hProcess;
-
-	int iPid = 0;
-	for(size_t i = 0;i < PIDs.size(); i++)
-	{
-		if(PIDs[i].dwPID == debug_event->dwProcessId)
-			hProcess = PIDs[i].hProc;iPid = i;
-	}
-
-	BYTE* bBuffer[8];
-
-	if(ReadProcessMemory(hProcess,(LPVOID)dwEbp,(LPVOID)bBuffer,8,&dwBytesRead))
-		dwRetAdr = (DWORD)*bBuffer;
-
-	return dwRetAdr;
 }
 
 bool clsDebugger::IsTargetSet()

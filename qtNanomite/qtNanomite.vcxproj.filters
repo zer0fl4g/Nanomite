@@ -197,6 +197,18 @@
     <ClCompile Include="clsDisassembler.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGRegEdit.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGRegEdit.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGRegEdit.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="clsSymbolAndSyntax.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -277,9 +289,6 @@
     <CustomBuild Include="qtDLGHandleView.ui">
       <Filter>Form Dateien</Filter>
     </CustomBuild>
-    <CustomBuild Include="qtDLGWindowView.ui">
-      <Filter>Form Dateien</Filter>
-    </CustomBuild>
     <CustomBuild Include="qtDLGWindowView.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
@@ -291,6 +300,18 @@
     </CustomBuild>
     <CustomBuild Include="clsDisassembler.h">
       <Filter>Header Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGRegEdit.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGRegEdit86.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGRegEdit64.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGWindowView.ui">
+      <Filter>Form Dateien</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
@@ -339,8 +360,17 @@
     <ClInclude Include="GeneratedFiles\ui_qtDLGHexView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGRegEdit86.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGRegEdit64.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsSymbolAndSyntax.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
-    <None Include="readme.md" />
+    <None Include="..\readme.md" />
   </ItemGroup>
 </Project>

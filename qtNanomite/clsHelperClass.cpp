@@ -14,7 +14,7 @@ clsHelperClass::~clsHelperClass()
 {
 }
 
-bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger)
+bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor)
 {
 	wofstream outfile;
 	outfile.open("NanomiteConfig.ini");
@@ -76,11 +76,26 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger)
 	wsprintf(cTemp,L"%s=%d\n",L"BreakOnEPMode",_coreDebugger->dbgSettings.dwBreakOnEPMode);
 	outfile.write(cTemp,wcslen(cTemp));
 
+	wsprintf(cTemp,L"%s=%s\n",L"COLOR_BP",qtNanomiteDisAsColor->colorBP.data());
+	outfile.write(cTemp,wcslen(cTemp));
+
+	wsprintf(cTemp,L"%s=%s\n",L"COLOR_CALL",qtNanomiteDisAsColor->colorCall.data());
+	outfile.write(cTemp,wcslen(cTemp));
+
+	wsprintf(cTemp,L"%s=%s\n",L"COLOR_JUMP",qtNanomiteDisAsColor->colorJump.data());
+	outfile.write(cTemp,wcslen(cTemp));
+
+	wsprintf(cTemp,L"%s=%s\n",L"COLOR_MOVE",qtNanomiteDisAsColor->colorMove.data());
+	outfile.write(cTemp,wcslen(cTemp));
+
+	wsprintf(cTemp,L"%s=%s\n",L"COLOR_STACK",qtNanomiteDisAsColor->colorStack.data());
+	outfile.write(cTemp,wcslen(cTemp));
+
 	outfile.close();
 	return true;
 }
 
-bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger)
+bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor)
 {
 	wstring sLine;
 	wifstream infile;
@@ -129,6 +144,17 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger)
 			QString sTemp = QString().fromStdWString(sSettingLine[1]);
 			_coreDebugger->CustomExceptionAdd(sTemp.split(":")[0].toULong(0,16),sTemp.split(":")[1].toULong(0,16),NULL);
 		}
+		else if(sSettingLine[0] == L"COLOR_BP")
+			qtNanomiteDisAsColor->colorBP = QString::fromStdWString(sSettingLine[1]);
+		else if(sSettingLine[0] == L"COLOR_CALL")
+			qtNanomiteDisAsColor->colorCall = QString::fromStdWString(sSettingLine[1]);
+		else if(sSettingLine[0] == L"COLOR_JUMP")
+			qtNanomiteDisAsColor->colorJump = QString::fromStdWString(sSettingLine[1]);
+		else if(sSettingLine[0] == L"COLOR_MOVE")
+			qtNanomiteDisAsColor->colorMove = QString::fromStdWString(sSettingLine[1]);
+		else if(sSettingLine[0] == L"COLOR_STACK")
+			qtNanomiteDisAsColor->colorStack = QString::fromStdWString(sSettingLine[1]);
+
 	}
 	infile.close();
 	return true;

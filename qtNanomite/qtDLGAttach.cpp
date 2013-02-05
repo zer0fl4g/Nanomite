@@ -9,6 +9,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
+	this->setStyleSheet("background: rgb(230, 235, 230)");
 
 	tblProcList->horizontalHeader()->resizeSection(0,135);
 	tblProcList->horizontalHeader()->resizeSection(1,50);
