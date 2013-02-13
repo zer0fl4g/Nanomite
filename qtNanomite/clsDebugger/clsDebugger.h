@@ -8,6 +8,8 @@
 #include <time.h>
 #include <QtCore>
 
+#include "clsDBInterface.h"
+
 // Taken from GDB
 #define DR_EXECUTE	(0x00)		/* Break on instruction execution.  */
 #define DR_WRITE	(0x01)		/* Break on data writes.			*/
@@ -101,15 +103,19 @@ public:
 	std::vector<BPStruct> MemoryBPs;
 	std::vector<BPStruct> HardwareBPs;
 	std::vector<customException> ExceptionHandler;
+	std::vector<clsDBInterface *> fileDBs;
 
 	CONTEXT ProcessContext;
 	WOW64_CONTEXT wowProcessContext;
 
 	clsDebuggerSettings dbgSettings;
-	
+
 	clsDebugger();
 	clsDebugger(std::wstring sTarget);
 	~clsDebugger();
+
+	static bool IsOffsetAnBP(quint64 Offset);
+	static bool IsOffsetEIP(quint64 Offset);
 
 	bool StopDebuggingAll();
 	bool StopDebugging(DWORD dwPID);
@@ -134,7 +140,11 @@ public:
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
 
+	void ClearTarget();
+	void ClearCommandLine();
 	void SetTarget(std::wstring sTarget);
+	void SetCommandLine(std::wstring sCommandLine);
+
 	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,quint64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
 	void CustomExceptionRemoveAll();
@@ -142,6 +152,7 @@ public:
 	HANDLE GetCurrentProcessHandle();
 
 	std::wstring GetTarget();
+	std::wstring GetCMDLine();
 
 signals:
 	void OnDebuggerBreak();
@@ -151,17 +162,24 @@ signals:
 	void OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
 	void OnException(std::wstring sFuncName,std::wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	void OnDbgString(std::wstring sMessage,DWORD dwPID);
-	void OnLog(tm *timeInfo,std::wstring sLog);
+	void OnLog(std::wstring sLog);
 	void OnDll(std::wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
 	void OnCallStack(quint64 dwStackAddr,
-						 quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
-						 quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
-						 std::wstring sSourceFilePath,int iSourceLineNum);
+		quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
+		quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
+		std::wstring sSourceFilePath,int iSourceLineNum);
 	void OnNewBreakpointAdded(BPStruct newBP,int iType);
+	void OnNewPID(std::wstring,int,bool);
+	void DeletePEManagerObject(std::wstring,int);
+	void CleanPEManager();
 
 private:
+	static clsDebugger *pThis;
+
 	PTCHAR tcLogString;
 	std::wstring _sTarget;
+	std::wstring _sCommandLine;
+
 	STARTUPINFO _si;
 	PROCESS_INFORMATION _pi;
 	bool _isDebugging;
@@ -178,7 +196,7 @@ private:
 	void AttachedDebugging(LPVOID pDebProc);
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
-	
+
 	static unsigned __stdcall DebuggingEntry(LPVOID pThis);
 
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
@@ -194,7 +212,6 @@ private:
 	bool wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
 	bool dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot);
 	bool InitBP();
-	bool IsValidFile(DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
@@ -210,7 +227,7 @@ private:
 	typedef DWORD (__stdcall *CustomHandler)(DEBUG_EVENT *debug_event);
 
 protected:
-		void run();
+	void run();
 };
 
 #endif

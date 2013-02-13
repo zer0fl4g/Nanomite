@@ -13,6 +13,8 @@ int RetTest()
 
 int _tmain(int argc,PCHAR argv[])
 {
+	if(argc > 0)
+		MessageBoxW(NULL,GetCommandLine(),L"MessageBoxFromCMD",MB_OK);
 	OutputDebugString(L"This is a DBG");
 	//__asm { int 3 };
 	RaiseException(0x1337,NULL,NULL,NULL);

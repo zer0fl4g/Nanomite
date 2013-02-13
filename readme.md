@@ -1,6 +1,30 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 6
+
++ fixed a crash in Step Over
++ fixed load of colors in option window
++ fixed a dead lock when using detach
++ fixed memory overhead in hexview
++ fixed a display issue of the time in log when the debugge finished
++ improved internal PEFile handling
++ added unload of symbols if a DLL gets unloaded during runtime
++ added some more instructions to syntax highlighter
++ added highlight of current EIP
++ added highlight of BPs
++ added possibility to remove BPs from BPManager
++ added auto completion for apis in BPManager
++ added DB Interface
++ added command line support
+
+####Notes:
+	
+	- BPManager
+		-	Use the "DEL" Key to remove the entries from BPManager
+		-	Type a module name and the box will propose you found apis that match your entry 
+			e.g type "Ker" and the BPManager will show all imports of the processes found with Ker* -> Kernel32::*
+
 ###Version 0.1 beta 5
 
 + fixed missing registers in x64 RegView

@@ -884,6 +884,112 @@
       </property>
      </item>
     </widget>
+    <widget class="QComboBox" name="comboMath">
+     <property name="geometry">
+      <rect>
+       <x>110</x>
+       <y>160</y>
+       <width>221</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <item>
+      <property name="text">
+       <string>White</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Black</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Red</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Green</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark green</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Blue</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark blue</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Cyan</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark cyan</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Magenta</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark magenta</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Yellow</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark yellow</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Gray</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Dark gray</string>
+      </property>
+     </item>
+     <item>
+      <property name="text">
+       <string>Light gray</string>
+      </property>
+     </item>
+    </widget>
+    <widget class="QLineEdit" name="lineEdit_6">
+     <property name="enabled">
+      <bool>false</bool>
+     </property>
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>160</y>
+       <width>91</width>
+       <height>21</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Math</string>
+     </property>
+    </widget>
    </widget>
   </widget>
   <widget class="QPushButton" name="btnClose">

@@ -55,7 +55,9 @@ bool clsDisassembler::IsNewInsertPossible()
 						switch (mbi.Type)
 						{
 							case MEM_IMAGE:		
-							case MEM_MAPPED: return true;    break;
+							case MEM_MAPPED:
+								return true;
+								break;
 						}
 						break;
 					}
@@ -144,7 +146,7 @@ void clsDisassembler::run()
 					wsprintf(sTemp,L"%S",newDisAss.CompleteInstr);	
 				newRow.ASM = QString::fromWCharArray(sTemp);
 				
-				// Comment && itemStyle		
+				// Comment/Symbol && itemStyle		
 				DataVisualizer.CreateDataForRow(&newRow);
 
 				newRow.Offset = QString("%1").arg(newDisAss.VirtualAddr,16,16,QChar('0')).toUpper();

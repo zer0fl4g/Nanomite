@@ -13,8 +13,15 @@ public:
 	qtDLGBreakPointManager(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGBreakPointManager();
 
+	void DeleteCompleterContent();
+
 	public slots:
 		void OnUpdate(BPStruct newBP,int iType);
+		void OnBPRemove();
+		void UpdateCompleter(std::wstring,int iPID,bool is64Bit);
+
+private:
+	QStringList completerList;
 
 	private slots:
 		void OnClose();

@@ -12,7 +12,7 @@ public:
 	~qtDLGAttach();
 
 signals:
-	void StartAttachedDebug(int iPID);
+	void StartAttachedDebug(int iPID,QString sFile);
 
 private:
 	void FillProcessList();

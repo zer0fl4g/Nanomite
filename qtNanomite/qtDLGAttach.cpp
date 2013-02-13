@@ -74,7 +74,7 @@ void qtDLGAttach::FillProcessList()
 
 void qtDLGAttach::OnProcessDoubleClick(int iRow,int iColumn)
 {
-	emit StartAttachedDebug(tblProcList->item(iRow,1)->text().toInt());
+	emit StartAttachedDebug(tblProcList->item(iRow,1)->text().toInt(),tblProcList->item(iRow,2)->text());
 	close();
 	return;
 }

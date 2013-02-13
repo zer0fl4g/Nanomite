@@ -39,6 +39,12 @@
     <Filter Include="Source Dateien\Dialogs">
       <UniqueIdentifier>{408a367d-e40b-4080-8390-4e1c586c5a73}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Dateien\SQLite">
+      <UniqueIdentifier>{09c1a5bc-4036-4114-bc49-99312e891209}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Dateien\SQLite">
+      <UniqueIdentifier>{6f74e63e-5989-40f4-8b3d-047c24413a90}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
@@ -209,6 +215,24 @@
     <ClCompile Include="clsSymbolAndSyntax.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
+    <ClCompile Include="clsDBInterface.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="db_sqlite\sqlite3.c">
+      <Filter>Source Dateien\SQLite</Filter>
+    </ClCompile>
+    <ClCompile Include="clsPEFile.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsPEManager.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_clsPEManager.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_clsPEManager.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -313,6 +337,12 @@
     <CustomBuild Include="qtDLGWindowView.ui">
       <Filter>Form Dateien</Filter>
     </CustomBuild>
+    <CustomBuild Include="clsDBInterface.h">
+      <Filter>Header Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="clsPEManager.h">
+      <Filter>Header Dateien</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -368,6 +398,12 @@
     </ClInclude>
     <ClInclude Include="clsSymbolAndSyntax.h">
       <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsPEFile.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="db_sqlite\sqlite3.h">
+      <Filter>Header Dateien\SQLite</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

@@ -1,7 +1,6 @@
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGNanomite.h"
-
-#include <string>
+#include "clsPEManager.h"
 
 using namespace std;
 
@@ -14,7 +13,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(pbClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(pbAddUpdate,SIGNAL(clicked()),this,SLOT(OnAddUpdate()));
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
-
+	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
 }
 
 qtDLGBreakPointManager::~qtDLGBreakPointManager()
@@ -152,4 +151,44 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		cbBreakOn->setCurrentIndex(2);
 	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Write") == 0)
 		cbBreakOn->setCurrentIndex(1);
+}
+
+void qtDLGBreakPointManager::OnBPRemove()
+{
+	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+	QList <QTableWidgetItem *> selectedItems = tblBPs->selectedItems();
+	if(selectedItems.count() <= 0)
+		return;
+
+	DWORD dwType = 0;
+	for(int i = 0; i < tblBPs->rowCount(); i++)
+	{
+		if(selectedItems.value(i)->isSelected())
+		{
+			if(QString().compare(tblBPs->item(i,2)->text(),"Software BP - int3") == 0)
+				dwType = 0;
+			else if(QString().compare(tblBPs->item(i,2)->text(),"Hardware BP - Dr[0-3]") == 0)
+				dwType = 2;
+			else if(QString().compare(tblBPs->item(i,2)->text(),"Memory BP - Page Guard") == 0)
+				dwType = 1;
+
+			myMainWindow->coreDebugger->RemoveBPFromList(tblBPs->item(i,1)->text().toULongLong(0,16),dwType);
+			tblBPs->removeRow(i);
+			i = 0;
+		}
+	}
+}
+
+void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID,bool is64Bit)
+{
+	completerList.append(clsPEManager::getImportsFromFile(FilePath));
+	
+	QCompleter *completer = new QCompleter(completerList, this);
+	completer->setCaseSensitivity(Qt::CaseInsensitive);
+	leOffset->setCompleter(completer);
+}
+
+void qtDLGBreakPointManager::DeleteCompleterContent()
+{
+	completerList.clear();
 }

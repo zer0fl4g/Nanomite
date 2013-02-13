@@ -1,6 +1,8 @@
 #include "clsHelperClass.h"
+#include "clsDBInterface.h"
 #include "dbghelp.h"
 
+#include <TlHelp32.h>
 #include <fstream>
 #include <algorithm>
 
@@ -91,6 +93,9 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	wsprintf(cTemp,L"%s=%s\n",L"COLOR_STACK",qtNanomiteDisAsColor->colorStack.data());
 	outfile.write(cTemp,wcslen(cTemp));
 
+	wsprintf(cTemp,L"%s=%s\n",L"COLOR_MATH",qtNanomiteDisAsColor->colorMath.data());
+	outfile.write(cTemp,wcslen(cTemp));
+
 	outfile.close();
 	return true;
 }
@@ -154,7 +159,8 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 			qtNanomiteDisAsColor->colorMove = QString::fromStdWString(sSettingLine[1]);
 		else if(sSettingLine[0] == L"COLOR_STACK")
 			qtNanomiteDisAsColor->colorStack = QString::fromStdWString(sSettingLine[1]);
-
+		else if(sSettingLine[0] == L"COLOR_MATH")
+			qtNanomiteDisAsColor->colorMath = QString::fromStdWString(sSettingLine[1]);
 	}
 	infile.close();
 	return true;
@@ -211,6 +217,14 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 {
 	bool bTest = false;
 
+	clsDBInterface *pDB = clsDBInterface::GetInstance();
+	if(pDB != NULL)
+	{
+		if(pDB->DBAPI_getSymbols(dwOffset,sFuncName,sModName))
+			return true;
+	}
+
+
 	IMAGEHLP_MODULEW64 imgMod = {0};
 	imgMod.SizeOfStruct = sizeof(imgMod);
 	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
@@ -226,6 +240,29 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 	sModName = imgMod.ModuleName;
 
 	free(pSymbol);
-	return bTest;
+
+	if(pDB != NULL)
+		return pDB->DBAPI_insertSymbols(dwOffset,sModName,sFuncName);
+	else 
+		return true;
 }
 
+string clsHelperClass::convertWSTRtoSTR(wstring FileName)
+{
+	size_t newSize = wcstombs(NULL, FileName.c_str(), 0) + 2;
+	char* newStr = (char*)malloc(newSize);
+	wcstombs(newStr, FileName.c_str(), newSize);
+	string str = newStr;
+	free(newStr);
+	return str;
+}
+
+wstring clsHelperClass::convertSTRtoWSTR(string FileName)
+{
+	size_t newSize = mbstowcs(NULL, FileName.c_str(), 0) + 2;
+	wchar_t* newStr = (wchar_t*)malloc(newSize);
+	mbstowcs(newStr, FileName.c_str(), newSize);
+	wstring str = newStr;
+	free(newStr);
+	return str;
+}

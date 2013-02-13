@@ -73,13 +73,14 @@ void qtDLGOption::OnReload()
 	myMainWindow->qtNanomiteDisAsColor->colorStack = "Dark green";
 	myMainWindow->qtNanomiteDisAsColor->colorJump = "Blue";
 	myMainWindow->qtNanomiteDisAsColor->colorMove = "Gray";
+	myMainWindow->qtNanomiteDisAsColor->colorMath = "Magenta";
 
 	comboBP->setCurrentIndex(2);
 	comboCall->setCurrentIndex(3);
 	comboJump->setCurrentIndex(5);
 	comboMove->setCurrentIndex(13);
 	comboStack->setCurrentIndex(4);
-
+	comboMath->setCurrentIndex(9);
 
 	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
 
@@ -132,10 +133,10 @@ void qtDLGOption::OnSave()
 
 			if(!bExists)
 				myMainWindow->coreDebugger->CustomExceptionAdd(tblCustomExceptions->item(i,0)->text().toULong(0,16),
-					tblCustomExceptions->item(i,1)->text().toInt(),NULL);
+				tblCustomExceptions->item(i,1)->text().toInt(),NULL);
 			else
 				MessageBox(NULL,QString().sprintf("The exception : %08X does already exists!",tblCustomExceptions->item(i,0)->text().toULong()).toStdWString().c_str(),
-					L"Nanomite - Option",MB_OK);
+				L"Nanomite - Option",MB_OK);
 		}
 	}
 
@@ -144,7 +145,8 @@ void qtDLGOption::OnSave()
 	myMainWindow->qtNanomiteDisAsColor->colorStack = comboStack->currentText();
 	myMainWindow->qtNanomiteDisAsColor->colorJump = comboJump->currentText();
 	myMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
-	
+	myMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
+
 	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
 	MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
 }
@@ -169,11 +171,11 @@ void qtDLGOption::OnLoad()
 		rbDirect->setChecked(true);
 		break;
 	}
-	
+
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds);
-		cbDebugChild->setChecked(true);
+	cbDebugChild->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.dwSuspendType)
 		cbSuspendThread->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode)
@@ -201,21 +203,56 @@ void qtDLGOption::OnLoad()
 		}
 	}
 
-	//int itemIndex = NULL;
-	//itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP);
+	int itemIndex = NULL;
 
-	//if((itemIndex = comboBP->findText(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
-	//	comboBP->setCurrentIndex(itemIndex);
-	//
-	//if((itemIndex = comboCall->findText(myMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
-	//	comboCall->setCurrentIndex(itemIndex);
+	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
+		comboBP->setCurrentIndex(itemIndex);
 
-	//if((itemIndex = comboStack->findText(myMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
-	//	comboStack->setCurrentIndex(itemIndex);
+	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
+		comboCall->setCurrentIndex(itemIndex);
 
-	//if((itemIndex = comboJump->findText(myMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
-	//	comboJump->setCurrentIndex(itemIndex);
+	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
+		comboStack->setCurrentIndex(itemIndex);
 
-	//if((itemIndex = comboMove->findText(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
-	//	comboMove->setCurrentIndex(itemIndex);
+	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
+		comboJump->setCurrentIndex(itemIndex);
+
+	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
+		comboMove->setCurrentIndex(itemIndex);
+}
+
+int qtDLGOption::getIndex(QString itemColor)
+{
+	if(itemColor.compare("White") == 0)
+		return 0;
+	else if(itemColor.compare("Black") == 0)
+		return 1;
+	else if(itemColor.compare("Red") == 0)
+		return 2;
+	else if(itemColor.compare("Green") == 0)
+		return 3;
+	else if(itemColor.compare("Dark green") == 0)
+		return 4;
+	else if(itemColor.compare("Blue") == 0)
+		return 5;
+	else if(itemColor.compare("Dark blue") == 0)
+		return 6;
+	else if(itemColor.compare("Cyan") == 0)
+		return 7;
+	else if(itemColor.compare("Dark cyan") == 0)
+		return 8;
+	else if(itemColor.compare("Magenta") == 0)
+		return 9;
+	else if(itemColor.compare("Dark magenta") == 0)
+		return 10;
+	else if(itemColor.compare("Yellow") == 0)
+		return 11;
+	else if(itemColor.compare("Dark yellow") == 0)
+		return 12;
+	else if(itemColor.compare("Gray") == 0)
+		return 13;
+	else if(itemColor.compare("Dark gray") == 0)
+		return 14;
+	else if(itemColor.compare("Light gray") == 0)
+		return 15;
 }

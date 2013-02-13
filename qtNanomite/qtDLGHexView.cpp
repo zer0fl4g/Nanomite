@@ -24,8 +24,8 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 		dwBaseOffset = StartOffset;
 	HANDLE hProcess = NULL;
 	LPVOID pBuffer = malloc(Size);
-	TCHAR *tcTempBuffer = (PTCHAR)malloc(255 * sizeof(255)),
-		*tcAsciiHexTemp = (PTCHAR)malloc(255 * sizeof(255));
+	TCHAR *tcTempBuffer = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
+		*tcAsciiHexTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 	tblHexView->setRowCount(0);
 

@@ -17,11 +17,12 @@
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
 #include "clsSymbolAndSyntax.h"
+#include "clsDBInterface.h"
 
 #ifdef _DEBUG
-	#define _CRTDBG_MAP_ALLOC
-	#include <stdlib.h>
-	#include <crtdbg.h>
+#define _CRTDBG_MAP_ALLOC
+#include <stdlib.h>
+#include <crtdbg.h>
 #endif
 
 using namespace std;
@@ -35,7 +36,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	QWidget *midWid = new QWidget;
 	midWid->setLayout(mainLayout);
 	setCentralWidget(midWid);
-	
+
 	QApplication::setStyle(new QPlastiqueStyle);
 
 	qRegisterMetaType<DWORD>("DWORD");
@@ -47,6 +48,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	coreDebugger = new clsDebugger;
 	coreDisAs = new clsDisassembler;
+	PEManager = new clsPEManager;
 	clsCallbacks *NanomiteCallbacks = new clsCallbacks;
 	dlgDetInfo = new qtDLGDetailInfo(this,Qt::Window);
 	dlgDbgStr = new qtDLGDebugStrings(this,Qt::Window);
@@ -54,13 +56,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;
 
-	//
-	qtNanomiteDisAsColor->colorBP = "red";
-	qtNanomiteDisAsColor->colorCall = "green";
-	qtNanomiteDisAsColor->colorStack = "dark green";
-	qtNanomiteDisAsColor->colorJump = "blue";
-	qtNanomiteDisAsColor->colorMove = "grey";
-	//
 	InitListSizes();
 
 	qtDLGMyWindow = this;
@@ -78,8 +73,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 		NanomiteCallbacks,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDll(std::wstring,DWORD,quint64,bool)),
 		NanomiteCallbacks,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnLog(tm*,std::wstring)),
-		NanomiteCallbacks,SLOT(OnLog(tm*,std::wstring)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),
+		NanomiteCallbacks,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),
 		NanomiteCallbacks,SLOT(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
@@ -121,6 +116,15 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// GUI Shortcuts
 	connect(new QShortcut(QKeySequence("F2"),this),SIGNAL(activated()),this,SLOT(OnF2BreakPointPlace()));
 	connect(new QShortcut(QKeySequence("F4"),this),SIGNAL(activated()),this,SLOT(OnPrintMemoryLeaks()));
+
+	// Callbacks from Debugger to PEManager
+	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int,bool)),PEManager,SLOT(InsertPIDForFile(std::wstring,int,bool)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
+
+	// Callbacks from Debugger to BPManager
+	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int,bool)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int,bool)),Qt::QueuedConnection);
+
 }
 
 qtDLGNanomite::~qtDLGNanomite()
@@ -147,6 +151,14 @@ void qtDLGNanomite::action_FileOpenNewFile()
 
 	coreDebugger->RemoveBPs();
 	clsHelperClass::MenuLoadNewFile(coreDebugger);
+	PEManager->OpenFile(coreDebugger->GetTarget());
+	if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+	{
+		MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+		PEManager->CloseFile(coreDebugger->GetTarget(),0);
+		coreDebugger->ClearTarget();
+		return;
+	}
 
 	CleanGUI();
 	UpdateStateBar(0x3);
@@ -156,9 +168,9 @@ void qtDLGNanomite::action_FileAttachTo()
 {
 	if(!coreDebugger->GetDebuggingState())
 	{
-		 qtDLGAttach newAttaching;
-		 connect(&newAttaching,SIGNAL(StartAttachedDebug(int)),this,SLOT(action_DebugAttachStart(int)));
-		 newAttaching.exec();
+		qtDLGAttach newAttaching;
+		connect(&newAttaching,SIGNAL(StartAttachedDebug(int,QString)),this,SLOT(action_DebugAttachStart(int,QString)));
+		newAttaching.exec();
 	}
 }
 
@@ -180,8 +192,32 @@ void qtDLGNanomite::action_DebugStart()
 		CleanGUI();
 
 		if(!coreDebugger->IsTargetSet())
-				if(!clsHelperClass::MenuLoadNewFile(coreDebugger))
-					return;
+		{
+			if(!clsHelperClass::MenuLoadNewFile(coreDebugger))
+				return;
+			coreDebugger->ClearCommandLine();
+		}
+
+		PEManager->OpenFile(coreDebugger->GetTarget());
+		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+		{
+			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			coreDebugger->ClearTarget();
+			return;
+		}
+
+		if(coreDebugger->GetCMDLine().size() <= 0)
+		{
+			bool bOk = false;
+			QString strNewCommandLine = QInputDialog::getText(this,"CommandLine:","",QLineEdit::Normal,NULL,&bOk);
+
+			if(bOk && !strNewCommandLine.isEmpty())
+			{
+				wstring *tempStr = new wstring(strNewCommandLine.toStdWString());
+				coreDebugger->SetCommandLine(*tempStr);
+			}
+		}
 
 		coreDebugger->start();
 
@@ -194,12 +230,23 @@ void qtDLGNanomite::action_DebugStart()
 	}
 }
 
-void qtDLGNanomite::action_DebugAttachStart(int iPID)
+void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 {
 	if(!coreDebugger->GetDebuggingState())
 	{
 		CleanGUI();
 
+		wstring *filePath = new wstring(FilePath.toStdWString());
+
+		PEManager->OpenFile(*filePath);
+		if(!PEManager->isValidPEFile(*filePath))
+		{
+			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			return;
+		}
+
+		coreDebugger->SetTarget(*filePath);
 		coreDebugger->AttachToProcess(iPID);
 		coreDebugger->start();
 
@@ -220,7 +267,19 @@ void qtDLGNanomite::action_DebugRestart()
 
 	CleanGUI();
 	if(coreDebugger->IsTargetSet())
+	{
+		PEManager->OpenFile(coreDebugger->GetTarget());
+
+		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+		{
+			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			coreDebugger->ClearTarget();
+			return;
+		}
+
 		coreDebugger->start();
+	}
 }
 
 void qtDLGNanomite::action_DebugSuspend()
@@ -264,7 +323,7 @@ void qtDLGNanomite::action_DebugStepOver()
 	BOOL bIsWOW64 = false;
 	if(clsAPIImport::pIsWow64Process)
 		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-	
+
 	if(bIsWOW64)
 		dwEIP = coreDebugger->wowProcessContext.Eip;
 	else
@@ -276,7 +335,7 @@ void qtDLGNanomite::action_DebugStepOver()
 	++i;
 	if((QMapData::Node *)i == (QMapData::Node *)coreDisAs->SectionDisAs.constEnd())
 		coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
-	
+
 	coreDebugger->StepOver(i.value().Offset.toULongLong(0,16));
 }
 
@@ -308,7 +367,7 @@ void qtDLGNanomite::action_WindowShowMemory()
 	{
 		_iMenuPID = -1;
 		actionWindow_Show_Memory->setDisabled(true);
-	
+
 		GenerateMenu();
 
 		if(_iMenuPID >= 0)
@@ -328,7 +387,7 @@ void qtDLGNanomite::action_WindowShowHeap()
 	{
 		_iMenuPID = -1;
 		actionWindow_Show_Heap->setDisabled(true);
-	
+
 		GenerateMenu();
 
 		if(_iMenuPID >= 0)
@@ -348,7 +407,7 @@ void qtDLGNanomite::action_WindowShowStrings()
 	{
 		_iMenuPID = -1;
 		actionWindow_Show_Strings->setDisabled(true);
-	
+
 		GenerateMenu();
 
 		if(_iMenuPID >= 0)
@@ -373,7 +432,7 @@ void qtDLGNanomite::action_WindowShowHandles()
 	{
 		_iMenuPID = -1;
 		actionWindow_Show_Handles->setDisabled(true);
-	
+
 		GenerateMenu();
 
 		if(_iMenuPID >= 0)
@@ -393,7 +452,7 @@ void qtDLGNanomite::action_WindowShowWindows()
 	{
 		_iMenuPID = -1;
 		actionWindow_Show_Windows->setDisabled(true);
-	
+
 		GenerateMenu();
 
 		if(_iMenuPID >= 0)
@@ -423,7 +482,7 @@ void qtDLGNanomite::OnDebuggerBreak()
 		BOOL bIsWOW64 = false;
 		if(clsAPIImport::pIsWow64Process)
 			clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-		
+
 		if(bIsWOW64)
 		{
 			dwEIP = coreDebugger->wowProcessContext.Eip;
@@ -826,14 +885,14 @@ void qtDLGNanomite::LoadRegView()
 #endif
 
 	BOOL bCF = false, // Carry Flag
-		 bPF = false, // Parity Flag
-		 bAF = false, // Auxiliarty carry flag
-		 bZF = false, // Zero Flag
-		 bSF = false, // Sign Flag
-		 bTF = false, // Trap Flag
-		 bIF = false, // Interrupt Flag
-		 bDF = false, // Direction Flag
-		 bOF = false; // Overflow Flag
+		bPF = false, // Parity Flag
+		bAF = false, // Auxiliarty carry flag
+		bZF = false, // Zero Flag
+		bSF = false, // Sign Flag
+		bTF = false, // Trap Flag
+		bIF = false, // Interrupt Flag
+		bDF = false, // Direction Flag
+		bOF = false; // Overflow Flag
 
 	bOF = (dwEFlags & 0x800) ? true : false;
 	bDF = (dwEFlags & 0x400) ? true : false;
@@ -885,7 +944,7 @@ void qtDLGNanomite::CleanGUI()
 	tblCallstack->setRowCount(0);
 	tblDisAs->setRowCount(0);
 	tblRegView->setRowCount(0);
-	
+
 	dlgDetInfo->tblPIDs->setRowCount(0);
 	dlgDetInfo->tblTIDs->setRowCount(0);
 	dlgDetInfo->tblExceptions->setRowCount(0);
@@ -900,6 +959,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 {
 	UpdateStateBar(0x3);
 	coreDisAs->SectionDisAs.clear();
+	dlgBPManager->DeleteCompleterContent();
 }
 
 void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
@@ -933,7 +993,9 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 	{
 		tblDisAs->setRowCount(0);
 
+		bool IsAlreadyEIPSet = false;
 		int iLines = 0;
+
 		QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
 		QMap<QString,DisAsDataRow>::const_iterator iEnd = coreDisAs->SectionDisAs.constEnd();--iEnd;
 
@@ -953,23 +1015,26 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 			--i;
 		}
 
-		
+
 		quint64 itemStyle;
 		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 14) - 2)
 		{
 			itemStyle = i.value().itemStyle;
 			tblDisAs->insertRow(tblDisAs->rowCount());
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 0,
-				new QTableWidgetItem(i.value().Offset));
-			if(itemStyle & COLOR_BP)
+			tblDisAs->setItem(tblDisAs->rowCount() - 1, 0,new QTableWidgetItem(i.value().Offset));
+			if(clsDebugger::IsOffsetAnBP(i.value().Offset.toULongLong(0,16)))
 				tblDisAs->item(tblDisAs->rowCount() - 1,0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 1,
-				new QTableWidgetItem(i.value().OpCodes));
+			if(!IsAlreadyEIPSet && clsDebugger::IsOffsetEIP(i.value().Offset.toULongLong(0,16)))
+			{
+				tblDisAs->item(tblDisAs->rowCount() - 1,0)->setBackground(QColor("Magenta"));
+				IsAlreadyEIPSet = true;
+			}
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 2,
-				new QTableWidgetItem(i.value().ASM));
+			tblDisAs->setItem(tblDisAs->rowCount() - 1, 1,new QTableWidgetItem(i.value().OpCodes));
+
+			tblDisAs->setItem(tblDisAs->rowCount() - 1, 2,new QTableWidgetItem(i.value().ASM));
 			if(itemStyle & COLOR_CALLS)
 				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorCall));
 			else if(itemStyle & COLOR_JUMP)
@@ -978,16 +1043,17 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMove));
 			else if(itemStyle & COLOR_STACK)
 				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorStack));
+			else if(itemStyle & COLOR_MATH)
+				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMath));
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 3,
-				new QTableWidgetItem(i.value().Comment));
+			tblDisAs->setItem(tblDisAs->rowCount() - 1, 3,new QTableWidgetItem(i.value().Comment));
 
 			if(!i.value().Offset.isEmpty() && i.value().Offset.compare(iEnd.value().Offset) == 0)
 			{
 				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),iEnd.value().Offset.toULongLong(0,16));
 				return;
 			}
-			
+
 			++iLines;++i;
 		}
 	}
@@ -1032,7 +1098,7 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 	{
 		bool bOk = false;
 		QString strNewOffset = QInputDialog::getText(this,"Please give a Offset:","VA:",QLineEdit::Normal,NULL,&bOk);
-		
+
 		if(bOk && !strNewOffset.isEmpty())
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),strNewOffset.toULongLong(0,16)))
 				OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));		
@@ -1043,17 +1109,17 @@ void qtDLGNanomite::OnRegViewChangeRequest(QTableWidgetItem *pItem)
 {
 	if(!coreDebugger->GetDebuggingState())
 		return;
-	
+
 	qtDLGRegEdit *newRegEditWindow;
 #ifdef _AMD64_
-		BOOL bIsWOW64 = false;
-		if(clsAPIImport::pIsWow64Process)
-			clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-		
-		if(bIsWOW64)
-			newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->wowProcessContext,false);
-		else
-			newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->ProcessContext,true);			
+	BOOL bIsWOW64 = false;
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+
+	if(bIsWOW64)
+		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->wowProcessContext,false);
+	else
+		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->ProcessContext,true);			
 #else
 	newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->ProcessContext,false);			
 #endif	
@@ -1075,7 +1141,7 @@ void qtDLGNanomite::OnF2BreakPointPlace()
 
 	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
 	if(coreDebugger->AddBreakpointToList(NULL,DR_EXECUTE,-1,dwSelectedVA,NULL,true))
-		currentSelectedItems.value(0)->setForeground(Qt::red);
+		currentSelectedItems.value(0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 
 	return;
 }

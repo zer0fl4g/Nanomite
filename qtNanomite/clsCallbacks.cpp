@@ -8,8 +8,13 @@ clsCallbacks::clsCallbacks() {}
 
 clsCallbacks::~clsCallbacks(){}
 
-int clsCallbacks::OnLog(tm *timeInfo,wstring sLog)
+int clsCallbacks::OnLog(wstring sLog)
 {
+	time_t tTime;
+	tm* timeInfo;
+	time(&tTime);
+	timeInfo = localtime(&tTime);
+
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 	myMainWindow->tblLogBox->insertRow(myMainWindow->tblLogBox->rowCount());
 	

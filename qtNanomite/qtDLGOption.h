@@ -21,6 +21,8 @@ public:
 
 private:
 	void OnLoad();
+
+	int getIndex(QString itemColor);
 };
 
 #endif

@@ -7,6 +7,7 @@
 
 #include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
+#include "clsPEManager.h"
 
 #include "ui_qtDLGNanomite.h"
 
@@ -16,12 +17,13 @@ Q_DECLARE_METATYPE (std::wstring)
 Q_DECLARE_METATYPE (BPStruct)
 
 struct qtNanomiteDisAsColorSettings
-{
+{ 
 	QString colorBP;
 	QString colorCall;
 	QString colorMove;
 	QString colorJump;
 	QString colorStack;
+	QString colorMath;
 };
 
 class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
@@ -34,6 +36,7 @@ public:
 	long lExceptionCount;
 	clsDebugger *coreDebugger;
 	clsDisassembler *coreDisAs;
+	clsPEManager *PEManager;
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;
 	qtDLGBreakPointManager *dlgBPManager;
@@ -48,7 +51,7 @@ private slots:
 	void action_FileDetach();
 	void action_FileTerminateGUI();
 	void action_DebugStart();
-	void action_DebugAttachStart(int iPID);
+	void action_DebugAttachStart(int iPID,QString FilePath);
 	void action_DebugStop();
 	void action_DebugRestart();
 	void action_DebugSuspend();

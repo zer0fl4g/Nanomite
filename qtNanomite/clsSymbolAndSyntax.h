@@ -8,6 +8,7 @@
 #define COLOR_JUMP		4
 #define COLOR_MOVE		8
 #define COLOR_STACK		16
+#define COLOR_MATH		32
 
 class clsSymbolAndSyntax
 {
@@ -16,7 +17,7 @@ public:
 	~clsSymbolAndSyntax();
 
 	bool CreateDataForRow(DisAsDataRow *pDataRow); 
-	bool IsOffsetAnBP(quint64 Offset);
+	bool IsEIP(quint64 Offset);
 
 	QString CreateSymbols(quint64 FuncOffset);
 	

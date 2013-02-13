@@ -15,7 +15,7 @@ public:
 	static bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam);
 
 public slots:
-		int OnLog(tm *timeInfo,std::wstring sLog);
+		int OnLog(std::wstring sLog);
 		int OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 		int OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
 		int OnException(std::wstring sFuncName,std::wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
