@@ -1,6 +1,8 @@
 #include "qtDLGHexView.h"
 #include "qtDLGNanomite.h"
 
+#include "clsMemManager.h"
+
 #include <Windows.h>
 
 qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID, unsigned long long StartOffset,unsigned long long Size)
@@ -24,8 +26,8 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 		dwBaseOffset = StartOffset;
 	HANDLE hProcess = NULL;
 	LPVOID pBuffer = malloc(Size);
-	TCHAR *tcTempBuffer = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
-		*tcAsciiHexTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	TCHAR *tcTempBuffer = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),
+		*tcAsciiHexTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
 	tblHexView->setRowCount(0);
 
@@ -40,17 +42,17 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 
 	if(!VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,PAGE_EXECUTE_READWRITE,&dwProtection))
 	{
-		free(pBuffer);
-		free(tcAsciiHexTemp);
-		free(tcTempBuffer);
+		clsMemManager::CFree(pBuffer);
+		clsMemManager::CFree(tcAsciiHexTemp);
+		clsMemManager::CFree(tcTempBuffer);
 		return;
 	}
 
 	if(!ReadProcessMemory(hProcess,(LPVOID)StartOffset,(LPVOID)pBuffer,Size,&dwBytesRead))
 	{
-		free(pBuffer);
-		free(tcAsciiHexTemp);
-		free(tcTempBuffer);
+		clsMemManager::CFree(pBuffer);
+		clsMemManager::CFree(tcAsciiHexTemp);
+		clsMemManager::CFree(tcTempBuffer);
 		return;
 	}
 
@@ -108,9 +110,9 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 
 	VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,dwProtection,NULL);
 
-	free(pBuffer);
-	free(tcAsciiHexTemp);
-	free(tcTempBuffer);
+	clsMemManager::CFree(pBuffer);
+	clsMemManager::CFree(tcAsciiHexTemp);
+	clsMemManager::CFree(tcTempBuffer);
 }
 
 qtDLGHexView::~qtDLGHexView()

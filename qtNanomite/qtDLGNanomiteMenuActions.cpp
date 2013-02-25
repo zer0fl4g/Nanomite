@@ -1,0 +1,421 @@
+#include "qtDLGNanomite.h"
+#include "qtDLGAbout.h"
+#include "qtDLGAttach.h"
+#include "qtDLGOption.h"
+#include "qtDLGMemoryView.h"
+#include "qtDLGHeapView.h"
+#include "qtDLGStringView.h"
+#include "qtDLGHandleView.h"
+#include "qtDLGWindowView.h"
+#include "qtDLGHexView.h"
+#include "qtDLGRegEdit.h"
+#include "qtDLGPEEditor.h"
+
+#include "clsHelperClass.h"
+#include "clsDisassembler.h"
+#include "clsAPIImport.h"
+#include "clsMemManager.h"
+
+using namespace std;
+
+void qtDLGNanomite::action_FileTerminateGUI()
+{
+	if(coreDebugger->GetDebuggingState())
+		coreDebugger->StopDebuggingAll();
+	close();
+}
+
+void qtDLGNanomite::action_FileOpenNewFile()
+{
+	if(coreDebugger->GetDebuggingState())
+		coreDebugger->StopDebuggingAll();
+
+	coreDebugger->RemoveBPs();
+	coreDebugger->ClearTarget();
+	coreDebugger->ClearCommandLine();
+	
+	action_DebugStart();
+}
+
+void qtDLGNanomite::action_FileAttachTo()
+{
+	if(!coreDebugger->GetDebuggingState())
+	{
+		qtDLGAttach newAttaching;
+		connect(&newAttaching,SIGNAL(StartAttachedDebug(int,QString)),this,SLOT(action_DebugAttachStart(int,QString)));
+		newAttaching.exec();
+	}
+}
+
+void qtDLGNanomite::action_FileDetach()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		if(!coreDebugger->DetachFromProcess())
+			MessageBox(NULL,L"Failed to detach from Process!",L"Nanomite",MB_OK);
+		else
+			UpdateStateBar(0x3);
+	}
+}
+
+void qtDLGNanomite::action_DebugStart()
+{
+	if(!coreDebugger->GetDebuggingState())
+	{
+		CleanGUI();
+
+		if(!coreDebugger->IsTargetSet())
+		{
+			if(!clsHelperClass::MenuLoadNewFile(coreDebugger))
+				return;
+			coreDebugger->ClearCommandLine();
+		}
+
+		PEManager->OpenFile(coreDebugger->GetTarget());
+		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+		{
+			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			coreDebugger->ClearTarget();
+			return;
+		}
+
+		if(coreDebugger->GetCMDLine().size() <= 0)
+		{
+			bool bOk = false;
+			QString strNewCommandLine = QInputDialog::getText(this,"CommandLine:","",QLineEdit::Normal,NULL,&bOk);
+
+			if(bOk && !strNewCommandLine.isEmpty())
+			{
+				wstring *tempStr = new wstring(strNewCommandLine.toStdWString());
+				coreDebugger->SetCommandLine(*tempStr);
+			}
+		}
+
+		coreDebugger->start();
+
+		UpdateStateBar(0x1);
+	}
+	else
+	{
+		coreDebugger->ResumeDebugging();
+		UpdateStateBar(0x1);
+	}
+}
+
+void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
+{
+	if(!coreDebugger->GetDebuggingState())
+	{
+		CleanGUI();
+
+		wstring *filePath = new wstring(FilePath.toStdWString());
+
+		PEManager->OpenFile(*filePath);
+		if(!PEManager->isValidPEFile(*filePath))
+		{
+			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			return;
+		}
+
+		coreDebugger->SetTarget(*filePath);
+		coreDebugger->AttachToProcess(iPID);
+		coreDebugger->start();
+
+		UpdateStateBar(0x1);
+	}
+}
+
+void qtDLGNanomite::action_DebugStop()
+{
+	if(coreDebugger->GetDebuggingState())
+		coreDebugger->StopDebuggingAll();
+	PEManager->CleanPEManager();
+}
+
+void qtDLGNanomite::action_DebugRestart()
+{
+	if(coreDebugger->GetDebuggingState())
+		coreDebugger->StopDebuggingAll();
+	PEManager->CleanPEManager();
+	CleanGUI();
+	
+	if(coreDebugger->IsTargetSet())
+	{
+		PEManager->OpenFile(coreDebugger->GetTarget());
+
+		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+		{
+			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			coreDebugger->ClearTarget();
+			return;
+		}
+
+		coreDebugger->start();
+	}
+}
+
+void qtDLGNanomite::action_DebugSuspend()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionDebug_Suspend->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID == 0)
+		{
+			coreDebugger->SuspendDebuggingAll();
+			UpdateStateBar(0x2);
+		}
+		else
+		{
+			coreDebugger->SuspendDebugging(_iMenuPID);
+			UpdateStateBar(0x2);
+		}
+
+		actionDebug_Suspend->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_DebugStepIn()
+{
+	if(coreDebugger->GetDebuggingState())
+		coreDebugger->StepIn();
+}
+
+void qtDLGNanomite::action_DebugStepOver()
+{
+	DWORD eFlags = NULL;
+	quint64 dwEIP = NULL;
+#ifdef _AMD64_
+	BOOL bIsWOW64 = false;
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+
+	if(bIsWOW64)
+	{
+		dwEIP = coreDebugger->wowProcessContext.Eip;
+		eFlags = coreDebugger->wowProcessContext.EFlags;
+	}
+	else
+	{
+		dwEIP = coreDebugger->ProcessContext.Rip;
+		eFlags = coreDebugger->ProcessContext.EFlags;
+	}
+#else
+	dwEIP = coreDebugger->ProcessContext.Eip;
+	eFlags = coreDebugger->ProcessContext.EFlags;
+#endif
+
+	QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
+	
+	bool bOF = (eFlags & 0x800) ? true : false;
+	bool bDF = (eFlags & 0x400) ? true : false;
+	bool bTF = (eFlags & 0x100) ? true : false;
+	bool bSF = (eFlags & 0x80) ? true : false;
+	bool bZF = (eFlags & 0x40) ? true : false;
+	bool bAF = (eFlags & 0x10) ? true : false;
+	bool bPF = (eFlags & 0x4) ? true : false;
+	bool bCF = (eFlags & 0x1) ? true : false;
+
+	// based on http://download.intel.com/products/processor/manual/325462.pdf
+		// jmp - always
+	if((i.value().ASM.contains("jmp"))																				||
+		// of = 1, jo
+		(i.value().ASM.contains("jo") && bOF)																		||
+		// of = 0, jno
+		(i.value().ASM.contains("jno") && !bOF)																		||
+		// sf = 1, js
+		((i.value().ASM.contains("js") && bSF))																		||
+		// sf = 0, jns
+		((i.value().ASM.contains("jns") && !bSF))																	||
+		// zf = 1, jz - je
+		((i.value().ASM.contains("jz") || i.value().ASM.contains("je")) && bZF)										||
+		// pf = 1, jp - jpe
+		((i.value().ASM.contains("jp") || i.value().ASM.contains("jpe")) && bPF)									||
+		// pf = 0, jnp - jpo 
+		((i.value().ASM.contains("jnp") || i.value().ASM.contains("jpo")) && !bPF)									||
+		// zf = 0, jnz - jne
+		((i.value().ASM.contains("jnz") || i.value().ASM.contains("jne")) && !bZF)									||
+		// sf != of, jl - jnge
+		((i.value().ASM.contains("jl") || i.value().ASM.contains("jnge")) && (bSF != bOF))							||
+		// sf == of, jnl - jge
+		((i.value().ASM.contains("jnl") || i.value().ASM.contains("jge")) && (bSF == bOF))							||
+		// cf = 1 + zf = 1, jbe - jna
+		((i.value().ASM.contains("jbe") || i.value().ASM.contains("jna")) && (bZF && bCF))							||
+		// cf = 0 + zf = 0, jnbe - ja
+		((i.value().ASM.contains("jnbe") || i.value().ASM.contains("ja")) && (!bZF && !bCF))						||
+		// zf = 1 || sf != of, jle - jng
+		((i.value().ASM.contains("jle") || i.value().ASM.contains("jng")) && (bZF && bSF != bOF))					||
+		// zf = 0 && sf == of, jnle - jg
+		((i.value().ASM.contains("jnle") || i.value().ASM.contains("jg")) && (!bZF && bSF == bOF))					||
+		// cf = 1, jb - jc - jnae
+		((i.value().ASM.contains("jb") || i.value().ASM.contains("jc") || i.value().ASM.contains("jnae")) && bCF)	||
+		// cf = 0, jnb - jae - jnc
+		((i.value().ASM.contains("jnb") || i.value().ASM.contains("jnc") || i.value().ASM.contains("jae")) && !bCF))
+	{
+		// jump conditions are set so lets step over jump
+		coreDebugger->StepOver(i.value().ASM.split(" ")[1].replace("h","").toULongLong(0,16));
+	}
+	else
+	{
+		// normal step over
+		++i;
+		if((QMapData::Node *)i == (QMapData::Node *)coreDisAs->SectionDisAs.constEnd())
+			coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
+
+		coreDebugger->StepOver(i.value().Offset.toULongLong(0,16));
+	}
+}
+
+void qtDLGNanomite::action_OptionsAbout()
+{
+	qtDLGAbout DLGAbout;
+	DLGAbout.exec();
+}
+
+void qtDLGNanomite::action_OptionsOptions()
+{
+	qtDLGOption newOption;
+	newOption.exec();
+}
+
+void qtDLGNanomite::action_WindowDetailInformation()
+{
+	dlgDetInfo->show();
+}
+
+void qtDLGNanomite::action_WindowBreakpointManager()
+{
+	dlgBPManager->show();
+}
+
+void qtDLGNanomite::action_WindowShowMemory()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Memory->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGMemoryView *dlgMemory = new qtDLGMemoryView(this,Qt::Window,_iMenuPID);
+			dlgMemory->show();
+		}
+
+		actionWindow_Show_Memory->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowHeap()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Heap->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGHeapView *dlgHeap = new qtDLGHeapView(this,Qt::Window,_iMenuPID);
+			dlgHeap->show();
+		}
+
+		actionWindow_Show_Heap->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowStrings()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Strings->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGStringView *dlgString = new qtDLGStringView(this,Qt::Window,_iMenuPID);
+			dlgString->show();
+		}
+
+		actionWindow_Show_Strings->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowDebugOutput()
+{
+	dlgDbgStr->show();
+}
+
+void qtDLGNanomite::action_WindowShowHandles()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Handles->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGHandleView *dlgHandle = new qtDLGHandleView(this,Qt::Window,_iMenuPID);
+			dlgHandle->show();
+		}
+
+		actionWindow_Show_Handles->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowWindows()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Windows->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGWindowView *dlgWindows = new qtDLGWindowView(this,Qt::Window,_iMenuPID);
+			dlgWindows->show();
+		}
+
+		actionWindow_Show_Windows->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowPEEditor()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_PEEditor->setDisabled(true);
+
+		GenerateMenu(false);
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(PEManager,this,Qt::Window,_iMenuPID);
+			dlgPEEditor->show();
+		}
+
+		actionWindow_Show_PEEditor->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}

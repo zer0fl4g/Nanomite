@@ -1,9 +1,11 @@
 ﻿
 Microsoft Visual Studio Solution File, Format Version 11.00
 # Visual Studio 2010
-Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "Debugme", "Debugme\Debugme.vcxproj", "{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}"
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "DebugMe.WinAPI", "Debugme\Debugme.vcxproj", "{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qtNanomite", "qtNanomite\qtNanomite.vcxproj", "{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugMe.NET", "DotNetDebugMe\DebugMe.NET.csproj", "{63B08CA5-4563-4A73-8549-4DBC101A6D4A}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -14,13 +16,9 @@ Global
 	EndGlobalSection
 	GlobalSection(ProjectConfigurationPlatforms) = postSolution
 		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Debug|Win32.ActiveCfg = Debug|Win32
-		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Debug|Win32.Build.0 = Debug|Win32
 		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Debug|x64.ActiveCfg = Debug|x64
-		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Debug|x64.Build.0 = Debug|x64
 		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Release|Win32.ActiveCfg = Release|Win32
-		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Release|Win32.Build.0 = Release|Win32
 		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Release|x64.ActiveCfg = Release|x64
-		{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}.Release|x64.Build.0 = Release|x64
 		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|Win32.ActiveCfg = Debug|Win32
 		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|Win32.Build.0 = Debug|Win32
 		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Debug|x64.ActiveCfg = Debug|x64
@@ -29,6 +27,10 @@ Global
 		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Release|Win32.Build.0 = Release|Win32
 		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Release|x64.ActiveCfg = Release|x64
 		{EB27501E-3FA6-4559-82C4-FF4E9D19CF75}.Release|x64.Build.0 = Release|x64
+		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Debug|Win32.ActiveCfg = Debug|x86
+		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Debug|x64.ActiveCfg = Debug|x64
+		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Release|Win32.ActiveCfg = Release|x86
+		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Release|x64.ActiveCfg = Release|x86
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

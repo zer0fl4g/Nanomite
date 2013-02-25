@@ -1,15 +1,6 @@
 #include <QShortcut>
 
 #include "qtDLGNanomite.h"
-#include "qtDLGAbout.h"
-#include "qtDLGAttach.h"
-#include "qtDLGOption.h"
-#include "qtDLGMemoryView.h"
-#include "qtDLGHeapView.h"
-#include "qtDLGStringView.h"
-#include "qtDLGHandleView.h"
-#include "qtDLGWindowView.h"
-#include "qtDLGHexView.h"
 #include "qtDLGRegEdit.h"
 
 #include "clsCallbacks.h"
@@ -18,12 +9,7 @@
 #include "clsAPIImport.h"
 #include "clsSymbolAndSyntax.h"
 #include "clsDBInterface.h"
-
-#ifdef _DEBUG
-#define _CRTDBG_MAP_ALLOC
-#include <stdlib.h>
-#include <crtdbg.h>
-#endif
+#include "clsMemManager.h"
 
 using namespace std;
 
@@ -49,10 +35,12 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	coreDebugger = new clsDebugger;
 	coreDisAs = new clsDisassembler;
 	PEManager = new clsPEManager;
+	DBManager = new clsDBManager;
 	clsCallbacks *NanomiteCallbacks = new clsCallbacks;
 	dlgDetInfo = new qtDLGDetailInfo(this,Qt::Window);
 	dlgDbgStr = new qtDLGDebugStrings(this,Qt::Window);
 	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
+	dlgSourceViewer = new qtDLGSourceViewer(this,Qt::Window);
 
 	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;
 
@@ -105,365 +93,56 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Debug_Output, SIGNAL(triggered()), this, SLOT(action_WindowShowDebugOutput()));
 	connect(actionWindow_Show_Handles, SIGNAL(triggered()), this, SLOT(action_WindowShowHandles()));
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
+	//connect(actionWindow_Show_PEEditor, SIGNAL(triggered()), this, SLOT(action_WindowShowPEEditor()));
 
 	// Actions on Window Events
 	connect(tblDisAs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomDisassemblerContextMenu(QPoint)));
 	connect(tblRegView,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnRegViewChangeRequest(QTableWidgetItem *)));
+	connect(tblCallstack,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnCallstackDisplaySource(QTableWidgetItem *)));
+	connect(tblCallstack,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomCallstackContextMenu(QPoint)));
 	connect(tblRegView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomRegViewContextMenu(QPoint)));
+	connect(tblLogBox,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomLogContextMenu(QPoint)));
 	connect(scrollStackView,SIGNAL(valueChanged(int)),this,SLOT(OnStackScroll(int)));
 	connect(scrollDisAs,SIGNAL(valueChanged(int)),this,SLOT(OnDisAsScroll(int)));
 
 	// GUI Shortcuts
 	connect(new QShortcut(QKeySequence("F2"),this),SIGNAL(activated()),this,SLOT(OnF2BreakPointPlace()));
-	connect(new QShortcut(QKeySequence("F4"),this),SIGNAL(activated()),this,SLOT(OnPrintMemoryLeaks()));
+	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnDisAsReturnPressed()));
+	connect(new QShortcut(QKeySequence("Backspace"),this),SIGNAL(activated()),this,SLOT(OnDisAsReturn()));
 
 	// Callbacks from Debugger to PEManager
-	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int,bool)),PEManager,SLOT(InsertPIDForFile(std::wstring,int,bool)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
 
-	// Callbacks from Debugger to BPManager
-	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int,bool)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int,bool)),Qt::QueuedConnection);
+	// Callbacks from GUI to SourceViewer
+	connect(this,SIGNAL(OnDisplaySource(QString,int)),dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));
 
+	// eventFilter for mouse scroll
+	tblDisAs->installEventFilter(this);
+    tblDisAs->viewport()->installEventFilter(this);
+
+	tblStack->installEventFilter(this);
+    tblStack->viewport()->installEventFilter(this);
 }
 
 qtDLGNanomite::~qtDLGNanomite()
 {
-
+	delete coreDebugger;
+	delete coreDisAs;
+	delete PEManager;
+	delete DBManager;
+	delete dlgDetInfo;
+	delete dlgDbgStr;
+	delete dlgBPManager;
+	delete dlgSourceViewer;
+	delete qtNanomiteDisAsColor;
 }
 
 qtDLGNanomite* qtDLGNanomite::GetInstance()
 {
 	return qtDLGMyWindow;
-}
-
-void qtDLGNanomite::action_FileTerminateGUI()
-{
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StopDebuggingAll();
-	close();
-}
-
-void qtDLGNanomite::action_FileOpenNewFile()
-{
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StopDebuggingAll();
-
-	coreDebugger->RemoveBPs();
-	clsHelperClass::MenuLoadNewFile(coreDebugger);
-	PEManager->OpenFile(coreDebugger->GetTarget());
-	if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
-	{
-		MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
-		PEManager->CloseFile(coreDebugger->GetTarget(),0);
-		coreDebugger->ClearTarget();
-		return;
-	}
-
-	CleanGUI();
-	UpdateStateBar(0x3);
-}
-
-void qtDLGNanomite::action_FileAttachTo()
-{
-	if(!coreDebugger->GetDebuggingState())
-	{
-		qtDLGAttach newAttaching;
-		connect(&newAttaching,SIGNAL(StartAttachedDebug(int,QString)),this,SLOT(action_DebugAttachStart(int,QString)));
-		newAttaching.exec();
-	}
-}
-
-void qtDLGNanomite::action_FileDetach()
-{
-	if(coreDebugger->GetDebuggingState())
-	{
-		if(!coreDebugger->DetachFromProcess())
-			MessageBox(NULL,L"Failed to detach from Process!",L"Nanomite",MB_OK);
-		else
-			UpdateStateBar(0x3);
-	}
-}
-
-void qtDLGNanomite::action_DebugStart()
-{
-	if(!coreDebugger->GetDebuggingState())
-	{
-		CleanGUI();
-
-		if(!coreDebugger->IsTargetSet())
-		{
-			if(!clsHelperClass::MenuLoadNewFile(coreDebugger))
-				return;
-			coreDebugger->ClearCommandLine();
-		}
-
-		PEManager->OpenFile(coreDebugger->GetTarget());
-		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
-		{
-			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
-			PEManager->CloseFile(coreDebugger->GetTarget(),0);
-			coreDebugger->ClearTarget();
-			return;
-		}
-
-		if(coreDebugger->GetCMDLine().size() <= 0)
-		{
-			bool bOk = false;
-			QString strNewCommandLine = QInputDialog::getText(this,"CommandLine:","",QLineEdit::Normal,NULL,&bOk);
-
-			if(bOk && !strNewCommandLine.isEmpty())
-			{
-				wstring *tempStr = new wstring(strNewCommandLine.toStdWString());
-				coreDebugger->SetCommandLine(*tempStr);
-			}
-		}
-
-		coreDebugger->start();
-
-		UpdateStateBar(0x1);
-	}
-	else
-	{
-		coreDebugger->ResumeDebugging();
-		UpdateStateBar(0x1);
-	}
-}
-
-void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
-{
-	if(!coreDebugger->GetDebuggingState())
-	{
-		CleanGUI();
-
-		wstring *filePath = new wstring(FilePath.toStdWString());
-
-		PEManager->OpenFile(*filePath);
-		if(!PEManager->isValidPEFile(*filePath))
-		{
-			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
-			PEManager->CloseFile(coreDebugger->GetTarget(),0);
-			return;
-		}
-
-		coreDebugger->SetTarget(*filePath);
-		coreDebugger->AttachToProcess(iPID);
-		coreDebugger->start();
-
-		UpdateStateBar(0x1);
-	}
-}
-
-void qtDLGNanomite::action_DebugStop()
-{
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StopDebuggingAll();
-}
-
-void qtDLGNanomite::action_DebugRestart()
-{
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StopDebuggingAll();
-
-	CleanGUI();
-	if(coreDebugger->IsTargetSet())
-	{
-		PEManager->OpenFile(coreDebugger->GetTarget());
-
-		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
-		{
-			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
-			PEManager->CloseFile(coreDebugger->GetTarget(),0);
-			coreDebugger->ClearTarget();
-			return;
-		}
-
-		coreDebugger->start();
-	}
-}
-
-void qtDLGNanomite::action_DebugSuspend()
-{
-	_iMenuPID = -1;
-	actionDebug_Suspend->setDisabled(true);
-
-	GenerateMenu();
-
-	if(_iMenuPID == 0)
-	{
-		if(coreDebugger->GetDebuggingState())
-		{
-			coreDebugger->SuspendDebuggingAll();
-			UpdateStateBar(0x2);
-		}
-	}
-	else
-	{
-		if(coreDebugger->GetDebuggingState())
-		{
-			coreDebugger->SuspendDebugging(_iMenuPID);
-			UpdateStateBar(0x2);
-		}
-	}
-
-	actionDebug_Suspend->setEnabled(true);
-	_iMenuPID = -1;
-}
-
-void qtDLGNanomite::action_DebugStepIn()
-{
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StepIn();
-}
-
-void qtDLGNanomite::action_DebugStepOver()
-{
-	quint64 dwEIP = NULL;
-#ifdef _AMD64_
-	BOOL bIsWOW64 = false;
-	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-	if(bIsWOW64)
-		dwEIP = coreDebugger->wowProcessContext.Eip;
-	else
-		dwEIP = coreDebugger->ProcessContext.Rip;
-#else
-	dwEIP = coreDebugger->ProcessContext.Eip;
-#endif
-	QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
-	++i;
-	if((QMapData::Node *)i == (QMapData::Node *)coreDisAs->SectionDisAs.constEnd())
-		coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
-
-	coreDebugger->StepOver(i.value().Offset.toULongLong(0,16));
-}
-
-void qtDLGNanomite::action_OptionsAbout()
-{
-	qtDLGAbout DLGAbout;
-	DLGAbout.exec();
-}
-
-void qtDLGNanomite::action_OptionsOptions()
-{
-	qtDLGOption newOption;
-	newOption.exec();
-}
-
-void qtDLGNanomite::action_WindowDetailInformation()
-{
-	dlgDetInfo->show();
-}
-
-void qtDLGNanomite::action_WindowBreakpointManager()
-{
-	dlgBPManager->show();
-}
-
-void qtDLGNanomite::action_WindowShowMemory()
-{
-	if(coreDebugger->GetDebuggingState())
-	{
-		_iMenuPID = -1;
-		actionWindow_Show_Memory->setDisabled(true);
-
-		GenerateMenu();
-
-		if(_iMenuPID >= 0)
-		{
-			qtDLGMemoryView *dlgMemory = new qtDLGMemoryView(this,Qt::Window,_iMenuPID);
-			dlgMemory->show();
-		}
-
-		actionWindow_Show_Memory->setEnabled(true);
-		_iMenuPID = -1;
-	}
-}
-
-void qtDLGNanomite::action_WindowShowHeap()
-{
-	if(coreDebugger->GetDebuggingState())
-	{
-		_iMenuPID = -1;
-		actionWindow_Show_Heap->setDisabled(true);
-
-		GenerateMenu();
-
-		if(_iMenuPID >= 0)
-		{
-			qtDLGHeapView *dlgHeap = new qtDLGHeapView(this,Qt::Window,_iMenuPID);
-			dlgHeap->show();
-		}
-
-		actionWindow_Show_Heap->setEnabled(true);
-		_iMenuPID = -1;
-	}
-}
-
-void qtDLGNanomite::action_WindowShowStrings()
-{
-	if(coreDebugger->GetDebuggingState())
-	{
-		_iMenuPID = -1;
-		actionWindow_Show_Strings->setDisabled(true);
-
-		GenerateMenu();
-
-		if(_iMenuPID >= 0)
-		{
-			qtDLGStringView *dlgString = new qtDLGStringView(this,Qt::Window,_iMenuPID);
-			dlgString->show();
-		}
-
-		actionWindow_Show_Strings->setEnabled(true);
-		_iMenuPID = -1;
-	}
-}
-
-void qtDLGNanomite::action_WindowShowDebugOutput()
-{
-	dlgDbgStr->show();
-}
-
-void qtDLGNanomite::action_WindowShowHandles()
-{
-	if(coreDebugger->GetDebuggingState())
-	{
-		_iMenuPID = -1;
-		actionWindow_Show_Handles->setDisabled(true);
-
-		GenerateMenu();
-
-		if(_iMenuPID >= 0)
-		{
-			qtDLGHandleView *dlgHandle = new qtDLGHandleView(this,Qt::Window,_iMenuPID);
-			dlgHandle->show();
-		}
-
-		actionWindow_Show_Handles->setEnabled(true);
-		_iMenuPID = -1;
-	}
-}
-
-void qtDLGNanomite::action_WindowShowWindows()
-{
-	if(coreDebugger->GetDebuggingState())
-	{
-		_iMenuPID = -1;
-		actionWindow_Show_Windows->setDisabled(true);
-
-		GenerateMenu();
-
-		if(_iMenuPID >= 0)
-		{
-			qtDLGWindowView *dlgWindows = new qtDLGWindowView(this,Qt::Window,_iMenuPID);
-			dlgWindows->show();
-		}
-
-		actionWindow_Show_Windows->setEnabled(true);
-		_iMenuPID = -1;
-	}
 }
 
 void qtDLGNanomite::OnDebuggerBreak()
@@ -496,7 +175,14 @@ void qtDLGNanomite::OnDebuggerBreak()
 #else
 		dwEIP = coreDebugger->ProcessContext.Eip;
 		LoadStackView(coreDebugger->ProcessContext.Esp,4);
-#endif	
+#endif
+		wstring FilePath; 
+		int LineNumber = NULL;
+
+		clsHelperClass::LoadSourceForAddr(FilePath,LineNumber,dwEIP,coreDebugger->GetCurrentProcessHandle());
+		if(FilePath.length() > 0 && LineNumber > 0)
+			emit OnDisplaySource(QString::fromStdWString(FilePath),LineNumber);	
+
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
 			OnDisplayDisassembly(dwEIP);
 		UpdateStateBar(0x2);
@@ -550,14 +236,14 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	if(!VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwNewProtect,&dwOldProtect))
 		return;
 
-	bBuffer = (LPBYTE)malloc(dwSize);
+	bBuffer = (LPBYTE)clsMemManager::CAlloc(dwSize);
 	if(bBuffer == NULL)
 		return;
 
 	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,&dwBytesRead))
 		return;
 
-	sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
 	tblStack->setRowCount(0);
 	for(size_t i = 0;i < (dwSize / dwStackSize); i++)
@@ -599,8 +285,8 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	}
 
 	bCheckVar = VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwOldProtect,NULL);
-	free(bBuffer);
-	free(sTemp);
+	clsMemManager::CFree(bBuffer);
+	clsMemManager::CFree(sTemp);
 }
 
 void qtDLGNanomite::InitListSizes()
@@ -967,7 +653,7 @@ void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
 	_iMenuPID = qAction->text().toULong(0,16);
 }
 
-void qtDLGNanomite::GenerateMenu()
+void qtDLGNanomite::GenerateMenu(bool isAllEnabled)
 {
 	QAction *qAction;
 	QMenu menu;
@@ -981,7 +667,10 @@ void qtDLGNanomite::GenerateMenu()
 		}
 	}
 	menu.addSeparator();
-	qAction = new QAction("All",this);
+
+	if(isAllEnabled)
+		qAction = new QAction("All",this);
+	
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(GenerateMenuCallback(QAction*)));
 	menu.addAction(qAction);
 	menu.exec(QCursor::pos());
@@ -991,8 +680,6 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 {
 	if(coreDisAs->SectionDisAs.count() > 0 && dwEIP != 0)
 	{
-		tblDisAs->setRowCount(0);
-
 		bool IsAlreadyEIPSet = false;
 		int iLines = 0;
 
@@ -1015,6 +702,8 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 			--i;
 		}
 
+
+		tblDisAs->setRowCount(0);
 
 		quint64 itemStyle;
 		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 14) - 2)
@@ -1061,13 +750,11 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 
 void qtDLGNanomite::OnCustomRegViewContextMenu(QPoint qPoint)
 {
-	QAction *qAction;
 	QMenu menu;
 
 	_iSelectedRow = tblRegView->indexAt(qPoint).row();
 
-	qAction = new QAction("Send to Disassembler",this);
-	menu.addAction(qAction);
+	menu.addAction(new QAction("Send (R/E)IP to Disassembler",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -1075,13 +762,36 @@ void qtDLGNanomite::OnCustomRegViewContextMenu(QPoint qPoint)
 
 void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 {
-	QAction *qAction;
 	QMenu menu;
 
 	_iSelectedRow = tblDisAs->indexAt(qPoint).row();
 
-	qAction = new QAction("Goto Offset",this);
-	menu.addAction(qAction);
+	menu.addAction(new QAction("Goto Offset",this));
+	menu.addAction(new QAction("Show Source",this));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGNanomite::OnCustomLogContextMenu(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblLogBox->indexAt(qPoint).row();
+
+	menu.addAction(new QAction("Clear Log",this));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGNanomite::OnCustomCallstackContextMenu(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblCallstack->indexAt(qPoint).row();
+
+	menu.addAction(new QAction("Goto Function in disassembler",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -1089,7 +799,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 
 void qtDLGNanomite::MenuCallback(QAction* pAction)
 {
-	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
+	if(QString().compare(pAction->text(),"Send (R/E)IP to Disassembler") == 0)
 	{
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)))
 			OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
@@ -1102,6 +812,22 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 		if(bOk && !strNewOffset.isEmpty())
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),strNewOffset.toULongLong(0,16)))
 				OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));		
+	}
+	else if(QString().compare(pAction->text(),"Clear Log") == 0)
+	{
+		tblLogBox->setRowCount(0);	
+	}
+	else if(QString().compare(pAction->text(),"Show Source") == 0)
+	{
+		if(dlgSourceViewer->IsSourceAvailable)
+			dlgSourceViewer->show();
+		else
+			MessageBoxW(NULL,L"Sorry, there is no source available!",L"Nanomite",MB_OK);
+	}
+	else if(QString().compare(pAction->text(),"Goto Function in disassembler") == 0)
+	{
+		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
+			OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));		
 	}
 }
 
@@ -1146,7 +872,62 @@ void qtDLGNanomite::OnF2BreakPointPlace()
 	return;
 }
 
-void qtDLGNanomite::OnPrintMemoryLeaks()
+void qtDLGNanomite::OnDisAsReturnPressed()
 {
-	_CrtDumpMemoryLeaks();
+	QList<QTableWidgetItem *> currentSelectedItems = tblDisAs->selectedItems();
+	if(coreDebugger->GetCurrentProcessHandle() == NULL || currentSelectedItems.count() <= 0) return;
+
+	quint64 dwSelectedVA = NULL;
+	QString tempSelectedString = currentSelectedItems.value(2)->text();
+
+	if(tempSelectedString.contains("dword ptr"))
+		dwSelectedVA = tempSelectedString.split(" ")[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16);
+	else
+		dwSelectedVA = tempSelectedString.split(" ")[1].replace("h","").toULongLong(0,16);
+
+	if(dwSelectedVA != 0)
+	{
+		_OffsetWalkHistory.append(currentSelectedItems.value(0)->text().toULongLong(0,16));
+		coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwSelectedVA);
+	}
+	return;
+}
+
+void qtDLGNanomite::OnDisAsReturn()
+{
+	if(_OffsetWalkHistory.isEmpty()) return;
+	coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),_OffsetWalkHistory.takeLast());
+}
+
+void qtDLGNanomite::OnCallstackDisplaySource(QTableWidgetItem *pItem)
+{
+	QString sourcePath = tblCallstack->item(pItem->row(),6)->text();
+	int LineNumber = tblCallstack->item(pItem->row(),5)->text().toInt();
+
+	if(LineNumber <= 0 && sourcePath.isEmpty()) return;
+
+	emit OnDisplaySource(sourcePath,LineNumber);
+	dlgSourceViewer->show();
+
+	return;
+}
+
+bool qtDLGNanomite::eventFilter(QObject *pObject,QEvent *event)
+{
+	if(event->type() == QEvent::Wheel)
+	{
+		QWheelEvent *pWheel = (QWheelEvent*)event;
+		
+		if(pObject == tblDisAs)
+		{
+			OnDisAsScroll(pWheel->delta() * -1);
+			return true;
+		}
+		else if(pObject == tblStack)
+		{
+			OnStackScroll(pWheel->delta() * -1);
+			return true;
+		}
+	}
+	return false;
 }

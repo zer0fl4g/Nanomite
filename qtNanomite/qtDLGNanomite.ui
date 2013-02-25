@@ -244,6 +244,9 @@
            <family>Lucida Console</family>
           </font>
          </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
          <property name="frameShadow">
           <enum>QFrame::Sunken</enum>
          </property>
@@ -417,6 +420,9 @@
            <family>Lucida Console</family>
           </font>
          </property>
+         <property name="contextMenuPolicy">
+          <enum>Qt::CustomContextMenu</enum>
+         </property>
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
@@ -537,6 +543,7 @@
     <addaction name="actionWindow_Show_Debug_Output"/>
     <addaction name="actionWindow_Show_Handles"/>
     <addaction name="actionWindow_Show_Windows"/>
+    <addaction name="actionWindow_Show_PEEditor"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
@@ -572,6 +579,7 @@
    <addaction name="actionWindow_Show_Debug_Output"/>
    <addaction name="actionWindow_Show_Handles"/>
    <addaction name="actionWindow_Show_Windows"/>
+   <addaction name="actionWindow_Show_PEEditor"/>
   </widget>
   <widget class="QStatusBar" name="stateBar">
    <property name="sizePolicy">
@@ -756,6 +764,15 @@
    </property>
    <property name="text">
     <string>Show Windows</string>
+   </property>
+  </action>
+  <action name="actionWindow_Show_PEEditor">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_PEEditor.ico</normaloff>:/DLGNanomite/Icons/ID_PEEditor.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Show PE-Editor</string>
    </property>
   </action>
  </widget>

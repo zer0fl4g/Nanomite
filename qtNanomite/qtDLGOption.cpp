@@ -1,5 +1,6 @@
 #include "qtDLGOption.h"
 
+#include "clsMemManager.h"
 #include "clsHelperClass.h"
 
 qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
@@ -147,8 +148,8 @@ void qtDLGOption::OnSave()
 	myMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
 	myMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
 
-	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
-	MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
+	if(clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor))
+		MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
 }
 
 void qtDLGOption::OnLoad()
@@ -219,6 +220,9 @@ void qtDLGOption::OnLoad()
 
 	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
 		comboMove->setCurrentIndex(itemIndex);
+
+	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorMath)) != -1)
+		comboMath->setCurrentIndex(itemIndex);
 }
 
 int qtDLGOption::getIndex(QString itemColor)

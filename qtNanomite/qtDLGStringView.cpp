@@ -1,6 +1,7 @@
 #include "qtDLGStringView.h"
 #include "qtDLGNanomite.h"
 #include "clsHelperClass.h"
+#include "clsMemManager.h"
 
 #include <fstream>
 #include <sstream>
@@ -32,7 +33,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 			iForEntry = i; iForEnd = i +1;
 	}
 
-	PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(WCHAR));
+	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(WCHAR));
 	quint64 StartOffset = NULL,EndOffset = NULL;
 
 	for(int i = iForEntry; i < iForEnd;i++)
@@ -142,8 +143,8 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 					new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->PIDs[i].dwPID)));
 
 				// Offset
-				tblStringView->setItem(tblStringView->rowCount() - 1,1,
-					new QTableWidgetItem(QString().sprintf("%08X",inputFile.tellg())));
+				//tblStringView->setItem(tblStringView->rowCount() - 1,1,
+				//	new QTableWidgetItem(QString().sprintf("%08X",inputFile.tellg())));
 
 				// String
 				tblStringView->setItem(tblStringView->rowCount() - 1,2,
@@ -151,7 +152,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 			}
 		}
 	}
-	free(sTemp);
+	clsMemManager::CFree(sTemp);
 }
 
 qtDLGStringView::~qtDLGStringView()

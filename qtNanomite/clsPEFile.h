@@ -9,7 +9,7 @@
 class clsPEFile
 {
 public:
-	clsPEFile(std::wstring FileName,bool is64Bit = false);
+	clsPEFile(std::wstring FileName);
 	~clsPEFile();
 
 	bool isValidPEFile();
@@ -21,6 +21,8 @@ public:
 	PIMAGE_DOS_HEADER getDosHeader();
 	PIMAGE_NT_HEADERS32 getNTHeader32();
 	PIMAGE_NT_HEADERS64 getNTHeader64();
+
+	bool is64Bit();
 
 private:
 	std::wstring _FileName;

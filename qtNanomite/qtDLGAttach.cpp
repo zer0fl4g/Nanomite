@@ -4,6 +4,8 @@
 #include <Psapi.h>
 #include <TlHelp32.h>
 
+#include "clsMemManager.h"
+
 qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
 {

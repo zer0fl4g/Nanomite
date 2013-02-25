@@ -2,10 +2,9 @@
 
 using namespace std;
 
-clsPEFile::clsPEFile(wstring FileName,bool is64Bit)
+clsPEFile::clsPEFile(wstring FileName)
 {
 	_FileName = FileName;
-	_is64Bit = is64Bit;
 	LoadFile(_FileName);
 }
 
@@ -24,18 +23,16 @@ bool clsPEFile::LoadFile(wstring FileName)
 	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
 	if(_lpBuffer == NULL)
 	{
+		CloseHandle(hFile);
 		CloseHandle(hFileMap);
 		return false;
 	}
-	
-	//_lpBuffer = malloc(0x1000);
-	//memcpy(_lpBuffer,lpBuffer,0x1000);
 			
 	_pIDH = (PIMAGE_DOS_HEADER)_lpBuffer;
 	if(_pIDH->e_magic != IMAGE_DOS_SIGNATURE)
 	{
 		UnmapViewOfFile(_lpBuffer);
-		//free(_lpBuffer);
+		CloseHandle(hFile);
 		CloseHandle(hFileMap);
 		return false;
 	}
@@ -47,7 +44,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 		if(_pINH64 != NULL && _pINH64->Signature != IMAGE_NT_SIGNATURE)
 		{
 			UnmapViewOfFile(_lpBuffer);
-			//free(_lpBuffer);
+			CloseHandle(hFile);
 			CloseHandle(hFileMap);
 			return false;
 		}
@@ -58,13 +55,13 @@ bool clsPEFile::LoadFile(wstring FileName)
 		if(_pINH32 != NULL && _pINH32->Signature != IMAGE_NT_SIGNATURE)
 		{
 			UnmapViewOfFile(_lpBuffer);
-			//free(_lpBuffer);
+			CloseHandle(hFile);
 			CloseHandle(hFileMap);
 			return false;
 		}
 	}
 
-	//UnmapViewOfFile(_lpBuffer);
+	CloseHandle(hFile);
 	CloseHandle(hFileMap);
 	return true;
 }
@@ -219,6 +216,7 @@ bool clsPEFile::CheckPEType(LPVOID pBuffer)
 			return true;
 #endif
 	}
+	// do something incase its invalid...
 	return false;
 }
 
@@ -231,10 +229,20 @@ PIMAGE_NT_HEADERS32 clsPEFile::getNTHeader32()
 {
 	if(!_is64Bit)
 		return _pINH32;
+	return 0;
 }
 
 PIMAGE_NT_HEADERS64 clsPEFile::getNTHeader64()
 {
 	if(_is64Bit)
 		return _pINH64;
+	return 0;
+}
+
+bool clsPEFile::is64Bit()
+{
+	if(_is64Bit)
+		return true;
+	else 
+		return false;
 }

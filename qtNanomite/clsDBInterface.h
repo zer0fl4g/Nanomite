@@ -8,21 +8,13 @@ class clsDBInterface
 {
 
 public:
-	int _PID;
-	
-	clsDBInterface(std::wstring FilePath,int PID);
+	clsDBInterface(std::wstring FilePath);
 	~clsDBInterface();
 	
-	static bool DBAPI_getSymbols(unsigned long long Key,std::wstring &ModName,std::wstring &FuncName);
-	static bool DBAPI_insertSymbols(unsigned long long Key,std::wstring ModName,std::wstring FuncName);
-	
-	static clsDBInterface* GetInstance();
+	bool DBAPI_getSymbols(unsigned long long Key,std::wstring &ModName,std::wstring &FuncName);
+	bool DBAPI_insertSymbols(unsigned long long Key,std::wstring ModName,std::wstring FuncName);
 
 private:
-	static clsDBInterface *pThis;
-
-	std::string _FileName;
-
 	bool _isDBOpen;
 
 	sqlite3 *pDB;

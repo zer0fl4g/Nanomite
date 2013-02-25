@@ -3,12 +3,9 @@
 
 #include <string>
 #include <vector>
-
 #include <Windows.h>
 #include <time.h>
 #include <QtCore>
-
-#include "clsDBInterface.h"
 
 // Taken from GDB
 #define DR_EXECUTE	(0x00)		/* Break on instruction execution.  */
@@ -19,7 +16,6 @@
 #define LOGBUFFER (512 * sizeof(TCHAR))
 #define LOGBUFFERCHAR (512)
 #define THREAD_GETSET_CONTEXT	(0x0018) 
-
 
 struct clsDebuggerSettings
 {
@@ -103,7 +99,6 @@ public:
 	std::vector<BPStruct> MemoryBPs;
 	std::vector<BPStruct> HardwareBPs;
 	std::vector<customException> ExceptionHandler;
-	std::vector<clsDBInterface *> fileDBs;
 
 	CONTEXT ProcessContext;
 	WOW64_CONTEXT wowProcessContext;
@@ -169,7 +164,7 @@ signals:
 		quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
 		std::wstring sSourceFilePath,int iSourceLineNum);
 	void OnNewBreakpointAdded(BPStruct newBP,int iType);
-	void OnNewPID(std::wstring,int,bool);
+	void OnNewPID(std::wstring,int);
 	void DeletePEManagerObject(std::wstring,int);
 	void CleanPEManager();
 

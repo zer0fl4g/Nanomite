@@ -1,5 +1,7 @@
 #include "qtDLGRegEdit.h"
 
+#include "clsMemManager.h"
+
 #include <QTCore>
 #include <QtGui>
 

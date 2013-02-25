@@ -18,7 +18,7 @@ public:
 	public slots:
 		void OnUpdate(BPStruct newBP,int iType);
 		void OnBPRemove();
-		void UpdateCompleter(std::wstring,int iPID,bool is64Bit);
+		void UpdateCompleter(std::wstring,int iPID);
 
 private:
 	QStringList completerList;

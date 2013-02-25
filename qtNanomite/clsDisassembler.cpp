@@ -167,7 +167,7 @@ void clsDisassembler::run()
 		return;
 	}
 
-	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,NULL);
+	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
 	free(pBuffer);
 
 	QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;

@@ -1,15 +1,11 @@
 #include "clsDBInterface.h"
 #include "clsHelperClass.h"
+#include "clsMemManager.h"
 
 using namespace std;
 
-clsDBInterface* clsDBInterface::pThis = NULL;
-
-clsDBInterface::clsDBInterface(wstring FilePath,int PID)
+clsDBInterface::clsDBInterface(wstring FilePath)
 {
-	pThis = this;
-	_PID = PID;
-
 	string FileName = getFileNameFromPath(FilePath);
 	FileName.append("_db_HASH_.sqlite");
 
@@ -27,7 +23,7 @@ clsDBInterface::clsDBInterface(wstring FilePath,int PID)
 
 	string createTableQuery = "CREATE TABLE IF NOT EXISTS symbols (offset REAL PRIMARY KEY,modname TEXT,funcname TEXT);";
     
-	sqlite3_prepare(pThis->pDB, createTableQuery.c_str(), createTableQuery.size(), &insertStmt, NULL);
+	sqlite3_prepare(pDB, createTableQuery.c_str(), createTableQuery.size(), &insertStmt, NULL);
     if (sqlite3_step(insertStmt) != SQLITE_DONE)
 	{
 		// only for debug
@@ -47,10 +43,10 @@ bool clsDBInterface::DBAPI_getSymbols(quint64 Key,std::wstring &ModName,std::wst
 {
 	sqlite3_stmt *selectStmt;
 
-	char* symbolQuery = (char*)malloc(120);
+	char* symbolQuery = (char*)clsMemManager::CAlloc(120);
 	sprintf(symbolQuery,"select * from symbols where 'Offset' == %016I64X;",Key);
 
-    sqlite3_prepare(pThis->pDB, symbolQuery, strlen(symbolQuery) + 1, &selectStmt, NULL);
+    sqlite3_prepare(pDB, symbolQuery, strlen(symbolQuery) + 1, &selectStmt, NULL);
     
 	while(true)
 	{
@@ -67,7 +63,7 @@ bool clsDBInterface::DBAPI_getSymbols(quint64 Key,std::wstring &ModName,std::wst
 			break;
 	}
 
-	free(symbolQuery);
+	clsMemManager::CFree(symbolQuery);
 
 	if(ModName.length() <= 0)
 		return false;
@@ -78,26 +74,21 @@ bool clsDBInterface::DBAPI_insertSymbols(quint64 Key,std::wstring ModName,std::w
 {
 	sqlite3_stmt *insertStmt;
 
-	char* insertQuery = (char*)malloc(ModName.size() + FuncName.size() + 100);
+	char* insertQuery = (char*)clsMemManager::CAlloc(ModName.size() + FuncName.size() + 100);
 	sprintf(insertQuery,"INSERT INTO symbols (offset,modname,funcname) VALUES ('%016I64X', '%s','%s');",
 		Key,
 		clsHelperClass::convertWSTRtoSTR(ModName).c_str(),
 		clsHelperClass::convertWSTRtoSTR(FuncName).c_str());
     
-    sqlite3_prepare(pThis->pDB, insertQuery, strlen(insertQuery) + 1, &insertStmt, NULL);
+    sqlite3_prepare(pDB, insertQuery, strlen(insertQuery) + 1, &insertStmt, NULL);
     if (sqlite3_step(insertStmt) != SQLITE_DONE)
 	{
-		free(insertQuery);
+		clsMemManager::CFree(insertQuery);
 		return false;
 	}
 	
-	free(insertQuery);
+	clsMemManager::CFree(insertQuery);
 	return true;
-}
-
-clsDBInterface* clsDBInterface::GetInstance()
-{
-	return pThis;
 }
 
 string clsDBInterface::getFileNameFromPath(wstring FilePath)

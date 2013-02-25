@@ -1,10 +1,15 @@
 #include "clsHelperClass.h"
-#include "clsDBInterface.h"
+#include "clsDBManager.h"
+#include "clsMemManager.h"
+
 #include "dbghelp.h"
 
 #include <TlHelp32.h>
 #include <fstream>
 #include <algorithm>
+#include <QtCore>
+#include <QFileDialog>
+#include <string>
 
 using namespace std;
 
@@ -24,7 +29,8 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	if(!outfile.is_open())
 		return false;
 
-	TCHAR cTemp[128];
+	PTCHAR cTemp = (PTCHAR)clsMemManager::CAlloc(128);
+
 	wsprintf(cTemp,L"%s=%s\n",L"DebugChilds",_coreDebugger->dbgSettings.bDebugChilds ? L"true" : L"false");
 	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"AutoLoadSym",_coreDebugger->dbgSettings.bAutoLoadSymbols ? L"true" : L"false");
@@ -97,6 +103,7 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	outfile.write(cTemp,wcslen(cTemp));
 
 	outfile.close();
+	clsMemManager::CFree(cTemp);
 	return true;
 }
 
@@ -168,28 +175,15 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 
 bool clsHelperClass::MenuLoadNewFile(clsDebugger *_coreDebugger)
 {
-	TCHAR cFile[MAX_PATH];
+	QString fileName = QFileDialog::getOpenFileName(NULL,"Please select a Target",QDir::currentPath(),"Executables (*.exe)");
 
-	OPENFILENAME ofn; 
-	ZeroMemory(&ofn,sizeof(ofn));
-	ofn.lStructSize = sizeof(ofn);
+	wstring *pFile = new wstring(fileName.toStdWString());
 
-	ofn.hwndOwner = NULL;
-	ofn.lpstrFile = cFile;
-	ofn.lpstrFile[0] = '\0';
-	ofn.nMaxFile = sizeof(cFile);
-	ofn.lpstrFilter = L"Executable Files (*.exe)\0*.exe\0\0";
-	ofn.nFilterIndex = 1;
-	ofn.lpstrFileTitle = NULL;
-	ofn.nMaxFileTitle = 0;
-	ofn.lpstrInitialDir = NULL;
-	ofn.Flags = OFN_PATHMUSTEXIST | OFN_FILEMUSTEXIST;
-
-	if(GetOpenFileName(&ofn) == true)
-		_coreDebugger->SetTarget(ofn.lpstrFile);
+	if(!fileName.isEmpty())
+		_coreDebugger->SetTarget(*pFile);
 	else
 	{
-		MessageBox(NULL,L"No valid file!",L"Nanomite",MB_OK);
+		MessageBox(NULL,L"Error while selecting your file!",L"Nanomite",MB_OK);
 		return false;
 	}
 	return true;
@@ -216,13 +210,10 @@ vector<wstring> clsHelperClass::split(const wstring& s,const wstring& f ){
 bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quint64 dwOffset,HANDLE hProc)
 {
 	bool bTest = false;
+	DWORD PID  = GetProcessId(hProc);
 
-	clsDBInterface *pDB = clsDBInterface::GetInstance();
-	if(pDB != NULL)
-	{
-		if(pDB->DBAPI_getSymbols(dwOffset,sFuncName,sModName))
-			return true;
-	}
+	if(clsDBManager::DBAPI_getSymbolsFromPID(PID,dwOffset,sFuncName,sModName))
+		return true;
 
 
 	IMAGEHLP_MODULEW64 imgMod = {0};
@@ -241,28 +232,40 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 
 	free(pSymbol);
 
-	if(pDB != NULL)
-		return pDB->DBAPI_insertSymbols(dwOffset,sModName,sFuncName);
-	else 
-		return true;
+	return clsDBManager::DBAPI_insertSymbolsFromPID(PID,dwOffset,sModName,sFuncName);
+}
+
+void clsHelperClass::LoadSourceForAddr(wstring &FileName,int &LineNumber,quint64 dwOffset,HANDLE hProc)
+{
+	DWORD dwDisplacement = NULL;
+
+	IMAGEHLP_LINEW64 imgSource;
+	imgSource.SizeOfStruct = sizeof(imgSource);
+	
+	if(SymGetLineFromAddrW64(hProc,dwOffset,(PDWORD)&dwDisplacement,&imgSource))
+	{
+		FileName = imgSource.FileName;
+		LineNumber = imgSource.LineNumber;
+	}
+	return;
 }
 
 string clsHelperClass::convertWSTRtoSTR(wstring FileName)
 {
 	size_t newSize = wcstombs(NULL, FileName.c_str(), 0) + 2;
-	char* newStr = (char*)malloc(newSize);
+	char* newStr = (char*)clsMemManager::CAlloc(newSize);
 	wcstombs(newStr, FileName.c_str(), newSize);
 	string str = newStr;
-	free(newStr);
+	clsMemManager::CFree(newStr);
 	return str;
 }
 
 wstring clsHelperClass::convertSTRtoWSTR(string FileName)
 {
 	size_t newSize = mbstowcs(NULL, FileName.c_str(), 0) + 2;
-	wchar_t* newStr = (wchar_t*)malloc(newSize);
+	wchar_t* newStr = (wchar_t*)clsMemManager::CAlloc(newSize);
 	mbstowcs(newStr, FileName.c_str(), newSize);
 	wstring str = newStr;
-	free(newStr);
+	clsMemManager::CFree(newStr);
 	return str;
 }

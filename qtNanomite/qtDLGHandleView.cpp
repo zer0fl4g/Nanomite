@@ -1,6 +1,8 @@
 #include "qtDLGHandleView.h"
 #include "qtDLGNanomite.h"
+
 #include "NativeHeaders.h"
+#include "clsMemManager.h"
 
 qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	: QWidget(parent, flags)

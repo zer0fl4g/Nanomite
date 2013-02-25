@@ -233,6 +233,51 @@
     <ClCompile Include="GeneratedFiles\Release\moc_clsPEManager.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGPEEditor.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGPEEditor.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGPEEditor.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="clsCrashHandler.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGNanomiteMenuActions.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGSourceViewer.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGSourceViewer.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGSourceViewer.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="clsMemManager.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsDBManager.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsMemPool.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsMemPoolNew.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsDebugger\clsDebuggerBreakpoints.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsDebugger\clsDebuggerCallbacks.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsDebugger\clsDebuggerPublicAPI.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -343,6 +388,18 @@
     <CustomBuild Include="clsPEManager.h">
       <Filter>Header Dateien</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGPEEditor.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGPEEditor.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGSourceViewer.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGSourceViewer.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -404,6 +461,30 @@
     </ClInclude>
     <ClInclude Include="db_sqlite\sqlite3.h">
       <Filter>Header Dateien\SQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGPEEditor.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsCrashHandler.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGSourceViewer.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="db_sqlite\sqlite3ext.h">
+      <Filter>Header Dateien\SQLite</Filter>
+    </ClInclude>
+    <ClInclude Include="clsMemManager.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsDBManager.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsMemPool.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsMemPoolNew.h">
+      <Filter>Header Dateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

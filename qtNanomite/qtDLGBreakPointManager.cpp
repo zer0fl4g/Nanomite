@@ -2,6 +2,8 @@
 #include "qtDLGNanomite.h"
 #include "clsPEManager.h"
 
+#include "clsMemManager.h"
+
 using namespace std;
 
 qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags)
@@ -179,7 +181,7 @@ void qtDLGBreakPointManager::OnBPRemove()
 	}
 }
 
-void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID,bool is64Bit)
+void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID)
 {
 	completerList.append(clsPEManager::getImportsFromFile(FilePath));
 	

@@ -4,12 +4,16 @@
 #include "qtDLGDetailInfo.h"
 #include "qtDLGDebugStrings.h"
 #include "qtDLGBreakPointManager.h"
+#include "qtDLGSourceViewer.h"
 
 #include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
 #include "clsPEManager.h"
+#include "clsDBManager.h"
 
 #include "ui_qtDLGNanomite.h"
+
+#include <QWheelEvent>
 
 Q_DECLARE_METATYPE (DWORD)
 Q_DECLARE_METATYPE (quint64)
@@ -37,9 +41,13 @@ public:
 	clsDebugger *coreDebugger;
 	clsDisassembler *coreDisAs;
 	clsPEManager *PEManager;
+	clsDBManager *DBManager;
+
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;
 	qtDLGBreakPointManager *dlgBPManager;
+	qtDLGSourceViewer *dlgSourceViewer;
+
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
 	qtDLGNanomite(QWidget *parent = 0, Qt::WFlags flags = 0);
@@ -67,6 +75,7 @@ private slots:
 	void action_WindowShowDebugOutput();
 	void action_WindowShowHandles();
 	void action_WindowShowWindows();
+	void action_WindowShowPEEditor();
 
 	void OnF2BreakPointPlace();
 	void OnDisplayDisassembly(quint64 dwEIP);
@@ -76,25 +85,36 @@ private slots:
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
 	void OnCustomRegViewContextMenu(QPoint qPoint);
+	void OnCustomCallstackContextMenu(QPoint qPoint);
 	void OnCustomDisassemblerContextMenu(QPoint qPoint);
-	void OnPrintMemoryLeaks();
-
+	void OnCustomLogContextMenu(QPoint qPoint);
+	void OnDisAsReturnPressed();
+	void OnDisAsReturn();
+	void OnCallstackDisplaySource(QTableWidgetItem *pItem);
 	void LoadRegView();
 	void GenerateMenuCallback(QAction *qAction);
 	void MenuCallback(QAction*);
 	
+signals:
+	void OnDisplaySource(QString,int);
+
+
 private:
 	int _iMenuPID;
 	int _iSelectedRow;
+	QList<quint64> _OffsetWalkHistory;
 
 	static qtDLGNanomite *qtDLGMyWindow;
 	
 	void resizeEvent(QResizeEvent *event);
 	void InitListSizes();
 	void CleanGUI();
-	void GenerateMenu();
+	void GenerateMenu(bool isAllEnabled = true);
 	void UpdateStateBar(DWORD dwAction);
 	void LoadStackView(quint64 dwESP, DWORD dwStackSize);	
+
+protected:
+	bool eventFilter(QObject *pOpject,QEvent *event);
 };
 
 #endif // QTDLGNANOMITE_H

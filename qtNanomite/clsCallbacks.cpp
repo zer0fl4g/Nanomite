@@ -1,4 +1,6 @@
 #include "clsCallbacks.h"
+#include "clsMemManager.h"
+
 #include "qtDLGNanomite.h"
 #include "qtDLGWindowView.h"
 
@@ -49,15 +51,15 @@ int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,
 			new QTableWidgetItem("Running"));
 
 		myMainWindow->dlgDetInfo->tblTIDs->scrollToBottom();
-	}
+	} 
 	else
 	{
 		for(int i = 0; i < myMainWindow->dlgDetInfo->tblTIDs->rowCount();i++)
-			if(QString().compare(myMainWindow->dlgDetInfo->tblTIDs->item(i,0)->text(),QString().sprintf("%08X",dwPID)) == 0 &&
-				QString().compare(myMainWindow->dlgDetInfo->tblTIDs->item(i,1)->text(),QString().sprintf("%08X",dwTID)) == 0)
+			if(QString().compare(myMainWindow->dlgDetInfo->tblTIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0 &&
+				QString().compare(myMainWindow->dlgDetInfo->tblTIDs->item(i,1)->text(),QString("%1").arg(dwTID,8,16,QChar('0'))) == 0)
 			{
-				myMainWindow->dlgDetInfo->tblTIDs->item(i,4)->setText("Terminated");
-				myMainWindow->dlgDetInfo->tblTIDs->item(i,2)->setText(QString("%1").arg(dwExitCode,8,16,QChar('0')));
+				myMainWindow->dlgDetInfo->tblTIDs->setItem(i,4,new QTableWidgetItem(QString("Terminated")));
+				myMainWindow->dlgDetInfo->tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
 			}
 	}
 
@@ -86,7 +88,7 @@ int clsCallbacks::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dwEP,
 	else
 	{
 		for(int i = 0; i < myMainWindow->dlgDetInfo->tblPIDs->rowCount();i++)
-			if(QString().compare(myMainWindow->dlgDetInfo->tblPIDs->item(i,0)->text(),QString().sprintf("%08X",dwPID)) == 0)
+			if(QString().compare(myMainWindow->dlgDetInfo->tblPIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0)
 				myMainWindow->dlgDetInfo->tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
 	}
 	return 0;

@@ -1,6 +1,41 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 7
+
++ fixed some small handling bugs
++ fixed a bug in disassembler which did not replace old protection on memory after disassembling
++ fixed a bug which did not show terminated processes in DetailView
++ fixed a bug which did not show terminated threads in DetailView
++ fixed a bug which did not clean up memory on manual debugge stop
++ improved DB handler
++ added resolve of jump conditions to improve StepOver
++ added "Return" and "Backspace" Hotkey to navigate in Disassembler
++ added "Clear Log" context menu in LogBox
++ added "Show Source" context menu in Disassembler
++ added "Goto Function" context menu in Callstack
++ added a crash handler
++ added Source Viewer
++ added memory pool for performance improvment and memory leak reduction
++ added mouse scrolling in disassembler and stack
++ added direkt run of target after using menu to select a file
+
+####Notes:
+	- CrashHandler
+		- if Nanomite crashs a dumpfile will be written to the application folder. 
+		  Please send me this file via zer0fl4g[at]gmail[dot]com
+	- Hotkey "Return"
+		- when you selected a jump / call / ... you can follow this instruction using the "Return" key
+	- Hotkey "Backspace"
+		- steps back when you used "Return" to follow a call
+	- Source Viewer 
+		- double click on source line in Callstack view. A new Window will open and show the source code (if found)
+		- right click in disassembler opens source view also
+	- Memory Pool
+		- redericted malloc / new / delete / free to the memory pool
+		- heap fragmentation reduction
+		- increasing performance
+
 ###Version 0.1 beta 6
 
 + fixed a crash in Step Over
@@ -18,8 +53,7 @@
 + added DB Interface
 + added command line support
 
-####Notes:
-	
+####Notes:	
 	- BPManager
 		-	Use the "DEL" Key to remove the entries from BPManager
 		-	Type a module name and the box will propose you found apis that match your entry 
@@ -64,7 +98,6 @@
 + changed window style to Qt Plastique
 
 ####Notes:
-
 - dependencies:
 	- For developers:	You will need a QT Framework which has been compiled with /MT ( or /MTd) else you
 						have a dependencie of the cruntime even if qtNanomite has been compiled without.

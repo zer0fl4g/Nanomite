@@ -22,6 +22,7 @@
     <ProjectGuid>{2B8A08B1-8196-4817-9990-67CC2AA2FDB0}</ProjectGuid>
     <Keyword>Win32Proj</Keyword>
     <RootNamespace>Debugme</RootNamespace>
+    <ProjectName>DebugMe.WinAPI</ProjectName>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">

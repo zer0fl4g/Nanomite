@@ -40,6 +40,7 @@ bool clsSymbolAndSyntax::CreateDataForRow(DisAsDataRow *pDataRow)
 		strInstructions[0].compare("jna") == 0		||
 		strInstructions[0].compare("jo") == 0		||
 		strInstructions[0].compare("jc") == 0		||
+		strInstructions[0].compare("jnc") == 0		||
 		strInstructions[0].compare("jnb") == 0		||
 		strInstructions[0].compare("jpe") == 0		||
 		strInstructions[0].compare("jnp") == 0		||

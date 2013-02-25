@@ -9,20 +9,31 @@ clsPEManager::clsPEManager()
 	pThis = this;
 }
 
-void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID, bool is64Bit)
+wstring clsPEManager::getFilenameFromPID(int PID)
+{
+	for(size_t i = 0; i < PEFiles.size(); i++)
+	{
+		if(PEFiles[i].PID == PID)
+		{
+			return PEFiles[i].FileName;
+		}
+	}
+	return L"";
+}
+
+void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 {
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
 		if(PEFiles[i].FileName == FileName)
 		{
 			PEFiles[i].PID = PID;
-			PEFiles[i].is64Bit = is64Bit;
 			return;
 		}
 	}
 
 	//File not found so open it (child proc)
-	OpenFile(FileName,PID,is64Bit);
+	OpenFile(FileName,PID);
 }
 
 bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
@@ -35,9 +46,9 @@ bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
 
 	PEManager newPEFile;
 
-	newPEFile.PEFile = new clsPEFile(FileName,is64Bit);
+	newPEFile.PEFile = new clsPEFile(FileName);
 	newPEFile.FileName = FileName;
-	newPEFile.is64Bit = is64Bit;
+	newPEFile.is64Bit = newPEFile.PEFile->is64Bit();
 	newPEFile.PID = PID;
 
 	PEFiles.push_back(newPEFile);

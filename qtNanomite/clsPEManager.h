@@ -9,16 +9,6 @@ class clsPEManager: public QObject
 {
 	Q_OBJECT
 public:
-	struct PEManager
-	{
-		clsPEFile *PEFile;
-		int PID;
-		bool is64Bit;
-		std::wstring FileName;
-	};
-
-	static clsPEManager *pThis;
-
 	static QStringList getImportsFromFile(std::wstring FileName);
 
 	clsPEManager();
@@ -34,13 +24,24 @@ public:
 	PIMAGE_NT_HEADERS32 getNTHeader32(std::wstring FileName,int PID = -1);
 	PIMAGE_NT_HEADERS64 getNTHeader64(std::wstring FileName,int PID = -1);
 
+	std::wstring getFilenameFromPID(int PID);
 
 	public slots:
-		void InsertPIDForFile(std::wstring,int,bool);
+		void InsertPIDForFile(std::wstring,int);
 		void CloseFile(std::wstring,int);
 		void CleanPEManager();
 
 private:
+	static clsPEManager *pThis;
+
+	struct PEManager
+	{
+		clsPEFile *PEFile;
+		int PID;
+		bool is64Bit;
+		std::wstring FileName;
+	};
+
 	std::vector<PEManager> PEFiles;
 };
 
