@@ -72,7 +72,14 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 		newPID.sFileName = sFileName;
 		newPID.dwExitCode = dwExitCode;
 		newPID.hProc = hProc;
-		newPID.bKernelBP = false;
+		if(!_NormalDebugging)
+		{
+			_NormalDebugging = true;
+			newPID.bKernelBP = true;
+		}
+		else
+			newPID.bKernelBP = false;
+
 		newPID.bWOW64KernelBP = false;
 		newPID.bSymLoad = false;
 		newPID.bRunning = true;

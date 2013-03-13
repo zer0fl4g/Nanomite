@@ -11,8 +11,11 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 	_PEManager = PEManager;
 	
 	if(_PEManager != NULL)
-	{	_currentFile = _PEManager->getFilenameFromPID(_PID);
-
+	{	
+		_currentFile = _PEManager->getFilenameFromPID(_PID);
+		this->setWindowTitle(QString("[Nanomite] - PEEditor : %1 - %2").arg(PID,8,16,QChar('0')).arg(QString().fromStdWString(_currentFile)));
+		
+		InitList();
 		LoadPEView();
 	}
 	else
@@ -27,7 +30,30 @@ qtDLGPEEditor::~qtDLGPEEditor()
 
 }
 
+void qtDLGPEEditor::InitList()
+{
+	//// List Import
+	//tblImports->horizontalHeader()->resizeSection(0,135);
+	//tblImports->horizontalHeader()->resizeSection(1,135);
+
+	//// List Section
+	////tblSections->horizontalHeader()->resizeSection(0,85);
+
+	//// List DOS
+	//tblDOS->horizontalHeader()->resizeSection(0,135);
+	//tblDOS->horizontalHeader()->resizeSection(1,135);
+
+	//// List FILE
+	//tblFH->horizontalHeader()->resizeSection(0,135);
+	//tblFH->horizontalHeader()->resizeSection(1,250);
+
+	//// List OPTIONAL
+	//tblOH->horizontalHeader()->resizeSection(0,125);
+	//tblOH->horizontalHeader()->resizeSection(0,125);
+}
+
 void qtDLGPEEditor::LoadPEView()
 {
 
 }
+

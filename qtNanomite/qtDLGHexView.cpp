@@ -22,8 +22,8 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	SIZE_T dwBytesRead = NULL;
 	DWORD dwCounter = NULL,
 		dwProtection = NULL,
-		dwStepSize = 0x10,
-		dwBaseOffset = StartOffset;
+		dwStepSize = 0x10;
+	DWORD64	dwBaseOffset = StartOffset;
 	HANDLE hProcess = NULL;
 	LPVOID pBuffer = malloc(Size);
 	TCHAR *tcTempBuffer = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),

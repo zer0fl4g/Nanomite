@@ -71,7 +71,7 @@
          <widget class="QTableWidget" name="tblDisAs">
           <property name="minimumSize">
            <size>
-            <width>800</width>
+            <width>850</width>
             <height>405</height>
            </size>
           </property>
@@ -169,7 +169,7 @@
          <widget class="QTableWidget" name="tblRegView">
           <property name="minimumSize">
            <size>
-            <width>358</width>
+            <width>310</width>
             <height>405</height>
            </size>
           </property>
@@ -467,7 +467,7 @@
      <x>0</x>
      <y>0</y>
      <width>1194</width>
-     <height>20</height>
+     <height>21</height>
     </rect>
    </property>
    <property name="sizePolicy">
@@ -569,6 +569,7 @@
    <addaction name="actionDebug_Restart"/>
    <addaction name="actionDebug_Step_In"/>
    <addaction name="actionDebug_Step_Over"/>
+   <addaction name="action_Debug_Step_Out"/>
    <addaction name="separator"/>
    <addaction name="actionWindow_Detail_Information"/>
    <addaction name="actionWindow_Breakpoint_Manager"/>
@@ -773,6 +774,15 @@
    </property>
    <property name="text">
     <string>Show PE-Editor</string>
+   </property>
+  </action>
+  <action name="action_Debug_Step_Out">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_STEPB2U.ico</normaloff>:/DLGNanomite/Icons/IDI_STEPB2U.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Return to UserCode</string>
    </property>
   </action>
  </widget>

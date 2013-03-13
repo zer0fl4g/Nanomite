@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="DLGNanomite">
+    <file>../Icons/IDI_STEPB2U.ico</file>
     <file>../Icons/ID_PEEditor.ico</file>
     <file>../Icons/450x150.bmp</file>
     <file>../Icons/ID_BPManager.ico</file>

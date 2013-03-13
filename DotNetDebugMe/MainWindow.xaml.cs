@@ -22,6 +22,7 @@ namespace DotNetDebugMe
         public MainWindow()
         {
             InitializeComponent();
+            throw new Exception("Test");
         }
     }
 }

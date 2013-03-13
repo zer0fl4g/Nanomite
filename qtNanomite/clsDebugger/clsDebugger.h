@@ -164,6 +164,7 @@ signals:
 		quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
 		std::wstring sSourceFilePath,int iSourceLineNum);
 	void OnNewBreakpointAdded(BPStruct newBP,int iType);
+	void OnBreakpointDeleted(quint64 bpOffset);
 	void OnNewPID(std::wstring,int);
 	void DeletePEManagerObject(std::wstring,int);
 	void CleanPEManager();

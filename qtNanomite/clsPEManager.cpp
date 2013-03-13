@@ -45,13 +45,17 @@ bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
 	}
 
 	PEManager newPEFile;
+	bool bLoaded = false;
 
-	newPEFile.PEFile = new clsPEFile(FileName);
+	newPEFile.PEFile = new clsPEFile(FileName,&bLoaded);
 	newPEFile.FileName = FileName;
 	newPEFile.is64Bit = newPEFile.PEFile->is64Bit();
 	newPEFile.PID = PID;
 
-	PEFiles.push_back(newPEFile);
+	if(bLoaded)
+		PEFiles.push_back(newPEFile);
+	else
+		return false;
 	return true;
 }
 

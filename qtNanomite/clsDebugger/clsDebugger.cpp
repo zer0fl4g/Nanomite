@@ -246,9 +246,6 @@ void clsDebugger::DebuggingLoop()
 				PTCHAR tcDllFilepath = GetFileNameFromHandle(debug_event.u.CreateProcessInfo.hFile);
 				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,hProc);
 
-				BOOL Is64Bit = false;
-				clsAPIImport::pIsWow64Process(hProc,&Is64Bit);
-
 				emit OnNewPID((wstring)tcDllFilepath,debug_event.dwProcessId);
 
 				//clsDBManager::OpenNewFile(debug_event.dwProcessId,(wstring)tcDllFilepath);
@@ -271,7 +268,7 @@ void clsDebugger::DebuggingLoop()
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
 				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
-
+				InitBP();
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:

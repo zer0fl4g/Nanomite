@@ -32,12 +32,6 @@ bool clsDebugger::wSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwKeep,DWORD dw
 			if(WriteProcessMemory(hPID,(LPVOID)dwOffset,(LPVOID)&bNew,dwSize,&dwBytesWritten))
 				return true;
 		}
-		else
-		{
-			//EP Entrypoint
-			if(WriteProcessMemory(hPID,(LPVOID)dwOffset,(LPVOID)&bOrgByte,dwSize,&dwBytesWritten))
-				return true;
-		}
 	}
 	return false;
 }
@@ -303,6 +297,9 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 		}
 		break;
 	}
+	
+	emit OnBreakpointDeleted(dwOffset);
+
 	return true;
 }
 
@@ -338,6 +335,8 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 
 	if(!bExists)
 	{
+		DWORD dwSize = 1;
+
 		switch(dwBPType)
 		{
 		case 0:
@@ -347,13 +346,14 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 
 				newBP.dwOffset = dwOffset;
 				newBP.dwHandle = dwKeep;
-				newBP.dwSize = 1;
-				newBP.bOrgByte = NULL;
+				newBP.dwSize = dwSize;
+				wSoftwareBP(dwPID,dwOffset,dwKeep,dwSize,newBP.bOrgByte);
 				newBP.dwPID = dwPID;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
 
 				SoftwareBPs.push_back(newBP);
+
 				emit OnNewBreakpointAdded(newBP,0);
 				bRetValue = true;
 
@@ -366,13 +366,14 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 
 				newBP.dwOffset = dwOffset;
 				newBP.dwHandle = dwKeep;
-				newBP.dwSize = 1;
+				newBP.dwSize = dwSize;
 				newBP.dwPID = dwPID;
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
 
 				MemoryBPs.push_back(newBP);
+				wMemoryBP(dwPID,dwOffset,dwSize,dwKeep);
 				emit OnNewBreakpointAdded(newBP,1);
 				bRetValue = true;
 
@@ -387,7 +388,7 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				BPStruct newBP;
 				newBP.dwOffset = dwOffset;
 				newBP.dwHandle = dwKeep;
-				newBP.dwSize = 1;
+				newBP.dwSize = dwSize;
 				newBP.dwPID = dwPID;
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
@@ -418,6 +419,7 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				if(!bSlot1) newBP.dwSlot = 0;
 
 				HardwareBPs.push_back(newBP);
+				wHardwareBP(dwPID,dwOffset,dwSize,newBP.dwSlot,dwTypeFlag);
 				emit OnNewBreakpointAdded(newBP,2);
 				bRetValue = true;
 
@@ -425,8 +427,8 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 			}
 		}
 	}
-	if(_isDebugging)
-		InitBP();
+	//if(_isDebugging)
+	//	InitBP();
 
 	return bRetValue;
 }

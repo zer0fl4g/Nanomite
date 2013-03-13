@@ -194,3 +194,15 @@ void qtDLGBreakPointManager::DeleteCompleterContent()
 {
 	completerList.clear();
 }
+
+void qtDLGBreakPointManager::OnDelete(quint64 bpOffset)
+{
+	for(int i = 0; i < tblBPs->rowCount(); i++)
+	{
+		if(tblBPs->item(i,1)->text().toULongLong(0,16) == bpOffset)
+		{
+			tblBPs->removeRow(i);
+			i = 0;
+		}
+	}
+}

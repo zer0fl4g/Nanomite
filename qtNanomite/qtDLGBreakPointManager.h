@@ -17,6 +17,7 @@ public:
 
 	public slots:
 		void OnUpdate(BPStruct newBP,int iType);
+		void OnDelete(quint64 bpOffset);
 		void OnBPRemove();
 		void UpdateCompleter(std::wstring,int iPID);
 

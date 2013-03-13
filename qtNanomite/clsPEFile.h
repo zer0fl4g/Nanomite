@@ -9,7 +9,7 @@
 class clsPEFile
 {
 public:
-	clsPEFile(std::wstring FileName);
+	clsPEFile(std::wstring FileName,bool *bLoaded);
 	~clsPEFile();
 
 	bool isValidPEFile();

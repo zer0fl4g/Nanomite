@@ -266,9 +266,6 @@
     <ClCompile Include="clsMemPool.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="clsMemPoolNew.cpp">
-      <Filter>Source Dateien</Filter>
-    </ClCompile>
     <ClCompile Include="clsDebugger\clsDebuggerBreakpoints.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
@@ -483,11 +480,9 @@
     <ClInclude Include="clsMemPool.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="clsMemPoolNew.h">
-      <Filter>Header Dateien</Filter>
-    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />
+    <None Include="..\changelog.md" />
   </ItemGroup>
 </Project>

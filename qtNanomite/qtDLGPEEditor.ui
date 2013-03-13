@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1088</width>
-    <height>608</height>
+    <width>1138</width>
+    <height>636</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,6 +17,239 @@
    <iconset resource="qtDLGNanomite.qrc">
     <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
+  <widget class="QGroupBox" name="groupBox">
+   <property name="geometry">
+    <rect>
+     <x>310</x>
+     <y>0</y>
+     <width>300</width>
+     <height>630</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>IMAGE_OPTIONAL_HEADER</string>
+   </property>
+   <widget class="QTableWidget" name="tblOH">
+    <property name="geometry">
+     <rect>
+      <x>6</x>
+      <y>15</y>
+      <width>290</width>
+      <height>610</height>
+     </rect>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="horizontalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Name</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_2">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>222</y>
+     <width>300</width>
+     <height>410</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>IMAGE_FILE_HEADER</string>
+   </property>
+   <widget class="QTableWidget" name="tblFH">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>14</y>
+      <width>290</width>
+      <height>390</height>
+     </rect>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="horizontalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderMinimumSectionSize">
+     <number>14</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Name</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_3">
+   <property name="geometry">
+    <rect>
+     <x>5</x>
+     <y>0</y>
+     <width>300</width>
+     <height>220</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>IMAGE_DOS_HEADER</string>
+   </property>
+   <widget class="QTableWidget" name="tblDOS">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>14</y>
+      <width>290</width>
+      <height>200</height>
+     </rect>
+    </property>
+    <property name="alternatingRowColors">
+     <bool>false</bool>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="horizontalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderMinimumSectionSize">
+     <number>14</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Name</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>Value</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_4">
+   <property name="geometry">
+    <rect>
+     <x>614</x>
+     <y>418</y>
+     <width>520</width>
+     <height>211</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Sections</string>
+   </property>
+   <widget class="QTableWidget" name="tblSections">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>14</y>
+      <width>510</width>
+      <height>192</height>
+     </rect>
+    </property>
+    <property name="selectionBehavior">
+     <enum>QAbstractItemView::SelectRows</enum>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="horizontalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderMinimumSectionSize">
+     <number>14</number>
+    </attribute>
+   </widget>
+  </widget>
+  <widget class="QGroupBox" name="groupBox_5">
+   <property name="geometry">
+    <rect>
+     <x>613</x>
+     <y>0</y>
+     <width>310</width>
+     <height>420</height>
+    </rect>
+   </property>
+   <property name="title">
+    <string>Imports</string>
+   </property>
+   <widget class="QTableWidget" name="tblImports">
+    <property name="geometry">
+     <rect>
+      <x>5</x>
+      <y>15</y>
+      <width>300</width>
+      <height>400</height>
+     </rect>
+    </property>
+    <attribute name="horizontalHeaderVisible">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="horizontalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderMinimumSectionSize">
+     <number>14</number>
+    </attribute>
+    <column>
+     <property name="text">
+      <string>Module</string>
+     </property>
+    </column>
+    <column>
+     <property name="text">
+      <string>API</string>
+     </property>
+    </column>
+   </widget>
+  </widget>
  </widget>
  <resources>
   <include location="qtDLGNanomite.qrc"/>

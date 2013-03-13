@@ -11,6 +11,7 @@ LONG CALLBACK clsCrashHandler::ErrorReporter(PEXCEPTION_POINTERS pExceptionPtrs)
 	// 0x40010006 = STRG + C from cruntime, ignore!
 	if(pExceptionPtrs->ExceptionRecord->ExceptionCode == 0x000006ba ||
 		pExceptionPtrs->ExceptionRecord->ExceptionCode == 0x406d1388 ||
+		pExceptionPtrs->ExceptionRecord->ExceptionCode == 0xE0000001 ||
 		pExceptionPtrs->ExceptionRecord->ExceptionCode == 0x40010006)
 		return EXCEPTION_EXECUTE_HANDLER;
 	

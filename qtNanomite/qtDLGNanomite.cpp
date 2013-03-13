@@ -22,6 +22,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	QWidget *midWid = new QWidget;
 	midWid->setLayout(mainLayout);
 	setCentralWidget(midWid);
+	setAcceptDrops(true);
 
 	QApplication::setStyle(new QPlastiqueStyle);
 
@@ -68,6 +69,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 
 	// Callbacks from Disassambler Thread to GUI
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
@@ -93,6 +95,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Debug_Output, SIGNAL(triggered()), this, SLOT(action_WindowShowDebugOutput()));
 	connect(actionWindow_Show_Handles, SIGNAL(triggered()), this, SLOT(action_WindowShowHandles()));
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
+	connect(action_Debug_Step_Out,SIGNAL(triggered()), this, SLOT(action_DebugStepOut()));
 	//connect(actionWindow_Show_PEEditor, SIGNAL(triggered()), this, SLOT(action_WindowShowPEEditor()));
 
 	// Actions on Window Events
@@ -152,9 +155,11 @@ void qtDLGNanomite::OnDebuggerBreak()
 		UpdateStateBar(0x3);
 	else
 	{
+		// display callstack
 		tblCallstack->setRowCount(0);
 		coreDebugger->ShowCallStack();
 
+		// display Reg
 		LoadRegView();
 
 #ifdef _AMD64_
@@ -176,6 +181,7 @@ void qtDLGNanomite::OnDebuggerBreak()
 		dwEIP = coreDebugger->ProcessContext.Eip;
 		LoadStackView(coreDebugger->ProcessContext.Esp,4);
 #endif
+		// Load SourceFile to Dlg
 		wstring FilePath; 
 		int LineNumber = NULL;
 
@@ -183,8 +189,17 @@ void qtDLGNanomite::OnDebuggerBreak()
 		if(FilePath.length() > 0 && LineNumber > 0)
 			emit OnDisplaySource(QString::fromStdWString(FilePath),LineNumber);	
 
+		// Update Disassembler
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
 			OnDisplayDisassembly(dwEIP);
+
+		// Update Window Title
+		wstring ModName,FuncName;
+		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
+
+		this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow -- %1.%2").arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
+
+		// Update Toolbar
 		UpdateStateBar(0x2);
 	}
 }
@@ -646,6 +661,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	UpdateStateBar(0x3);
 	coreDisAs->SectionDisAs.clear();
 	dlgBPManager->DeleteCompleterContent();
+	this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow"));
 }
 
 void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
@@ -863,12 +879,16 @@ void qtDLGNanomite::resizeEvent(QResizeEvent *event)
 void qtDLGNanomite::OnF2BreakPointPlace()
 {
 	QList<QTableWidgetItem *> currentSelectedItems = tblDisAs->selectedItems();
-	if(!coreDebugger->GetDebuggingState() || currentSelectedItems.count() <= 0) return;
+	if(currentSelectedItems.count() <= 0) return;
 
 	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
 	if(coreDebugger->AddBreakpointToList(NULL,DR_EXECUTE,-1,dwSelectedVA,NULL,true))
 		currentSelectedItems.value(0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
-
+	else
+	{// exists
+		coreDebugger->RemoveBPFromList(dwSelectedVA,NULL);
+		currentSelectedItems.value(0)->setForeground(QColor("Black"));
+	}	
 	return;
 }
 
@@ -929,5 +949,27 @@ bool qtDLGNanomite::eventFilter(QObject *pObject,QEvent *event)
 			return true;
 		}
 	}
+	//else if(event->type() == QEvent::Resize)
+	//{
+	//	OnDebuggerBreak();
+	//}
 	return false;
+}
+
+void qtDLGNanomite::dragEnterEvent(QDragEnterEvent* pEvent)
+{
+	if(pEvent->mimeData()->hasUrls()) {
+        pEvent->acceptProposedAction();
+    }
+}
+
+void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
+{ 
+	if(pEvent->mimeData()->hasUrls())
+    {
+		wstring* filePath = new wstring(QString(pEvent->mimeData()->data("FileName")).toStdWString());
+		coreDebugger->SetTarget(*filePath);
+		action_DebugStart();
+		pEvent->acceptProposedAction();
+    }
 }

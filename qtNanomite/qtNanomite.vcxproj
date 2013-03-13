@@ -209,7 +209,7 @@
       <SubSystem>Windows</SubSystem>
       <OutputFile>$(OutDir)\$(ProjectName).exe</OutputFile>
       <AdditionalLibraryDirectories>$(QTDIR)\lib;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
-      <GenerateDebugInformation>false</GenerateDebugInformation>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>qtmain.lib;QtCore4.lib;QtGui4.lib;BeaEngine_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ManifestFile>$(IntDir)$(TargetName)$(TargetExt).intermediate.manifest</ManifestFile>
       <IgnoreSpecificDefaultLibraries>crt64.lib;libc.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib;msvcp100.lib</IgnoreSpecificDefaultLibraries>
@@ -233,7 +233,6 @@
     <ClCompile Include="clsHelperClass.cpp" />
     <ClCompile Include="clsMemManager.cpp" />
     <ClCompile Include="clsMemPool.cpp" />
-    <ClCompile Include="clsMemPoolNew.cpp" />
     <ClCompile Include="clsPEFile.cpp" />
     <ClCompile Include="clsPEManager.cpp" />
     <ClCompile Include="clsSymbolAndSyntax.cpp" />
@@ -578,7 +577,6 @@
     <ClInclude Include="clsDBManager.h" />
     <ClInclude Include="clsMemManager.h" />
     <ClInclude Include="clsMemPool.h" />
-    <ClInclude Include="clsMemPoolNew.h" />
     <ClInclude Include="clsPEFile.h" />
     <CustomBuild Include="clsPEManager.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
@@ -1164,6 +1162,7 @@
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
+    <None Include="..\changelog.md" />
     <None Include="..\readme.md" />
     <CustomBuild Include="qtDLGRegEdit86.ui">
       <FileType>Document</FileType>

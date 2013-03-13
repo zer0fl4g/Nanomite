@@ -65,6 +65,7 @@ private slots:
 	void action_DebugSuspend();
 	void action_DebugStepIn();
 	void action_DebugStepOver();
+	void action_DebugStepOut();
 	void action_OptionsAbout();
 	void action_OptionsOptions();
 	void action_WindowDetailInformation();
@@ -115,6 +116,8 @@ private:
 
 protected:
 	bool eventFilter(QObject *pOpject,QEvent *event);
+	void dragEnterEvent(QDragEnterEvent* pEvent);
+	void dropEvent(QDropEvent* pEvent);
 };
 
 #endif // QTDLGNANOMITE_H

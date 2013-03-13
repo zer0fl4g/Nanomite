@@ -68,6 +68,9 @@ void qtDLGAttach::FillProcessList()
 							}
 						} while (Module32Next(hModules,&pModEntry));
 					}
+					else
+						tblProcList->setItem(tblProcList->rowCount() - 1,2,
+							new QTableWidgetItem(QString("")));
 				}
 			} while (Process32Next(hToolSnapShot,&pProcessEntry));
 		}
@@ -76,7 +79,12 @@ void qtDLGAttach::FillProcessList()
 
 void qtDLGAttach::OnProcessDoubleClick(int iRow,int iColumn)
 {
-	emit StartAttachedDebug(tblProcList->item(iRow,1)->text().toInt(),tblProcList->item(iRow,2)->text());
-	close();
-	return;
+	QString targetFile = tblProcList->item(iRow,2)->text();
+	if(!targetFile.isEmpty() && targetFile.length() > 0)
+	{
+		emit StartAttachedDebug(tblProcList->item(iRow,1)->text().toInt(),targetFile);
+		close();
+	}	
+	else
+		MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
 }

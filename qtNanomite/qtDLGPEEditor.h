@@ -23,6 +23,8 @@ private:
 	clsPEManager* _PEManager;
 
 	void LoadPEView();
+	void InitList();
+
 };
 
 #endif

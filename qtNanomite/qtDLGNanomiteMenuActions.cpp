@@ -16,6 +16,9 @@
 #include "clsAPIImport.h"
 #include "clsMemManager.h"
 
+#include <TlHelp32.h>
+#include <Psapi.h>
+
 using namespace std;
 
 void qtDLGNanomite::action_FileTerminateGUI()
@@ -71,8 +74,8 @@ void qtDLGNanomite::action_DebugStart()
 			coreDebugger->ClearCommandLine();
 		}
 
-		PEManager->OpenFile(coreDebugger->GetTarget());
-		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+		if(!PEManager->OpenFile(coreDebugger->GetTarget()) || 
+			!PEManager->isValidPEFile(coreDebugger->GetTarget()))
 		{
 			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
 			PEManager->CloseFile(coreDebugger->GetTarget(),0);
@@ -136,25 +139,9 @@ void qtDLGNanomite::action_DebugStop()
 
 void qtDLGNanomite::action_DebugRestart()
 {
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StopDebuggingAll();
-	PEManager->CleanPEManager();
-	CleanGUI();
-	
-	if(coreDebugger->IsTargetSet())
-	{
-		PEManager->OpenFile(coreDebugger->GetTarget());
-
-		if(!PEManager->isValidPEFile(coreDebugger->GetTarget()))
-		{
-			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
-			PEManager->CloseFile(coreDebugger->GetTarget(),0);
-			coreDebugger->ClearTarget();
-			return;
-		}
-
-		coreDebugger->start();
-	}
+	action_DebugStop();
+	Sleep(50);
+	action_DebugStart();
 }
 
 void qtDLGNanomite::action_DebugSuspend()
@@ -190,6 +177,8 @@ void qtDLGNanomite::action_DebugStepIn()
 
 void qtDLGNanomite::action_DebugStepOver()
 {
+	if(!coreDebugger->GetDebuggingState()) return;
+
 	DWORD eFlags = NULL;
 	quint64 dwEIP = NULL;
 #ifdef _AMD64_
@@ -271,6 +260,72 @@ void qtDLGNanomite::action_DebugStepOver()
 
 		coreDebugger->StepOver(i.value().Offset.toULongLong(0,16));
 	}
+}
+
+void qtDLGNanomite::action_DebugStepOut()
+{
+	if(!coreDebugger->GetDebuggingState()) return;
+	
+	DWORD64 ModuleBase = NULL,
+			ModuleSize = NULL,
+			CurAddress = NULL;
+	HANDLE	hProcess = coreDebugger->GetCurrentProcessHandle();
+	PTCHAR	lpFileName = (PTCHAR)malloc(MAX_PATH *sizeof(TCHAR)),
+			lpCurrentName = (PTCHAR)coreDebugger->GetTarget().c_str(),
+			lpCurrentFileName = NULL;
+	bool	bWeGotIt = false;
+
+	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentName,'/');
+
+	MODULEENTRY32 pModEntry;
+	pModEntry.dwSize = sizeof(MODULEENTRY32);
+	MEMORY_BASIC_INFORMATION mbi;
+		
+	while(VirtualQueryEx(hProcess,(LPVOID)CurAddress,&mbi,sizeof(mbi)))
+	{
+		if(GetMappedFileName(hProcess, (LPVOID)CurAddress, lpFileName, MAX_PATH) > 0)
+		{
+			lpCurrentFileName = clsHelperClass::reverseStrip(lpFileName,'\\');
+			if(lpCurrentFileName != NULL && wcslen(lpCurrentFileName) > 0)
+			{
+				if(wcscmp(lpCurrentFileName,lpCurrentName) == 0)
+				{
+					if(!bWeGotIt)
+					{
+						bWeGotIt = true;
+						ModuleBase = (DWORD64)mbi.BaseAddress;
+					}
+					
+					ModuleSize += mbi.RegionSize;
+				}
+				else
+				{
+					if(bWeGotIt)
+					{
+						free(lpCurrentFileName);
+						break;
+					}
+				}
+
+				free(lpCurrentFileName);
+			}
+		}
+		CurAddress += mbi.RegionSize;
+	}
+
+	for(int i = 0; i < tblCallstack->rowCount(); i++)
+	{
+		DWORD64 currentFunction = tblCallstack->item(i,3)->text().toULongLong(0,16);
+
+		if(currentFunction >= ModuleBase && currentFunction < (ModuleBase + ModuleSize))
+		{
+			coreDebugger->StepOver(currentFunction);
+			break;
+		}
+	}
+
+	free(lpCurrentName);
+	free(lpFileName);
 }
 
 void qtDLGNanomite::action_OptionsAbout()

@@ -269,3 +269,30 @@ wstring clsHelperClass::convertSTRtoWSTR(string FileName)
 	clsMemManager::CFree(newStr);
 	return str;
 }
+
+PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
+{
+	int iModPos = NULL,
+		iModLen = NULL;
+	PTCHAR lpTempString = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+
+	iModLen = wcslen(lpString);
+	if(iModLen > 0)
+	{
+		for(int i = iModLen; i > 0 ; i--)
+		{
+			if(lpString[i] == lpSearchString)
+			{
+				iModPos = i;
+				break;
+			}
+		}
+		memcpy(lpTempString,(LPVOID)&lpString[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
+		return lpTempString;
+	}					
+	else
+	{
+		free(lpTempString);
+		return NULL;
+	}
+}

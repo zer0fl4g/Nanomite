@@ -2,15 +2,16 @@
 
 using namespace std;
 
-clsPEFile::clsPEFile(wstring FileName)
+clsPEFile::clsPEFile(wstring FileName,bool *bLoaded)
 {
 	_FileName = FileName;
-	LoadFile(_FileName);
+	*bLoaded = LoadFile(_FileName);
 }
 
 clsPEFile::~clsPEFile()
 {
 	UnmapViewOfFile(_lpBuffer);
+	_FileName.erase();
 	//free(_lpBuffer);
 }
 
@@ -41,7 +42,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 	if(_is64Bit)
 	{
 		_pINH64 = (PIMAGE_NT_HEADERS64)((DWORD)_pIDH + _pIDH->e_lfanew);
-		if(_pINH64 != NULL && _pINH64->Signature != IMAGE_NT_SIGNATURE)
+		if((_pINH64 != NULL && _pINH64->Signature != IMAGE_NT_SIGNATURE) || _pINH64->FileHeader.Characteristics & IMAGE_FILE_DLL)
 		{
 			UnmapViewOfFile(_lpBuffer);
 			CloseHandle(hFile);
@@ -52,7 +53,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 	else
 	{
 		_pINH32 = (PIMAGE_NT_HEADERS32)((DWORD)_pIDH + _pIDH->e_lfanew);
-		if(_pINH32 != NULL && _pINH32->Signature != IMAGE_NT_SIGNATURE)
+		if((_pINH32 != NULL && _pINH32->Signature != IMAGE_NT_SIGNATURE) || _pINH32->FileHeader.Characteristics & IMAGE_FILE_DLL)
 		{
 			UnmapViewOfFile(_lpBuffer);
 			CloseHandle(hFile);
@@ -70,14 +71,14 @@ bool clsPEFile::isValidPEFile()
 {
 	if(_is64Bit)
 	{
-		if(_pINH64->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64) 
+		if(_pINH64 == NULL || _pINH64->FileHeader.Machine != IMAGE_FILE_MACHINE_AMD64) 
 		{
 			return false;
 		}
 	}
 	else
 	{
-		if(_pINH32->FileHeader.Machine != IMAGE_FILE_MACHINE_I386) 
+		if(_pINH32 == NULL || _pINH32->FileHeader.Machine != IMAGE_FILE_MACHINE_I386) 
 		{
 			return false;
 		}
@@ -106,23 +107,22 @@ QStringList clsPEFile::getImports32()
 		PIMAGE_IMPORT_DESCRIPTOR pImportHeader = (PIMAGE_IMPORT_DESCRIPTOR)((BYTE*)dwImportSectionOffset);
 		do
 		{
-			PIMAGE_THUNK_DATA32 pIAT = (PIMAGE_THUNK_DATA32)((pImportHeader->FirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
+			PIMAGE_THUNK_DATA32 pIAT = NULL;
 
-			if (pIAT->u1.Ordinal)
+			if(pImportHeader->OriginalFirstThunk != 0)
+				pIAT = (PIMAGE_THUNK_DATA32)((pImportHeader->OriginalFirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
+            else
+                pIAT = (PIMAGE_THUNK_DATA32)((pImportHeader->FirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
+
+			while (pIAT->u1.Ordinal != 0 && !(pIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG))
 			{
-				do
-				{
-					if (IMAGE_SNAP_BY_ORDINAL32(pIAT->u1.Ordinal))
-					{
+				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
+				if(pImportName != NULL && pImportName->Hint != NULL && pImportName->Name != NULL)
+					importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
 
-					} else {
-						PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.AddressOfData - dwVAOfImportSection) + dwImportSectionOffset);
-						if(pImportName != NULL)
-							importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
-					}
-					pIAT++;
-				} while (pIAT->u1.AddressOfData != 0);
+				pIAT++;
 			}
+
 			pImportHeader++;
 		} while (pImportHeader->Name);
 	}
@@ -142,23 +142,22 @@ QStringList clsPEFile::getImports64()
 		PIMAGE_IMPORT_DESCRIPTOR pImportHeader = (PIMAGE_IMPORT_DESCRIPTOR)((BYTE*)dwImportSectionOffset);
 		do
 		{
-			PIMAGE_THUNK_DATA64 pIAT = (PIMAGE_THUNK_DATA64)((pImportHeader->FirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
+			PIMAGE_THUNK_DATA64 pIAT = NULL;
 
-			if (pIAT->u1.Ordinal)
+			if(pImportHeader->OriginalFirstThunk != 0)
+				pIAT = (PIMAGE_THUNK_DATA64)((pImportHeader->OriginalFirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
+            else
+                pIAT = (PIMAGE_THUNK_DATA64)((pImportHeader->FirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
+
+			while (pIAT->u1.Ordinal != 0 && !(pIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG))
 			{
-				do
-				{
-					if (IMAGE_SNAP_BY_ORDINAL64(pIAT->u1.Ordinal))
-					{
+				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
+				if(pImportName != NULL && pImportName->Hint != NULL && pImportName->Name != NULL)
+					importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
 
-					} else {
-						PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.AddressOfData - dwVAOfImportSection) + dwImportSectionOffset);
-						if(pImportName != NULL)
-							importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
-					}
-					pIAT++;
-				} while (pIAT->u1.AddressOfData != 0);
+				pIAT++;
 			}
+
 			pImportHeader++;
 		} while (pImportHeader->Name);
 	}
@@ -170,10 +169,12 @@ DWORD64 clsPEFile::dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS6
 {
 	DWORD64 tableVA = pINH->OptionalHeader.DataDirectory[iTableEntryNr].VirtualAddress;
 	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)(pBuffer + pIDH->e_lfanew + sizeof(IMAGE_NT_HEADERS64));
+
 	for (WORD i = 0; i < pINH->FileHeader.NumberOfSections; i++)
 	{
 	  DWORD64 sectionVA = pSectionHeader->VirtualAddress;
 	  DWORD64 sectionSize = pSectionHeader->Misc.VirtualSize;
+
 	  if ((sectionVA <= tableVA) && (tableVA < (sectionVA + sectionSize)))
 	  {
 		   return (DWORD64)(pBuffer + pSectionHeader->PointerToRawData + (tableVA-sectionVA));
@@ -188,10 +189,12 @@ DWORD clsPEFile::dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 
 {
 	DWORD tableVA = pINH->OptionalHeader.DataDirectory[iTableEntryNr].VirtualAddress;
 	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)(pBuffer + pIDH->e_lfanew + sizeof(IMAGE_NT_HEADERS32));
+
 	for (WORD i = 0; i < pINH->FileHeader.NumberOfSections; i++)
 	{
 	  DWORD sectionVA = pSectionHeader->VirtualAddress;
 	  DWORD sectionSize = pSectionHeader->Misc.VirtualSize;
+
 	  if ((sectionVA <= tableVA) && (tableVA < (sectionVA + sectionSize)))
 	  {
 		   return (DWORD)(pBuffer + pSectionHeader->PointerToRawData + (tableVA-sectionVA));
