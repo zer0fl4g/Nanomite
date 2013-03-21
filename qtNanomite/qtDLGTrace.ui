@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>qtDLGTraceClass</class>
+ <widget class="QWidget" name="qtDLGTraceClass">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>848</width>
+    <height>664</height>
+   </rect>
+  </property>
+  <property name="windowTitle">
+   <string>[Nanomite] - Trace</string>
+  </property>
+  <property name="windowIcon">
+   <iconset resource="qtDLGNanomite.qrc">
+    <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
+  </property>
+  <widget class="QWidget" name="verticalLayoutWidget">
+   <property name="geometry">
+    <rect>
+     <x>0</x>
+     <y>0</y>
+     <width>851</width>
+     <height>671</height>
+    </rect>
+   </property>
+   <layout class="QVBoxLayout" name="verticalLayout">
+    <item>
+     <widget class="QTableWidget" name="tblTraceLog">
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>true</bool>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>15</number>
+      </attribute>
+      <attribute name="verticalHeaderHighlightSections">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>15</number>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>PID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>TID</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Offset</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Instruction</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>CPU Registers</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <resources>
+  <include location="qtDLGNanomite.qrc"/>
+ </resources>
+ <connections/>
+</ui>

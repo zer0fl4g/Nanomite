@@ -357,3 +357,16 @@ wstring clsDebugger::GetTarget()
 {
 	return _sTarget;
 }
+
+bool clsDebugger::SetTraceFlagForPID(DWORD dwPID,bool bIsEnabled)
+{
+	for(int i = 0; i < PIDs.size(); i++)
+	{
+		if(PIDs[i].dwPID == dwPID)
+		{
+			PIDs[i].bTraceFlag = bIsEnabled;
+			return StepIn();
+		}
+	}
+	return false;
+}

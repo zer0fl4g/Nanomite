@@ -35,6 +35,24 @@ bool clsDBManager::DBAPI_insertSymbolsFromPID(int PID,unsigned long long Key,std
 	return false;
 }
 
+//bool clsDBManager::DBAPI_insertTraceInfo(unsigned long long currentOffset,int PID,int TID,std::wstring currentInstruction,std::wstring currentRegs)
+//{
+//	if(pThis != NULL)
+//		for(int i = 0; i < pThis->DBs.size(); i++)
+//			if(pThis->DBs[i].PID == PID)
+//				return pThis->DBs[i].DBi->DBAPI_insertTraceInfo(currentOffset,PID,TID,currentInstruction,currentRegs);
+//	return false;
+//}
+//
+//bool clsDBManager::DBAPI_getTraceInfo(int count,unsigned long long startOffset,int &PID, int &TID,vector<wstring> instructions, vector<wstring> regs)
+//{
+//	if(pThis != NULL)
+//		for(int i = 0; i < pThis->DBs.size(); i++)
+//			if(pThis->DBs[i].PID == PID)
+//				return pThis->DBs[i].DBi->DBAPI_getTraceInfo(count,startOffset,PID,TID,instructions,regs);
+//	return false;
+//}
+
 bool clsDBManager::OpenNewFile(int PID, wstring FilePath)
 {
 	if(pThis != NULL)

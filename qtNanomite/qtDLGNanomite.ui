@@ -50,7 +50,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1191</width>
+      <width>1212</width>
       <height>751</height>
      </rect>
     </property>
@@ -71,7 +71,7 @@
          <widget class="QTableWidget" name="tblDisAs">
           <property name="minimumSize">
            <size>
-            <width>850</width>
+            <width>900</width>
             <height>405</height>
            </size>
           </property>
@@ -89,6 +89,9 @@
           <property name="contextMenuPolicy">
            <enum>Qt::CustomContextMenu</enum>
           </property>
+          <property name="midLineWidth">
+           <number>0</number>
+          </property>
           <property name="verticalScrollBarPolicy">
            <enum>Qt::ScrollBarAlwaysOff</enum>
           </property>
@@ -101,6 +104,9 @@
           <property name="showGrid">
            <bool>false</bool>
           </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
           </attribute>
@@ -169,7 +175,7 @@
          <widget class="QTableWidget" name="tblRegView">
           <property name="minimumSize">
            <size>
-            <width>310</width>
+            <width>250</width>
             <height>405</height>
            </size>
           </property>
@@ -196,6 +202,9 @@
           <property name="showGrid">
            <bool>false</bool>
           </property>
+          <attribute name="horizontalHeaderVisible">
+           <bool>true</bool>
+          </attribute>
           <attribute name="horizontalHeaderStretchLastSection">
            <bool>true</bool>
           </attribute>
@@ -203,10 +212,10 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>15</number>
+           <number>14</number>
           </attribute>
           <attribute name="verticalHeaderMinimumSectionSize">
-           <number>15</number>
+           <number>14</number>
           </attribute>
           <column>
            <property name="text">
@@ -230,7 +239,7 @@
          <property name="minimumSize">
           <size>
            <width>1189</width>
-           <height>160</height>
+           <height>140</height>
           </size>
          </property>
          <property name="maximumSize">
@@ -345,6 +354,9 @@
          <property name="showGrid">
           <bool>false</bool>
          </property>
+         <attribute name="horizontalHeaderVisible">
+          <bool>true</bool>
+         </attribute>
          <attribute name="horizontalHeaderStretchLastSection">
           <bool>true</bool>
          </attribute>
@@ -432,6 +444,9 @@
          <property name="showGrid">
           <bool>false</bool>
          </property>
+         <attribute name="horizontalHeaderVisible">
+          <bool>true</bool>
+         </attribute>
          <attribute name="horizontalHeaderStretchLastSection">
           <bool>true</bool>
          </attribute>
@@ -509,6 +524,9 @@
     <addaction name="separator"/>
     <addaction name="actionDebug_Step_In"/>
     <addaction name="actionDebug_Step_Over"/>
+    <addaction name="separator"/>
+    <addaction name="actionDebug_Trace_Start"/>
+    <addaction name="actionDebug_Trace_Stop"/>
    </widget>
    <widget class="QMenu" name="menuOptions">
     <property name="sizePolicy">
@@ -544,6 +562,7 @@
     <addaction name="actionWindow_Show_Handles"/>
     <addaction name="actionWindow_Show_Windows"/>
     <addaction name="actionWindow_Show_PEEditor"/>
+    <addaction name="actionDebug_Trace_Show"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
@@ -573,6 +592,10 @@
    <addaction name="separator"/>
    <addaction name="actionWindow_Detail_Information"/>
    <addaction name="actionWindow_Breakpoint_Manager"/>
+   <addaction name="separator"/>
+   <addaction name="actionDebug_Trace_Start"/>
+   <addaction name="actionDebug_Trace_Stop"/>
+   <addaction name="actionDebug_Trace_Show"/>
    <addaction name="separator"/>
    <addaction name="actionWindow_Show_Memory"/>
    <addaction name="actionWindow_Show_Heap"/>
@@ -783,6 +806,21 @@
    </property>
    <property name="text">
     <string>Return to UserCode</string>
+   </property>
+  </action>
+  <action name="actionDebug_Trace_Start">
+   <property name="text">
+    <string>Trace Start</string>
+   </property>
+  </action>
+  <action name="actionDebug_Trace_Stop">
+   <property name="text">
+    <string>Trace Stop</string>
+   </property>
+  </action>
+  <action name="actionDebug_Trace_Show">
+   <property name="text">
+    <string>Show Trace Info</string>
    </property>
   </action>
  </widget>

@@ -5,6 +5,7 @@
 #include "qtDLGDebugStrings.h"
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGSourceViewer.h"
+#include "qtDLGTrace.h"
 
 #include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
@@ -47,6 +48,7 @@ public:
 	qtDLGDebugStrings *dlgDbgStr;
 	qtDLGBreakPointManager *dlgBPManager;
 	qtDLGSourceViewer *dlgSourceViewer;
+	qtDLGTrace *dlgTraceWindow;
 
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
@@ -77,6 +79,9 @@ private slots:
 	void action_WindowShowHandles();
 	void action_WindowShowWindows();
 	void action_WindowShowPEEditor();
+	void action_DebugTraceStart();
+	void action_DebugTraceStop();
+	void action_DebugTraceShow();
 
 	void OnF2BreakPointPlace();
 	void OnDisplayDisassembly(quint64 dwEIP);
@@ -98,7 +103,6 @@ private slots:
 	
 signals:
 	void OnDisplaySource(QString,int);
-
 
 private:
 	int _iMenuPID;

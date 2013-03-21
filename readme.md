@@ -11,6 +11,7 @@
 - Step back to user code
 - Attaching
 - Detaching
+- Single Step Tracing
 - Supporting child processes
 - Supporting multithreading
 - Display source code (if found)
@@ -31,23 +32,16 @@
 	- cpu registers
 
 ## Changelog
-###Version 0.1 beta 8
-+ fixed a crash in attaching to a process where we don´t have a file path
-+ fixed a bug which ignored DbgBreakPoint on attaching
-+ fixed a bug which caused double breaking in case we set a breakpoint while beeing on the entrypoint
-+ fixed a crash in pe import reader
-+ fixed a crash (see github issue #1)
-+ fixed a bug in HexView which didn´t display data on x64 processes
-+ fixed a possible crash when opening invalid non pe files
-+ fixed a small bug in "Restart"
-+ added display of current function in windowtitle
-+ added support for drag and drop of files
-+ added possibility to remove breakpoints with "F2" (needs to be a selected row in disassembler)
-+ added "Step back to user code"
+###Version 0.1 beta 9
++ fixed a crash in loading imports of files without IAT
++ fixed a crash in "Goto Offset" context menu
++ small gui improvements
++ added Single Step Tracer
 
 ####Notes:
-	- "Step back to user code"
-		- If you use this the debugger will continue the execution until you get to the first function 
-		  which is located in the main module
+	- "Custom Stylesheets"
+		- the file "stylesheet.qss" in the application folder can be modified to adapt the main parts of the 
+		  GUI Design to your personal needs
+
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

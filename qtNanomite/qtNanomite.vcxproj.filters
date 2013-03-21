@@ -275,6 +275,18 @@
     <ClCompile Include="clsDebugger\clsDebuggerPublicAPI.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
+    <ClCompile Include="clsMemDump.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGTrace.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGTrace.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGTrace.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -397,6 +409,12 @@
     <CustomBuild Include="qtDLGSourceViewer.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGTrace.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGTrace.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -479,6 +497,12 @@
     </ClInclude>
     <ClInclude Include="clsMemPool.h">
       <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsMemDump.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGTrace.h">
+      <Filter>Generierte Dateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

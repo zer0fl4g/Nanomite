@@ -474,3 +474,47 @@ void qtDLGNanomite::action_WindowShowPEEditor()
 		_iMenuPID = -1;
 	}
 }
+
+void qtDLGNanomite::action_DebugTraceShow()
+{
+	dlgTraceWindow->show();
+}
+
+void qtDLGNanomite::action_DebugTraceStart()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionDebug_Trace_Start->setDisabled(true);
+
+		GenerateMenu(false);
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGTrace::clearTraceData();
+			coreDebugger->SetTraceFlagForPID(_iMenuPID,true);
+		}
+
+		actionDebug_Trace_Start->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_DebugTraceStop()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionDebug_Trace_Start->setDisabled(true);
+
+		GenerateMenu(false);
+
+		if(_iMenuPID >= 0)
+		{
+			coreDebugger->SetTraceFlagForPID(_iMenuPID,false);
+		}
+
+		actionDebug_Trace_Start->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}

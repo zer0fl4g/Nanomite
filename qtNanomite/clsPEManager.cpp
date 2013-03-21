@@ -96,6 +96,9 @@ QStringList clsPEManager::getImports(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName == FileName || PEFiles[i].PID == PID)
 			return PEFiles[i].PEFile->getImports();
 	}
+
+	// no imports or invalid file
+	return QStringList();
 }
 
 clsPEManager::~clsPEManager()

@@ -22,6 +22,7 @@ public:
 	static std::string convertWSTRtoSTR(std::wstring FileName);
 	static std::wstring convertSTRtoWSTR(std::string FileName);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
+	static QString LoadStyleSheet();
 };
 
 #endif // QTDLGNANOMITE_H

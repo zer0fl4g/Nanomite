@@ -54,6 +54,7 @@ struct PIDStruct
 	bool bRunning;
 	bool bSymLoad;
 	bool bTrapFlag;
+	bool bTraceFlag;
 	HANDLE hProc;
 	PTCHAR sFileName;
 };
@@ -131,6 +132,7 @@ public:
 	bool ReadMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
 	bool WriteMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
 	bool AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep);
+	bool SetTraceFlagForPID(DWORD dwPID, bool bIsEnabled);
 
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();

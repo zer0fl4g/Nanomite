@@ -8,7 +8,7 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
-	this->setStyleSheet("background: rgb(230, 235, 230)");
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	//this->setAttribute(Qt::WA_DeleteOnClose,true);
 
 	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());

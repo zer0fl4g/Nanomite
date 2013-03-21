@@ -2,12 +2,17 @@
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
+#include <QCryptographicHash>
+
 using namespace std;
 
 clsDBInterface::clsDBInterface(wstring FilePath)
 {
 	string FileName = getFileNameFromPath(FilePath);
-	FileName.append("_db_HASH_.sqlite");
+	QString FileNameHash = QString(QCryptographicHash::hash(QString().fromStdString(FileName).toAscii(),QCryptographicHash::Md5).toHex());
+	string *FileNameSTDHash = new string(FileNameHash.toStdString());
+	
+	FileName.append("_").append(*FileNameSTDHash).append(".sqlite");
 
 	if(!sqlite3_open(FileName.c_str(),&pDB) == SQLITE_OK)
 	{
@@ -21,10 +26,28 @@ clsDBInterface::clsDBInterface(wstring FilePath)
 
 	sqlite3_stmt *insertStmt;
 
+	// symbol table
 	string createTableQuery = "CREATE TABLE IF NOT EXISTS symbols (offset REAL PRIMARY KEY,modname TEXT,funcname TEXT);";
-    
 	sqlite3_prepare(pDB, createTableQuery.c_str(), createTableQuery.size(), &insertStmt, NULL);
     if (sqlite3_step(insertStmt) != SQLITE_DONE)
+	{
+		// only for debug
+		return;
+	}
+
+	// drop previous traces
+	createTableQuery = "DROP TABLE IF EXISTS trace;";
+	sqlite3_prepare(pDB, createTableQuery.c_str(), createTableQuery.size(), &insertStmt, NULL);
+	if (sqlite3_step(insertStmt) != SQLITE_DONE)
+	{
+		// only for debug
+		return;
+	}
+
+	// create trace table
+	createTableQuery = "CREATE TABLE IF NOT EXISTS trace (offset REAL PRIMARY KEY,PID TEXT,TID TEXT,instruction TEXT,regs TEXT);";
+	sqlite3_prepare(pDB, createTableQuery.c_str(), createTableQuery.size(), &insertStmt, NULL);
+	if (sqlite3_step(insertStmt) != SQLITE_DONE)
 	{
 		// only for debug
 		return;
@@ -53,7 +76,6 @@ bool clsDBInterface::DBAPI_getSymbols(quint64 Key,std::wstring &ModName,std::wst
 		int s = sqlite3_step(selectStmt);
 		if (s == SQLITE_ROW)
 		{
-			const unsigned char * text;
 			ModName = clsHelperClass::convertSTRtoWSTR((const char*)sqlite3_column_text(selectStmt, 1));
 			FuncName = clsHelperClass::convertSTRtoWSTR((const char*)sqlite3_column_text(selectStmt, 2));
 		}
@@ -96,3 +118,56 @@ string clsDBInterface::getFileNameFromPath(wstring FilePath)
 	vector<wstring> TempData = clsHelperClass::split(FilePath,L"\\");
 	return clsHelperClass::convertWSTRtoSTR(TempData[TempData.size() - 1]);
 }
+
+//bool clsDBInterface::DBAPI_insertTraceInfo(unsigned long long currentOffset,int PID,int TID,std::wstring currentInstruction,std::wstring currentRegs)
+//{
+//	sqlite3_stmt *insertStmt;
+//
+//	char* insertQuery = (char*)clsMemManager::CAlloc(sizeof(unsigned long long) + sizeof(int) + sizeof(int) + currentRegs.size() + currentInstruction.size() + 100);
+//	sprintf(insertQuery,"INSERT INTO trace (offset,PID,TID,instruction,regs) VALUES ('%016I64X','%08X','%08X','%s','%s');",
+//		currentOffset,
+//		PID,
+//		TID,
+//		clsHelperClass::convertWSTRtoSTR(currentInstruction).c_str(),
+//		clsHelperClass::convertWSTRtoSTR(currentRegs).c_str());
+//
+//	sqlite3_prepare(pDB, insertQuery, strlen(insertQuery) + 1, &insertStmt, NULL);
+//	if (sqlite3_step(insertStmt) != SQLITE_DONE)
+//	{
+//		clsMemManager::CFree(insertQuery);
+//		return false;
+//	}
+//
+//	clsMemManager::CFree(insertQuery);
+//	return true;
+//}
+//
+//bool clsDBInterface::DBAPI_getTraceInfo(int count,unsigned long long startOffset,int &PID, int &TID,vector<wstring> instructions, vector<wstring> regs)
+//{
+//	sqlite3_stmt *selectStmt;
+//
+//	char* symbolQuery = (char*)clsMemManager::CAlloc(120);
+//	sprintf(symbolQuery,"select * from trace where 'Offset' == %016I64X;",startOffset);
+//
+//	sqlite3_prepare(pDB, symbolQuery, strlen(symbolQuery) + 1, &selectStmt, NULL);
+//
+//	while(true)
+//	{
+//		int s = sqlite3_step(selectStmt);
+//		if (s == SQLITE_ROW)
+//		{
+//			instructions.push_back(clsHelperClass::convertSTRtoWSTR((const char*)sqlite3_column_text(selectStmt, 3)));
+//			regs.push_back(clsHelperClass::convertSTRtoWSTR((const char*)sqlite3_column_text(selectStmt, 4)));
+//		}
+//		else if (s == SQLITE_DONE)
+//			break;
+//		else
+//			break;
+//	}
+//
+//	clsMemManager::CFree(symbolQuery);
+//
+//	if(instructions.size() <= 0 || regs.size() <= 0)
+//		return false;
+//	return true;
+//}

@@ -84,6 +84,7 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 		newPID.bSymLoad = false;
 		newPID.bRunning = true;
 		newPID.bTrapFlag = false;
+		newPID.bTraceFlag = false;
 		newPID.dwBPRestoreFlag = NULL;
 		PIDs.push_back(newPID);
 	}

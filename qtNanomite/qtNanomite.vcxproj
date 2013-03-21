@@ -231,6 +231,7 @@
     <ClCompile Include="clsDebugger\clsDebuggerPublicAPI.cpp" />
     <ClCompile Include="clsDisassembler.cpp" />
     <ClCompile Include="clsHelperClass.cpp" />
+    <ClCompile Include="clsMemDump.cpp" />
     <ClCompile Include="clsMemManager.cpp" />
     <ClCompile Include="clsMemPool.cpp" />
     <ClCompile Include="clsPEFile.cpp" />
@@ -310,6 +311,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
     <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGStringView.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGTrace.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Release|x64'">true</ExcludedFromBuild>
     </ClCompile>
@@ -403,6 +408,10 @@
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGTrace.cpp">
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
+      <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
+    </ClCompile>
     <ClCompile Include="GeneratedFiles\Release\moc_qtDLGWindowView.cpp">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>
@@ -426,6 +435,7 @@
     <ClCompile Include="qtDLGRegEdit.cpp" />
     <ClCompile Include="qtDLGSourceViewer.cpp" />
     <ClCompile Include="qtDLGStringView.cpp" />
+    <ClCompile Include="qtDLGTrace.cpp" />
     <ClCompile Include="qtDLGWindowView.cpp" />
   </ItemGroup>
   <ItemGroup>
@@ -471,6 +481,24 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="clsAPIImport.h" />
+    <CustomBuild Include="qtDLGTrace.h">
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qtDLGTrace.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Moc%27ing qtDLGTrace.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -D_AMD64_ -D_WIN64 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_CORE_LIB -DQT_GUI_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Moc%27ing qtDLGTrace.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -DWIN32 -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Moc%27ing qtDLGTrace.h...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -D_AMD64_ -DQT_LARGEFILE_SUPPORT -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB "-I.\GeneratedFiles" "-I." "-I$(QTDIR)\include" "-I.\GeneratedFiles\$(ConfigurationName)\." "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui"</Command>
+    </CustomBuild>
     <CustomBuild Include="qtDLGSourceViewer.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Moc%27ing qtDLGSourceViewer.h...</Message>
@@ -575,6 +603,7 @@
     </CustomBuild>
     <ClInclude Include="clsCrashHandler.h" />
     <ClInclude Include="clsDBManager.h" />
+    <ClInclude Include="clsMemDump.h" />
     <ClInclude Include="clsMemManager.h" />
     <ClInclude Include="clsMemPool.h" />
     <ClInclude Include="clsPEFile.h" />
@@ -610,6 +639,7 @@
     <ClInclude Include="GeneratedFiles\ui_qtDLGRegEdit86.h" />
     <ClInclude Include="GeneratedFiles\ui_qtDLGSourceViewer.h" />
     <ClInclude Include="GeneratedFiles\ui_qtDLGStringView.h" />
+    <ClInclude Include="GeneratedFiles\ui_qtDLGTrace.h" />
     <ClInclude Include="GeneratedFiles\ui_qtDLGWindowView.h" />
     <ClInclude Include="NativeHeaders.h" />
     <CustomBuild Include="qtDLGHexView.h">
@@ -1223,6 +1253,25 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
     <CustomBuild Include="qtDLGSourceViewer.ui">
+      <FileType>Document</FileType>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
+      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">Uic%27ing %(Identity)...</Message>
+      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
+      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGTrace.ui">
       <FileType>Document</FileType>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">Uic%27ing %(Identity)...</Message>

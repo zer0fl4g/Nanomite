@@ -42,7 +42,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	dlgDbgStr = new qtDLGDebugStrings(this,Qt::Window);
 	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
 	dlgSourceViewer = new qtDLGSourceViewer(this,Qt::Window);
-
+	dlgTraceWindow = new qtDLGTrace(this,Qt::Window);
 	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;
 
 	InitListSizes();
@@ -70,7 +70,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
-
+	
 	// Callbacks from Disassambler Thread to GUI
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 
@@ -96,6 +96,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Handles, SIGNAL(triggered()), this, SLOT(action_WindowShowHandles()));
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
 	connect(action_Debug_Step_Out,SIGNAL(triggered()), this, SLOT(action_DebugStepOut()));
+	connect(actionDebug_Trace_Start, SIGNAL(triggered()), this, SLOT(action_DebugTraceStart()));
+	connect(actionDebug_Trace_Stop, SIGNAL(triggered()), this, SLOT(action_DebugTraceStop()));
+	connect(actionDebug_Trace_Show, SIGNAL(triggered()), this, SLOT(action_DebugTraceShow()));
 	//connect(actionWindow_Show_PEEditor, SIGNAL(triggered()), this, SLOT(action_WindowShowPEEditor()));
 
 	// Actions on Window Events
@@ -237,7 +240,7 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwRowCount = (tblStack->verticalHeader()->height() + 4) / 28,
+		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 14) - 2,
 		dwSize = (dwRowCount * 2) * dwStackSize;
 	quint64	dwStartOffset = dwESP - dwStackSize * dwRowCount,
 		dwEndOffset = dwESP + dwStackSize * dwRowCount;
@@ -327,7 +330,7 @@ void qtDLGNanomite::InitListSizes()
 	tblDisAs->horizontalHeader()->resizeSection(2,250);
 
 	// List Register
-	tblRegView->horizontalHeader()->resizeSection(0,125);
+	tblRegView->horizontalHeader()->resizeSection(0,75);
 
 	// List DetInfo  Processes
 	dlgDetInfo->tblPIDs->horizontalHeader()->resizeSection(0,135);
@@ -359,7 +362,7 @@ void qtDLGNanomite::InitListSizes()
 	dlgBPManager->tblBPs->horizontalHeader()->resizeSection(2,135);
 	dlgBPManager->tblBPs->horizontalHeader()->resizeSection(3,50);
 
-	this->setStyleSheet("background: rgb(230, 235, 230)");
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 }
 
 void qtDLGNanomite::OnStackScroll(int iValue)
@@ -661,6 +664,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	UpdateStateBar(0x3);
 	coreDisAs->SectionDisAs.clear();
 	dlgBPManager->DeleteCompleterContent();
+	qtDLGTrace::clearTraceData();
 	this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow"));
 }
 
@@ -722,7 +726,7 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 		tblDisAs->setRowCount(0);
 
 		quint64 itemStyle;
-		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 14) - 2)
+		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 14) - 1)
 		{
 			itemStyle = i.value().itemStyle;
 			tblDisAs->insertRow(tblDisAs->rowCount());
@@ -827,7 +831,7 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 
 		if(bOk && !strNewOffset.isEmpty())
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),strNewOffset.toULongLong(0,16)))
-				OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));		
+				OnDisplayDisassembly(strNewOffset.toULongLong(0,16));		
 	}
 	else if(QString().compare(pAction->text(),"Clear Log") == 0)
 	{

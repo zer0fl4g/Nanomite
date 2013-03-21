@@ -1,6 +1,7 @@
 #include "qtDLGRegEdit.h"
 
 #include "clsMemManager.h"
+#include "clsHelperClass.h"
 
 #include <QTCore>
 #include <QtGui>
@@ -28,7 +29,7 @@ qtDLGRegEdit::qtDLGRegEdit(QWidget *parent, Qt::WFlags flags,LPVOID pProcessCont
 	FillGUI();
 
 	this->setFixedSize(this->width(),this->height());
-	this->setStyleSheet("background: rgb(230, 235, 230)");
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 }
 
 qtDLGRegEdit::~qtDLGRegEdit()

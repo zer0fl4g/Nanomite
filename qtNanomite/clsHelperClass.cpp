@@ -212,8 +212,8 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 	bool bTest = false;
 	DWORD PID  = GetProcessId(hProc);
 
-	if(clsDBManager::DBAPI_getSymbolsFromPID(PID,dwOffset,sFuncName,sModName))
-		return true;
+	//if(clsDBManager::DBAPI_getSymbolsFromPID(PID,dwOffset,sFuncName,sModName))
+	//	return true;
 
 
 	IMAGEHLP_MODULEW64 imgMod = {0};
@@ -232,7 +232,8 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 
 	free(pSymbol);
 
-	return clsDBManager::DBAPI_insertSymbolsFromPID(PID,dwOffset,sModName,sFuncName);
+	return true;
+	//return clsDBManager::DBAPI_insertSymbolsFromPID(PID,dwOffset,sModName,sFuncName);
 }
 
 void clsHelperClass::LoadSourceForAddr(wstring &FileName,int &LineNumber,quint64 dwOffset,HANDLE hProc)
@@ -295,4 +296,21 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 		free(lpTempString);
 		return NULL;
 	}
+}
+
+QString clsHelperClass::LoadStyleSheet()
+{
+	//QFile File("stylesheet.qss");
+	//File.open(QFile::ReadOnly);
+	//QString styleSheet = QLatin1String(File.readAll());
+	//File.close();
+	//return styleSheet;
+
+	return	"QTableWidget"
+			"{ "
+			"	background: rgb(230, 235, 230);"
+			"	font-family: Consolas;"
+			//"	font-family: Courier;"
+			"	font-size: 12;"
+			"}";
 }
