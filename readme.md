@@ -38,4 +38,10 @@
 + small gui improvements
 + added Single Step Tracer
 
+####Notes:
+	- "Custom Stylesheets"
+		- the file "stylesheet.qss" in the application folder can be modified to adapt the main parts of the 
+		  GUI Design to your personal needs
+
+
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)
