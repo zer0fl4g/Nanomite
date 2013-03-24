@@ -2,7 +2,7 @@
 #include "clsDBManager.h"
 #include "clsMemManager.h"
 
-#include "dbghelp.h"
+#include <dbghelp.h>
 
 #include <TlHelp32.h>
 #include <fstream>
@@ -210,14 +210,13 @@ vector<wstring> clsHelperClass::split(const wstring& s,const wstring& f ){
 bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quint64 dwOffset,HANDLE hProc)
 {
 	bool bTest = false;
-	DWORD PID  = GetProcessId(hProc);
+	//DWORD PID  = GetProcessId(hProc);
 
 	//if(clsDBManager::DBAPI_getSymbolsFromPID(PID,dwOffset,sFuncName,sModName))
 	//	return true;
 
-
 	IMAGEHLP_MODULEW64 imgMod = {0};
-	imgMod.SizeOfStruct = sizeof(imgMod);
+	imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
 	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 	memset(pSymbol, 0, sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);

@@ -2,8 +2,9 @@
 #include "clsMemManager.h"
 #include "clsDBManager.h"
 #include "clsAPIImport.h"
+#include "clsHelperClass.h"
 
-#include "dbghelp.h"
+#include <dbghelp.h>
 
 using namespace std;
 
@@ -169,19 +170,27 @@ bool clsDebugger::StepIn()
 
 bool clsDebugger::ShowCallStack()
 {
-
 	if(_dwCurTID == 0 || _dwCurPID == 0)
 		return false;
 
 	HANDLE hProc,hThread = OpenThread(THREAD_GETSET_CONTEXT,false,_dwCurTID);
 	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 	DWORD dwMaschineMode = NULL;
-	quint64 dwDisplacement;
 	LPVOID pContext;
-	IMAGEHLP_MODULEW64 imgMod = {0};
 	STACKFRAME64 stackFr = {0};
-
+	wstring sFuncName,
+		sFuncMod,
+		sReturnToFunc,
+		sReturnToMod;
+	quint64 dwStackAddr,
+		dwReturnTo,
+		dwEIP,
+		dwDisplacement;
+	IMAGEHLP_LINEW64 imgSource = {0};
+	IMAGEHLP_MODULEW64 imgMod = {0};
+	BOOL bSuccess;
 	int iPid = 0;
+
 	for(size_t i = 0;i < PIDs.size(); i++)
 	{
 		if(PIDs[i].dwPID == _dwCurPID)
@@ -243,7 +252,6 @@ bool clsDebugger::ShowCallStack()
 	stackFr.AddrStack.Offset = context.Esp;
 #endif
 
-	BOOL bSuccess;
 	do
 	{
 		bSuccess = StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0);
@@ -251,30 +259,38 @@ bool clsDebugger::ShowCallStack()
 		if(!bSuccess)        
 			break;
 
+		memset(&imgSource,0,sizeof(IMAGEHLP_LINEW64));
+		imgSource.SizeOfStruct = sizeof(IMAGEHLP_LINEW64);
+
+		dwStackAddr = stackFr.AddrStack.Offset;
+		dwEIP = stackFr.AddrPC.Offset;
+		dwReturnTo = stackFr.AddrReturn.Offset;
+
+
 		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
 		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
-
 		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 		pSymbol->MaxNameLen = MAX_SYM_NAME;
 
-		quint64 dwStackAddr = stackFr.AddrStack.Offset;
-		quint64 dwEIP = stackFr.AddrPC.Offset;
-
+		bSuccess = SymGetModuleInfoW64(hProc,dwEIP,&imgMod);
 		bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
-		wstring sFuncName = pSymbol->Name;
-		bSuccess = SymGetModuleInfoW64(hProc,dwEIP, &imgMod);
-		wstring sFuncMod = imgMod.ModuleName;
+		sFuncName = pSymbol->Name;		
+		sFuncMod = imgMod.ModuleName;		
+	
 
-		quint64 dwReturnTo = stackFr.AddrReturn.Offset;
-		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
-		wstring sReturnToFunc = pSymbol->Name;
+		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
+		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
+		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
+		pSymbol->MaxNameLen = MAX_SYM_NAME;
+
 		bSuccess = SymGetModuleInfoW64(hProc,dwReturnTo,&imgMod);
-		wstring sReturnToMod = imgMod.ModuleName;
+		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
+		sReturnToMod = imgMod.ModuleName;
+		sReturnToFunc = pSymbol->Name;
 
-		IMAGEHLP_LINEW64 imgSource;
-		imgSource.SizeOfStruct = sizeof(IMAGEHLP_LINEW64);
-		bSuccess = SymGetLineFromAddrW64(hProc,stackFr.AddrPC.Offset,(PDWORD)&dwDisplacement,&imgSource);
+		bSuccess = SymGetLineFromAddrW64(hProc,dwEIP,(PDWORD)&dwDisplacement,&imgSource);
 
 		if(bSuccess)
 			emit OnCallStack(dwStackAddr,

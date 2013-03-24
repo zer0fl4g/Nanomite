@@ -712,16 +712,18 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 			return;
 		}
 
-		for(int iBack = 0; iBack <= 5; iBack++)
+		if((QMapData::Node *)i != (QMapData::Node *)coreDisAs->SectionDisAs.constBegin())
 		{
-			if(!i.value().Offset.isEmpty() && i.value().Offset.compare(coreDisAs->SectionDisAs.begin().value().Offset) == 0)
+			for(int iBack = 0; iBack <= 5; iBack++)
 			{
-				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16));
-				return;
-			}			
-			--i;
+				if(!i.value().Offset.isEmpty() && i.value().Offset.compare(coreDisAs->SectionDisAs.begin().value().Offset) == 0)
+				{
+					coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16));
+					return;
+				}			
+				--i;
+			}
 		}
-
 
 		tblDisAs->setRowCount(0);
 

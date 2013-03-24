@@ -115,10 +115,13 @@ void clsDisassembler::run()
 		// MOV EDI,EDI
 		// PUSH EBP
 		// MOV EBP, ESP
-		DWORD	searchPattern = 0x8bff558b,
-				searchPattern2 = 0x90909090;
+		DWORD	searchPattern	= 0x8B55FF8B,
+				searchPattern2	= 0xEC8B55,
+				searchPattern3	= 0x90909090;
 
-		while(memcmp(pBuffer,&searchPattern,0x4) != 0 && memcmp(pBuffer,&searchPattern2,0x4) != 0)
+		while(memcmp(pBuffer,&searchPattern,0x4) != 0	&&
+			memcmp(pBuffer,&searchPattern2,0x3) != 0 &&
+			memcmp(pBuffer,&searchPattern3,0x4) != 0)
 		{
 			if((_dwStartOffset + 3) >= _dwEndOffset)
 			{

@@ -1,6 +1,6 @@
 #include "clsCrashHandler.h"
-#include "clsDebugger\dbghelp.h"
 
+#include <dbghelp.h>
 #include <stdio.h>
 #include <time.h>
 
