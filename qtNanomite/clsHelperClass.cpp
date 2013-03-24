@@ -183,7 +183,7 @@ bool clsHelperClass::MenuLoadNewFile(clsDebugger *_coreDebugger)
 		_coreDebugger->SetTarget(*pFile);
 	else
 	{
-		MessageBox(NULL,L"Error while selecting your file!",L"Nanomite",MB_OK);
+		//MessageBox(NULL,L"Error while selecting your file!",L"Nanomite",MB_OK);
 		return false;
 	}
 	return true;

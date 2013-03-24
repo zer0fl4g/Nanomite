@@ -1,5 +1,7 @@
 #include "qtDLGTrace.h"
+
 #include "clsHelperClass.h"
+#include "clsMemManager.h"
 
 #include <QWheelEvent>
 

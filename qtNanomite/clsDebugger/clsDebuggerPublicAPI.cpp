@@ -251,17 +251,16 @@ bool clsDebugger::ShowCallStack()
 		if(!bSuccess)        
 			break;
 
-		memset(&imgMod,0x00,sizeof(imgMod));
-		imgMod.SizeOfStruct = sizeof(imgMod);
-		bSuccess = SymGetModuleInfoW64(hProc,stackFr.AddrPC.Offset, &imgMod);
+		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
+		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
 
 		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
 		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 		pSymbol->MaxNameLen = MAX_SYM_NAME;
 
 		quint64 dwStackAddr = stackFr.AddrStack.Offset;
-
 		quint64 dwEIP = stackFr.AddrPC.Offset;
+
 		bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
 		wstring sFuncName = pSymbol->Name;
 		bSuccess = SymGetModuleInfoW64(hProc,dwEIP, &imgMod);
@@ -271,11 +270,10 @@ bool clsDebugger::ShowCallStack()
 		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
 		wstring sReturnToFunc = pSymbol->Name;
 		bSuccess = SymGetModuleInfoW64(hProc,dwReturnTo,&imgMod);
-
 		wstring sReturnToMod = imgMod.ModuleName;
 
 		IMAGEHLP_LINEW64 imgSource;
-		imgSource.SizeOfStruct = sizeof(imgSource);
+		imgSource.SizeOfStruct = sizeof(IMAGEHLP_LINEW64);
 		bSuccess = SymGetLineFromAddrW64(hProc,stackFr.AddrPC.Offset,(PDWORD)&dwDisplacement,&imgSource);
 
 		if(bSuccess)

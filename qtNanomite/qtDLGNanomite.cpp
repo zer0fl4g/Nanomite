@@ -232,6 +232,9 @@ void qtDLGNanomite::UpdateStateBar(DWORD dwAction)
 
 void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 {
+	if(!coreDebugger->GetDebuggingState())
+		return;
+
 	bool bCheckVar = false;
 	SIZE_T dwBytesRead = NULL;
 	wstring sFuncName,sModName;
@@ -244,9 +247,6 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 		dwSize = (dwRowCount * 2) * dwStackSize;
 	quint64	dwStartOffset = dwESP - dwStackSize * dwRowCount,
 		dwEndOffset = dwESP + dwStackSize * dwRowCount;
-
-	if(!coreDebugger->GetDebuggingState())
-		return;
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 		return;

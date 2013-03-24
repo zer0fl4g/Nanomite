@@ -33,9 +33,11 @@
 
 ## Changelog
 ###Version 0.1 beta 9
++ fixed a bug in disassembler
 + fixed a crash in loading imports of files without IAT
 + fixed a crash in "Goto Offset" context menu
 + small gui improvements
 + added Single Step Tracer
++ removed error message if you cancel the file selection
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

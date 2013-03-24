@@ -91,10 +91,12 @@ void clsDisassembler::run()
 	if(_dwStartOffset == 0 || _dwEndOffset == 0)
 		return;
 
-	quint64 dwSize = _dwEndOffset - _dwStartOffset;
+	quint64 dwSize = _dwEndOffset - _dwStartOffset,
+		dwOrgStart = _dwStartOffset;
 	DWORD	dwOldProtection = 0,
 			dwNewProtection = PAGE_EXECUTE_READWRITE;
-	LPVOID pBuffer = malloc(dwSize);
+	LPVOID pBuffer = malloc(dwSize),
+			pOrgBuffer = pBuffer;
 	clsSymbolAndSyntax DataVisualizer(_hProc);
 
 	if(VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwNewProtection,&dwOldProtection) &&
@@ -108,6 +110,26 @@ void clsDisassembler::run()
 		wstring sFuncName,sModName;
 
 		memset(&newDisAss, 0, sizeof(DISASM));
+
+		// 8BFF558B(EC)
+		// MOV EDI,EDI
+		// PUSH EBP
+		// MOV EBP, ESP
+		DWORD	searchPattern = 0x8bff558b,
+				searchPattern2 = 0x90909090;
+
+		while(memcmp(pBuffer,&searchPattern,0x4) != 0 && memcmp(pBuffer,&searchPattern2,0x4) != 0)
+		{
+			if((_dwStartOffset + 3) >= _dwEndOffset)
+			{
+				pBuffer = pOrgBuffer;
+				_dwStartOffset = dwOrgStart;
+				break;
+			}
+
+			pBuffer = (LPVOID)((DWORD64)pBuffer + 1);
+			_dwStartOffset++;
+		}
 
 		newDisAss.EIP = (quint64)pBuffer;
 		newDisAss.VirtualAddr = _dwStartOffset;
@@ -168,7 +190,7 @@ void clsDisassembler::run()
 	}
 
 	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
-	free(pBuffer);
+	free(pOrgBuffer);
 
 	QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
 	_dwEndOffset = iEnd.key().toULongLong(0,16);
