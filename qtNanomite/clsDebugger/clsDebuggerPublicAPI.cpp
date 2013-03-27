@@ -40,7 +40,6 @@ bool clsDebugger::SuspendDebuggingAll()
 {
 	for(size_t i = 0;i < PIDs.size();i++)
 		SuspendDebugging(PIDs[i].dwPID);
-	CleanWorkSpace();
 	return true;
 }
 
@@ -164,7 +163,20 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 bool clsDebugger::StepIn()
 {
 	_bSingleStepFlag = true;
-	ProcessContext.EFlags |= 0x100;
+
+	#ifdef _AMD64_
+		BOOL bIsWOW64 = false;
+		if(clsAPIImport::pIsWow64Process)
+			clsAPIImport::pIsWow64Process(GetCurrentProcessHandle(),&bIsWOW64);
+	
+		if(bIsWOW64)
+			wowProcessContext.EFlags |= 0x100;
+		else
+			ProcessContext.EFlags |= 0x100;
+	#else
+		ProcessContext.EFlags |= 0x100;
+	#endif
+
 	return PulseEvent(_hDbgEvent);
 }
 

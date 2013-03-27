@@ -809,16 +809,29 @@
    </property>
   </action>
   <action name="actionDebug_Trace_Start">
+   <property name="icon">
+    <iconset>
+     <normalon>:/DLGNanomite/Icons/IDI_STARTTRACE.ico</normalon>
+    </iconset>
+   </property>
    <property name="text">
     <string>Trace Start</string>
    </property>
   </action>
   <action name="actionDebug_Trace_Stop">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_STOPTRACE.ico</normaloff>:/DLGNanomite/Icons/IDI_STOPTRACE.ico</iconset>
+   </property>
    <property name="text">
     <string>Trace Stop</string>
    </property>
   </action>
   <action name="actionDebug_Trace_Show">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_SHOWTRACE.ico</normaloff>:/DLGNanomite/Icons/ID_SHOWTRACE.ico</iconset>
+   </property>
    <property name="text">
     <string>Show Trace Info</string>
    </property>

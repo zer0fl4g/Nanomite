@@ -74,6 +74,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// Callbacks from Disassambler Thread to GUI
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 
+	// Callbacks from GUI to Disassembler
+	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
+
 	// Actions for the MainMenu and Toolbar
 	connect(actionFile_OpenNew, SIGNAL(triggered()), this, SLOT(action_FileOpenNewFile()));
 	connect(actionFile_AttachTo, SIGNAL(triggered()), this, SLOT(action_FileAttachTo()));
@@ -270,7 +273,7 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 		int itemIndex = tblStack->rowCount();
 
 		// Current Offset
-		wsprintf(sTemp,L"0x%016I64X",(dwStartOffset + i * dwStackSize));
+		wsprintf(sTemp,L"%016I64X",(dwStartOffset + i * dwStackSize));
 		tblStack->setItem(itemIndex - 1,0,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
 
 		// Value

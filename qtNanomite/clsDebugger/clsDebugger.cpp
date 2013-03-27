@@ -248,7 +248,7 @@ void clsDebugger::DebuggingLoop()
 
 				emit OnNewPID((wstring)tcDllFilepath,debug_event.dwProcessId);
 
-				clsDBManager::OpenNewFile(debug_event.dwProcessId,(wstring)tcDllFilepath);
+				//clsDBManager::OpenNewFile(debug_event.dwProcessId,(wstring)tcDllFilepath);
 
 				int iPid = 0;
 				for(size_t i = 0;i < PIDs.size();i++)
@@ -567,7 +567,8 @@ void clsDebugger::DebuggingLoop()
 								{
 									_bSingleStepFlag = true;
 									SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
-									qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);								}
+									qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);		
+								}
 								else
 									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							}
