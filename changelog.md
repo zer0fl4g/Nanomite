@@ -1,6 +1,18 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 9
++ fixed a bug in disassembler
++ fixed a bug in wow64 StepIn
++ fixed a crash when suspending a process and then StepIn
++ fixed a bug which didn´t display all modules in callstack
++ fixed a crash in loading imports of files without IAT
++ fixed a crash in "Goto Offset" context menu
++ small gui improvements
++ added Single Step Tracer
++ added memory dumper
++ removed error message if you cancel the file selection
+
 ###Version 0.1 beta 8
 + fixed a crash in attaching to a process where we don´t have a file path
 + fixed a bug which ignored DbgBreakPoint on attaching

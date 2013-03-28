@@ -3,6 +3,7 @@
 #include "qtDLGHexView.h"
 
 #include "clsMemManager.h"
+#include "clsMemDump.h"
 
 #include <TlHelp32.h>
 
@@ -93,7 +94,7 @@ void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
 	_iSelectedRow = tblHeapView->indexAt(qPoint).row();
 
 	menu.addAction(new QAction("Send Offset To HexView",this));
-	//menu.addAction(new QAction("Dump Memory To File",this));
+	menu.addAction(new QAction("Dump Memory To File",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 
@@ -111,6 +112,11 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Dump Memory To File") == 0)
 	{
-		// clsMemDumper memDump(hProc,dwStartOffset,dwSize);
+		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblHeapView->item(_iSelectedRow,0)->text().toULongLong(0,16));
+
+		clsMemDump memDump(hProc,
+			L"Heap",
+			tblHeapView->item(_iSelectedRow,2)->text().toULongLong(0,16),
+			tblHeapView->item(_iSelectedRow,3)->text().toULongLong(0,16));
 	}
 }

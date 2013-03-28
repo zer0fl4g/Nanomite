@@ -147,6 +147,7 @@ public:
 	void CustomExceptionRemoveAll();
 
 	HANDLE GetCurrentProcessHandle();
+	static HANDLE GetProcessHandleByPID(DWORD PID);
 
 	std::wstring GetTarget();
 	std::wstring GetCMDLine();

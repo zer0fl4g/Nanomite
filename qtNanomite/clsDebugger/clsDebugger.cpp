@@ -900,6 +900,14 @@ HANDLE clsDebugger::GetCurrentProcessHandle(DWORD dwPID)
 	return NULL;
 }
 
+HANDLE clsDebugger::GetProcessHandleByPID(DWORD PID)
+{
+	if(pThis != NULL)
+		return pThis->GetCurrentProcessHandle(PID);
+
+	return NULL;
+}
+
 bool clsDebugger::IsOffsetAnBP(quint64 Offset)
 {
 	for(size_t i = 0; i < pThis->SoftwareBPs.size(); i++)

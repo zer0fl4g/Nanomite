@@ -17,3 +17,11 @@
 *.aps
 *.svn-base
 /Build/Win32/Debug/*.xml
+DotNetDebugMe/obj/
+qtNanomite/GeneratedFiles/
+qtNanomite/TempOutput/
+*.config
+*.cache
+*_manifest.rc
+*.cbp
+*.layout

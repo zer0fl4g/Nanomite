@@ -3,6 +3,7 @@
 #include "qtDLGHexView.h"
 
 #include "clsMemManager.h"
+#include "clsMemDump.h"
 
 #include <Psapi.h>
 #include <TlHelp32.h>
@@ -58,15 +59,15 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 			// Base Address
 #ifdef _AMD64_
-			wsprintf(sTemp,L"0x%016I64X",mbi.BaseAddress);
+			wsprintf(sTemp,L"%016I64X",mbi.BaseAddress);
 #else
-			wsprintf(sTemp,L"0x%016X",mbi.BaseAddress);
+			wsprintf(sTemp,L"%016X",mbi.BaseAddress);
 #endif
 			tblMemoryView->setItem(tblMemoryView->rowCount() -1,1,
 				new QTableWidgetItem(QString().fromStdWString(sTemp)));
 
 			// Size
-			wsprintf(sTemp,L"0x%08X",mbi.RegionSize);
+			wsprintf(sTemp,L"%08X",mbi.RegionSize);
 			tblMemoryView->setItem(tblMemoryView->rowCount() -1,2,
 				new QTableWidgetItem(QString().fromStdWString(sTemp)));
 
@@ -152,7 +153,7 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
 
 	menu.addAction(new QAction("Send Offset To HexView",this));
-	//menu.addAction(new QAction("Dump Memory To File",this));
+	menu.addAction(new QAction("Dump Memory To File",this));
 
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
@@ -170,6 +171,11 @@ void qtDLGMemoryView::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Dump Memory To File") == 0)
 	{
-		// clsMemDumper memDump(hProc,dwStartOffset,dwSize);
+		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
+
+		clsMemDump memDump(hProc,
+			(PTCHAR)tblMemoryView->item(_iSelectedRow,3)->text().utf16(),
+			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
+			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
 	}
 }

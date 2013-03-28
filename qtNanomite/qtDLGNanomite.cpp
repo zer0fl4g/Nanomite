@@ -771,6 +771,10 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 			++iLines;++i;
 		}
 	}
+	else
+	{
+		coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
+	}
 }
 
 void qtDLGNanomite::OnCustomRegViewContextMenu(QPoint qPoint)
