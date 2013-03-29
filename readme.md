@@ -35,7 +35,7 @@
 ###Version 0.1 beta 9
 + fixed a bug in disassembler
 + fixed a bug in wow64 StepIn
-+ fixed a crash when suspending a Process and then StepIn
++ fixed a crash when suspending a process and then StepIn
 + fixed a bug which didn´t display all modules in callstack
 + fixed a crash in loading imports of files without IAT
 + fixed a crash in "Goto Offset" context menu

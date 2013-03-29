@@ -3,8 +3,9 @@
 clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD64 Size)
 {
 	DWORD	OldProtection	= NULL,
-			NewProtection	= 0x40,
-			BytesReaded		= NULL;
+			NewProtection	= PAGE_EXECUTE_READWRITE,
+			BytesWrote		= NULL;
+	SIZE_T	BytesReaded		= NULL;
 
 	if(!VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,NewProtection,&OldProtection))
 	{
@@ -13,7 +14,7 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 	}
 	
 	LPVOID pBuffer = malloc(Size);
-	if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,(size_t*)&BytesReaded))
+	if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
 	{
 		MessageBoxW(NULL,L"Failed to read Memory!",L"Nanomite",MB_OK);
 		free(pBuffer);
@@ -21,7 +22,10 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 	}
 	
 	PTCHAR FileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
-	wsprintf(FileName,L"%s_%016I64X-%016I64X_%08X.bin",FileBaseName,BaseOffset,BaseOffset + Size,Size);
+	if(wcslen(FileBaseName) <= 0)
+		wsprintf(FileName,L"NANOMITEDUMP_%016I64X-%016I64X_%08X.bin",BaseOffset,BaseOffset + Size,Size);
+	else
+		wsprintf(FileName,L"%s_%016I64X-%016I64X_%08X.bin",FileBaseName,BaseOffset,BaseOffset + Size,Size);
 
 	HANDLE hFile = CreateFile(FileName, GENERIC_READ | GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hFile == INVALID_HANDLE_VALUE)
@@ -32,7 +36,7 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 		return;
 	}
 
-	if(!WriteFile(hFile,pBuffer,Size,&BytesReaded,NULL))
+	if(!WriteFile(hFile,pBuffer,Size,&BytesWrote,NULL))
 		MessageBoxW(NULL,L"Failed to write to File!",L"Nanomite",MB_OK);
 
 	free(FileName);

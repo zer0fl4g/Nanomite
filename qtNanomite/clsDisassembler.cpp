@@ -26,8 +26,8 @@ bool clsDisassembler::IsNewInsertNeeded()
 {
 	if(_dwEIP <= _dwStartOffset || _dwEIP >= _dwEndOffset || SectionDisAs.count() <= 0)
 	{
-		_dwStartOffset = _dwEIP - 250;
-		_dwEndOffset = _dwEIP + 250;
+		_dwStartOffset = _dwEIP - 300;
+		_dwEndOffset = _dwEIP + 300;
 
 		return IsNewInsertPossible();
 	}
@@ -116,12 +116,11 @@ void clsDisassembler::run()
 		// PUSH EBP
 		// MOV EBP, ESP
 		DWORD	searchPattern	= 0x8B55FF8B,
-				searchPattern2	= 0xEC8B55,
-				searchPattern3	= 0x90909090;
+				searchPattern2	= 0xEC8B55;// searchPattern3 = 0x90909090;
 
 		while(memcmp(pBuffer,&searchPattern,0x4) != 0	&&
-			memcmp(pBuffer,&searchPattern2,0x3) != 0 &&
-			memcmp(pBuffer,&searchPattern3,0x4) != 0)
+			memcmp(pBuffer,&searchPattern2,0x3) != 0 /*&&
+			memcmp(pBuffer,&searchPattern3,0x4) != 0*/)
 		{
 			if((_dwStartOffset + 3) >= _dwEndOffset)
 			{

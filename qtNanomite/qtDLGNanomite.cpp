@@ -246,10 +246,10 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 14) - 2,
-		dwSize = (dwRowCount * 2) * dwStackSize;
-	quint64	dwStartOffset = dwESP - dwStackSize * dwRowCount,
-		dwEndOffset = dwESP + dwStackSize * dwRowCount;
+		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 14),
+		dwSize = dwRowCount * dwStackSize;
+	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
+		dwEndOffset = dwESP + dwStackSize * (dwRowCount / 2);
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 		return;
@@ -267,7 +267,7 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
 	tblStack->setRowCount(0);
-	for(size_t i = 0;i < (dwSize / dwStackSize); i++)
+	for(size_t i = 0; i < dwRowCount; i++)
 	{
 		tblStack->insertRow(tblStack->rowCount());
 		int itemIndex = tblStack->rowCount();

@@ -96,6 +96,9 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 				tblMemoryView->setItem(tblMemoryView->rowCount() -1,3,
 					new QTableWidgetItem(QString().fromStdWString(sTemp)));			
 			}
+			else
+				tblMemoryView->setItem(tblMemoryView->rowCount() -1,3,
+					new QTableWidgetItem(QString("")));		
 
 			// Mem Type
 			switch (mbi.State)
