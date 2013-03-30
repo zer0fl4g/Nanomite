@@ -266,6 +266,13 @@ void qtDLGNanomite::action_DebugStepOut()
 {
 	if(!coreDebugger->GetDebuggingState()) return;
 	
+	coreDebugger->StepOver(tblCallstack->item(0,3)->text().toULongLong(0,16));
+}
+
+void qtDLGNanomite::action_DebugRunToUserCode()
+{
+	if(!coreDebugger->GetDebuggingState()) return;
+	
 	DWORD64 ModuleBase = NULL,
 			ModuleSize = NULL,
 			CurAddress = NULL;

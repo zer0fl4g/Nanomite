@@ -61,6 +61,17 @@ void clsDebugger::CleanWorkSpace()
 	for(size_t i = 0;i < PIDs.size();i++)
 		SymCleanup(PIDs[i].hProc);
 
+	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it)
+	{
+		if(it->dwHandle == 0x2)
+		{
+			SoftwareBPs.erase(it);
+			it = SoftwareBPs.begin();
+		}
+		if(SoftwareBPs.size() <= 0)
+			break;
+	}
+
 	PIDs.clear();
 	DLLs.clear();
 	TIDs.clear();
@@ -369,7 +380,7 @@ void clsDebugger::DebuggingLoop()
 						iPid = i;
 
 				if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,false) &&
-					!(debug_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP && _bSingleStepFlag))
+					!((debug_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP || debug_event.u.Exception.ExceptionRecord.ExceptionCode == 0x4000001e) && _bSingleStepFlag))
 					PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
 
 				switch (exInfo.ExceptionRecord.ExceptionCode)
@@ -422,7 +433,7 @@ void clsDebugger::DebuggingLoop()
 								SetThreadContextHelper(true,true,debug_event.dwThreadId,debug_event.dwProcessId);
 								PIDs[iPid].bTrapFlag = true;
 								PIDs[iPid].dwBPRestoreFlag = 0x2;
-
+								
 								if(bIsEP && dbgSettings.dwBreakOnEPMode == 3)
 									dwContinueStatus = CallBreakDebugger(&debug_event,2);
 								else if(bIsEP && dbgSettings.dwBreakOnEPMode == 1)

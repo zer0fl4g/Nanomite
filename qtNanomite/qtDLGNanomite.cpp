@@ -87,6 +87,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionDebug_Restart, SIGNAL(triggered()), this, SLOT(action_DebugRestart()));
 	connect(actionDebug_Suspend, SIGNAL(triggered()), this, SLOT(action_DebugSuspend()));
 	connect(actionDebug_Step_In, SIGNAL(triggered()), this, SLOT(action_DebugStepIn()));
+	connect(actionDebug_Step_Out, SIGNAL(triggered()), this, SLOT(action_DebugStepOut()));
 	connect(actionDebug_Step_Over, SIGNAL(triggered()), this, SLOT(action_DebugStepOver()));
 	connect(actionOptions_About, SIGNAL(triggered()), this, SLOT(action_OptionsAbout()));
 	connect(actionOptions_Options, SIGNAL(triggered()), this, SLOT(action_OptionsOptions()));
@@ -98,7 +99,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Debug_Output, SIGNAL(triggered()), this, SLOT(action_WindowShowDebugOutput()));
 	connect(actionWindow_Show_Handles, SIGNAL(triggered()), this, SLOT(action_WindowShowHandles()));
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
-	connect(action_Debug_Step_Out,SIGNAL(triggered()), this, SLOT(action_DebugStepOut()));
+	connect(action_Debug_Run_to_UserCode,SIGNAL(triggered()), this, SLOT(action_DebugRunToUserCode()));
 	connect(actionDebug_Trace_Start, SIGNAL(triggered()), this, SLOT(action_DebugTraceStart()));
 	connect(actionDebug_Trace_Stop, SIGNAL(triggered()), this, SLOT(action_DebugTraceStop()));
 	connect(actionDebug_Trace_Show, SIGNAL(triggered()), this, SLOT(action_DebugTraceShow()));
@@ -199,12 +200,6 @@ void qtDLGNanomite::OnDebuggerBreak()
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
 			OnDisplayDisassembly(dwEIP);
 
-		// Update Window Title
-		wstring ModName,FuncName;
-		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
-
-		this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow -- %1.%2").arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
-
 		// Update Toolbar
 		UpdateStateBar(0x2);
 	}
@@ -246,7 +241,7 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 14),
+		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 12),
 		dwSize = dwRowCount * dwStackSize;
 	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
 		dwEndOffset = dwESP + dwStackSize * (dwRowCount / 2);
@@ -731,7 +726,7 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 		tblDisAs->setRowCount(0);
 
 		quint64 itemStyle;
-		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 14) - 1)
+		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 12) - 1)
 		{
 			itemStyle = i.value().itemStyle;
 			tblDisAs->insertRow(tblDisAs->rowCount());
@@ -770,6 +765,11 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 
 			++iLines;++i;
 		}
+
+		// Update Window Title
+		wstring ModName,FuncName;
+		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
+		this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow -- %1.%2").arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
 	}
 	else
 	{

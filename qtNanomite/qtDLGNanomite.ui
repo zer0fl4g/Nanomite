@@ -114,10 +114,10 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>14</number>
+           <number>12</number>
           </attribute>
           <attribute name="verticalHeaderMinimumSectionSize">
-           <number>14</number>
+           <number>12</number>
           </attribute>
           <column>
            <property name="text">
@@ -275,10 +275,10 @@
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderDefaultSectionSize">
-          <number>14</number>
+          <number>12</number>
          </attribute>
          <attribute name="verticalHeaderMinimumSectionSize">
-          <number>14</number>
+          <number>12</number>
          </attribute>
          <column>
           <property name="text">
@@ -364,10 +364,10 @@
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderDefaultSectionSize">
-          <number>14</number>
+          <number>12</number>
          </attribute>
          <attribute name="verticalHeaderMinimumSectionSize">
-          <number>14</number>
+          <number>12</number>
          </attribute>
          <column>
           <property name="text">
@@ -454,10 +454,10 @@
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderDefaultSectionSize">
-          <number>14</number>
+          <number>12</number>
          </attribute>
          <attribute name="verticalHeaderMinimumSectionSize">
-          <number>14</number>
+          <number>12</number>
          </attribute>
          <column>
           <property name="text">
@@ -524,6 +524,7 @@
     <addaction name="separator"/>
     <addaction name="actionDebug_Step_In"/>
     <addaction name="actionDebug_Step_Over"/>
+    <addaction name="action_Debug_Run_to_UserCode"/>
     <addaction name="separator"/>
     <addaction name="actionDebug_Trace_Start"/>
     <addaction name="actionDebug_Trace_Stop"/>
@@ -588,7 +589,8 @@
    <addaction name="actionDebug_Restart"/>
    <addaction name="actionDebug_Step_In"/>
    <addaction name="actionDebug_Step_Over"/>
-   <addaction name="action_Debug_Step_Out"/>
+   <addaction name="actionDebug_Step_Out"/>
+   <addaction name="action_Debug_Run_to_UserCode"/>
    <addaction name="separator"/>
    <addaction name="actionWindow_Detail_Information"/>
    <addaction name="actionWindow_Breakpoint_Manager"/>
@@ -799,13 +801,13 @@
     <string>Show PE-Editor</string>
    </property>
   </action>
-  <action name="action_Debug_Step_Out">
+  <action name="action_Debug_Run_to_UserCode">
    <property name="icon">
     <iconset resource="qtDLGNanomite.qrc">
      <normaloff>:/DLGNanomite/Icons/IDI_STEPB2U.ico</normaloff>:/DLGNanomite/Icons/IDI_STEPB2U.ico</iconset>
    </property>
    <property name="text">
-    <string>Return to UserCode</string>
+    <string>Run to User Code</string>
    </property>
   </action>
   <action name="actionDebug_Trace_Start">
@@ -834,6 +836,15 @@
    </property>
    <property name="text">
     <string>Show Trace Info</string>
+   </property>
+  </action>
+  <action name="actionDebug_Step_Out">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/IDI_STEPOUT.ico</normaloff>:/DLGNanomite/Icons/IDI_STEPOUT.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Step Out</string>
    </property>
   </action>
  </widget>

@@ -68,6 +68,7 @@ private slots:
 	void action_DebugStepIn();
 	void action_DebugStepOver();
 	void action_DebugStepOut();
+	void action_DebugRunToUserCode();
 	void action_OptionsAbout();
 	void action_OptionsOptions();
 	void action_WindowDetailInformation();

@@ -43,6 +43,9 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 	free(pBuffer);
 	CloseHandle(hFile);
 
+	if(!VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,OldProtection,&NewProtection))
+		MessageBoxW(NULL,L"Failed to reprotect the Memory!",L"Nanomite",MB_OK);
+	
 	MessageBoxW(NULL,L"Memory Dump finished!",L"Nanomite",MB_OK);
 }
 

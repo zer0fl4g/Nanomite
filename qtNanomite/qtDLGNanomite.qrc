@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="DLGNanomite">
+    <file>../Icons/IDI_STEPOUT.ico</file>
     <file>../Icons/ID_SHOWTRACE.ico</file>
     <file>../Icons/IDI_STOPTRACE.ico</file>
     <file>../Icons/IDI_STARTTRACE.ico</file>
