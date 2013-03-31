@@ -101,6 +101,7 @@ void qtDLGNanomite::action_DebugStart()
 	}
 	else
 	{
+		qtDLGTrace::clearTraceData();
 		coreDebugger->ResumeDebugging();
 		UpdateStateBar(0x1);
 	}
@@ -172,12 +173,16 @@ void qtDLGNanomite::action_DebugSuspend()
 void qtDLGNanomite::action_DebugStepIn()
 {
 	if(coreDebugger->GetDebuggingState())
+	{
+		qtDLGTrace::clearTraceData();
 		coreDebugger->StepIn();
+	}
 }
 
 void qtDLGNanomite::action_DebugStepOver()
 {
 	if(!coreDebugger->GetDebuggingState()) return;
+	qtDLGTrace::clearTraceData();
 
 	DWORD eFlags = NULL;
 	quint64 dwEIP = NULL;
@@ -265,14 +270,16 @@ void qtDLGNanomite::action_DebugStepOver()
 void qtDLGNanomite::action_DebugStepOut()
 {
 	if(!coreDebugger->GetDebuggingState()) return;
-	
+	qtDLGTrace::clearTraceData();
+
 	coreDebugger->StepOver(tblCallstack->item(0,3)->text().toULongLong(0,16));
 }
 
 void qtDLGNanomite::action_DebugRunToUserCode()
 {
 	if(!coreDebugger->GetDebuggingState()) return;
-	
+	qtDLGTrace::clearTraceData();
+
 	DWORD64 ModuleBase = NULL,
 			ModuleSize = NULL,
 			CurAddress = NULL;

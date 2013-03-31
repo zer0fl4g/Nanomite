@@ -13,7 +13,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
 	setupUi(this);
-	this->setLayout(verticalLayout);
+	this->setLayout(horizontalLayout);
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	pThis = this;
 
@@ -22,6 +22,8 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	tblTraceLog->horizontalHeader()->resizeSection(2,135); //OFFSET
 	tblTraceLog->horizontalHeader()->resizeSection(3,300); //INST.
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
+
+	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
 }
 
 qtDLGTrace::~qtDLGTrace()
@@ -48,6 +50,8 @@ void qtDLGTrace::clearTraceData()
 	if(pThis == NULL) return;
 
 	pThis->traceData.clear();
+	pThis->scrollTrace->setValue(0);
+	pThis->scrollTrace->setMaximum(0);
 }
 
 void qtDLGTrace::showEvent(QShowEvent * event)
@@ -58,20 +62,29 @@ void qtDLGTrace::showEvent(QShowEvent * event)
 void qtDLGTrace::OnShow(int delta)
 {
 	int iLines = NULL,
-		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 15) - 1;
+		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 12) - 1;
 	QMap<DWORD64,TraceInfoRow>::const_iterator i;
+
+	scrollTrace->setMaximum(traceData.count());
 
 	if(delta < 0 && tblTraceLog->rowCount() > 0)
 	{
 		i = traceData.constFind(tblTraceLog->item(0,2)->text().toULongLong(0,16));
 		--i;
+		scrollTrace->setValue(scrollTrace->value() - 1);
 	}
-	else if(delta > 0 && tblTraceLog->rowCount() > 0)
+	else if(delta > 0 && tblTraceLog->rowCount() > 1)
 	{
 		i = traceData.constFind(tblTraceLog->item(1,2)->text().toULongLong(0,16));
+		scrollTrace->setValue(scrollTrace->value() + 1);
+	}
+	else if(delta == 0)
+	{
+		i = traceData.constBegin();
+		scrollTrace->setValue(0);
 	}
 	else
-		i = traceData.constBegin();
+		return;
 
 	if((QMapData::Node *)i == (QMapData::Node *)traceData.constEnd())
 		return;

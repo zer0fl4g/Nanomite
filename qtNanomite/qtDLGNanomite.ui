@@ -55,18 +55,36 @@
      </rect>
     </property>
     <layout class="QVBoxLayout" name="mainLayout">
+     <property name="spacing">
+      <number>0</number>
+     </property>
      <item>
       <widget class="QSplitter" name="splitter_4">
        <property name="orientation">
         <enum>Qt::Vertical</enum>
        </property>
+       <property name="handleWidth">
+        <number>1</number>
+       </property>
+       <property name="childrenCollapsible">
+        <bool>true</bool>
+       </property>
        <widget class="QSplitter" name="splitter_2">
         <property name="orientation">
          <enum>Qt::Vertical</enum>
         </property>
+        <property name="handleWidth">
+         <number>1</number>
+        </property>
         <widget class="QSplitter" name="splitter">
          <property name="orientation">
           <enum>Qt::Horizontal</enum>
+         </property>
+         <property name="handleWidth">
+          <number>1</number>
+         </property>
+         <property name="childrenCollapsible">
+          <bool>false</bool>
          </property>
          <widget class="QTableWidget" name="tblDisAs">
           <property name="minimumSize">
@@ -142,7 +160,7 @@
          </widget>
          <widget class="QScrollBar" name="scrollDisAs">
           <property name="sizePolicy">
-           <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+           <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
             <horstretch>0</horstretch>
             <verstretch>0</verstretch>
            </sizepolicy>
@@ -321,6 +339,12 @@
         <property name="orientation">
          <enum>Qt::Horizontal</enum>
         </property>
+        <property name="handleWidth">
+         <number>1</number>
+        </property>
+        <property name="childrenCollapsible">
+         <bool>false</bool>
+        </property>
         <widget class="QTableWidget" name="tblStack">
          <property name="minimumSize">
           <size>
@@ -387,7 +411,7 @@
         </widget>
         <widget class="QScrollBar" name="scrollStackView">
          <property name="sizePolicy">
-          <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+          <sizepolicy hsizetype="Fixed" vsizetype="Expanding">
            <horstretch>0</horstretch>
            <verstretch>0</verstretch>
           </sizepolicy>
@@ -524,6 +548,7 @@
     <addaction name="separator"/>
     <addaction name="actionDebug_Step_In"/>
     <addaction name="actionDebug_Step_Over"/>
+    <addaction name="actionDebug_Step_Out"/>
     <addaction name="action_Debug_Run_to_UserCode"/>
     <addaction name="separator"/>
     <addaction name="actionDebug_Trace_Start"/>

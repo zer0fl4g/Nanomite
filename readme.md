@@ -8,6 +8,7 @@
 	- Hardware (DR CPU Regs)
 - Step In
 - Step Over
+- Step Out
 - Step back to user code
 - Attaching
 - Detaching
@@ -43,5 +44,11 @@
 + added Single Step Tracer
 + added memory dumper
 + removed error message if you cancel the file selection
+
+####Notes:
+	- Single Step Tracer
+		- only a part is displayed in the window. Use mouse scroll to navigate (will be improved)
+	- MemoryDumper
+		- RightClick in MemoryView or HeapView shows you the option to dump the selected segment.
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

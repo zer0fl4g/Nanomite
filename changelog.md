@@ -13,6 +13,12 @@
 + added memory dumper
 + removed error message if you cancel the file selection
 
+####Notes:
+	- Single Step Tracer
+		- only a part is displayed in the window. Use mouse scroll to navigate (will be improved)
+	- MemoryDumper
+		- RightClick in MemoryView or HeapView shows you the option to dump the selected segment.
+
 ###Version 0.1 beta 8
 + fixed a crash in attaching to a process where we don´t have a file path
 + fixed a bug which ignored DbgBreakPoint on attaching

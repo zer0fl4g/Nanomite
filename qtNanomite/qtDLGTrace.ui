@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>848</width>
-    <height>664</height>
+    <width>712</width>
+    <height>510</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,16 +17,19 @@
    <iconset resource="qtDLGNanomite.qrc">
     <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>851</width>
-     <height>671</height>
+     <width>711</width>
+     <height>511</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QTableWidget" name="tblTraceLog">
       <property name="editTriggers">
@@ -42,13 +45,13 @@
        <bool>false</bool>
       </attribute>
       <attribute name="verticalHeaderDefaultSectionSize">
-       <number>15</number>
+       <number>12</number>
       </attribute>
       <attribute name="verticalHeaderHighlightSections">
        <bool>false</bool>
       </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
-       <number>15</number>
+       <number>12</number>
       </attribute>
       <column>
        <property name="text">
@@ -75,6 +78,19 @@
         <string>CPU Registers</string>
        </property>
       </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QScrollBar" name="scrollTrace">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Minimum">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
      </widget>
     </item>
    </layout>
