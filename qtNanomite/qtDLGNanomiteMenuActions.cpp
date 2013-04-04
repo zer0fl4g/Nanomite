@@ -509,7 +509,7 @@ void qtDLGNanomite::action_DebugTraceStart()
 			coreDebugger->SetTraceFlagForPID(_iMenuPID,true);
 		}
 
-		actionDebug_Trace_Start->setEnabled(true);
+		//actionDebug_Trace_Start->setEnabled(true);
 		_iMenuPID = -1;
 	}
 }
@@ -519,16 +519,17 @@ void qtDLGNanomite::action_DebugTraceStop()
 	if(coreDebugger->GetDebuggingState())
 	{
 		_iMenuPID = -1;
-		actionDebug_Trace_Start->setDisabled(true);
+		actionDebug_Trace_Stop->setDisabled(true);
 
 		GenerateMenu(false);
 
 		if(_iMenuPID >= 0)
 		{
 			coreDebugger->SetTraceFlagForPID(_iMenuPID,false);
+			actionDebug_Trace_Start->setEnabled(true);
 		}
 
-		actionDebug_Trace_Start->setEnabled(true);
+		actionDebug_Trace_Stop->setEnabled(true);
 		_iMenuPID = -1;
 	}
 }

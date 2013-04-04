@@ -33,22 +33,9 @@
 	- cpu registers
 
 ## Changelog
-###Version 0.1 beta 9
-+ fixed a bug in disassembler
-+ fixed a bug in wow64 StepIn
-+ fixed a crash when suspending a process and then StepIn
-+ fixed a bug which didn´t display all modules in callstack
-+ fixed a crash in loading imports of files without IAT
-+ fixed a crash in "Goto Offset" context menu
-+ small gui improvements
-+ added Single Step Tracer
-+ added memory dumper
-+ removed error message if you cancel the file selection
-
-####Notes:
-	- Single Step Tracer
-		- only a part is displayed in the window. Use mouse scroll to navigate (will be improved)
-	- MemoryDumper
-		- RightClick in MemoryView or HeapView shows you the option to dump the selected segment.
+###Version 0.1 beta 10
++ fixed display of wrong function offset in callstack
++ fixed a bug which didn´t break on module ep if "break on system ep" was selected
++ added display of current PID/TID in mainwindow title
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

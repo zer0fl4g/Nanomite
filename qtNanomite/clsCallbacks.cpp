@@ -190,7 +190,7 @@ int clsCallbacks::OnCallStack(quint64 dwStackAddr,
 			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString::fromStdWString(sFuncName))));
 	else
 		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString("%1").arg(dwStackAddr,16,16,QChar('0')))));
+			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString("%1").arg(dwEIP,16,16,QChar('0')))));
 
 	// Return To
 	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,3,
@@ -202,7 +202,7 @@ int clsCallbacks::OnCallStack(quint64 dwStackAddr,
 			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString::fromStdWString(sReturnToFunc))));
 	else
 		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString("%1").arg(dwStackAddr,16,16,QChar('0')))));
+			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString("%1").arg(dwReturnTo,16,16,QChar('0')))));
 
 	// Source Line
 	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,5,

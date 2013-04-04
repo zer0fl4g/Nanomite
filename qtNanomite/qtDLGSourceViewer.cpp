@@ -29,7 +29,11 @@ void qtDLGSourceViewer::OnDisplaySource(QString sourceFile,int LineNumber)
 			QListWidgetItem *pItem = new QListWidgetItem();
 			pItem->setText(file.readLine().replace("\r","").replace("\n",""));
 			if(LineCounter == LineNumber)
+			{
 				pItem->setBackground(QBrush(QColor("Blue"),Qt::SolidPattern));
+				pItem->setForeground(QBrush(QColor("White"),Qt::SolidPattern));
+			}
+
 			listSource->addItem(pItem);
 			LineCounter++;
 		}

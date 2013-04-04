@@ -1,6 +1,11 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 10
++ fixed display of wrong function offset in callstack
++ fixed a bug which didn´t break on EP if "break on system ep" was selected
++ added display of current PID/TID in mainwindow title
+
 ###Version 0.1 beta 9
 + fixed a bug in disassembler
 + fixed a bug in wow64 StepIn

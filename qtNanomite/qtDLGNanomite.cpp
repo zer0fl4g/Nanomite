@@ -241,7 +241,7 @@ void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 12),
+		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 11),
 		dwSize = dwRowCount * dwStackSize;
 	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
 		dwEndOffset = dwESP + dwStackSize * (dwRowCount / 2);
@@ -726,7 +726,7 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 		tblDisAs->setRowCount(0);
 
 		quint64 itemStyle;
-		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 12) - 1)
+		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 11) - 1)
 		{
 			itemStyle = i.value().itemStyle;
 			tblDisAs->insertRow(tblDisAs->rowCount());
@@ -769,7 +769,7 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 		// Update Window Title
 		wstring ModName,FuncName;
 		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
-		this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow -- %1.%2").arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
+		this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow -[PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
 	}
 	else
 	{

@@ -426,7 +426,8 @@ void clsDebugger::DebuggingLoop()
 										if(SoftwareBPs[i].dwHandle != 0x2)
 											SoftwareBPs[i].bRestoreBP = true;
 										else
-											bStepOver = true;
+											if(!bIsEP)
+												bStepOver = true;
 									}
 								}
 
@@ -436,8 +437,8 @@ void clsDebugger::DebuggingLoop()
 								
 								if(bIsEP && dbgSettings.dwBreakOnEPMode == 3)
 									dwContinueStatus = CallBreakDebugger(&debug_event,2);
-								else if(bIsEP && dbgSettings.dwBreakOnEPMode == 1)
-									dwContinueStatus = CallBreakDebugger(&debug_event,2);
+								//else if(bIsEP && dbgSettings.dwBreakOnEPMode == 1)
+								//	dwContinueStatus = CallBreakDebugger(&debug_event,2);
 								else
 								{
 									if(!bStepOver)

@@ -132,10 +132,10 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>12</number>
+           <number>11</number>
           </attribute>
           <attribute name="verticalHeaderMinimumSectionSize">
-           <number>12</number>
+           <number>11</number>
           </attribute>
           <column>
            <property name="text">
@@ -230,10 +230,10 @@
            <bool>false</bool>
           </attribute>
           <attribute name="verticalHeaderDefaultSectionSize">
-           <number>14</number>
+           <number>11</number>
           </attribute>
           <attribute name="verticalHeaderMinimumSectionSize">
-           <number>14</number>
+           <number>11</number>
           </attribute>
           <column>
            <property name="text">
@@ -293,10 +293,10 @@
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderDefaultSectionSize">
-          <number>12</number>
+          <number>11</number>
          </attribute>
          <attribute name="verticalHeaderMinimumSectionSize">
-          <number>12</number>
+          <number>11</number>
          </attribute>
          <column>
           <property name="text">
@@ -388,10 +388,10 @@
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderDefaultSectionSize">
-          <number>12</number>
+          <number>11</number>
          </attribute>
          <attribute name="verticalHeaderMinimumSectionSize">
-          <number>12</number>
+          <number>11</number>
          </attribute>
          <column>
           <property name="text">
@@ -478,10 +478,10 @@
           <bool>false</bool>
          </attribute>
          <attribute name="verticalHeaderDefaultSectionSize">
-          <number>12</number>
+          <number>11</number>
          </attribute>
          <attribute name="verticalHeaderMinimumSectionSize">
-          <number>12</number>
+          <number>11</number>
          </attribute>
          <column>
           <property name="text">
@@ -769,7 +769,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_Memory.ico</normaloff>:/DLGNanomite/Icons/ID_Memory.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Memory</string>
+    <string>Memory</string>
    </property>
   </action>
   <action name="actionWindow_Show_Heap">
@@ -778,7 +778,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_Heap.ico</normaloff>:/DLGNanomite/Icons/ID_Heap.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Heap</string>
+    <string>Heap</string>
    </property>
   </action>
   <action name="actionWindow_Show_Strings">
@@ -787,7 +787,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_Strings.ico</normaloff>:/DLGNanomite/Icons/ID_Strings.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Strings</string>
+    <string>Strings</string>
    </property>
   </action>
   <action name="actionWindow_Show_Debug_Output">
@@ -796,7 +796,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_DebugString.ico</normaloff>:/DLGNanomite/Icons/ID_DebugString.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Debug Output</string>
+    <string>Debug Output</string>
    </property>
   </action>
   <action name="actionWindow_Show_Handles">
@@ -805,7 +805,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_Handles.ico</normaloff>:/DLGNanomite/Icons/ID_Handles.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Handles</string>
+    <string>Handles</string>
    </property>
   </action>
   <action name="actionWindow_Show_Windows">
@@ -814,7 +814,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_Windows.ico</normaloff>:/DLGNanomite/Icons/ID_Windows.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Windows</string>
+    <string>Windows</string>
    </property>
   </action>
   <action name="actionWindow_Show_PEEditor">
@@ -823,7 +823,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_PEEditor.ico</normaloff>:/DLGNanomite/Icons/ID_PEEditor.ico</iconset>
    </property>
    <property name="text">
-    <string>Show PE-Editor</string>
+    <string>PE-Editor</string>
    </property>
   </action>
   <action name="action_Debug_Run_to_UserCode">
@@ -860,7 +860,7 @@
      <normaloff>:/DLGNanomite/Icons/ID_SHOWTRACE.ico</normaloff>:/DLGNanomite/Icons/ID_SHOWTRACE.ico</iconset>
    </property>
    <property name="text">
-    <string>Show Trace Info</string>
+    <string>Trace Info</string>
    </property>
   </action>
   <action name="actionDebug_Step_Out">
