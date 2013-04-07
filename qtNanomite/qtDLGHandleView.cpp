@@ -1,6 +1,7 @@
 #include "qtDLGHandleView.h"
 #include "qtDLGNanomite.h"
 
+#include "clsAPIImport.h"
 #include "NativeHeaders.h"
 #include "clsMemManager.h"
 
@@ -30,10 +31,6 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 			iForEntry = i; iForEnd = i + 1;
 	}
 
-	_NtQuerySystemInformation NtQuerySystemInformation = (_NtQuerySystemInformation)GetProcAddress(GetModuleHandleA("ntdll.dll"),"NtQuerySystemInformation");
-	_NtDuplicateObject NtDuplicateObject = (_NtDuplicateObject)GetProcAddress(GetModuleHandleA("ntdll.dll"),"NtDuplicateObject");
-	_NtQueryObject NtQueryObject = (_NtQueryObject)GetProcAddress(GetModuleHandleA("ntdll.dll"),"NtQueryObject");
-
 	for(int i = iForEntry; i < iForEnd;i++)
 	{
 		NTSTATUS status;
@@ -43,7 +40,7 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 		PSYSTEM_HANDLE_INFORMATION handleInfo = (PSYSTEM_HANDLE_INFORMATION)malloc(handleInfoSize);
 
-		while ((status = NtQuerySystemInformation(SystemHandleInformation,handleInfo,handleInfoSize,NULL)) == STATUS_INFO_LENGTH_MISMATCH)
+		while ((status = clsAPIImport::pNtQuerySystemInformation(SystemHandleInformation,handleInfo,handleInfoSize,NULL)) == STATUS_INFO_LENGTH_MISMATCH)
 			handleInfo = (PSYSTEM_HANDLE_INFORMATION)realloc(handleInfo, handleInfoSize *= 2);
 
 		if (!NT_SUCCESS(status))
@@ -66,11 +63,11 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 			if (handle.ProcessId != dwPID)
 				continue;
 
-			if (!NT_SUCCESS(NtDuplicateObject(hProc,(HANDLE)handle.Handle,GetCurrentProcess(),&dupHandle,0,0,0)))
+			if (!NT_SUCCESS(clsAPIImport::pNtDuplicateObject(hProc,(HANDLE)handle.Handle,GetCurrentProcess(),&dupHandle,0,0,0)))
 				continue;
 
 			objectTypeInfo = (POBJECT_TYPE_INFORMATION)malloc(0x1000);
-			if (!NT_SUCCESS(NtQueryObject(dupHandle,ObjectTypeInformation,objectTypeInfo,0x1000,NULL)))
+			if (!NT_SUCCESS(clsAPIImport::pNtQueryObject(dupHandle,ObjectTypeInformation,objectTypeInfo,0x1000,NULL)))
 			{
 				CloseHandle(dupHandle);
 				free(objectTypeInfo);
@@ -86,10 +83,10 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 			}
 
 			objectNameInfo = malloc(0x1000);
-			if (!NT_SUCCESS(NtQueryObject(dupHandle,ObjectNameInformation,objectNameInfo,0x1000,&returnLength)))
+			if (!NT_SUCCESS(clsAPIImport::pNtQueryObject(dupHandle,ObjectNameInformation,objectNameInfo,0x1000,&returnLength)))
 			{
 				objectNameInfo = realloc(objectNameInfo, returnLength);
-				if (!NT_SUCCESS(NtQueryObject(dupHandle,ObjectNameInformation,objectNameInfo,returnLength,NULL)))
+				if (!NT_SUCCESS(clsAPIImport::pNtQueryObject(dupHandle,ObjectNameInformation,objectNameInfo,returnLength,NULL)))
 				{
 					InsertDataIntoTable(dwPID,(DWORD)handle.Handle,objectTypeInfo->Name.Buffer,L"Couldn´t get name");
 					free(objectTypeInfo);

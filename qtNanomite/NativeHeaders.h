@@ -1,3 +1,6 @@
+#ifndef NATIVEHEADER_H
+#define NATIVEHEADER_H
+
 #define NT_SUCCESS(x) ((x) >= 0)
 #define STATUS_INFO_LENGTH_MISMATCH 0xc0000004
 
@@ -5,29 +8,6 @@
 #define ObjectBasicInformation 0
 #define ObjectNameInformation 1
 #define ObjectTypeInformation 2
-
-typedef NTSTATUS (NTAPI *_NtQuerySystemInformation)(
-	ULONG SystemInformationClass,
-	PVOID SystemInformation,
-	ULONG SystemInformationLength,
-	PULONG ReturnLength
-	);
-typedef NTSTATUS (NTAPI *_NtDuplicateObject)(
-	HANDLE SourceProcessHandle,
-	HANDLE SourceHandle,
-	HANDLE TargetProcessHandle,
-	PHANDLE TargetHandle,
-	ACCESS_MASK DesiredAccess,
-	ULONG Attributes,
-	ULONG Options
-	);
-typedef NTSTATUS (NTAPI *_NtQueryObject)(
-	HANDLE ObjectHandle,
-	ULONG ObjectInformationClass,
-	PVOID ObjectInformation,
-	ULONG ObjectInformationLength,
-	PULONG ReturnLength
-	);
 
 typedef struct _UNICODE_STRING
 {
@@ -88,3 +68,5 @@ typedef struct _OBJECT_TYPE_INFORMATION
 	ULONG PagedPoolUsage;
 	ULONG NonPagedPoolUsage;
 } OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
+
+#endif

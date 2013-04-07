@@ -10,6 +10,7 @@
 #include "qtDLGHexView.h"
 #include "qtDLGRegEdit.h"
 #include "qtDLGPEEditor.h"
+#include "qtDLGFunctions.h"
 
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
@@ -530,6 +531,27 @@ void qtDLGNanomite::action_DebugTraceStop()
 		}
 
 		actionDebug_Trace_Stop->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowFunctions()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Functions->setDisabled(true);
+
+		GenerateMenu();
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGFunctions *dlgFunctions = new qtDLGFunctions(this,Qt::Window,_iMenuPID);
+			connect(dlgFunctions,SIGNAL(ShowInDisAs(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
+			dlgFunctions->show();
+		}
+
+		actionWindow_Show_Functions->setEnabled(true);
 		_iMenuPID = -1;
 	}
 }

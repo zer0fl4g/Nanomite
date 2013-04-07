@@ -287,6 +287,15 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qtDLGTrace.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGFunctions.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGFunctions.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGFunctions.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -415,6 +424,12 @@
     <CustomBuild Include="qtDLGTrace.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGFunctions.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGFunctions.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -504,9 +519,18 @@
     <ClInclude Include="GeneratedFiles\ui_qtDLGTrace.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
+    <ClInclude Include="resource.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGFunctions.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
   </ItemGroup>
   <ItemGroup>
     <None Include="..\readme.md" />
     <None Include="..\changelog.md" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="qtNanomite.rc" />
   </ItemGroup>
 </Project>

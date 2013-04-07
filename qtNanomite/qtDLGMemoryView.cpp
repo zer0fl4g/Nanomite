@@ -155,8 +155,8 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 
 	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
 
-	menu.addAction(new QAction("Send Offset To HexView",this));
-	menu.addAction(new QAction("Dump Memory To File",this));
+	menu.addAction(new QAction("Send to HexView",this));
+	menu.addAction(new QAction("Dump to File",this));
 
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
@@ -165,14 +165,14 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 
 void qtDLGMemoryView::MenuCallback(QAction* pAction)
 {
-	if(QString().compare(pAction->text(),"Send Offset To HexView") == 0)
+	if(QString().compare(pAction->text(),"Send to HexView") == 0)
 	{
 		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16),
 			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
 			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
 		newView->show();
 	}
-	else if(QString().compare(pAction->text(),"Dump Memory To File") == 0)
+	else if(QString().compare(pAction->text(),"Dump to File") == 0)
 	{
 		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
 

@@ -80,6 +80,7 @@ private slots:
 	void action_WindowShowHandles();
 	void action_WindowShowWindows();
 	void action_WindowShowPEEditor();
+	void action_WindowShowFunctions();
 	void action_DebugTraceStart();
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();
@@ -108,6 +109,15 @@ signals:
 private:
 	int _iMenuPID;
 	int _iSelectedRow;
+	int _iSelectedAction;
+	/*
+	0 = from Disassembler
+	1 = from RegView
+	2 = from Callstack
+	3 = from StackView
+	4 = from LogBox
+	*/
+
 	QList<quint64> _OffsetWalkHistory;
 
 	static qtDLGNanomite *qtDLGMyWindow;

@@ -99,6 +99,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Debug_Output, SIGNAL(triggered()), this, SLOT(action_WindowShowDebugOutput()));
 	connect(actionWindow_Show_Handles, SIGNAL(triggered()), this, SLOT(action_WindowShowHandles()));
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
+	connect(actionWindow_Show_Functions, SIGNAL(triggered()), this, SLOT(action_WindowShowFunctions()));
 	connect(action_Debug_Run_to_UserCode,SIGNAL(triggered()), this, SLOT(action_DebugRunToUserCode()));
 	connect(actionDebug_Trace_Start, SIGNAL(triggered()), this, SLOT(action_DebugTraceStart()));
 	connect(actionDebug_Trace_Stop, SIGNAL(triggered()), this, SLOT(action_DebugTraceStop()));
@@ -782,8 +783,11 @@ void qtDLGNanomite::OnCustomRegViewContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblRegView->indexAt(qPoint).row();
+	_iSelectedAction = 1;
 
-	menu.addAction(new QAction("Send (R/E)IP to Disassembler",this));
+	menu.addAction(new QAction("Send to StackView",this));
+	menu.addAction(new QAction("Send to Disassembler",this));
+	//menu.addAction(new QAction("Send to HexView",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -794,6 +798,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblDisAs->indexAt(qPoint).row();
+	_iSelectedAction = 0;
 
 	menu.addAction(new QAction("Goto Offset",this));
 	menu.addAction(new QAction("Show Source",this));
@@ -807,6 +812,7 @@ void qtDLGNanomite::OnCustomLogContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblLogBox->indexAt(qPoint).row();
+	_iSelectedAction = 4;
 
 	menu.addAction(new QAction("Clear Log",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
@@ -819,8 +825,9 @@ void qtDLGNanomite::OnCustomCallstackContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblCallstack->indexAt(qPoint).row();
+	_iSelectedAction = 2;
 
-	menu.addAction(new QAction("Goto Function in disassembler",this));
+	menu.addAction(new QAction("Send to Disassembler",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -828,11 +835,40 @@ void qtDLGNanomite::OnCustomCallstackContextMenu(QPoint qPoint)
 
 void qtDLGNanomite::MenuCallback(QAction* pAction)
 {
-	if(QString().compare(pAction->text(),"Send (R/E)IP to Disassembler") == 0)
+	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
-		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-			OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		if(_iSelectedAction == 1)
+		{
+			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)))
+				OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		}
+		else if(_iSelectedAction == 2)
+		{
+			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
+				OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
+		}
 	}
+	else if(QString().compare(pAction->text(),"Send to StackView") == 0)
+	{
+#ifdef _AMD64_
+		BOOL bIsWOW64 = false;
+		if(clsAPIImport::pIsWow64Process)
+			clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+
+		if(bIsWOW64)
+			LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),4);
+		else
+			LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),8);
+#else
+		LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)),4);
+#endif
+	}
+	//else if(QString().compare(pAction->text(),"Send to HexView") == 0)
+	//{
+	//	qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,coreDebugger->GetCurrentPID(),
+	//		,);
+	//	newView->show();
+	//}
 	else if(QString().compare(pAction->text(),"Goto Offset") == 0)
 	{
 		bool bOk = false;
@@ -852,11 +888,6 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 			dlgSourceViewer->show();
 		else
 			MessageBoxW(NULL,L"Sorry, there is no source available!",L"Nanomite",MB_OK);
-	}
-	else if(QString().compare(pAction->text(),"Goto Function in disassembler") == 0)
-	{
-		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-			OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));		
 	}
 }
 
@@ -913,7 +944,7 @@ void qtDLGNanomite::OnDisAsReturnPressed()
 	quint64 dwSelectedVA = NULL;
 	QString tempSelectedString = currentSelectedItems.value(2)->text();
 
-	if(tempSelectedString.contains("dword ptr"))
+	if(tempSelectedString.contains("dword ptr") || tempSelectedString.contains("qword ptr"))
 		dwSelectedVA = tempSelectedString.split(" ")[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16);
 	else
 		dwSelectedVA = tempSelectedString.split(" ")[1].replace("h","").toULongLong(0,16);

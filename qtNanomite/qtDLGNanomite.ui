@@ -462,6 +462,9 @@
          <property name="editTriggers">
           <set>QAbstractItemView::NoEditTriggers</set>
          </property>
+         <property name="selectionMode">
+          <enum>QAbstractItemView::ExtendedSelection</enum>
+         </property>
          <property name="selectionBehavior">
           <enum>QAbstractItemView::SelectRows</enum>
          </property>
@@ -589,6 +592,7 @@
     <addaction name="actionWindow_Show_Windows"/>
     <addaction name="actionWindow_Show_PEEditor"/>
     <addaction name="actionDebug_Trace_Show"/>
+    <addaction name="actionWindow_Show_Functions"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
@@ -631,6 +635,7 @@
    <addaction name="actionWindow_Show_Handles"/>
    <addaction name="actionWindow_Show_Windows"/>
    <addaction name="actionWindow_Show_PEEditor"/>
+   <addaction name="actionWindow_Show_Functions"/>
   </widget>
   <widget class="QStatusBar" name="stateBar">
    <property name="sizePolicy">
@@ -870,6 +875,15 @@
    </property>
    <property name="text">
     <string>Step Out</string>
+   </property>
+  </action>
+  <action name="actionWindow_Show_Functions">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Functions.ico</normaloff>:/DLGNanomite/Icons/ID_Functions.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Functions</string>
    </property>
   </action>
  </widget>
