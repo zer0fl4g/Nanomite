@@ -37,5 +37,11 @@
 + fixed display of wrong function offset in callstack
 + fixed a bug which didn´t break on module ep if "break on system ep" was selected
 + added display of current PID/TID in mainwindow title
++ added function view
++ added and cleaned context menus
+
+####Notes:
+	- function view
+		-
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

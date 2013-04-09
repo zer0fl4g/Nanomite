@@ -27,6 +27,7 @@ signals:
 
 private:
 	int _iPID;
+	int _iSelectedRow;
 
 	QList<FunctionData>	functionList;
 
@@ -38,6 +39,10 @@ private:
 	quint64 GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer);
 
 	QList<FunctionData> GetPossibleFunctionBeginning(quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer);
+
+	private slots:
+		void OnCustomContextMenu(QPoint qPoint);
+		void MenuCallback(QAction* pAction);
 };
 
 #endif

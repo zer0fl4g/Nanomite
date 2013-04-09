@@ -18,6 +18,8 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 	_iPID = iPID;
 
+	connect(tblFunctions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
+
 	// Init List
 	tblFunctions->horizontalHeader()->resizeSection(0,75);
 	tblFunctions->horizontalHeader()->resizeSection(1,200);
@@ -134,8 +136,13 @@ void qtDLGFunctions::InsertSymbolsIntoLists(HANDLE hProc)
 			if(functionList[i].functionSymbol.isEmpty())
 			{
 				clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,functionList[i].FunctionOffset,hProc);
-				wstring *sFuncTemp = &sFuncName;
-				functionList[i].functionSymbol = QString().fromStdWString(*sFuncTemp);
+				if(sFuncName.length() > 0)
+				{
+					wstring *sFuncTemp = &sFuncName;
+					functionList[i].functionSymbol = QString().fromStdWString(*sFuncTemp);
+				}
+				else
+					functionList[i].functionSymbol = QString("sub_%1").arg(functionList[i].FunctionOffset,16,16,QChar('0'));
 			}		
 		}
 	}
@@ -170,29 +177,27 @@ QList<FunctionData> qtDLGFunctions::GetPossibleFunctionBeginning(quint64 StartOf
 
 	for(quint64 i = StartOffset; i < (StartOffset + Size); i++)
 	{
-
 		int counter = 0;
 		if(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
 		{
 			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-			counter++;i++;
+			counter++;
 
 			while(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
 			{
 				lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
 				counter++;i++;
-				if(i >= (StartOffset + Size)) break;
 			}
 		}
 		else
 			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
 
-		if(counter >= 2)
+		if(counter > 4)
 		{
 			// possible beginning
 			FunctionData newFunction;
-			newFunction.FunctionOffset = i;
-			newFunction.FunctionSize = GetPossibleFunctionEnding(i,(StartOffset + Size) - i,SearchPattern,lpBuffer);
+			newFunction.FunctionOffset = i + 1;
+			newFunction.FunctionSize = GetPossibleFunctionEnding(i + 1,(StartOffset + Size) - i + 1,SearchPattern,(LPVOID)((quint64)lpBuffer + 1));
 
 			if(newFunction.FunctionSize > 4)
 				functions.append(newFunction);
@@ -209,23 +214,39 @@ quint64 qtDLGFunctions::GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Si
 		if(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
 		{
 			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-			counter++;i++;
+			counter++;
 
 			while(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
 			{
 				lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
 				counter++;i++;		
-				if(i >= (BaseAddress + Size)) break;
 			}
 		}
 		else
 			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
 
-		if(counter >= 2)
-		{
-			// possible ending
-			return i - BaseAddress;
-		}
+		if(counter > 4)
+			return i - BaseAddress - counter;
 	}
 	return 0;
+}
+
+void qtDLGFunctions::OnCustomContextMenu(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblFunctions->indexAt(qPoint).row();
+
+	menu.addAction(new QAction("Send to Disassembler",this));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGFunctions::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
+	{
+		emit ShowInDisAs(tblFunctions->item(_iSelectedRow,2)->text().toULongLong(0,16));
+	}
 }

@@ -664,6 +664,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	coreDisAs->SectionDisAs.clear();
 	dlgBPManager->DeleteCompleterContent();
 	qtDLGTrace::clearTraceData();
+	actionDebug_Trace_Start->setEnabled(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow"));
 }
 
@@ -860,7 +861,7 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 		else
 			LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),8);
 #else
-		LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)),4);
+		LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),4);
 #endif
 	}
 	//else if(QString().compare(pAction->text(),"Send to HexView") == 0)
