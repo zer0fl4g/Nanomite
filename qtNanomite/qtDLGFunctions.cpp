@@ -39,7 +39,8 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	for(int i = iForEntry; i < iForEnd;i++)
 	{
 		GetValidMemoryParts((PTCHAR)myMainWindow->coreDebugger->GetTarget().c_str(),myMainWindow->coreDebugger->PIDs[i].hProc);
-		InsertSymbolsIntoLists(myMainWindow->coreDebugger->PIDs[i].hProc);
+		InsertSymbolsIntoLists(myMainWindow->coreDebugger->PIDs[i].hProc,
+			myMainWindow->coreDebugger->PIDs[i].dwPID);
 	}
 
 	DisplayFunctionLists();
@@ -53,12 +54,9 @@ qtDLGFunctions::~qtDLGFunctions()
 
 void qtDLGFunctions::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc)
 {
-	DWORD64 ModuleBase = NULL,
-			ModuleSize = NULL,
-			CurAddress = NULL;
-	PTCHAR	lpFileName = (PTCHAR)malloc(MAX_PATH *sizeof(TCHAR)),
+	DWORD64 CurAddress = NULL;
+	PTCHAR	lpFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH *sizeof(TCHAR)),
 			lpCurrentFileName = NULL;
-	bool	bWeGotIt = false;
 
 	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentName,'/');
 
@@ -75,36 +73,20 @@ void qtDLGFunctions::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc)
 			{
 				if(wcscmp(lpCurrentFileName,lpCurrentName) == 0)
 				{
-					if(!bWeGotIt)
-					{
-						bWeGotIt = true;
-						ModuleBase = (DWORD64)mbi.BaseAddress;
-					}
-
-					ModuleSize += mbi.RegionSize;
-				}
-				else
-				{
-					if(bWeGotIt)
-					{
-						free(lpCurrentFileName);
-						break;
-					}
-				}
-
-				free(lpCurrentFileName);
+					ParseMemoryRangeForFunctions(hProc,(quint64)mbi.BaseAddress,mbi.RegionSize);
+				}				
 			}
+			free(lpCurrentFileName);
 		}
 		CurAddress += mbi.RegionSize;
 	}
-
-	ParseMemoryRangeForFunctions(hProc,ModuleBase,ModuleSize);
+	clsMemManager::CFree(lpFileName);
 }
 
 void qtDLGFunctions::ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size)
 {
 	LPVOID lpBuffer = malloc(Size);
-	DWORD	searchPattern	= NULL,
+	DWORD	//searchPattern	= NULL,
 			searchPattern2	= 0x90909090,
 			searchPattern3	= 0xCCCCCCCC,
 			dwOldProtection = NULL,
@@ -118,14 +100,14 @@ void qtDLGFunctions::ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddre
 
 	VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwOldProtection,&dwNewProtection);
 
-	//functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern,lpBuffer));
-	functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern2,lpBuffer));
-	functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern3,lpBuffer));
+	//functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern,lpBuffer,4));
+	functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern2,lpBuffer,4));
+	functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern3,lpBuffer,4));
 
 	free(lpBuffer);
 }
 
-void qtDLGFunctions::InsertSymbolsIntoLists(HANDLE hProc)
+void qtDLGFunctions::InsertSymbolsIntoLists(HANDLE hProc,WORD PID)
 {
 	wstring sModName,sFuncName;
 
@@ -140,6 +122,7 @@ void qtDLGFunctions::InsertSymbolsIntoLists(HANDLE hProc)
 				{
 					wstring *sFuncTemp = &sFuncName;
 					functionList[i].functionSymbol = QString().fromStdWString(*sFuncTemp);
+					functionList[i].PID = PID;
 				}
 				else
 					functionList[i].functionSymbol = QString("sub_%1").arg(functionList[i].FunctionOffset,16,16,QChar('0'));
@@ -155,7 +138,7 @@ void qtDLGFunctions::DisplayFunctionLists()
 		tblFunctions->insertRow(tblFunctions->rowCount());
 		// PID
 		tblFunctions->setItem(tblFunctions->rowCount() - 1,0,
-			new QTableWidgetItem(QString("0")));
+			new QTableWidgetItem(QString("%1").arg(functionList[i].PID,8,16,QChar('0'))));
 
 		// Func Name
 		tblFunctions->setItem(tblFunctions->rowCount() - 1,1,
@@ -171,7 +154,7 @@ void qtDLGFunctions::DisplayFunctionLists()
 	}
 }
 
-QList<FunctionData> qtDLGFunctions::GetPossibleFunctionBeginning(quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer)
+QList<FunctionData> qtDLGFunctions::GetPossibleFunctionBeginning(quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen)
 {
 	QList<FunctionData> functions;
 
@@ -192,12 +175,12 @@ QList<FunctionData> qtDLGFunctions::GetPossibleFunctionBeginning(quint64 StartOf
 		else
 			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
 
-		if(counter > 4)
+		if(counter > SpaceLen)
 		{
 			// possible beginning
 			FunctionData newFunction;
 			newFunction.FunctionOffset = i + 1;
-			newFunction.FunctionSize = GetPossibleFunctionEnding(i + 1,(StartOffset + Size) - i + 1,SearchPattern,(LPVOID)((quint64)lpBuffer + 1));
+			newFunction.FunctionSize = GetPossibleFunctionEnding(i + 1,(StartOffset + Size) - i + 1,SearchPattern,(LPVOID)((quint64)lpBuffer + 1),SpaceLen);
 
 			if(newFunction.FunctionSize > 4)
 				functions.append(newFunction);
@@ -206,7 +189,7 @@ QList<FunctionData> qtDLGFunctions::GetPossibleFunctionBeginning(quint64 StartOf
 	return functions;
 }
 
-quint64 qtDLGFunctions::GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer)
+quint64 qtDLGFunctions::GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen)
 {
 	for(quint64 i = BaseAddress; i < (BaseAddress + Size); i++)
 	{
@@ -225,7 +208,7 @@ quint64 qtDLGFunctions::GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Si
 		else
 			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
 
-		if(counter > 4)
+		if(counter > SpaceLen)
 			return i - BaseAddress - counter;
 	}
 	return 0;

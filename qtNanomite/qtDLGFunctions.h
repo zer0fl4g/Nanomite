@@ -11,6 +11,7 @@ struct FunctionData
 {
 	quint64 FunctionOffset;
 	quint64 FunctionSize;
+	WORD PID;
 	QString functionSymbol;
 };
 
@@ -33,12 +34,12 @@ private:
 
 	void GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc);
 	void ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
-	void InsertSymbolsIntoLists(HANDLE hProc);
+	void InsertSymbolsIntoLists(HANDLE hProc,WORD PID);
 	void DisplayFunctionLists();
 
-	quint64 GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer);
+	quint64 GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen);
 
-	QList<FunctionData> GetPossibleFunctionBeginning(quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer);
+	QList<FunctionData> GetPossibleFunctionBeginning(quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen);
 
 	private slots:
 		void OnCustomContextMenu(QPoint qPoint);

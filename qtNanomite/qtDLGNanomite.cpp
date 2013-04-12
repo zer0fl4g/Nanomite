@@ -836,6 +836,8 @@ void qtDLGNanomite::OnCustomCallstackContextMenu(QPoint qPoint)
 
 void qtDLGNanomite::MenuCallback(QAction* pAction)
 {
+	if(!coreDebugger->GetDebuggingState()) return;
+
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
 		if(_iSelectedAction == 1)

@@ -3,8 +3,14 @@
 ## Changelog
 ###Version 0.1 beta 10
 + fixed display of wrong function offset in callstack
-+ fixed a bug which didn´t break on EP if "break on system ep" was selected
++ fixed a bug which didn´t break on module ep if "break on system ep" was selected
 + added display of current PID/TID in mainwindow title
++ added function view
++ added and cleaned context menus
+
+####Notes:
+	- function view
+		- parsed the memory of the loaded targets and scanns for functions.
 
 ###Version 0.1 beta 9
 + fixed a bug in disassembler

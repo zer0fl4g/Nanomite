@@ -21,7 +21,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 	if(hFile == INVALID_HANDLE_VALUE) return false;
 		
 	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
-	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
+	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,0x2000);
 	if(_lpBuffer == NULL)
 	{
 		CloseHandle(hFile);
@@ -89,10 +89,33 @@ bool clsPEFile::isValidPEFile()
 
 QStringList clsPEFile::getImports()
 {
+	QStringList importsOfFile;
+	HANDLE hFile = CreateFileW(_FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
+	if(hFile == INVALID_HANDLE_VALUE) return importsOfFile;
+
+	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
+	LPVOID lpOrgBuffer = _lpBuffer;
+
+	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
+	if(_lpBuffer == NULL)
+	{
+		CloseHandle(hFile);
+		CloseHandle(hFileMap);
+		UnmapViewOfFile(_lpBuffer);
+		_lpBuffer = lpOrgBuffer;
+		return importsOfFile;
+	}
+
 	if(_is64Bit)
-		return getImports64();
+		importsOfFile = getImports64();
 	else
-		return getImports32();
+		importsOfFile = getImports32();
+
+	UnmapViewOfFile(_lpBuffer);
+	_lpBuffer = lpOrgBuffer;
+	CloseHandle(hFile);
+	CloseHandle(hFileMap);
+	return importsOfFile;
 }
 
 QStringList clsPEFile::getImports32()

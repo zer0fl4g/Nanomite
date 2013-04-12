@@ -42,6 +42,6 @@
 
 ####Notes:
 	- function view
-		-
+		- parsed the memory of the loaded targets and scanns for functions.
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)
