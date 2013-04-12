@@ -1,13 +1,36 @@
 #include "qtDLGNanomite.h"
 #include "clsCrashHandler.h"
 #include "clsMemManager.h"
+#include <WinBase.h>
 
 #include <QtGui/QApplication>
 //#include <QDebug>
 
+BOOL IsUserAdmin()
+{
+    BOOL _isUserAdmin = false;
+
+    SID_IDENTIFIER_AUTHORITY NtAuthority = SECURITY_NT_AUTHORITY;
+    PSID AdministratorsGroup;
+
+    if (AllocateAndInitializeSid(&NtAuthority,2,SECURITY_BUILTIN_DOMAIN_RID, DOMAIN_ALIAS_RID_ADMINS,0,0,0,0,0,0,&AdministratorsGroup))
+    {
+        CheckTokenMembership( NULL, AdministratorsGroup, &_isUserAdmin);
+        
+        FreeSid(AdministratorsGroup);
+    }    
+
+    return _isUserAdmin;
+}
+
 int main(int argc, char *argv[])
 {
 	AddVectoredExceptionHandler(1,clsCrashHandler::ErrorReporter);
+
+    if (!IsUserAdmin())
+    {
+        MessageBoxW(NULL,L"You didn´t start the debugger with admin rights!\r\nThis could cause problems with some features!",L"Nanomite",MB_OK);
+    }
 
 	clsMemManager clsMManage = clsMemManager();
 	//Tests - 500bytes, 100000 rounds
@@ -45,13 +68,7 @@ int main(int argc, char *argv[])
 	//}
 	//qDebug() << "Test using clsMemManager: " << GetTickCount() - dwStartTick;
 
-	QSettings adminTest("HKEY_LOCAL_MACHINE", QSettings::NativeFormat);
-	QVariant currentValue = adminTest.value("(Default)");
-	adminTest.setValue("(Default)", currentValue);
-	adminTest.sync();
-	if (adminTest.status() == QSettings::AccessError)
-		MessageBoxW(NULL,L"You didn´t start the debugger with admin rights!\r\nThis could cause problems with some features!",L"Nanomite",MB_OK);
-
+	
 	QApplication a(argc, argv);
 	qtDLGNanomite w;
 	w.show();
