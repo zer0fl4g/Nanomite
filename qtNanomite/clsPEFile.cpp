@@ -137,10 +137,10 @@ QStringList clsPEFile::getImports32()
             else
                 pIAT = (PIMAGE_THUNK_DATA32)((pImportHeader->FirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
 
-			while (pIAT->u1.Ordinal != 0 && !(pIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG))
+			while (pIAT->u1.Ordinal != 0 && !(pIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG32))
 			{
 				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
-				if(pImportName != NULL && pImportName->Hint != NULL && pImportName->Name != NULL)
+				if(pImportName != NULL && pImportName->Name != NULL)
 					importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
 
 				pIAT++;
@@ -172,10 +172,10 @@ QStringList clsPEFile::getImports64()
             else
                 pIAT = (PIMAGE_THUNK_DATA64)((pImportHeader->FirstThunk - dwVAOfImportSection) + dwImportSectionOffset);
 
-			while (pIAT->u1.Ordinal != 0 && !(pIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG))
+			while (pIAT->u1.Ordinal != 0 && !(pIAT->u1.Ordinal & IMAGE_ORDINAL_FLAG64))
 			{
 				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
-				if(pImportName != NULL && pImportName->Hint != NULL && pImportName->Name != NULL)
+				if(pImportName != NULL && pImportName->Name != NULL)
 					importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
 
 				pIAT++;

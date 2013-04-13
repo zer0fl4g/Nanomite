@@ -2,6 +2,7 @@
 
 #include "qtDLGNanomite.h"
 #include "qtDLGRegEdit.h"
+#include "qtDLGAssembler.h"
 
 #include "clsCallbacks.h"
 #include "clsHelperClass.h"
@@ -761,7 +762,7 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 
 			if(!i.value().Offset.isEmpty() && i.value().Offset.compare(iEnd.value().Offset) == 0)
 			{
-				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),iEnd.value().Offset.toULongLong(0,16));
+				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(4,0)->text().toULongLong(0,16),true);
 				return;
 			}
 
@@ -802,6 +803,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	_iSelectedAction = 0;
 
 	menu.addAction(new QAction("Goto Offset",this));
+	menu.addAction(new QAction("Edit Instruction",this));
 	menu.addAction(new QAction("Show Source",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
@@ -849,6 +851,14 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 		{
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
 				OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
+		}
+	}
+	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
+	{
+		if(_iSelectedAction == 0)
+		{
+			qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle());
+			dlgAssembler->show();
 		}
 	}
 	else if(QString().compare(pAction->text(),"Send to StackView") == 0)

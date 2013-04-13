@@ -25,7 +25,7 @@ public:
 	clsDisassembler();
 	~clsDisassembler();
 
-	bool InsertNewDisassembly(HANDLE hProc,quint64 dwEIP);
+	bool InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClear = false);
 
 signals:
 	void DisAsFinished(quint64 dwEIP);

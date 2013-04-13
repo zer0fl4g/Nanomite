@@ -68,13 +68,15 @@ bool clsDisassembler::IsNewInsertPossible()
 	return false;
 }
 
-bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP)
+bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClear)
 {
 	if(_hProc == INVALID_HANDLE_VALUE || dwEIP == NULL)
 		return false;
 
 	_dwEIP = dwEIP;
 	_hProc = hProc;
+
+	if(bClear) SectionDisAs.clear();
 
 	if(IsNewInsertNeeded())
 	{
