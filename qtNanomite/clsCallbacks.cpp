@@ -131,7 +131,7 @@ int clsCallbacks::OnDbgString(wstring sMessage,DWORD dwPID)
 	myMainWindow->dlgDbgStr->tblDebugStrings->setItem(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount() - 1,1,
 		new QTableWidgetItem(QString::fromStdWString(sMessage)));
 
-	myMainWindow->dlgDetInfo->tblExceptions->scrollToBottom();
+	myMainWindow->dlgDbgStr->tblDebugStrings->scrollToBottom();
 
 	return 0;
 }

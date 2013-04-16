@@ -23,6 +23,7 @@ public:
 	static std::wstring convertSTRtoWSTR(std::string FileName);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
 	static QString LoadStyleSheet();
+	static bool IsWindowsXP();
 };
 
 #endif // QTDLGNANOMITE_H

@@ -597,9 +597,20 @@ void clsDebugger::DebuggingLoop()
 							PIDs[iPid].bTrapFlag = true;
 
 							for(size_t i = 0;i < MemoryBPs.size();i++)
+							{
 								if(MemoryBPs[i].dwOffset == (quint64)exInfo.ExceptionRecord.ExceptionAddress)
+								{
 									MemoryBPs[i].bRestoreBP = true;
 
+									memset(tcLogString,0x00,LOGBUFFER);
+#ifdef _AMD64_
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Memory BP at %016I64X",MemoryBPs[i].dwOffset);
+#else
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Memory BP at %08X",(DWORD)MemoryBPs[i].dwOffset);
+#endif
+									PBLogInfo();
+								}
+							}
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
 						}
 						break;

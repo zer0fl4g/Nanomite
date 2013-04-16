@@ -50,6 +50,9 @@
     <attribute name="verticalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
+    <attribute name="verticalHeaderMinimumSectionSize">
+     <number>14</number>
+    </attribute>
     <column>
      <property name="text">
       <string>Name</string>
@@ -202,52 +205,86 @@
     </attribute>
    </widget>
   </widget>
-  <widget class="QGroupBox" name="groupBox_5">
+  <widget class="QTabWidget" name="tab_3">
    <property name="geometry">
     <rect>
-     <x>613</x>
-     <y>0</y>
-     <width>310</width>
-     <height>420</height>
+     <x>620</x>
+     <y>10</y>
+     <width>511</width>
+     <height>401</height>
     </rect>
    </property>
-   <property name="title">
-    <string>Imports</string>
+   <property name="currentIndex">
+    <number>1</number>
    </property>
-   <widget class="QTableWidget" name="tblImports">
-    <property name="geometry">
-     <rect>
-      <x>5</x>
-      <y>15</y>
-      <width>300</width>
-      <height>400</height>
-     </rect>
-    </property>
-    <attribute name="horizontalHeaderVisible">
-     <bool>true</bool>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>Imports</string>
     </attribute>
-    <attribute name="horizontalHeaderHighlightSections">
-     <bool>false</bool>
-    </attribute>
-    <attribute name="verticalHeaderVisible">
-     <bool>false</bool>
-    </attribute>
-    <attribute name="verticalHeaderHighlightSections">
-     <bool>false</bool>
-    </attribute>
-    <attribute name="verticalHeaderMinimumSectionSize">
-     <number>14</number>
-    </attribute>
-    <column>
-     <property name="text">
-      <string>Module</string>
+    <widget class="QTreeWidget" name="treeImport">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>-1</y>
+       <width>511</width>
+       <height>381</height>
+      </rect>
      </property>
-    </column>
-    <column>
-     <property name="text">
-      <string>API</string>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
      </property>
-    </column>
+     <attribute name="headerDefaultSectionSize">
+      <number>50</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Module</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>API</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Offset</string>
+      </property>
+     </column>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab_2">
+    <attribute name="title">
+     <string>Exports</string>
+    </attribute>
+    <widget class="QTreeWidget" name="treeExports">
+     <property name="geometry">
+      <rect>
+       <x>-1</x>
+       <y>-1</y>
+       <width>511</width>
+       <height>381</height>
+      </rect>
+     </property>
+     <attribute name="headerDefaultSectionSize">
+      <number>100</number>
+     </attribute>
+     <column>
+      <property name="text">
+       <string>Module</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>API</string>
+      </property>
+     </column>
+     <column>
+      <property name="text">
+       <string>Offset</string>
+      </property>
+     </column>
+    </widget>
    </widget>
   </widget>
  </widget>

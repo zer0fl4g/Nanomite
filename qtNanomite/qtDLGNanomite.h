@@ -102,7 +102,7 @@ private slots:
 	void LoadRegView();
 	void GenerateMenuCallback(QAction *qAction);
 	void MenuCallback(QAction*);
-	
+
 signals:
 	void OnDisplaySource(QString,int);
 

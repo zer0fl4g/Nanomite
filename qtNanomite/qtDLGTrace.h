@@ -31,6 +31,7 @@ private:
 	static qtDLGTrace *pThis;
 	QMap<DWORD64,TraceInfoRow> traceData;
 
+private slots:
 	void OnShow(int Offset);
 
 protected:

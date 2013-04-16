@@ -16,7 +16,6 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 
 	_iPID = iPID;
 
-
 	connect(tblHeapView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
@@ -32,6 +31,78 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 
 	for(int i = iForEntry; i < iForEnd;i++)
 	{
+	 // // Create debug buffer
+	 // PDEBUG_BUFFER db = (PDEBUG_BUFFER)clsAPIImport::pRtlCreateQueryDebugBuffer(0,false); 
+	 // HeapBlock hb = {0,0,0,0};
+	 // int iHeapCount = 0;
+
+	 // // Get process heap data
+	 // clsAPIImport::pRtlQueryProcessDebugInformation(myMainWindow->coreDebugger->PIDs[i].dwPID, PDI_HEAPS | PDI_HEAP_BLOCKS,(ULONG)db);
+
+	 // ULONG heapNodeCount = db->HeapInformation ? *PULONG(db->HeapInformation) : 0;
+
+	 // PDEBUG_HEAP_INFORMATION heapInfo = PDEBUG_HEAP_INFORMATION(PULONG(db->HeapInformation) + 1);
+
+	 // // Go through each of the heap nodes and dispaly the information
+	 // for (unsigned int iNode = 0; iNode < heapNodeCount; iNode++) 
+	 // {
+		//  // Now enumerate all blocks within this heap node...
+		//  memset(&hb,0,sizeof(hb));
+
+		//  if(GetFirstHeapBlock(&heapInfo[iNode],&hb))
+		//  {
+		//	do
+		//	{
+		//		tblHeapView->insertRow(tblHeapView->rowCount());
+		//		// PID
+		//		tblHeapView->setItem(tblHeapView->rowCount() - 1,0,
+		//			new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->PIDs[i].dwPID)));
+
+		//		// Heap ID
+		//		tblHeapView->setItem(tblHeapView->rowCount() - 1,1,
+		//			new QTableWidgetItem(QString().sprintf("%08X",heapInfo[iNode].Base)));
+
+		//		// Base Address
+		//		tblHeapView->setItem(tblHeapView->rowCount() - 1,2,
+		//			new QTableWidgetItem(QString().sprintf("%08X",hb.dwAddress)));
+
+		//		// Block Size
+		//		tblHeapView->setItem(tblHeapView->rowCount() - 1,3,
+		//			new QTableWidgetItem(QString().sprintf("%08X",hb.dwSize)));
+
+		//		// Block Count
+		//		tblHeapView->setItem(tblHeapView->rowCount() - 1,4,
+		//			new QTableWidgetItem(QString().sprintf("%d",++iHeapCount)));
+
+		//		// Flags
+		//		switch(hb.dwFlags)
+		//		{
+		//		case LF32_FIXED:
+		//			tblHeapView->setItem(tblHeapView->rowCount() - 1,5,
+		//				new QTableWidgetItem(QString("LF32_FIXED")));
+		//			break;
+		//		case LF32_FREE:
+		//			tblHeapView->setItem(tblHeapView->rowCount() - 1,5,
+		//				new QTableWidgetItem(QString("LF32_FREE")));
+		//			break;
+		//		case LF32_MOVEABLE:
+		//			tblHeapView->setItem(tblHeapView->rowCount() - 1,5,
+		//				new QTableWidgetItem(QString("LF32_MOVEABLE")));
+		//			break;
+		//		}
+
+		//	}while(GetNextHeapBlock(&heapInfo[iNode],&hb));
+
+		//	//printf("\n Base Address = 0x%.8x", heapInfo[i].Base);
+		//	//printf("\n Block count = %d", heapInfo[i].BlockCount);
+		//	//printf("\n Committed Size= 0x%.8x", heapInfo[i].Committed);
+		//	//printf("\n Allocated Size = 0x%.8x", heapInfo[i].Allocated);
+		//	//printf("\n Flags = 0x%.8x", heapInfo[i].Flags);
+		//}
+	 // }
+	 // // Clean up the buffer
+	 // clsAPIImport::pRtlDestroyQueryDebugBuffer((ULONG)db);
+
 		HEAPLIST32 heapList;
 		int iHeapCount = 0;
 		HANDLE hHeapSnap = CreateToolhelp32Snapshot(TH32CS_SNAPHEAPLIST,myMainWindow->coreDebugger->PIDs[i].dwPID);
@@ -54,28 +125,47 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 						{
 							tblHeapView->insertRow(tblHeapView->rowCount());
 							// PID
-							tblHeapView->setItem(tblHeapView->rowCount() - 1,0, new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->PIDs[i].dwPID)));
+							tblHeapView->setItem(tblHeapView->rowCount() - 1,0,
+								new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->PIDs[i].dwPID)));
 
 							// Heap ID
-							tblHeapView->setItem(tblHeapView->rowCount() - 1,1,new QTableWidgetItem(QString().sprintf("%08X",he.th32HeapID)));
+							tblHeapView->setItem(tblHeapView->rowCount() - 1,1,
+								new QTableWidgetItem(QString().sprintf("%08X",he.th32HeapID)));
 
 							// Base Address
-							tblHeapView->setItem(tblHeapView->rowCount() - 1,2,new QTableWidgetItem(QString().sprintf("%08X",he.dwAddress)));
+							tblHeapView->setItem(tblHeapView->rowCount() - 1,2,
+								new QTableWidgetItem(QString().sprintf("%08X",he.dwAddress)));
 
 							// Allocated Size
-							tblHeapView->setItem(tblHeapView->rowCount() - 1,3,new QTableWidgetItem(QString().sprintf("%08X",he.dwBlockSize)));
+							tblHeapView->setItem(tblHeapView->rowCount() - 1,3,
+								new QTableWidgetItem(QString().sprintf("%08X",he.dwBlockSize)));
 
 							// Block Count
-							tblHeapView->setItem(tblHeapView->rowCount() - 1,4,new QTableWidgetItem(QString().sprintf("%d",++iHeapCount)));
+							tblHeapView->setItem(tblHeapView->rowCount() - 1,4,
+								new QTableWidgetItem(QString().sprintf("%d",++iHeapCount)));
 
 							// Flags
-							tblHeapView->setItem(tblHeapView->rowCount() - 1,5,new QTableWidgetItem(QString().sprintf("%08X",he.dwFlags)));
+							switch(he.dwFlags)
+							{
+							case LF32_FIXED:
+								tblHeapView->setItem(tblHeapView->rowCount() - 1,5,
+									new QTableWidgetItem(QString("LF32_FIXED")));
+								break;
+							case LF32_FREE:
+								tblHeapView->setItem(tblHeapView->rowCount() - 1,5,
+									new QTableWidgetItem(QString("LF32_FREE")));
+								break;
+							case LF32_MOVEABLE:
+								tblHeapView->setItem(tblHeapView->rowCount() - 1,5,
+									new QTableWidgetItem(QString("LF32_MOVEABLE")));
+								break;
+							}
 
 							he.dwSize = sizeof(HEAPENTRY32);
-						} while( Heap32Next(&he) );
+						}while(Heap32Next(&he));
 					}
 					heapList.dwSize = sizeof(HEAPLIST32);
-				} while (Heap32ListNext(hHeapSnap,&heapList));
+				}while(Heap32ListNext(hHeapSnap,&heapList));
 			}
 			CloseHandle(hHeapSnap);
 		}
@@ -120,3 +210,84 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 			tblHeapView->item(_iSelectedRow,3)->text().toULongLong(0,16));
 	}
 }
+//
+//bool qtDLGHeapView::GetFirstHeapBlock(PDEBUG_HEAP_INFORMATION curHeapNode, HeapBlock *hb)
+//{
+//  int *block;
+//
+//  hb->reserved = 0;
+//  hb->dwAddress = 0;
+//  hb->dwFlags = 0;
+//
+//  block = (int*) curHeapNode->Blocks;
+//
+//  while( ( *(block+1) & 2 ) == 2 )
+//  {
+//    hb->reserved++;
+//    hb->dwAddress = (void *) ( *(block+3) + curHeapNode->Granularity );
+//    block = block + 4;
+//    hb->dwSize = *block;
+//  }
+//
+//  // Update the flags...
+//  USHORT flags = *(block+1);
+//
+//  if( ( flags & 0xF1 ) != 0 || ( flags & 0x0200 ) != 0 )
+//    hb->dwFlags = 1;
+//  else if( (flags & 0x20) != 0 )
+//         hb->dwFlags = 4;
+//       else if( (flags & 0x0100) != 0 )
+//              hb->dwFlags = 2;
+//
+//   return TRUE;
+//}
+//
+//bool qtDLGHeapView::GetNextHeapBlock(PDEBUG_HEAP_INFORMATION curHeapNode, HeapBlock *hb)
+//{
+//  int *block;
+//
+//  hb->reserved++;
+//  block = (int*) curHeapNode->Blocks;
+//
+//  // Make it point to next block address entry
+//  block = block + hb->reserved * 4; 
+//
+//  if( hb->reserved > curHeapNode->BlockCount)
+//        return false;
+//
+//  if((*(block + 1) & 2) == 2 )
+//  {
+//    do
+//    {
+//      // new address = curBlockAddress + Granularity ;
+//      hb->dwAddress = (void *) ( *(block+3) + curHeapNode->Granularity );
+//
+//      // If all the blocks have been enumerated....exit
+//      if( hb->reserved > curHeapNode->BlockCount)
+//        return false;
+//
+//      hb->reserved++;
+//      block = (int*)(block + 4); //move to next block
+//      hb->dwSize = *block;
+//     }
+//     while((*(block+1)& 2) == 2);
+//  }
+//  else
+//  {
+//    // New Address = prev Address + prev block size ;
+//    hb->dwAddress = (void*) ( (int)hb->dwAddress + hb->dwSize );
+//    hb->dwSize = *block;
+//  }
+//
+//  // Update the flags...
+//  USHORT flags = *( block+1);
+//
+//  if( ( flags & 0xF1 ) != 0 || ( flags & 0x0200 ) != 0 )
+//    hb->dwFlags = 1;
+//  else if( (flags & 0x20) != 0 )
+//         hb->dwFlags = 4;
+//       else if( (flags & 0x0100) != 0 )
+//              hb->dwFlags = 2;
+//
+//  return TRUE;
+//}

@@ -105,7 +105,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionDebug_Trace_Start, SIGNAL(triggered()), this, SLOT(action_DebugTraceStart()));
 	connect(actionDebug_Trace_Stop, SIGNAL(triggered()), this, SLOT(action_DebugTraceStop()));
 	connect(actionDebug_Trace_Show, SIGNAL(triggered()), this, SLOT(action_DebugTraceShow()));
-	//connect(actionWindow_Show_PEEditor, SIGNAL(triggered()), this, SLOT(action_WindowShowPEEditor()));
+	connect(actionWindow_Show_PEEditor, SIGNAL(triggered()), this, SLOT(action_WindowShowPEEditor()));
 
 	// Actions on Window Events
 	connect(tblDisAs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomDisassemblerContextMenu(QPoint)));
@@ -805,6 +805,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	menu.addAction(new QAction("Goto Offset",this));
 	menu.addAction(new QAction("Edit Instruction",this));
 	menu.addAction(new QAction("Show Source",this));
+	menu.addAction(new QAction("Set R/EIP to this",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -852,6 +853,22 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
 				OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
 		}
+	}
+	else if(QString().compare(pAction->text(),"Set R/EIP to this") == 0)
+	{
+#ifdef _AMD64_
+		BOOL bIsWOW64 = false;
+		if(clsAPIImport::pIsWow64Process)
+			clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+
+		if(bIsWOW64)
+			coreDebugger->wowProcessContext.Eip = tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+		else
+			coreDebugger->ProcessContext.Rip = tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+#else
+		coreDebugger->ProcessContext.Eip = tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+#endif
+		OnDebuggerBreak();
 	}
 	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
 	{

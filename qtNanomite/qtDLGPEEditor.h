@@ -5,7 +5,7 @@
 
 #include "clsPEManager.h"
 
-class qtDLGPEEditor : public QWidget
+class qtDLGPEEditor : public QWidget, Ui_qtDLGPEEditorClass
 {
 	Q_OBJECT
 
@@ -14,14 +14,13 @@ public:
 	~qtDLGPEEditor();
 	
 private:
-	Ui::qtDLGPEEditorClass ui;
-
 	int _PID;
 
 	std::wstring _currentFile;
 
 	clsPEManager* _PEManager;
 
+	void InsertImports();
 	void LoadPEView();
 	void InitList();
 

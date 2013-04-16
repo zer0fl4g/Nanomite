@@ -84,12 +84,12 @@ void clsPEManager::CloseFile(std::wstring FileName,int PID)
 	}
 }
 
-QStringList clsPEManager::getImportsFromFile(std::wstring FileName)
+QList<ImportAPI> clsPEManager::getImportsFromFile(std::wstring FileName)
 {
 	return clsPEManager::pThis->getImports(FileName,0);
 }
 
-QStringList clsPEManager::getImports(std::wstring FileName,int PID)
+QList<ImportAPI> clsPEManager::getImports(std::wstring FileName,int PID)
 {
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -98,7 +98,7 @@ QStringList clsPEManager::getImports(std::wstring FileName,int PID)
 	}
 
 	// no imports or invalid file
-	return QStringList();
+	return QList<ImportAPI>();
 }
 
 clsPEManager::~clsPEManager()

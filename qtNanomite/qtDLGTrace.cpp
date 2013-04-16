@@ -23,7 +23,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	tblTraceLog->horizontalHeader()->resizeSection(3,300); //INST.
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
 
-	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
+	//connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
 }
 
 qtDLGTrace::~qtDLGTrace()

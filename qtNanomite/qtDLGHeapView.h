@@ -3,6 +3,8 @@
 
 #include "ui_qtDLGHeapView.h"
 
+#include "clsAPIImport.h"
+
 class qtDLGHeapView : public QWidget, public Ui_qtDLGHeapViewClass
 {
 	Q_OBJECT
@@ -15,6 +17,9 @@ private:
 	int _iPID,
 		_iSelectedRow;
 
+	//bool GetNextHeapBlock(PDEBUG_HEAP_INFORMATION curHeapNode, HeapBlock *hb);
+	//bool GetFirstHeapBlock(PDEBUG_HEAP_INFORMATION curHeapNode, HeapBlock *hb);
+	
 	private slots:
 		void MenuCallback(QAction*);
 		void OnCustomContextMenuRequested(QPoint qPoint);

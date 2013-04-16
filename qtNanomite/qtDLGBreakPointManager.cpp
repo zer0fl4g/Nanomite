@@ -183,7 +183,12 @@ void qtDLGBreakPointManager::OnBPRemove()
 
 void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID)
 {
-	completerList.append(clsPEManager::getImportsFromFile(FilePath));
+	QList<ImportAPI> newImports = clsPEManager::getImportsFromFile(FilePath);
+
+	for(int i = 0; i < newImports.size(); i++)
+	{
+		completerList.append(newImports.value(i).APIName);
+	}
 	
 	QCompleter *completer = new QCompleter(completerList, this);
 	completer->setCaseSensitivity(Qt::CaseInsensitive);

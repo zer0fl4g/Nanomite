@@ -87,9 +87,9 @@ bool clsPEFile::isValidPEFile()
 	return true;
 }
 
-QStringList clsPEFile::getImports()
+QList<ImportAPI> clsPEFile::getImports()
 {
-	QStringList importsOfFile;
+	QList<ImportAPI> importsOfFile;
 	HANDLE hFile = CreateFileW(_FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
 	if(hFile == INVALID_HANDLE_VALUE) return importsOfFile;
 
@@ -118,9 +118,9 @@ QStringList clsPEFile::getImports()
 	return importsOfFile;
 }
 
-QStringList clsPEFile::getImports32()
+QList<ImportAPI> clsPEFile::getImports32()
 {
-	QStringList importsOfFile;
+	QList<ImportAPI> importsOfFile;
 
 	DWORD dwVAOfImportSection = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	DWORD dwImportSectionOffset = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_IMPORT,_pINH32,_pIDH,(PBYTE)_lpBuffer);
@@ -141,7 +141,12 @@ QStringList clsPEFile::getImports32()
 			{
 				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
 				if(pImportName != NULL && pImportName->Name != NULL)
-					importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
+				{
+					ImportAPI newAPI;
+					newAPI.APIOffset = pIAT->u1.AddressOfData;
+					newAPI.APIName = QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name));			
+					importsOfFile.push_back(newAPI);
+				}
 
 				pIAT++;
 			}
@@ -153,9 +158,9 @@ QStringList clsPEFile::getImports32()
 	return importsOfFile;
 }
 
-QStringList clsPEFile::getImports64()
+QList<ImportAPI> clsPEFile::getImports64()
 {
-	QStringList importsOfFile;
+	QList<ImportAPI> importsOfFile;
 
 	DWORD64 dwVAOfImportSection = _pINH64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	DWORD64 dwImportSectionOffset = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_IMPORT,_pINH64,_pIDH,(PBYTE)_lpBuffer);
@@ -176,7 +181,12 @@ QStringList clsPEFile::getImports64()
 			{
 				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
 				if(pImportName != NULL && pImportName->Name != NULL)
-					importsOfFile.push_back(QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name)));			
+				{
+					ImportAPI newAPI;
+					newAPI.APIOffset = pIAT->u1.AddressOfData;
+					newAPI.APIName = QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name));			
+					importsOfFile.push_back(newAPI);
+				}
 
 				pIAT++;
 			}

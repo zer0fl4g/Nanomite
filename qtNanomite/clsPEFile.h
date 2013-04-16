@@ -6,6 +6,12 @@
 #include <vector>
 #include <QStringlist.h>
 
+struct ImportAPI
+{
+	QString APIName;
+	quint64 APIOffset;
+};
+
 class clsPEFile
 {
 public:
@@ -14,9 +20,9 @@ public:
 
 	bool isValidPEFile();
 
-	QStringList clsPEFile::getImports();
-	QStringList clsPEFile::getImports32();
-	QStringList clsPEFile::getImports64();
+	QList<ImportAPI> clsPEFile::getImports();
+	QList<ImportAPI> clsPEFile::getImports32();
+	QList<ImportAPI> clsPEFile::getImports64();
 
 	PIMAGE_DOS_HEADER getDosHeader();
 	PIMAGE_NT_HEADERS32 getNTHeader32();

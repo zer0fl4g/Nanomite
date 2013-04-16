@@ -313,3 +313,15 @@ QString clsHelperClass::LoadStyleSheet()
 			"	font-size: 12;"
 			"}";
 }
+
+bool clsHelperClass::IsWindowsXP()
+{
+	OSVERSIONINFO versionInfo;
+	memset (&versionInfo, 0, sizeof(OSVERSIONINFO));
+	versionInfo.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
+	GetVersionEx(&versionInfo);
+
+	if (versionInfo.dwMinorVersion == 1  &&  versionInfo.dwMajorVersion == 5)
+		return true;
+	return false;
+}
