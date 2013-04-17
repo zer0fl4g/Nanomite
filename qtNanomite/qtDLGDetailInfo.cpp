@@ -1,4 +1,9 @@
 #include "qtDLGDetailInfo.h"
+#include "qtDLGPEEditor.h"
+
+#include "clsMemManager.h"
+#include "clsHelperClass.h"
+#include "clsPEManager.h"
 
 #include <QtCore>
 #include <QMenu>
@@ -75,6 +80,7 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 	_SelectedOffset = tblModules->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
+	menu.addAction(new QAction("Open Module in PE View",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -89,5 +95,14 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 			emit ShowInDisassembler(_SelectedOffset);
 			_SelectedOffset = NULL;
 		}
+	}
+	else if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
+	{
+		std::wstring *temp = new std::wstring(tblModules->item(_iSelectedRow,3)->text().toStdWString());
+		emit OpenFileInPEManager(*temp,-1);
+		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,
+			-1,
+			*temp);
+		dlgPEEditor->show();
 	}
 }

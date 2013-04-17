@@ -6,7 +6,7 @@
 #include <vector>
 #include <QStringlist.h>
 
-struct ImportAPI
+struct APIData
 {
 	QString APIName;
 	quint64 APIOffset;
@@ -20,9 +20,8 @@ public:
 
 	bool isValidPEFile();
 
-	QList<ImportAPI> clsPEFile::getImports();
-	QList<ImportAPI> clsPEFile::getImports32();
-	QList<ImportAPI> clsPEFile::getImports64();
+	QList<APIData> getImports();
+	QList<APIData> getExports();
 
 	PIMAGE_DOS_HEADER getDosHeader();
 	PIMAGE_NT_HEADERS32 getNTHeader32();
@@ -40,6 +39,11 @@ private:
 	PIMAGE_DOS_HEADER _pIDH;
 	PIMAGE_NT_HEADERS64 _pINH64;
 	PIMAGE_NT_HEADERS32 _pINH32;
+
+	QList<APIData> getImports32();
+	QList<APIData> getImports64();
+	QList<APIData> getExports32();
+	QList<APIData> getExports64();
 
 	bool LoadFile(std::wstring);
 	bool CheckPEType(LPVOID pBuffer);

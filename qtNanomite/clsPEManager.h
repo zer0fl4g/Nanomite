@@ -9,7 +9,8 @@ class clsPEManager: public QObject
 {
 	Q_OBJECT
 public:
-	static QList<ImportAPI> getImportsFromFile(std::wstring FileName);
+	static QList<APIData> getImportsFromFile(std::wstring FileName);
+	static clsPEManager* GetInstance();
 
 	clsPEManager();
 	~clsPEManager();
@@ -18,7 +19,8 @@ public:
 	bool isValidPEFile(std::wstring FileName,int PID = 0);
 	bool is64BitFile(std::wstring FileName,int PID = 0);
 
-	QList<ImportAPI> getImports(std::wstring FileName,int PID = -1);
+	QList<APIData> getImports(std::wstring FileName,int PID = -1);
+	QList<APIData> getExports(std::wstring FileName,int PID = -1);
 
 	PIMAGE_DOS_HEADER getDosHeader(std::wstring FileName,int PID = -1);
 	PIMAGE_NT_HEADERS32 getNTHeader32(std::wstring FileName,int PID = -1);

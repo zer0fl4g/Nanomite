@@ -215,7 +215,7 @@
     </rect>
    </property>
    <property name="currentIndex">
-    <number>1</number>
+    <number>0</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -233,6 +233,9 @@
      <property name="editTriggers">
       <set>QAbstractItemView::NoEditTriggers</set>
      </property>
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
      <attribute name="headerDefaultSectionSize">
       <number>50</number>
      </attribute>
@@ -266,6 +269,9 @@
        <height>381</height>
       </rect>
      </property>
+     <attribute name="headerVisible">
+      <bool>false</bool>
+     </attribute>
      <attribute name="headerDefaultSectionSize">
       <number>100</number>
      </attribute>

@@ -1,9 +1,10 @@
 #include "qtDLGPEEditor.h"
 
+#include "clsMemManager.h"
 #include "clsPEManager.h"
 #include "clsHelperClass.h"
 
-qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID)
+qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID, std::wstring FileName)
 {
 	setupUi(this);
 	
@@ -16,8 +17,20 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 	
 	if(_PEManager != NULL)
 	{	
-		_currentFile = _PEManager->getFilenameFromPID(_PID);
-		this->setWindowTitle(QString("[Nanomite] - PEEditor - PID: %1 - File: %2").arg(PID,8,16,QChar('0')).arg(QString().fromStdWString(_currentFile)));
+		if(FileName.length() > 0)
+			_currentFile = FileName;
+		else
+			_currentFile = _PEManager->getFilenameFromPID(_PID);
+		if(_currentFile.length() <= 0) 
+		{
+			MessageBoxW(NULL,L"Could not load File!",L"Nanomite",MB_OK);
+			close();
+		}
+
+		if(_PID == -1)
+			this->setWindowTitle(QString("[Nanomite] - PEEditor - File: %1").arg(QString().fromStdWString(_currentFile)));
+		else
+			this->setWindowTitle(QString("[Nanomite] - PEEditor - PID: %1 - File: %2").arg(PID,8,16,QChar('0')).arg(QString().fromStdWString(_currentFile)));
 		
 		InitList();
 		LoadPEView();
@@ -31,18 +44,20 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 
 qtDLGPEEditor::~qtDLGPEEditor()
 {
+	if(_PID == -1)
+		_PEManager->CloseFile(_currentFile,-1);
 	_PEManager = NULL;
 }
 
 void qtDLGPEEditor::InitList()
 {
 	// Imports
-	treeImport->header()->resizeSection(0,135);
+	treeImport->header()->resizeSection(0,250);
 	treeImport->header()->resizeSection(1,135);
 
-	// List Import
-	//tblImports->horizontalHeader()->resizeSection(0,135);
-	//tblImports->horizontalHeader()->resizeSection(1,135);
+	// Exports
+	treeExports->header()->resizeSection(0,250);
+	treeExports->header()->resizeSection(1,135);
 
 	// List Section
 	tblSections->horizontalHeader()->resizeSection(0,85);
@@ -63,12 +78,16 @@ void qtDLGPEEditor::InitList()
 void qtDLGPEEditor::LoadPEView()
 {
 	InsertImports();
+	InsertExports();
+	//InsertSections();
+	InsertDosHeader();
+	InsertNTHeader();
 }
 
 void qtDLGPEEditor::InsertImports()
 {
 	QTreeWidgetItem* topElement = new QTreeWidgetItem();
-	QList<ImportAPI> imports = _PEManager->getImports(_currentFile);
+	QList<APIData> imports = _PEManager->getImports(_currentFile);
 	QString lastTopElement;
 
 	for(int importCount = 0; importCount < imports.size(); importCount++)
@@ -84,7 +103,32 @@ void qtDLGPEEditor::InsertImports()
 		}
 		
 		QTreeWidgetItem* childElement = new QTreeWidgetItem(topElement);
-		childElement->setText(1,currentElement[1]);
-		childElement->setText(2,QString("%1").arg(imports.value(importCount).APIOffset,16,16,QChar('0')));
+		childElement->setText(0,currentElement[1]);
+		childElement->setText(1,QString("%1").arg(imports.value(importCount).APIOffset,16,16,QChar('0')));
 	}
+}
+
+void qtDLGPEEditor::InsertExports()
+{
+	QTreeWidgetItem* topElement = new QTreeWidgetItem();
+	QList<APIData> exports = _PEManager->getExports(_currentFile);
+	QString lastTopElement;
+
+	for(int exportsCount = 0; exportsCount < exports.size(); exportsCount++)
+	{		
+		topElement = new QTreeWidgetItem();
+		topElement->setText(0,exports.at(exportsCount).APIName);
+		topElement->setText(1,QString("%1").arg(exports.value(exportsCount).APIOffset,16,16,QChar('0')));
+		treeExports->addTopLevelItem(topElement);	  
+	}
+}
+
+void qtDLGPEEditor::InsertDosHeader()
+{
+		
+}
+
+void qtDLGPEEditor::InsertNTHeader()
+{
+
 }

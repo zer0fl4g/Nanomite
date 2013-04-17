@@ -305,11 +305,10 @@ QString clsHelperClass::LoadStyleSheet()
 	//File.close();
 	//return styleSheet;
 
-	return	"QTableWidget"
+	return	"QTableWidget, QTreeWidget"
 			"{ "
 			"	background: rgb(230, 235, 230);"
 			"	font-family: Consolas;"
-			//"	font-family: Courier;"
 			"	font-size: 12;"
 			"}";
 }
@@ -324,4 +323,14 @@ bool clsHelperClass::IsWindowsXP()
 	if (versionInfo.dwMinorVersion == 1  &&  versionInfo.dwMajorVersion == 5)
 		return true;
 	return false;
+}
+
+wstring clsHelperClass::replaceAll(wstring orgString, wstring oldString, wstring newString)
+{
+	QString org = QString().fromStdWString(orgString);
+	QString old = QString().fromStdWString(oldString);
+	QString news = QString().fromStdWString(newString);
+
+	wstring* ret = new wstring(org.replace(old,news).toStdWString()); 
+	return *ret;
 }

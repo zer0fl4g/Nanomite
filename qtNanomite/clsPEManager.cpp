@@ -1,8 +1,14 @@
 #include "clsPEManager.h"
+#include "clsHelperClass.h"
 
 using namespace std;
 
 clsPEManager* clsPEManager::pThis = NULL;
+
+clsPEManager* clsPEManager::GetInstance()
+{
+	return pThis;
+}
 
 clsPEManager::clsPEManager()
 {
@@ -23,9 +29,11 @@ wstring clsPEManager::getFilenameFromPID(int PID)
 
 void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 {
+	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName == FileName)
+		if(PEFiles[i].FileName.compare(newFileName) == 0)
 		{
 			PEFiles[i].PID = PID;
 			return;
@@ -33,22 +41,24 @@ void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 	}
 
 	//File not found so open it (child proc)
-	OpenFile(FileName,PID);
+	OpenFile(newFileName,PID);
 }
 
 bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
 {
+	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName == FileName || PEFiles[i].PID == PID)
+		if(PEFiles[i].FileName.compare(newFileName) == 0 || PEFiles[i].PID == PID)
 			return false;
 	}
 
 	PEManager newPEFile;
 	bool bLoaded = false;
 
-	newPEFile.PEFile = new clsPEFile(FileName,&bLoaded);
-	newPEFile.FileName = FileName;
+	newPEFile.PEFile = new clsPEFile(newFileName,&bLoaded);
+	newPEFile.FileName = newFileName;
 	newPEFile.is64Bit = newPEFile.PEFile->is64Bit();
 	newPEFile.PID = PID;
 
@@ -84,12 +94,12 @@ void clsPEManager::CloseFile(std::wstring FileName,int PID)
 	}
 }
 
-QList<ImportAPI> clsPEManager::getImportsFromFile(std::wstring FileName)
+QList<APIData> clsPEManager::getImportsFromFile(std::wstring FileName)
 {
 	return clsPEManager::pThis->getImports(FileName,0);
 }
 
-QList<ImportAPI> clsPEManager::getImports(std::wstring FileName,int PID)
+QList<APIData> clsPEManager::getImports(std::wstring FileName,int PID)
 {
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -97,8 +107,18 @@ QList<ImportAPI> clsPEManager::getImports(std::wstring FileName,int PID)
 			return PEFiles[i].PEFile->getImports();
 	}
 
-	// no imports or invalid file
-	return QList<ImportAPI>();
+	return QList<APIData>();
+}
+
+QList<APIData> clsPEManager::getExports(std::wstring FileName,int PID)
+{
+	for(size_t i = 0; i < PEFiles.size(); i++)
+	{
+		if(PEFiles[i].FileName == FileName || PEFiles[i].PID == PID)
+			return PEFiles[i].PEFile->getExports();
+	}
+
+	return QList<APIData>();
 }
 
 clsPEManager::~clsPEManager()

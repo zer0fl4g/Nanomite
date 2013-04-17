@@ -1,10 +1,11 @@
 #include "clsPEFile.h"
+#include "clsHelperClass.h"
 
 using namespace std;
 
 clsPEFile::clsPEFile(wstring FileName,bool *bLoaded)
 {
-	_FileName = FileName;
+	_FileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
 	*bLoaded = LoadFile(_FileName);
 }
 
@@ -42,7 +43,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 	if(_is64Bit)
 	{
 		_pINH64 = (PIMAGE_NT_HEADERS64)((DWORD)_pIDH + _pIDH->e_lfanew);
-		if((_pINH64 != NULL && _pINH64->Signature != IMAGE_NT_SIGNATURE) || _pINH64->FileHeader.Characteristics & IMAGE_FILE_DLL)
+		if(_pINH64 != NULL && _pINH64->Signature != IMAGE_NT_SIGNATURE)
 		{
 			UnmapViewOfFile(_lpBuffer);
 			CloseHandle(hFile);
@@ -53,7 +54,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 	else
 	{
 		_pINH32 = (PIMAGE_NT_HEADERS32)((DWORD)_pIDH + _pIDH->e_lfanew);
-		if((_pINH32 != NULL && _pINH32->Signature != IMAGE_NT_SIGNATURE) || _pINH32->FileHeader.Characteristics & IMAGE_FILE_DLL)
+		if(_pINH32 != NULL && _pINH32->Signature != IMAGE_NT_SIGNATURE)
 		{
 			UnmapViewOfFile(_lpBuffer);
 			CloseHandle(hFile);
@@ -87,9 +88,9 @@ bool clsPEFile::isValidPEFile()
 	return true;
 }
 
-QList<ImportAPI> clsPEFile::getImports()
+QList<APIData> clsPEFile::getImports()
 {
-	QList<ImportAPI> importsOfFile;
+	QList<APIData> importsOfFile;
 	HANDLE hFile = CreateFileW(_FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
 	if(hFile == INVALID_HANDLE_VALUE) return importsOfFile;
 
@@ -118,9 +119,9 @@ QList<ImportAPI> clsPEFile::getImports()
 	return importsOfFile;
 }
 
-QList<ImportAPI> clsPEFile::getImports32()
+QList<APIData> clsPEFile::getImports32()
 {
-	QList<ImportAPI> importsOfFile;
+	QList<APIData> importsOfFile;
 
 	DWORD dwVAOfImportSection = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	DWORD dwImportSectionOffset = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_IMPORT,_pINH32,_pIDH,(PBYTE)_lpBuffer);
@@ -142,8 +143,8 @@ QList<ImportAPI> clsPEFile::getImports32()
 				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
 				if(pImportName != NULL && pImportName->Name != NULL)
 				{
-					ImportAPI newAPI;
-					newAPI.APIOffset = pIAT->u1.AddressOfData;
+					APIData newAPI;
+					newAPI.APIOffset = pIAT->u1.Function;
 					newAPI.APIName = QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name));			
 					importsOfFile.push_back(newAPI);
 				}
@@ -158,9 +159,9 @@ QList<ImportAPI> clsPEFile::getImports32()
 	return importsOfFile;
 }
 
-QList<ImportAPI> clsPEFile::getImports64()
+QList<APIData> clsPEFile::getImports64()
 {
-	QList<ImportAPI> importsOfFile;
+	QList<APIData> importsOfFile;
 
 	DWORD64 dwVAOfImportSection = _pINH64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_IMPORT].VirtualAddress;
 	DWORD64 dwImportSectionOffset = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_IMPORT,_pINH64,_pIDH,(PBYTE)_lpBuffer);
@@ -182,8 +183,8 @@ QList<ImportAPI> clsPEFile::getImports64()
 				PIMAGE_IMPORT_BY_NAME pImportName = (PIMAGE_IMPORT_BY_NAME)((pIAT->u1.Function - dwVAOfImportSection) + dwImportSectionOffset);
 				if(pImportName != NULL && pImportName->Name != NULL)
 				{
-					ImportAPI newAPI;
-					newAPI.APIOffset = pIAT->u1.AddressOfData;
+					APIData newAPI;
+					newAPI.APIOffset = pIAT->u1.Function;
 					newAPI.APIName = QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name));			
 					importsOfFile.push_back(newAPI);
 				}
@@ -196,6 +197,89 @@ QList<ImportAPI> clsPEFile::getImports64()
 	}
 
 	return importsOfFile;
+}
+
+QList<APIData> clsPEFile::getExports()
+{
+	QList<APIData> exportsOfFile;
+	HANDLE hFile = CreateFileW(_FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
+	if(hFile == INVALID_HANDLE_VALUE) return exportsOfFile;
+
+	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
+	LPVOID lpOrgBuffer = _lpBuffer;
+
+	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
+	if(_lpBuffer == NULL)
+	{
+		CloseHandle(hFile);
+		CloseHandle(hFileMap);
+		UnmapViewOfFile(_lpBuffer);
+		_lpBuffer = lpOrgBuffer;
+		return exportsOfFile;
+	}
+
+	if(_is64Bit)
+		exportsOfFile = getExports64();
+	else
+		exportsOfFile = getExports32();
+
+	UnmapViewOfFile(_lpBuffer);
+	_lpBuffer = lpOrgBuffer;
+	CloseHandle(hFile);
+	CloseHandle(hFileMap);
+	return exportsOfFile;
+}
+
+QList<APIData> clsPEFile::getExports32()
+{
+	QList<APIData> exportsOfFile;
+
+	DWORD exportTableVA = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	DWORD exportTableOffset = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_EXPORT,_pINH32,_pIDH,(LPBYTE)_lpBuffer);
+
+	if(exportTableOffset != 0)
+	{
+		PIMAGE_EXPORT_DIRECTORY pExportTable = (PIMAGE_EXPORT_DIRECTORY)(exportTableOffset);
+
+		DWORD* addressOfFunctionsArray = (DWORD*)(((pExportTable->AddressOfFunctions)-exportTableVA) + exportTableOffset);
+		DWORD* addressOfNamesArray = (DWORD*)(((pExportTable->AddressOfNames)-exportTableVA) + exportTableOffset);
+		WORD* addressOfNameOrdinalsArray = (WORD*)(((pExportTable->AddressOfNameOrdinals)-exportTableVA) + exportTableOffset);
+
+		for (DWORD i = 0; i < pExportTable->NumberOfNames; i++)
+		{
+			APIData newAPI;
+			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]];
+			newAPI.APIName = (char*)(((addressOfNamesArray[i])-exportTableVA) + exportTableOffset);
+			exportsOfFile.push_back(newAPI);
+		}
+	}
+	return exportsOfFile;
+}
+
+QList<APIData> clsPEFile::getExports64()
+{
+	QList<APIData> exportsOfFile;
+
+	DWORD exportTableVA = _pINH64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	DWORD exportTableOffset = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_EXPORT,_pINH64,_pIDH,(LPBYTE)_lpBuffer);
+
+	if(exportTableOffset != 0)
+	{
+		PIMAGE_EXPORT_DIRECTORY pExportTable = (PIMAGE_EXPORT_DIRECTORY)(exportTableOffset);
+
+		DWORD* addressOfFunctionsArray = (DWORD*)(((pExportTable->AddressOfFunctions)-exportTableVA) + exportTableOffset);
+		DWORD* addressOfNamesArray = (DWORD*)(((pExportTable->AddressOfNames)-exportTableVA) + exportTableOffset);
+		WORD* addressOfNameOrdinalsArray = (WORD*)(((pExportTable->AddressOfNameOrdinals)-exportTableVA) + exportTableOffset);
+
+		for (DWORD i = 0; i < pExportTable->NumberOfNames; i++)
+		{
+			APIData newAPI;
+			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]];
+			newAPI.APIName = (char*)(((addressOfNamesArray[i])-exportTableVA) + exportTableOffset);
+			exportsOfFile.push_back(newAPI);
+		}
+	}
+	return exportsOfFile;
 }
 
 DWORD64 clsPEFile::dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS64 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer)

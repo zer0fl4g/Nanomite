@@ -13,6 +13,7 @@ public:
 
 signals:
 	void ShowInDisassembler(quint64 Offset);
+	void OpenFileInPEManager(std::wstring FileName,int PID);
 
 private:
 	int _iSelectedRow;

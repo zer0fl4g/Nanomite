@@ -21,6 +21,7 @@ public:
 	static void clsHelperClass::LoadSourceForAddr(std::wstring &FileName,int &LineNumber,quint64 dwOffset,HANDLE hProc);
 	static std::string convertWSTRtoSTR(std::wstring FileName);
 	static std::wstring convertSTRtoWSTR(std::string FileName);
+	static std::wstring clsHelperClass::replaceAll(std::wstring orgString,std::wstring oldString,std::wstring newString);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
 	static QString LoadStyleSheet();
 	static bool IsWindowsXP();

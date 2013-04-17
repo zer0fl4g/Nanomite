@@ -183,7 +183,7 @@ void qtDLGBreakPointManager::OnBPRemove()
 
 void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID)
 {
-	QList<ImportAPI> newImports = clsPEManager::getImportsFromFile(FilePath);
+	QList<APIData> newImports = clsPEManager::getImportsFromFile(FilePath);
 
 	for(int i = 0; i < newImports.size(); i++)
 	{

@@ -71,7 +71,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
-	
+	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
+	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
+
 	// Callbacks from Disassambler Thread to GUI
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 
@@ -126,7 +128,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
 
 	// Callbacks from GUI to SourceViewer
 	connect(this,SIGNAL(OnDisplaySource(QString,int)),dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));

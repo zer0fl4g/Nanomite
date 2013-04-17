@@ -10,7 +10,7 @@ class qtDLGPEEditor : public QWidget, Ui_qtDLGPEEditorClass
 	Q_OBJECT
 
 public:
-	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int PID = 0);
+	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int PID = 0, std::wstring FileName = L"");
 	~qtDLGPEEditor();
 	
 private:
@@ -20,10 +20,13 @@ private:
 
 	clsPEManager* _PEManager;
 
+	//void InsertSections();
+	void InsertDosHeader();
+	void InsertNTHeader();
+	void InsertExports();
 	void InsertImports();
 	void LoadPEView();
 	void InitList();
-
 };
 
 #endif
