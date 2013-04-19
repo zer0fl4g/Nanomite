@@ -22,7 +22,7 @@
     <rect>
      <x>310</x>
      <y>0</y>
-     <width>300</width>
+     <width>361</width>
      <height>630</height>
     </rect>
    </property>
@@ -34,9 +34,12 @@
      <rect>
       <x>6</x>
       <y>15</y>
-      <width>290</width>
+      <width>351</width>
       <height>610</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
     </property>
     <property name="selectionBehavior">
      <enum>QAbstractItemView::SelectRows</enum>
@@ -47,11 +50,20 @@
     <attribute name="horizontalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
+    <attribute name="horizontalHeaderStretchLastSection">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>13</number>
+    </attribute>
     <attribute name="verticalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
     <attribute name="verticalHeaderMinimumSectionSize">
-     <number>14</number>
+     <number>13</number>
     </attribute>
     <column>
      <property name="text">
@@ -69,9 +81,9 @@
    <property name="geometry">
     <rect>
      <x>5</x>
-     <y>222</y>
+     <y>381</y>
      <width>300</width>
-     <height>410</height>
+     <height>251</height>
     </rect>
    </property>
    <property name="title">
@@ -83,8 +95,11 @@
       <x>5</x>
       <y>14</y>
       <width>290</width>
-      <height>390</height>
+      <height>230</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
     </property>
     <property name="selectionBehavior">
      <enum>QAbstractItemView::SelectRows</enum>
@@ -95,11 +110,20 @@
     <attribute name="horizontalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
+    <attribute name="horizontalHeaderStretchLastSection">
+     <bool>true</bool>
+    </attribute>
+    <attribute name="verticalHeaderVisible">
+     <bool>false</bool>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>13</number>
+    </attribute>
     <attribute name="verticalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
     <attribute name="verticalHeaderMinimumSectionSize">
-     <number>14</number>
+     <number>13</number>
     </attribute>
     <column>
      <property name="text">
@@ -118,8 +142,8 @@
     <rect>
      <x>5</x>
      <y>0</y>
-     <width>300</width>
-     <height>220</height>
+     <width>301</width>
+     <height>381</height>
     </rect>
    </property>
    <property name="title">
@@ -131,8 +155,11 @@
       <x>5</x>
       <y>14</y>
       <width>290</width>
-      <height>200</height>
+      <height>361</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
     </property>
     <property name="alternatingRowColors">
      <bool>false</bool>
@@ -146,11 +173,20 @@
     <attribute name="horizontalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
+    <attribute name="horizontalHeaderStretchLastSection">
+     <bool>true</bool>
+    </attribute>
     <attribute name="verticalHeaderVisible">
      <bool>false</bool>
     </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>13</number>
+    </attribute>
+    <attribute name="verticalHeaderHighlightSections">
+     <bool>false</bool>
+    </attribute>
     <attribute name="verticalHeaderMinimumSectionSize">
-     <number>14</number>
+     <number>13</number>
     </attribute>
     <column>
      <property name="text">
@@ -167,9 +203,9 @@
   <widget class="QGroupBox" name="groupBox_4">
    <property name="geometry">
     <rect>
-     <x>614</x>
+     <x>680</x>
      <y>418</y>
-     <width>520</width>
+     <width>451</width>
      <height>211</height>
     </rect>
    </property>
@@ -181,9 +217,12 @@
      <rect>
       <x>5</x>
       <y>14</y>
-      <width>510</width>
+      <width>440</width>
       <height>192</height>
      </rect>
+    </property>
+    <property name="editTriggers">
+     <set>QAbstractItemView::NoEditTriggers</set>
     </property>
     <property name="selectionBehavior">
      <enum>QAbstractItemView::SelectRows</enum>
@@ -195,27 +234,30 @@
      <bool>false</bool>
     </attribute>
     <attribute name="verticalHeaderVisible">
-     <bool>false</bool>
+     <bool>true</bool>
+    </attribute>
+    <attribute name="verticalHeaderDefaultSectionSize">
+     <number>12</number>
     </attribute>
     <attribute name="verticalHeaderHighlightSections">
      <bool>false</bool>
     </attribute>
     <attribute name="verticalHeaderMinimumSectionSize">
-     <number>14</number>
+     <number>12</number>
     </attribute>
    </widget>
   </widget>
   <widget class="QTabWidget" name="tab_3">
    <property name="geometry">
     <rect>
-     <x>620</x>
+     <x>680</x>
      <y>10</y>
-     <width>511</width>
+     <width>451</width>
      <height>401</height>
     </rect>
    </property>
    <property name="currentIndex">
-    <number>0</number>
+    <number>1</number>
    </property>
    <widget class="QWidget" name="tab">
     <attribute name="title">
@@ -226,7 +268,7 @@
       <rect>
        <x>-1</x>
        <y>-1</y>
-       <width>511</width>
+       <width>450</width>
        <height>381</height>
       </rect>
      </property>
@@ -241,12 +283,7 @@
      </attribute>
      <column>
       <property name="text">
-       <string>Module</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>API</string>
+       <string>Modul / API</string>
       </property>
      </column>
      <column>
@@ -263,11 +300,14 @@
     <widget class="QTreeWidget" name="treeExports">
      <property name="geometry">
       <rect>
-       <x>-1</x>
+       <x>-2</x>
        <y>-1</y>
-       <width>511</width>
+       <width>450</width>
        <height>381</height>
       </rect>
+     </property>
+     <property name="editTriggers">
+      <set>QAbstractItemView::NoEditTriggers</set>
      </property>
      <attribute name="headerVisible">
       <bool>false</bool>
@@ -277,12 +317,7 @@
      </attribute>
      <column>
       <property name="text">
-       <string>Module</string>
-      </property>
-     </column>
-     <column>
-      <property name="text">
-       <string>API</string>
+       <string>Modul / API</string>
       </property>
      </column>
      <column>

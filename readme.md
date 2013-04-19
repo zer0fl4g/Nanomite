@@ -39,6 +39,8 @@
 + fixed a bug which didn´t break on module ep if "break on system ep" was selected
 + fixed a bug which lead to a crash if a wow64 file has ordinal imports
 + fixed a bug in the disassembly view which caused ungentle down scrolling
++ fixed a bug in PEManager which double loaded debugged files
++ fixed a bug which may lead to an error in disassembler
 + fixed a crash on context menus if not debugging something
 + added native check for Admin rights
 + added warnings if API import fails
@@ -49,6 +51,6 @@
 ####Notes:
 	- I´m happy to announce "En0mis" as a new Developer in this project! :)
 	- function view
-		- parsed the memory of the loaded targets and scanns for functions.
+		- scans the memory of the loaded targets and scanns for functions.
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

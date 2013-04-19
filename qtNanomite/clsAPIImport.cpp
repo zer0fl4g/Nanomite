@@ -25,9 +25,11 @@ bool clsAPIImport::LoadFunctions()
 	PTCHAR szWarning = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 	bool bGotAFail = false;
 
+#ifdef _AMD64_
 	pIsWow64Process = (MyIsWow64Process)GetProcAddress(GetModuleHandle(L"Kernel32"),"IsWow64Process");
 	pWow64GetThreadContext = (MyWow64GetThreadContext)GetProcAddress(GetModuleHandle(L"Kernel32"),"Wow64GetThreadContext");
 	pWow64SetThreadContext = (MyWow64SetThreadContext)GetProcAddress(GetModuleHandle(L"Kernel32"),"Wow64SetThreadContext");
+#endif
 	pNtQuerySystemInformation = (MyNtQuerySystemInformation)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQuerySystemInformation");
 	pNtDuplicateObject = (MyNtDuplicateObject)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtDuplicateObject");
 	pNtQueryObject = (MyNtQueryObject)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryObject");
@@ -37,6 +39,7 @@ bool clsAPIImport::LoadFunctions()
 
 	wsprintf(szWarning,L"%s",L"There has been some Error while importing this APIs:\r\n");
 
+#ifdef _AMD64_
 	if(!pIsWow64Process)
 	{
 		bGotAFail = true;
@@ -52,6 +55,7 @@ bool clsAPIImport::LoadFunctions()
 		bGotAFail = true;
 		wcscat_s(szWarning,MAX_PATH,L"Kernel32.dll::Wow64SetThreadContext\r\n");
 	}
+#endif
 	if(!pNtQuerySystemInformation)
 	{
 		bGotAFail = true;

@@ -208,7 +208,9 @@ void qtDLGNanomite::action_DebugStepOver()
 #endif
 
 	QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
-	
+	if(i == coreDisAs->SectionDisAs.constEnd())
+		return;
+
 	bool bOF = (eFlags & 0x800) ? true : false;
 	bool bDF = (eFlags & 0x400) ? true : false;
 	bool bTF = (eFlags & 0x100) ? true : false;

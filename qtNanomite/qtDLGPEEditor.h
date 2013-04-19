@@ -20,9 +20,10 @@ private:
 
 	clsPEManager* _PEManager;
 
-	//void InsertSections();
 	void InsertDosHeader();
-	void InsertNTHeader();
+	void InsertFileHeader();
+	void InsertOptionalHeader();
+	void InsertHeaderData(QTableWidget* tblHeaderTable,QString ValueName,quint64 dwValue);
 	void InsertExports();
 	void InsertImports();
 	void LoadPEView();
