@@ -69,7 +69,7 @@ void qtDLGPEEditor::LoadPEView()
 {
 	InsertImports();
 	InsertExports();
-	//InsertSections();
+	InsertSections();
 	InsertDosHeader();
 	InsertFileHeader();
 	InsertOptionalHeader();
@@ -253,4 +253,27 @@ void qtDLGPEEditor::InsertHeaderData(QTableWidget* tblHeaderTable,QString ValueN
 		new QTableWidgetItem(ValueName));
 	tblHeaderTable->setItem(tblHeaderTable->rowCount() - 1,1,
 		new QTableWidgetItem(QString("%1").arg(dwValue,16,16,QChar('0'))));
+}
+
+void qtDLGPEEditor::InsertSections()
+{
+	QList<PESectionData> sections = _PEManager->getSections(_currentFile);
+	if(sections.size() <= 0) return;
+
+	for(int i = 0; i < sections.size(); i++)
+	{
+		tblSections->insertRow(tblSections->rowCount());
+		tblSections->setItem(tblSections->rowCount() - 1,0,
+			new QTableWidgetItem(sections.at(i).SectionName));
+		tblSections->setItem(tblSections->rowCount() - 1,1,
+			new QTableWidgetItem(QString("%1").arg(sections.at(i).VirtualAddress,8,16,QChar('0'))));
+		tblSections->setItem(tblSections->rowCount() - 1,2,
+			new QTableWidgetItem(QString("%1").arg(sections.at(i).VirtualSize,8,16,QChar('0'))));
+		tblSections->setItem(tblSections->rowCount() - 1,3,
+			new QTableWidgetItem(QString("%1").arg(sections.at(i).PointerToRawData,8,16,QChar('0'))));
+		tblSections->setItem(tblSections->rowCount() - 1,4,
+			new QTableWidgetItem(QString("%1").arg(sections.at(i).SizeOfRawData,8,16,QChar('0'))));
+		tblSections->setItem(tblSections->rowCount() - 1,5,
+			new QTableWidgetItem(QString("%1").arg(sections.at(i).Characteristics,8,16,QChar('0'))));
+	}
 }

@@ -12,6 +12,16 @@ struct APIData
 	quint64 APIOffset;
 };
 
+struct PESectionData
+{
+	QString SectionName;
+	quint64 VirtualSize;
+	quint64 VirtualAddress;
+	quint64 SizeOfRawData;
+	quint64 PointerToRawData;
+	quint64 Characteristics;
+};
+
 class clsPEFile
 {
 public:
@@ -22,6 +32,7 @@ public:
 
 	QList<APIData> getImports();
 	QList<APIData> getExports();
+	QList<PESectionData> getSections();
 
 	PIMAGE_DOS_HEADER getDosHeader();
 	PIMAGE_NT_HEADERS32 getNTHeader32();
@@ -42,8 +53,6 @@ private:
 
 	QList<APIData> getImports32();
 	QList<APIData> getImports64();
-	QList<APIData> getExports32();
-	QList<APIData> getExports64();
 
 	bool LoadFile(std::wstring);
 	bool CheckPEType(LPVOID pBuffer);

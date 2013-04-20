@@ -22,7 +22,11 @@ bool clsPEFile::LoadFile(wstring FileName)
 	if(hFile == INVALID_HANDLE_VALUE) return false;
 		
 	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
-	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,0x2000);
+
+	if(GetFileSize(hFile,NULL) < 0x2000)
+		_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
+	else
+		_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,0x2000);
 	if(_lpBuffer == NULL)
 	{
 		CloseHandle(hFile);
@@ -218,67 +222,41 @@ QList<APIData> clsPEFile::getExports()
 		return exportsOfFile;
 	}
 
+	DWORD exportTableOffset = NULL;
+	DWORD exportTableVA = NULL;
+
 	if(_is64Bit)
-		exportsOfFile = getExports64();
+	{
+		exportTableVA = _pINH64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+		exportTableOffset = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_EXPORT,_pINH64,_pIDH,(LPBYTE)_lpBuffer);
+	}
 	else
-		exportsOfFile = getExports32();
+	{
+		exportTableVA = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+		exportTableOffset = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_EXPORT,_pINH32,_pIDH,(LPBYTE)_lpBuffer);
+	}
+
+	if(exportTableOffset != 0)
+	{
+		PIMAGE_EXPORT_DIRECTORY pExportTable = (PIMAGE_EXPORT_DIRECTORY)(exportTableOffset);
+
+		DWORD* addressOfFunctionsArray = (DWORD*)(((pExportTable->AddressOfFunctions)-exportTableVA) + exportTableOffset);
+		DWORD* addressOfNamesArray = (DWORD*)(((pExportTable->AddressOfNames)-exportTableVA) + exportTableOffset);
+		WORD* addressOfNameOrdinalsArray = (WORD*)(((pExportTable->AddressOfNameOrdinals)-exportTableVA) + exportTableOffset);
+
+		for (DWORD i = 0; i < pExportTable->NumberOfNames; i++)
+		{
+			APIData newAPI;
+			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]] + _pINH64->OptionalHeader.ImageBase;
+			newAPI.APIName = (char*)(((addressOfNamesArray[i])-exportTableVA) + exportTableOffset);
+			exportsOfFile.push_back(newAPI);
+		}
+	}
 
 	UnmapViewOfFile(_lpBuffer);
 	_lpBuffer = lpOrgBuffer;
 	CloseHandle(hFile);
 	CloseHandle(hFileMap);
-	return exportsOfFile;
-}
-
-QList<APIData> clsPEFile::getExports32()
-{
-	QList<APIData> exportsOfFile;
-
-	DWORD exportTableVA = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
-	DWORD exportTableOffset = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_EXPORT,_pINH32,_pIDH,(LPBYTE)_lpBuffer);
-
-	if(exportTableOffset != 0)
-	{
-		PIMAGE_EXPORT_DIRECTORY pExportTable = (PIMAGE_EXPORT_DIRECTORY)(exportTableOffset);
-
-		DWORD* addressOfFunctionsArray = (DWORD*)(((pExportTable->AddressOfFunctions)-exportTableVA) + exportTableOffset);
-		DWORD* addressOfNamesArray = (DWORD*)(((pExportTable->AddressOfNames)-exportTableVA) + exportTableOffset);
-		WORD* addressOfNameOrdinalsArray = (WORD*)(((pExportTable->AddressOfNameOrdinals)-exportTableVA) + exportTableOffset);
-
-		for (DWORD i = 0; i < pExportTable->NumberOfNames; i++)
-		{
-			APIData newAPI;
-			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]];
-			newAPI.APIName = (char*)(((addressOfNamesArray[i])-exportTableVA) + exportTableOffset);
-			exportsOfFile.push_back(newAPI);
-		}
-	}
-	return exportsOfFile;
-}
-
-QList<APIData> clsPEFile::getExports64()
-{
-	QList<APIData> exportsOfFile;
-
-	DWORD exportTableVA = _pINH64->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
-	DWORD exportTableOffset = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_EXPORT,_pINH64,_pIDH,(LPBYTE)_lpBuffer);
-
-	if(exportTableOffset != 0)
-	{
-		PIMAGE_EXPORT_DIRECTORY pExportTable = (PIMAGE_EXPORT_DIRECTORY)(exportTableOffset);
-
-		DWORD* addressOfFunctionsArray = (DWORD*)(((pExportTable->AddressOfFunctions)-exportTableVA) + exportTableOffset);
-		DWORD* addressOfNamesArray = (DWORD*)(((pExportTable->AddressOfNames)-exportTableVA) + exportTableOffset);
-		WORD* addressOfNameOrdinalsArray = (WORD*)(((pExportTable->AddressOfNameOrdinals)-exportTableVA) + exportTableOffset);
-
-		for (DWORD i = 0; i < pExportTable->NumberOfNames; i++)
-		{
-			APIData newAPI;
-			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]];
-			newAPI.APIName = (char*)(((addressOfNamesArray[i])-exportTableVA) + exportTableOffset);
-			exportsOfFile.push_back(newAPI);
-		}
-	}
 	return exportsOfFile;
 }
 
@@ -366,3 +344,70 @@ bool clsPEFile::is64Bit()
 	else 
 		return false;
 }
+
+QList<PESectionData> clsPEFile::getSections()
+{
+	QList<PESectionData> sectionsOfFile;
+	HANDLE hFile = CreateFileW(_FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
+	if(hFile == INVALID_HANDLE_VALUE) return sectionsOfFile;
+
+	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
+	LPVOID lpOrgBuffer = _lpBuffer;
+
+	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
+	if(_lpBuffer == NULL)
+	{
+		CloseHandle(hFile);
+		CloseHandle(hFileMap);
+		UnmapViewOfFile(_lpBuffer);
+		_lpBuffer = lpOrgBuffer;
+		return sectionsOfFile;
+	}
+
+	PIMAGE_SECTION_HEADER pSH = NULL;
+	DWORD SectionCount = NULL;
+
+	if(_is64Bit)
+	{
+		pSH = (PIMAGE_SECTION_HEADER)((quint64)_lpBuffer + _pIDH->e_lfanew + sizeof(IMAGE_NT_HEADERS64));
+		SectionCount = _pINH64->FileHeader.NumberOfSections;
+	}
+	else
+	{
+		pSH = (PIMAGE_SECTION_HEADER)((quint64)_lpBuffer + _pIDH->e_lfanew + sizeof(IMAGE_NT_HEADERS32));
+		SectionCount = _pINH32->FileHeader.NumberOfSections;
+	}
+
+	for (int i = 0; i < SectionCount;i++)
+	{
+		PESectionData newSection;
+		newSection.Characteristics = pSH->Characteristics;
+		newSection.PointerToRawData = pSH->PointerToRawData;
+		newSection.SectionName = (char*)pSH->Name;
+		newSection.SizeOfRawData = pSH->SizeOfRawData;
+		newSection.VirtualAddress = pSH->VirtualAddress;
+		newSection.VirtualSize = pSH->Misc.VirtualSize;
+		sectionsOfFile.push_back(newSection);
+
+		pSH++;
+	}
+
+	UnmapViewOfFile(_lpBuffer);
+	_lpBuffer = lpOrgBuffer;
+	CloseHandle(hFile);
+	CloseHandle(hFileMap);
+	return sectionsOfFile;
+}
+
+/*
+
+//IMAGE_DATA_DIRS
+printf("\r\nIMAGE_DATA_DIRECTORY:\r\n");
+for(int i = 0; i < pINH->OptionalHeader.NumberOfRvaAndSizes;i++)
+{
+printf("\t Nr.%02d: VA: 0x%08X Size: 0x%08X\r\n",
+i,
+pINH->OptionalHeader.DataDirectory[i].VirtualAddress,
+pINH->OptionalHeader.DataDirectory[i].Size);
+}
+*/

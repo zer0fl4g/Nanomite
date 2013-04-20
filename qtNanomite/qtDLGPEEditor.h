@@ -26,6 +26,7 @@ private:
 	void InsertHeaderData(QTableWidget* tblHeaderTable,QString ValueName,quint64 dwValue);
 	void InsertExports();
 	void InsertImports();
+	void InsertSections();
 	void LoadPEView();
 	void InitList();
 };
