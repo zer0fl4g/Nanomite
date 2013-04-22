@@ -42,6 +42,9 @@
 + fixed a bug in PEManager which double loaded debugged files
 + fixed a bug which may lead to an error in disassembler
 + fixed a crash on context menus if not debugging something
++ improved HeapView
++ added Message in DebugLog if breaking on MemoryBP
++ added PEViewer
 + added native check for Admin rights
 + added warnings if API import fails
 + added display of current PID/TID in mainwindow title

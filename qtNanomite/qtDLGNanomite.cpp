@@ -804,7 +804,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	_iSelectedAction = 0;
 
 	menu.addAction(new QAction("Goto Offset",this));
-	menu.addAction(new QAction("Edit Instruction",this));
+	//menu.addAction(new QAction("Edit Instruction",this));
 	menu.addAction(new QAction("Show Source",this));
 	menu.addAction(new QAction("Set R/EIP to this",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));

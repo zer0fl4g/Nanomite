@@ -16,12 +16,10 @@ public:
 private:
 	int _iPID,
 		_iSelectedRow;
-
-	//bool GetNextHeapBlock(PDEBUG_HEAP_INFORMATION curHeapNode, HeapBlock *hb);
-	//bool GetFirstHeapBlock(PDEBUG_HEAP_INFORMATION curHeapNode, HeapBlock *hb);
 	
 	private slots:
 		void MenuCallback(QAction*);
+		void OnSelectionChanged();
 		void OnCustomContextMenuRequested(QPoint qPoint);
 };
 

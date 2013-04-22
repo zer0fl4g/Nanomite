@@ -28,10 +28,13 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 		}
 
 		if(_PID == -1)
-			this->setWindowTitle(QString("[Nanomite] - PEEditor - File: %1").arg(QString().fromStdWString(_currentFile)));
+			this->loadedFile->setText(QString(" File: %1").arg(QString().fromStdWString(_currentFile)));
 		else
-			this->setWindowTitle(QString("[Nanomite] - PEEditor - PID: %1 - File: %2").arg(PID,8,16,QChar('0')).arg(QString().fromStdWString(_currentFile)));
-		
+		{
+			this->loadedFile->setText(QString(" File: %1").arg(QString().fromStdWString(_currentFile)));
+			this->setWindowTitle(QString("[Nanomite] - PEEditor - PID: %1").arg(PID,8,16,QChar('0')));
+		}
+
 		InitList();
 		LoadPEView();
 	}

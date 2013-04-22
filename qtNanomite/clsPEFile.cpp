@@ -247,7 +247,7 @@ QList<APIData> clsPEFile::getExports()
 		for (DWORD i = 0; i < pExportTable->NumberOfNames; i++)
 		{
 			APIData newAPI;
-			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]] + _pINH64->OptionalHeader.ImageBase;
+			newAPI.APIOffset = addressOfFunctionsArray[addressOfNameOrdinalsArray[i]];// + _pINH64->OptionalHeader.ImageBase;
 			newAPI.APIName = (char*)(((addressOfNamesArray[i])-exportTableVA) + exportTableOffset);
 			exportsOfFile.push_back(newAPI);
 		}
