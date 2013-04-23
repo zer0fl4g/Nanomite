@@ -124,7 +124,7 @@ private:
 	
 	void resizeEvent(QResizeEvent *event);
 	void InitListSizes();
-	void CleanGUI();
+	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void UpdateStateBar(DWORD dwAction);
 	void LoadStackView(quint64 dwESP, DWORD dwStackSize);	

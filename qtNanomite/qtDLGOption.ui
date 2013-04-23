@@ -79,13 +79,19 @@
        <bool>true</bool>
       </attribute>
       <attribute name="horizontalHeaderDefaultSectionSize">
-       <number>100</number>
+       <number>145</number>
+      </attribute>
+      <attribute name="horizontalHeaderMinimumSectionSize">
+       <number>145</number>
       </attribute>
       <attribute name="horizontalHeaderStretchLastSection">
        <bool>true</bool>
       </attribute>
       <attribute name="verticalHeaderVisible">
        <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>15</number>
       </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
        <number>15</number>
@@ -277,9 +283,9 @@
      <property name="geometry">
       <rect>
        <x>180</x>
-       <y>0</y>
+       <y>10</y>
        <width>151</width>
-       <height>91</height>
+       <height>81</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -289,13 +295,13 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>GroupBox</string>
+      <string/>
      </property>
      <widget class="QCheckBox" name="cbLoadSym">
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>20</y>
+        <y>10</y>
         <width>91</width>
         <height>17</height>
        </rect>
@@ -314,7 +320,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>40</y>
+        <y>30</y>
         <width>131</width>
         <height>17</height>
        </rect>
@@ -333,7 +339,7 @@
       <property name="geometry">
        <rect>
         <x>20</x>
-        <y>60</y>
+        <y>50</y>
         <width>121</width>
         <height>17</height>
        </rect>

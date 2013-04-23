@@ -103,12 +103,23 @@ void qtDLGOption::OnSave()
 
 	if(cbLoadSym->isChecked())
 		myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = false;
+
 	if(cbDebugChild->isChecked())
 		myMainWindow->coreDebugger->dbgSettings.bDebugChilds = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bDebugChilds = false;
+
 	if(cbSuspendThread->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 0x1;
+		myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 1;
+	else
+		myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 0;
+
 	if(cbIgEx->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0x1;
+		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 1;
+	else
+		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0;
 
 	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
 	if(cbIG_AVIOL->isChecked())
@@ -176,7 +187,7 @@ void qtDLGOption::OnLoad()
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds);
-	cbDebugChild->setChecked(true);
+		cbDebugChild->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.dwSuspendType)
 		cbSuspendThread->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode)

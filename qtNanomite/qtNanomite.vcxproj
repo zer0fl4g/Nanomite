@@ -184,6 +184,7 @@
       <ManifestFile>$(IntDir)$(TargetName)$(TargetExt).intermediate.manifest</ManifestFile>
       <EntryPointSymbol>
       </EntryPointSymbol>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <BuildLog>
       <Path>$(IntDir)\$(MSBuildProjectName).log</Path>
@@ -204,6 +205,7 @@
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -213,6 +215,7 @@
       <AdditionalDependencies>qtmain.lib;QtCore4.lib;QtGui4.lib;BeaEngine_x64.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <ManifestFile>$(IntDir)$(TargetName)$(TargetExt).intermediate.manifest</ManifestFile>
       <IgnoreSpecificDefaultLibraries>crt64.lib;libc.lib;msvcrt.lib;libcd.lib;libcmtd.lib;msvcrtd.lib;msvcp100.lib</IgnoreSpecificDefaultLibraries>
+      <LinkTimeCodeGeneration>UseLinkTimeCodeGeneration</LinkTimeCodeGeneration>
     </Link>
     <BuildLog>
       <Path>$(IntDir)\$(MSBuildProjectName).log</Path>
@@ -445,6 +448,7 @@
     <ClCompile Include="qtDLGMemoryView.cpp" />
     <ClCompile Include="qtDLGNanomite.cpp">
       <PreprocessorDefinitions Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">UNICODE;_AMD64_;QT_LARGEFILE_SUPPORT;QT_DLL;QT_NO_DEBUG;NDEBUG;QT_CORE_LIB;QT_GUI_LIB;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <WholeProgramOptimization Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">true</WholeProgramOptimization>
     </ClCompile>
     <ClCompile Include="qtDLGNanomiteMenuActions.cpp" />
     <ClCompile Include="qtDLGOption.cpp" />

@@ -1,14 +1,9 @@
 #ifndef CLSMEMMANAGER_H
 #define CLSMEMMANAGER_H
-//#define USE_NEW_POOL
 
 #include <Windows.h>
 
-#ifdef USE_NEW_POOL
-	#include "clsMemPoolNew.h"
-#else
-	#include "clsMemPool.h"
-#endif
+#include "clsMemPool.h"
 
 class clsMemManager
 {
@@ -23,22 +18,16 @@ public:
 	static void CFree(void* p);
 
 private:
-#ifdef USE_NEW_POOL
-	clsMemPoolNew *pPool_200;
-#else
 	clsMemPool *pPool_200;
-#endif
+
 	DWORD64 PoolBufferBase_200;
 	DWORD64 PoolBufferEnd_200;
 	DWORD64 PoolBufferSize_200;
 	DWORD64 PoolUnitCount_200;
 	DWORD64 PoolUnitSize_200;
 
-#ifdef USE_NEW_POOL
-	clsMemPoolNew *pPool_50;
-#else
 	clsMemPool *pPool_50;
-#endif
+
 	DWORD64 PoolBufferBase_50;
 	DWORD64 PoolBufferEnd_50;
 	DWORD64 PoolBufferSize_50;

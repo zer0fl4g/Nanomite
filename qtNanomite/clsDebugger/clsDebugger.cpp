@@ -854,12 +854,11 @@ bool clsDebugger::EnableDebugFlag()
 bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dwThreadID, DWORD dwPID)
 {
 	HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,dwThreadID);
-	if(hThread == INVALID_HANDLE_VALUE)
+	if(hThread == INVALID_HANDLE_VALUE) 
 		return false;
 
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
-	HANDLE hProcess = NULL;
 
 	if(clsAPIImport::pIsWow64Process)
 		clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
@@ -882,7 +881,6 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 	{
 		CONTEXT cTT;
 		cTT.ContextFlags = CONTEXT_ALL;
-		cTT.ContextFlags = CONTEXT_ALL;
 		GetThreadContext(hThread,&cTT);
 
 		if(bDecIP)
@@ -896,7 +894,6 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 
 #else
 	CONTEXT cTT;
-	cTT.ContextFlags = CONTEXT_ALL;
 	cTT.ContextFlags = CONTEXT_ALL;
 	GetThreadContext(hThread,&cTT);
 

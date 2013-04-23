@@ -114,31 +114,34 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 bool clsDebugger::PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
 {
 	wstring sModName,sFuncName;
-
-	_dwCurPID = dwPID;
 	clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,dwExceptionOffset,GetCurrentProcessHandle(dwPID));
-	_dwCurPID = 0;
 
 	emit OnException(sFuncName,sModName,dwExceptionOffset,dwExceptionCode,dwPID,dwTID);
 
 	memset(tcLogString,0x00,LOGBUFFER);
+
+	if(sFuncName.length() > 0 && sModName.length() > 0)
 #ifdef _AMD64_
-	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %s@%s ExceptionCode: %016I64X ExceptionOffset: %016I64X PID: %X TID: %X",
-		sFuncName.c_str(),
-		sModName.c_str(),
-		dwExceptionCode,
-		dwExceptionOffset,
-		dwPID,
-		dwTID);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %s@%s ExceptionCode: %016I64X ExceptionOffset: %016I64X PID: %X TID: %X",
 #else
-	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %s@%s ExceptionCode: %08X ExceptionOffset: %08X PID: %X TID: %X",
-		sFuncName.c_str(),
-		sModName.c_str(),
-		(DWORD)dwExceptionCode,
-		(DWORD)dwExceptionOffset,
-		dwPID,
-		dwTID);
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %s@%s ExceptionCode: %08X ExceptionOffset: %08X PID: %X TID: %X",
 #endif
+			sFuncName.c_str(),
+			sModName.c_str(),
+			dwExceptionCode,
+			dwExceptionOffset,
+			dwPID,
+			dwTID);
+	else
+#ifdef _AMD64_
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] ExceptionCode: %016I64X ExceptionOffset: %016I64X PID: %X TID: %X",
+#else
+		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] ExceptionCode: %08X ExceptionOffset: %08X PID: %X TID: %X",
+#endif
+			dwExceptionCode,
+			dwExceptionOffset,
+			dwPID,
+			dwTID);
 	PBLogInfo();
 
 	return true;

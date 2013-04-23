@@ -10,21 +10,13 @@ clsMemManager::clsMemManager()
 	// Create a 5000x200Byte Pool
 	PoolUnitCount_200 = 5000;
 	PoolUnitSize_200 = 200;
-#ifdef USE_NEW_POOL
-	pPool_200 = new clsMemPoolNew(PoolBufferBase_200,PoolBufferSize_200,PoolUnitCount_200,PoolUnitSize_200);
-#else
 	pPool_200 = new clsMemPool(PoolBufferBase_200,PoolBufferSize_200,PoolUnitCount_200,PoolUnitSize_200);
-#endif
 	PoolBufferEnd_200 = PoolBufferBase_200 + PoolBufferSize_200;
 
 	// Create a 50000x50Byte Pool
 	PoolUnitCount_50 = 50000;
 	PoolUnitSize_50 = 50;
-#ifdef USE_NEW_POOL
-	pPool_50 = new clsMemPoolNew(PoolBufferBase_50,PoolBufferSize_50,PoolUnitCount_50,PoolUnitSize_50);
-#else
 	pPool_50 = new clsMemPool(PoolBufferBase_50,PoolBufferSize_50,PoolUnitCount_50,PoolUnitSize_50);
-#endif
 	PoolBufferEnd_50 = PoolBufferBase_50 + PoolBufferSize_50;
 } 
 

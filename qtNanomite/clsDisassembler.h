@@ -8,11 +8,11 @@
 
 struct DisAsDataRow
 {
+	quint64 itemStyle;
 	QString Offset;
 	QString OpCodes;
 	QString ASM;
 	QString Comment;
-	quint64 itemStyle;
 };
 
 class clsDisassembler: public QThread

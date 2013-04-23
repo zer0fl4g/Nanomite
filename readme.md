@@ -32,28 +32,13 @@
 	- heap
 	- cpu registers
 	- functions
+	- pe header
 
 ## Changelog
-###Version 0.1 beta 10
-+ fixed a bug which displayed a wrong function offset in callstack
-+ fixed a bug which didn´t break on module ep if "break on system ep" was selected
-+ fixed a bug which lead to a crash if a wow64 file has ordinal imports
-+ fixed a bug in the disassembly view which caused ungentle down scrolling
-+ fixed a bug in PEManager which double loaded debugged files
-+ fixed a bug which may lead to an error in disassembler
-+ fixed a crash on context menus if not debugging something
-+ improved HeapView
-+ added Message in DebugLog if breaking on MemoryBP
-+ added PEViewer
-+ added native check for Admin rights
-+ added warnings if API import fails
-+ added display of current PID/TID in mainwindow title
-+ added function view
-+ added and cleaned context menus
-
-####Notes:
-	- I´m happy to announce "En0mis" as a new Developer in this project! :)
-	- function view
-		- scans the memory of the loaded targets and scanns for functions.
+###Version 0.1 beta 11
++ fixed a bug in options which didn´t save the correct settings
++ fixed display of exceptions if no symbols have been found
++ improvements on AttachDlg
++ added cleanup on debugge termination
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

@@ -642,10 +642,11 @@ void qtDLGNanomite::LoadRegView()
 	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bCF)));
 }
 
-void qtDLGNanomite::CleanGUI()
+void qtDLGNanomite::CleanGUI(bool bKeepLogBox)
 {
 	tblStack->setRowCount(0);
-	tblLogBox->setRowCount(0);
+	if(!bKeepLogBox)
+		tblLogBox->setRowCount(0);
 	tblCallstack->setRowCount(0);
 	tblDisAs->setRowCount(0);
 	tblRegView->setRowCount(0);
@@ -655,6 +656,10 @@ void qtDLGNanomite::CleanGUI()
 	dlgDetInfo->tblExceptions->setRowCount(0);
 	dlgDetInfo->tblModules->setRowCount(0);
 
+	dlgTraceWindow->tblTraceLog->setRowCount(0);
+
+	dlgSourceViewer->listSource->clear();
+
 	dlgDbgStr->tblDebugStrings->setRowCount(0);
 
 	lExceptionCount = 0;
@@ -662,12 +667,13 @@ void qtDLGNanomite::CleanGUI()
 
 void qtDLGNanomite::OnDebuggerTerminated()
 {
-	UpdateStateBar(0x3);
 	coreDisAs->SectionDisAs.clear();
 	dlgBPManager->DeleteCompleterContent();
 	qtDLGTrace::clearTraceData();
 	actionDebug_Trace_Start->setEnabled(true);
+	CleanGUI(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow"));
+	UpdateStateBar(0x3);
 }
 
 void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
@@ -804,7 +810,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	_iSelectedAction = 0;
 
 	menu.addAction(new QAction("Goto Offset",this));
-	//menu.addAction(new QAction("Edit Instruction",this));
+	menu.addAction(new QAction("Edit Instruction",this));
 	menu.addAction(new QAction("Show Source",this));
 	menu.addAction(new QAction("Set R/EIP to this",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
@@ -840,6 +846,9 @@ void qtDLGNanomite::OnCustomCallstackContextMenu(QPoint qPoint)
 
 void qtDLGNanomite::MenuCallback(QAction* pAction)
 {
+	if(QString().compare(pAction->text(),"Clear Log") == 0)
+		tblLogBox->setRowCount(0);	
+	
 	if(!coreDebugger->GetDebuggingState()) return;
 
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
@@ -908,10 +917,6 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 		if(bOk && !strNewOffset.isEmpty())
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),strNewOffset.toULongLong(0,16)))
 				OnDisplayDisassembly(strNewOffset.toULongLong(0,16));		
-	}
-	else if(QString().compare(pAction->text(),"Clear Log") == 0)
-	{
-		tblLogBox->setRowCount(0);	
 	}
 	else if(QString().compare(pAction->text(),"Show Source") == 0)
 	{

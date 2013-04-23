@@ -19,19 +19,19 @@
 
 struct clsDebuggerSettings
 {
-	bool bDebugChilds;
-	bool bAutoLoadSymbols;
 	DWORD dwSuspendType;
 	DWORD dwBreakOnEPMode;
 	DWORD dwDefaultExceptionMode;
+	bool bDebugChilds;
+	bool bAutoLoadSymbols;
 };
 
 struct DLLStruct
 {
 	PTCHAR sPath;
-	bool bLoaded;
 	DWORD dwPID;
 	quint64 dwBaseAdr;
+	bool bLoaded;
 };
 
 struct ThreadStruct
@@ -48,6 +48,8 @@ struct PIDStruct
 	DWORD dwPID;
 	DWORD dwExitCode;
 	DWORD dwBPRestoreFlag;
+	HANDLE hProc;
+	PTCHAR sFileName;
 	quint64 dwEP;
 	bool bKernelBP;
 	bool bWOW64KernelBP;
@@ -55,15 +57,10 @@ struct PIDStruct
 	bool bSymLoad;
 	bool bTrapFlag;
 	bool bTraceFlag;
-	HANDLE hProc;
-	PTCHAR sFileName;
 };
 
 struct BPStruct
 {
-	bool bRestoreBP;
-	BYTE bOrgByte;
-	quint64 dwOffset;
 	DWORD dwSize;
 	DWORD dwSlot;
 	DWORD dwPID;
@@ -79,6 +76,9 @@ struct BPStruct
 	|   0x1 - keep
 	|   0x2 - step , remove it
 	*/
+	quint64 dwOffset;
+	BYTE bOrgByte;
+	bool bRestoreBP;
 };
 
 struct customException
