@@ -6,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>499</width>
-    <height>378</height>
+    <width>319</width>
+    <height>19</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -17,20 +17,15 @@
    <iconset resource="qtDLGNanomite.qrc">
     <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QLineEdit" name="lineEdit">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>500</width>
-     <height>380</height>
+     <width>320</width>
+     <height>20</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
-    <item>
-     <widget class="QTableWidget" name="tblAssembler"/>
-    </item>
-   </layout>
   </widget>
  </widget>
  <resources>

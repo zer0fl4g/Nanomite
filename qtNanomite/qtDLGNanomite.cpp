@@ -150,6 +150,7 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete dlgDbgStr;
 	delete dlgBPManager;
 	delete dlgSourceViewer;
+	delete dlgTraceWindow;
 	delete qtNanomiteDisAsColor;
 }
 
@@ -791,6 +792,7 @@ void qtDLGNanomite::OnCustomRegViewContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
+
 	_iSelectedRow = tblRegView->indexAt(qPoint).row();
 	_iSelectedAction = 1;
 
@@ -884,7 +886,8 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 	{
 		if(_iSelectedAction == 0)
 		{
-			qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle());
+			qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs);
+			connect(dlgAssembler,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
 			dlgAssembler->show();
 		}
 	}

@@ -379,9 +379,9 @@ void clsDebugger::DebuggingLoop()
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
 						iPid = i;
 
-				if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,false) &&
-					!((debug_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP || debug_event.u.Exception.ExceptionRecord.ExceptionCode == 0x4000001e) && _bSingleStepFlag))
-					PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+				//if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,false) &&
+				//	!((debug_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP || debug_event.u.Exception.ExceptionRecord.ExceptionCode == 0x4000001e) && _bSingleStepFlag))
+				//	PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
 
 				switch (exInfo.ExceptionRecord.ExceptionCode)
 				{
@@ -621,6 +621,8 @@ void clsDebugger::DebuggingLoop()
 
 				if(!bIsEP && !bIsKernelBP && !bIsBP)
 				{
+					PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+
 					for (size_t i = 0; i < ExceptionHandler.size();i++)
 					{
 						if(debug_event.u.Exception.ExceptionRecord.ExceptionCode == ExceptionHandler[i].dwExceptionType)
