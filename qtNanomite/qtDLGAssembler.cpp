@@ -38,7 +38,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	QFile tempOutput("nanomite.asm");
 	tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&tempOutput);
-	//out << "BIT 64";
+	out << "BITS 64\r\n";
 	out << lineEdit->text();
 	tempOutput.close();
 

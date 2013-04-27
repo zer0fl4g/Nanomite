@@ -379,9 +379,8 @@ void clsDebugger::DebuggingLoop()
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
 						iPid = i;
 
-				//if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,false) &&
-				//	!((debug_event.u.Exception.ExceptionRecord.ExceptionCode == EXCEPTION_SINGLE_STEP || debug_event.u.Exception.ExceptionRecord.ExceptionCode == 0x4000001e) && _bSingleStepFlag))
-				//	PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+				if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,false))
+					PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
 
 				switch (exInfo.ExceptionRecord.ExceptionCode)
 				{
@@ -410,7 +409,7 @@ void clsDebugger::DebuggingLoop()
 								InitBP();
 							}
 
-							bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,true);
+							bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
 							if(bIsBP)
 							{
 								HANDLE hProc = PIDs[iPid].hProc;
@@ -420,8 +419,8 @@ void clsDebugger::DebuggingLoop()
 									if((quint64)exInfo.ExceptionRecord.ExceptionAddress == SoftwareBPs[i].dwOffset && 
 										(SoftwareBPs[i].dwPID == debug_event.dwProcessId || SoftwareBPs[i].dwPID == -1))
 									{
-										WriteProcessMemory(hProc,(LPVOID)SoftwareBPs[i].dwOffset,(LPVOID)&SoftwareBPs[i].bOrgByte,SoftwareBPs[i].dwSize,NULL);
-										FlushInstructionCache(hProc,(LPVOID)SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize);
+										bool b = WriteProcessMemory(hProc,(LPVOID)SoftwareBPs[i].dwOffset,(LPVOID)&SoftwareBPs[i].bOrgByte,SoftwareBPs[i].dwSize,NULL);
+										bool c = FlushInstructionCache(hProc,(LPVOID)SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize);
 
 										if(SoftwareBPs[i].dwHandle != 0x2)
 											SoftwareBPs[i].bRestoreBP = true;
@@ -434,11 +433,9 @@ void clsDebugger::DebuggingLoop()
 								SetThreadContextHelper(true,true,debug_event.dwThreadId,debug_event.dwProcessId);
 								PIDs[iPid].bTrapFlag = true;
 								PIDs[iPid].dwBPRestoreFlag = 0x2;
-								
+
 								if(bIsEP && dbgSettings.dwBreakOnEPMode == 3)
 									dwContinueStatus = CallBreakDebugger(&debug_event,2);
-								//else if(bIsEP && dbgSettings.dwBreakOnEPMode == 1)
-								//	dwContinueStatus = CallBreakDebugger(&debug_event,2);
 								else
 								{
 									if(!bStepOver)
@@ -470,7 +467,7 @@ void clsDebugger::DebuggingLoop()
 				case 0x4000001E: // Single Step in x86 Process which got executed in a x64 environment
 				case EXCEPTION_SINGLE_STEP:
 					{
-						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,true);
+						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
 
 						if(bIsBP)
 						{
@@ -589,7 +586,7 @@ void clsDebugger::DebuggingLoop()
 					}
 				case EXCEPTION_GUARD_PAGE:
 					{
-						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,true);
+						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
 						if(bIsBP)
 						{
 							SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
@@ -621,8 +618,6 @@ void clsDebugger::DebuggingLoop()
 
 				if(!bIsEP && !bIsKernelBP && !bIsBP)
 				{
-					PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
-
 					for (size_t i = 0; i < ExceptionHandler.size();i++)
 					{
 						if(debug_event.u.Exception.ExceptionRecord.ExceptionCode == ExceptionHandler[i].dwExceptionType)
@@ -743,7 +738,7 @@ bool clsDebugger::CheckProcessState(DWORD dwPID)
 	return false;
 }
 
-bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,DWORD dwPID,bool bClearTrapFlag)
+bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag)
 {
 	int iPID = NULL;
 	for(size_t i = 0;i < PIDs.size();i++)
@@ -757,15 +752,23 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,DWORD dwPID,boo
 		return true;
 	}
 
-	for(size_t i = 0;i < SoftwareBPs.size();i++)
-		if(dwExceptionOffset == SoftwareBPs[i].dwOffset && (SoftwareBPs[i].dwPID == dwPID || SoftwareBPs[i].dwPID == -1))
+	if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && _bSingleStepFlag)
+		return true;
+
+	if(dwExceptionType == EXCEPTION_BREAKPOINT ||
+		dwExceptionType == 0x4000001f ||
+		dwExceptionType == EXCEPTION_GUARD_PAGE)
+	{
+		for(size_t i = 0;i < SoftwareBPs.size();i++)
+			if(dwExceptionOffset == SoftwareBPs[i].dwOffset && (SoftwareBPs[i].dwPID == dwPID || SoftwareBPs[i].dwPID == -1))
+				return true;
+		for(size_t i = 0;i < MemoryBPs.size();i++)
+			if(dwExceptionOffset == MemoryBPs[i].dwOffset && (MemoryBPs[i].dwPID == dwPID || MemoryBPs[i].dwPID == -1))
+				return true;
+		for(size_t i = 0;i < HardwareBPs.size();i++)
+			if(dwExceptionOffset == HardwareBPs[i].dwOffset && (HardwareBPs[i].dwPID == dwPID || HardwareBPs[i].dwPID == -1))
 			return true;
-	for(size_t i = 0;i < MemoryBPs.size();i++)
-		if(dwExceptionOffset == MemoryBPs[i].dwOffset && (MemoryBPs[i].dwPID == dwPID || MemoryBPs[i].dwPID == -1))
-			return true;
-	for(size_t i = 0;i < HardwareBPs.size();i++)
-		if(dwExceptionOffset == HardwareBPs[i].dwOffset && (HardwareBPs[i].dwPID == dwPID || HardwareBPs[i].dwPID == -1))
-			return true;
+	}
 	return false;
 }
 

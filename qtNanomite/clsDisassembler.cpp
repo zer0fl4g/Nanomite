@@ -101,7 +101,7 @@ void clsDisassembler::run()
 			pOrgBuffer = pBuffer;
 	clsSymbolAndSyntax DataVisualizer(_hProc);
 
-	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwNewProtection,&dwOldProtection);	
+//	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwNewProtection,&dwOldProtection);	
 	if(ReadProcessMemory(_hProc,(LPVOID)_dwStartOffset,pBuffer,dwSize,NULL))
 	{
 		DISASM newDisAss;
@@ -188,7 +188,7 @@ void clsDisassembler::run()
 		return;
 	}
 
-	bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
+//	bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
 	free(pOrgBuffer);
 
 	QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;

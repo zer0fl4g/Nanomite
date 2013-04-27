@@ -38,7 +38,9 @@
 ###Version 0.1 beta 11
 + fixed a bug in options which didn´t save the correct settings
 + fixed display of exceptions if no symbols have been found
++ fixed a bug which made register editor not working in x64
 + fixed a bug which didn´t display exceptions if a breakpoint was set on this offset
++ fixed a bug in disassembler which may caused application crashes due to wrong memory protection
 + improvements on AttachDlg
 + added cleanup on debugge termination
 + added process patching

@@ -145,6 +145,7 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 	BPStruct newBP;
 	newBP.dwOffset = dwNewOffset;
 	newBP.dwHandle = 0x2;
+	newBP.bRestoreBP = false;
 	newBP.dwSize = 0x1;
 	newBP.bOrgByte = NULL;
 	newBP.dwPID = _dwCurPID;
