@@ -3,6 +3,8 @@
 
 #include "ui_qtDLGWindowView.h"
 
+#include "qtDLGNanomite.h"
+
 class qtDLGWindowView : public QWidget, public Ui_qtDLGWindowViewClass
 {
 	Q_OBJECT
@@ -15,5 +17,12 @@ public:
 
 private:
 	qint32 _iPID;
+	int _iForEntry;
+	int _iForEnd;
+
+	qtDLGNanomite *myMainWindow;
+
+	private slots:
+		void EnumWindow();
 };
 #endif

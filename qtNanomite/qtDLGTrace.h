@@ -27,12 +27,18 @@ public:
 	static void addTraceData(DWORD64 dwOffset,DWORD PID,DWORD TID);
 	static void clearTraceData();
 
+signals:
+	void OnDisplayDisassembly(quint64 Offset);
+
 private:
 	static qtDLGTrace *pThis;
 	QMap<DWORD64,TraceInfoRow> traceData;
+	int _iSelectedRow;
 
 private slots:
 	void OnShow(int Offset);
+	void OnCustomContextMenu(QPoint qPoint);
+	void MenuCallback(QAction* pAction);
 
 protected:
 	void showEvent(QShowEvent * event);

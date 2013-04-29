@@ -1,5 +1,4 @@
 #include "qtDLGStringView.h"
-#include "qtDLGNanomite.h"
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
@@ -22,21 +21,34 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblStringView->horizontalHeader()->resizeSection(1,135);
 
 	// Display
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+	myMainWindow = qtDLGNanomite::GetInstance();
 
-	int iForEntry = 0;
-	int iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	_iForEntry = 0;
+	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
 	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			iForEntry = i; iForEnd = i +1;
+			_iForEntry = i; _iForEnd = i +1;
 	}
+	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayStrings()));
+
+	DisplayStrings();
+}
+
+qtDLGStringView::~qtDLGStringView()
+{
+
+}
+
+void qtDLGStringView::DisplayStrings()
+{
+	tblStringView->setRowCount(0);
 
 	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(WCHAR));
 	quint64 StartOffset = NULL,EndOffset = NULL;
 
-	for(int i = iForEntry; i < iForEnd;i++)
+	for(int i = _iForEntry; i < _iForEnd;i++)
 	{
 		//clsHelperClass::getStartAndEndOffsetOfPID(myMainWindow->coreDebugger->PIDs[i].dwPID,StartOffset,EndOffset);
 		//if(StartOffset == 0 || EndOffset == 0)
@@ -153,9 +165,4 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 		}
 	}
 	clsMemManager::CFree(sTemp);
-}
-
-qtDLGStringView::~qtDLGStringView()
-{
-
 }

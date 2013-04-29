@@ -50,6 +50,16 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 	_SelectedOffset = tblTIDs->item(_iSelectedRow,2)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
+	menu.addAction(new QAction("Suspend",this));
+	menu.addAction(new QAction("Resume",this));
+	QMenu *submenu = menu.addMenu("Set Thread Priority");
+	submenu->addAction(new QAction("Highest",this));
+	submenu->addAction(new QAction("Above Normal",this));
+	submenu->addAction(new QAction("Normal",this));
+	submenu->addAction(new QAction("Below Normal",this));
+	submenu->addAction(new QAction("Lowest",this));
+
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -105,4 +115,48 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 			*temp);
 		dlgPEEditor->show();
 	}
+	else if(QString().compare(pAction->text(),"Suspend") == 0)
+	{
+		DWORD ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
+		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,ThreadID);
+		if(hThread == INVALID_HANDLE_VALUE) 
+		{
+			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			return;
+		}
+
+		if(SuspendThread(hThread) != -1)
+			tblTIDs->item(_iSelectedRow,4)->setText("Suspended");
+		else
+			MessageBoxW(NULL,L"ERROR, have not been able to suspend this Thread!",L"Nanomite",MB_OK);
+
+		CloseHandle(hThread);
+	}
+	else if(QString().compare(pAction->text(),"Resume") == 0)
+	{
+		DWORD ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
+		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,ThreadID);
+		if(hThread == INVALID_HANDLE_VALUE) 
+		{
+			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			return;
+		}
+
+		if(ResumeThread(hThread) != -1)
+			tblTIDs->item(_iSelectedRow,4)->setText("Running");
+		else
+			MessageBoxW(NULL,L"ERROR, have not been able to resume this Thread!",L"Nanomite",MB_OK);
+
+		CloseHandle(hThread);
+	}
+	else if(QString().compare(pAction->text(),"Highest") == 0)
+		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_HIGHEST);
+	else if(QString().compare(pAction->text(),"Above Normal") == 0)
+		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_ABOVE_NORMAL);
+	else if(QString().compare(pAction->text(),"Normal") == 0)
+		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_NORMAL);
+	else if(QString().compare(pAction->text(),"Below Normal") == 0)
+		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_BELOW_NORMAL);
+	else if(QString().compare(pAction->text(),"Lowest") == 0)
+		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
 }

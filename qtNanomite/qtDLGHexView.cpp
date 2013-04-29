@@ -11,6 +11,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
+	this->setWindowTitle(QString("[ Nanomite ] - Show Memory - PID - %1 - From: %2 - To: %3").arg(dwPID,8,16,QChar('0')).arg(StartOffset,8,16,QChar('0')).arg(StartOffset + Size,8,16,QChar('0')));
 
 	tblHexView->horizontalHeader()->resizeSection(0,75);
 	tblHexView->horizontalHeader()->resizeSection(1,135);

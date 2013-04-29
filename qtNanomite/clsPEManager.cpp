@@ -192,7 +192,8 @@ bool clsPEManager::is64BitFile(std::wstring FileName,int PID)
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(newFileName) == 0 || PEFiles[i].PID == PID)
 			return PEFiles[i].is64Bit;
 	}
+	return false;
 }

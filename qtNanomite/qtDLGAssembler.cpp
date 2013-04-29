@@ -5,7 +5,7 @@
 #include <QFile>
 
 qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
-	HANDLE hProc,quint64 InstructionOffset,clsDisassembler *pDisAs)
+	HANDLE hProc,quint64 InstructionOffset,clsDisassembler *pDisAs,bool Is64Bit)
 	: QWidget(parent, flags)
 {
 	setupUi(this);
@@ -14,6 +14,7 @@ qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
 
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(InsertNewInstructions()));
 
+	_Is64Bit = Is64Bit;
 	_pDisAs = pDisAs;
 	_InstructionOffset = InstructionOffset;
 	_hProc = hProc;
@@ -38,7 +39,11 @@ void qtDLGAssembler::InsertNewInstructions()
 	QFile tempOutput("nanomite.asm");
 	tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&tempOutput);
-	out << "BITS 64\r\n";
+
+	if(_Is64Bit)
+		out << "BITS 64\r\n";
+	else
+		out << "BITS 32\r\n";
 	out << lineEdit->text();
 	tempOutput.close();
 
@@ -50,7 +55,7 @@ void qtDLGAssembler::InsertNewInstructions()
     ZeroMemory(&pi,sizeof(pi));
 	TCHAR szCommandLine[] = L"nasm.exe -o nanomite.bin nanomite.asm";
 
-	if(!CreateProcess(NULL,szCommandLine,NULL,NULL,FALSE,0,NULL,NULL,&si,&pi)) 
+	if(!CreateProcess(NULL,szCommandLine,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&si,&pi)) 
     {
         MessageBoxW(NULL,L"Error, unable to launch assembler!",L"Nanomite",MB_OK);
         return;

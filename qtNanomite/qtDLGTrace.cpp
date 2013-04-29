@@ -23,6 +23,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	tblTraceLog->horizontalHeader()->resizeSection(3,300); //INST.
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
 
+	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 	//connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
 }
 
@@ -126,4 +127,22 @@ void qtDLGTrace::wheelEvent(QWheelEvent *event)
 void qtDLGTrace::resizeEvent(QResizeEvent *event)
 {
 	OnShow(0);
+}
+
+void qtDLGTrace::OnCustomContextMenu(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblTraceLog->indexAt(qPoint).row();
+
+	menu.addAction(new QAction("Send to Disassembler",this));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGTrace::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
+		emit OnDisplayDisassembly(tblTraceLog->item(_iSelectedRow,2)->text().toULongLong(0,16));
 }

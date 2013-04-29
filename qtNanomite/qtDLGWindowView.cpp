@@ -1,5 +1,4 @@
 #include "qtDLGWindowView.h"
-#include "qtDLGNanomite.h"
 
 #include "clsCallbacks.h"
 
@@ -20,26 +19,36 @@ qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblWindowView->horizontalHeader()->resizeSection(1,300);
 	tblWindowView->horizontalHeader()->resizeSection(2,75);
 	tblWindowView->horizontalHeader()->resizeSection(3,135);
+	tblWindowView->horizontalHeader()->resizeSection(4,135);
 
 	// Display
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+	myMainWindow = qtDLGNanomite::GetInstance();
 
-	int iForEntry = 0;
-	int iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	_iForEntry = 0;
+	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
 	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			iForEntry = i; iForEnd = i +1;
+			_iForEntry = i; _iForEnd = i +1;
 	}
 
-	for(int i = iForEntry; i < iForEnd;i++)
-	{
-		EnumWindows((WNDENUMPROC)clsCallbacks::EnumWindowCallBack,(LPARAM)myMainWindow->coreDebugger->PIDs[i].dwPID);
-	}
+	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(EnumWindow()));
+
+	EnumWindow();
 }
 
 qtDLGWindowView::~qtDLGWindowView()
 {
 
+}
+
+void qtDLGWindowView::EnumWindow()
+{
+	tblWindowView->setRowCount(0);
+
+	for(int i = _iForEntry; i < _iForEnd;i++)
+	{
+		EnumWindows((WNDENUMPROC)clsCallbacks::EnumWindowCallBack,(LPARAM)myMainWindow->coreDebugger->PIDs[i].dwPID);
+	}
 }

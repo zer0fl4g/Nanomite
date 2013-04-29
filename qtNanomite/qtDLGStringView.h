@@ -3,6 +3,8 @@
 
 #include "ui_qtDLGStringView.h"
 
+#include "qtDLGNanomite.h"
+
 class qtDLGStringView : public QWidget, public Ui_qtDLGStringViewClass
 {
 	Q_OBJECT
@@ -13,6 +15,13 @@ public:
 
 private:
 	qint32 _iPID;
+	int _iForEntry;
+	int _iForEnd;
+
+	qtDLGNanomite *myMainWindow;
+
+	private slots:
+		void DisplayStrings();
 };
 
 #endif

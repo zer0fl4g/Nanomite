@@ -1,5 +1,4 @@
 #include "qtDLGMemoryView.h"
-#include "qtDLGNanomite.h"
 #include "qtDLGHexView.h"
 
 #include "clsMemManager.h"
@@ -17,6 +16,7 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	_iPID = iPID;
 
 	connect(tblMemoryView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
+	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayMemory()));
 
 	// Init List
 	tblMemoryView->horizontalHeader()->resizeSection(0,75);
@@ -26,18 +26,61 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblMemoryView->horizontalHeader()->resizeSection(4,135);
 
 	// Display
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+	myMainWindow = qtDLGNanomite::GetInstance();
 
-	int iForEntry = 0;
-	int iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	_iForEntry = 0;
+	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
 	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			iForEntry = i; iForEnd = i +1;
+			_iForEntry = i; _iForEnd = i +1;
 	}
+	
+	DisplayMemory();
+}
 
+qtDLGMemoryView::~qtDLGMemoryView()
+{
 
+}
+
+void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
+
+	menu.addAction(new QAction("Send to HexView",this));
+	menu.addAction(new QAction("Dump to File",this));
+
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGMemoryView::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Send to HexView") == 0)
+	{
+		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16),
+			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
+			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
+		newView->show();
+	}
+	else if(QString().compare(pAction->text(),"Dump to File") == 0)
+	{
+		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
+
+		clsMemDump memDump(hProc,
+			(PTCHAR)tblMemoryView->item(_iSelectedRow,3)->text().utf16(),
+			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
+			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
+	}
+}
+
+void qtDLGMemoryView::DisplayMemory()
+{
 	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 	PTCHAR sTemp2 = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
@@ -45,7 +88,8 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	pModEntry.dwSize = sizeof(MODULEENTRY32);
 	MEMORY_BASIC_INFORMATION mbi;
 
-	for(int i = iForEntry; i < iForEnd;i++)
+	tblMemoryView->setRowCount(0);
+	for(int i = _iForEntry; i < _iForEnd;i++)
 	{
 		quint64 dwAddress = NULL;
 		while(VirtualQueryEx(myMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
@@ -142,43 +186,4 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	}
 	clsMemManager::CFree(sTemp2);
 	clsMemManager::CFree(sTemp);
-}
-
-qtDLGMemoryView::~qtDLGMemoryView()
-{
-
-}
-
-void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
-{
-	QMenu menu;
-
-	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
-
-	menu.addAction(new QAction("Send to HexView",this));
-	menu.addAction(new QAction("Dump to File",this));
-
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-
-	menu.exec(QCursor::pos());
-}
-
-void qtDLGMemoryView::MenuCallback(QAction* pAction)
-{
-	if(QString().compare(pAction->text(),"Send to HexView") == 0)
-	{
-		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
-			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
-		newView->show();
-	}
-	else if(QString().compare(pAction->text(),"Dump to File") == 0)
-	{
-		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
-
-		clsMemDump memDump(hProc,
-			(PTCHAR)tblMemoryView->item(_iSelectedRow,3)->text().utf16(),
-			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
-			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
-	}
 }

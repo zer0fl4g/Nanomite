@@ -280,6 +280,9 @@ void clsDebugger::DebuggingLoop()
 
 				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
 				InitBP();
+
+				// Insert Main Thread to List
+				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateThread.lpStartAddress,false,0,true);
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:

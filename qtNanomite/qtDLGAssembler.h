@@ -12,7 +12,7 @@ class qtDLGAssembler : public QWidget, public Ui_qtDLGAssemblerClass
 	Q_OBJECT
 
 public:
-	qtDLGAssembler(QWidget *parent, Qt::WFlags flags,HANDLE hProc,quint64 InstructionOffset,clsDisassembler *pDisAs);
+	qtDLGAssembler(QWidget *parent, Qt::WFlags flags,HANDLE hProc,quint64 InstructionOffset,clsDisassembler *pDisAs, bool Is64Bit);
 	~qtDLGAssembler();
 
 signals:
@@ -22,6 +22,7 @@ private:
 	HANDLE _hProc;
 	quint64 _InstructionOffset;
 	clsDisassembler *_pDisAs;
+	bool _Is64Bit;
 
 	private slots:
 		void InsertNewInstructions();

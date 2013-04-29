@@ -72,6 +72,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
+
+	// Callbacks from DetailInfo to PEManager
 	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
 
 	// Callbacks from Disassambler Thread to GUI
@@ -131,6 +133,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	// Callbacks from GUI to SourceViewer
 	connect(this,SIGNAL(OnDisplaySource(QString,int)),dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));
+
+	// Callbacks from TraceView to GUI
+	connect(dlgTraceWindow,SIGNAL(OnDisplayDisassembly(quint64)),this,SLOT(OnDisplayDisassembly(quint64)));
 
 	// eventFilter for mouse scroll
 	tblDisAs->installEventFilter(this);
@@ -828,6 +833,7 @@ void qtDLGNanomite::OnCustomLogContextMenu(QPoint qPoint)
 	_iSelectedAction = 4;
 
 	menu.addAction(new QAction("Clear Log",this));
+	menu.addAction(new QAction("Write Log to File",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -886,7 +892,7 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 	{
 		if(_iSelectedAction == 0)
 		{
-			qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs);
+			qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
 			connect(dlgAssembler,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
 			dlgAssembler->show();
 		}
@@ -927,6 +933,20 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 			dlgSourceViewer->show();
 		else
 			MessageBoxW(NULL,L"Sorry, there is no source available!",L"Nanomite",MB_OK);
+	}
+	else if(QString().compare(pAction->text(),"Write Log to File") == 0)
+	{
+		QString fileName = QFileDialog::getSaveFileName(NULL,"Please select a place to save the Logfile",QDir::currentPath(),"Log Files (*.log)");
+		QFile tempOutput(fileName);
+		tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
+		QTextStream out(&tempOutput);
+
+		for(int i = 0; i < tblLogBox->rowCount(); i++)
+		{
+			out << tblLogBox->item(i,0)->text() << "\t" << tblLogBox->item(i,1)->text() << "\r\n";
+		}
+
+		tempOutput.close();
 	}
 }
 

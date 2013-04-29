@@ -17,6 +17,8 @@ signals:
 
 private:
 	int _iSelectedRow;
+	int _iSelectedTable;
+
 	quint64 _SelectedOffset;
 
 private slots:

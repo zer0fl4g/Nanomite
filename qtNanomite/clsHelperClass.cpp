@@ -334,3 +334,44 @@ wstring clsHelperClass::replaceAll(wstring orgString, wstring oldString, wstring
 	wstring* ret = new wstring(org.replace(old,news).toStdWString()); 
 	return *ret;
 }
+
+bool clsHelperClass::SetThreadPriorityByTid(DWORD ThreadID, int threadPrio)
+{
+	HANDLE hThread = OpenThread(THREAD_SET_INFORMATION,false,ThreadID);
+	if(hThread == INVALID_HANDLE_VALUE) return false;
+
+	bool bSuccess = false;
+	if(!(bSuccess = SetThreadPriority(hThread,threadPrio)))
+		MessageBoxW(NULL,L"ERROR, could not set the thread priority",L"Nanomite",MB_OK);
+	CloseHandle(hThread);
+	return bSuccess;
+}
+
+DWORD clsHelperClass::GetMainThread(DWORD ProcessID)
+{
+	DWORD ThreadID = NULL;
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,0);
+    if(hSnap == INVALID_HANDLE_VALUE) return ThreadID;
+ 
+    THREADENTRY32 threadEntry;
+    threadEntry.dwSize = sizeof(THREADENTRY32);
+
+	if(!Thread32First(hSnap,&threadEntry))
+	{
+		CloseHandle(hSnap);
+		return ThreadID;
+	}
+
+	do
+	{
+        if(threadEntry.th32OwnerProcessID == ProcessID)
+		{
+			ThreadID = threadEntry.th32ThreadID;
+			break;
+		}
+	}
+	while(Thread32Next(hSnap,&threadEntry));
+
+	CloseHandle(hSnap);
+	return ThreadID;
+}

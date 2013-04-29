@@ -4,6 +4,8 @@
 #include "qtDLGNanomite.h"
 #include "qtDLGWindowView.h"
 
+#include "Psapi.h"
+
 using namespace std;
 
 clsCallbacks::clsCallbacks() {}
@@ -220,9 +222,11 @@ bool CALLBACK clsCallbacks::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 	DWORD dwHwPID = NULL;
 	GetWindowThreadProcessId(hWnd,&dwHwPID);
 	int iPid = (int)lParam;
-
+	
 	if(dwHwPID == iPid)
 	{
+		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,dwHwPID);
+		
 		qtDLGWindowView::pThis->tblWindowView->insertRow(qtDLGWindowView::pThis->tblWindowView->rowCount());
 		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 		// PID
@@ -242,12 +246,21 @@ bool CALLBACK clsCallbacks::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,3,
 			new QTableWidgetItem(QString("%1").arg((int)hWnd,8,16,QChar('0'))));
 
+		// WndProc
+		LONG_PTR wndproc = GetWindowLongPtr(hWnd,GWLP_ID);
+		qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,4,
+			new QTableWidgetItem(QString("%1").arg(wndproc,8,16,QChar('0'))));
+
 		// GetModuleName
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
-		GetWindowModuleFileName(hWnd,sTemp,MAX_PATH);
-		qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(sTemp)));
+		if(GetModuleFileNameEx(hProcess,NULL,sTemp,MAX_PATH) > 0)
+			qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,5,
+				new QTableWidgetItem(QString::fromStdWString(sTemp)));
+		else
+			qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,5,
+				new QTableWidgetItem(""));
 
+		CloseHandle(hProcess);
 		free(sTemp);
 	}
 	return true;

@@ -3,6 +3,8 @@
 
 #include "ui_qtDLGHeapView.h"
 
+#include "qtDLGNanomite.h"
+
 #include "clsAPIImport.h"
 
 class qtDLGHeapView : public QWidget, public Ui_qtDLGHeapViewClass
@@ -15,9 +17,14 @@ public:
 
 private:
 	int _iPID,
-		_iSelectedRow;
-	
+		_iSelectedRow,
+		_iForEntry,
+		_iForEnd;
+
+	qtDLGNanomite *myMainWindow;
+
 	private slots:
+		void DisplayHeap();
 		void MenuCallback(QAction*);
 		void OnSelectionChanged();
 		void OnCustomContextMenuRequested(QPoint qPoint);
