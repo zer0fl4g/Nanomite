@@ -187,10 +187,10 @@ int clsCallbacks::OnCallStack(quint64 dwStackAddr,
 		new QTableWidgetItem(QString("%1").arg(dwEIP,16,16,QChar('0'))));
 
 	// <mod.func>
-	if(sFuncName.length() > 0)
+	if(sFuncModule.length() > 0 && sFuncName.length() > 0)
 		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
 			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString::fromStdWString(sFuncName))));
-	else
+	else if(sFuncModule.length() > 0 && sFuncName.length() <= 0)
 		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
 			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString("%1").arg(dwEIP,16,16,QChar('0')))));
 
@@ -199,10 +199,10 @@ int clsCallbacks::OnCallStack(quint64 dwStackAddr,
 		new QTableWidgetItem(QString("%1").arg(dwReturnTo,16,16,QChar('0'))));
 
 	// Return To <mod.func>
-	if(sFuncName.length() > 0)
+	if(sFuncName.length() > 0 && sModuleName.length() > 0)
 		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
 			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString::fromStdWString(sReturnToFunc))));
-	else
+	else if(sFuncName.length() <= 0 && sModuleName.length() > 0)
 		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
 			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString("%1").arg(dwReturnTo,16,16,QChar('0')))));
 
@@ -247,9 +247,9 @@ bool CALLBACK clsCallbacks::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 			new QTableWidgetItem(QString("%1").arg((int)hWnd,8,16,QChar('0'))));
 
 		// WndProc
-		LONG_PTR wndproc = GetWindowLongPtr(hWnd,GWLP_ID);
-		qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,4,
-			new QTableWidgetItem(QString("%1").arg(wndproc,8,16,QChar('0'))));
+		//LONG_PTR wndproc = GetWindowLongPtr(hWnd,GWLP_ID);
+		//qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,4,
+		//	new QTableWidgetItem(QString("%1").arg(wndproc,8,16,QChar('0'))));
 
 		// GetModuleName
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));

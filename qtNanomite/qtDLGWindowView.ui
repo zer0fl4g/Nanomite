@@ -78,11 +78,6 @@
       </column>
       <column>
        <property name="text">
-        <string>WndProc</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
         <string>File Path</string>
        </property>
       </column>

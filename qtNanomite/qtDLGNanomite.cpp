@@ -334,7 +334,7 @@ void qtDLGNanomite::InitListSizes()
 	// List DisAs
 	tblDisAs->horizontalHeader()->resizeSection(0,135);
 	tblDisAs->horizontalHeader()->resizeSection(1,250);
-	tblDisAs->horizontalHeader()->resizeSection(2,250);
+	tblDisAs->horizontalHeader()->resizeSection(2,300);
 
 	// List Register
 	tblRegView->horizontalHeader()->resizeSection(0,75);

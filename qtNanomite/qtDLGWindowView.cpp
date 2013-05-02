@@ -19,7 +19,6 @@ qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblWindowView->horizontalHeader()->resizeSection(1,300);
 	tblWindowView->horizontalHeader()->resizeSection(2,75);
 	tblWindowView->horizontalHeader()->resizeSection(3,135);
-	tblWindowView->horizontalHeader()->resizeSection(4,135);
 
 	// Display
 	myMainWindow = qtDLGNanomite::GetInstance();

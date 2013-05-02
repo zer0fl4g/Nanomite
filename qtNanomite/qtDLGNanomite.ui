@@ -9,7 +9,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>1194</width>
+    <width>1230</width>
     <height>826</height>
    </rect>
   </property>
@@ -50,7 +50,7 @@
      <rect>
       <x>0</x>
       <y>0</y>
-      <width>1212</width>
+      <width>1396</width>
       <height>751</height>
      </rect>
     </property>
@@ -348,7 +348,7 @@
         <widget class="QTableWidget" name="tblStack">
          <property name="minimumSize">
           <size>
-           <width>400</width>
+           <width>375</width>
            <height>150</height>
           </size>
          </property>
@@ -441,7 +441,7 @@
         <widget class="QTableWidget" name="tblLogBox">
          <property name="minimumSize">
           <size>
-           <width>500</width>
+           <width>600</width>
            <height>150</height>
           </size>
          </property>
@@ -508,7 +508,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>1194</width>
+     <width>1230</width>
      <height>21</height>
     </rect>
    </property>
