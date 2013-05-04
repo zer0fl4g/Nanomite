@@ -305,6 +305,51 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qtDLGAssembler.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGRegisters.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGRegisters.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGRegisters.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGCallstack.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGCallstack.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGStack.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGStack.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGLogView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGLogView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="clsAppSettings.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_clsAppSettings.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_clsAppSettings.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGCallstack.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGStack.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGLogView.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -445,6 +490,33 @@
     <CustomBuild Include="qtDLGAssembler.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGRegisters.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGRegisters.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGCallstack.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGStack.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGLogView.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="clsAppSettings.h">
+      <Filter>Header Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGCallstack.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGStack.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGLogView.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -541,6 +613,18 @@
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_qtDLGAssembler.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGRegisters.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGCallstack.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGStack.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGLogView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
   </ItemGroup>

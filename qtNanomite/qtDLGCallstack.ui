@@ -1,0 +1,125 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<ui version="4.0">
+ <class>qtDLGCallstack</class>
+ <widget class="QDockWidget" name="qtDLGCallstack">
+  <property name="geometry">
+   <rect>
+    <x>0</x>
+    <y>0</y>
+    <width>991</width>
+    <height>239</height>
+   </rect>
+  </property>
+  <property name="features">
+   <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
+  </property>
+  <property name="windowTitle">
+   <string>Call Stack View</string>
+  </property>
+  <widget class="QWidget" name="widget">
+   <layout class="QGridLayout" name="gridLayout">
+    <property name="margin">
+     <number>0</number>
+    </property>
+    <item row="0" column="0">
+     <widget class="QTableWidget" name="tblCallstack">
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="minimumSize">
+       <size>
+        <width>300</width>
+        <height>140</height>
+       </size>
+      </property>
+      <property name="maximumSize">
+       <size>
+        <width>16777215</width>
+        <height>16777215</height>
+       </size>
+      </property>
+      <property name="font">
+       <font>
+        <family>Lucida Console</family>
+       </font>
+      </property>
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
+      <property name="frameShadow">
+       <enum>QFrame::Sunken</enum>
+      </property>
+      <property name="editTriggers">
+       <set>QAbstractItemView::NoEditTriggers</set>
+      </property>
+      <property name="selectionBehavior">
+       <enum>QAbstractItemView::SelectRows</enum>
+      </property>
+      <property name="horizontalScrollMode">
+       <enum>QAbstractItemView::ScrollPerPixel</enum>
+      </property>
+      <property name="showGrid">
+       <bool>false</bool>
+      </property>
+      <attribute name="horizontalHeaderHighlightSections">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="horizontalHeaderStretchLastSection">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderVisible">
+       <bool>false</bool>
+      </attribute>
+      <attribute name="verticalHeaderDefaultSectionSize">
+       <number>11</number>
+      </attribute>
+      <attribute name="verticalHeaderMinimumSectionSize">
+       <number>11</number>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>Stack Offset</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Func. Addr</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>&lt;mod.func&gt;</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Return To</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Return To - &lt;mod.func&gt;</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Source Line</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>Source File</string>
+       </property>
+      </column>
+     </widget>
+    </item>
+   </layout>
+  </widget>
+ </widget>
+ <layoutdefault spacing="6" margin="11"/>
+ <resources/>
+ <connections/>
+</ui>

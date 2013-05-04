@@ -6,6 +6,14 @@
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGSourceViewer.h"
 #include "qtDLGTrace.h"
+#include <qdockwidget.h>
+#include <qmainwindow.h>
+
+// Dock Widget Classes
+#include "qtDLGRegisters.h"
+#include "qtDLGCallstack.h"
+#include "qtDLGStack.h"
+#include "qtDLGLogView.h"
 
 #include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
@@ -49,6 +57,18 @@ public:
 	qtDLGBreakPointManager *dlgBPManager;
 	qtDLGSourceViewer *dlgSourceViewer;
 	qtDLGTrace *dlgTraceWindow;
+
+	// Docks
+	qtDLGRegisters	*cpuRegView;
+	qtDLGCallstack	*callstackView;
+	qtDLGStack		*stackView;
+	qtDLGLogView	*logView;	
+
+	QTableWidget	*tblLogBox;
+	QTableWidget	*tblCallstack;
+	QTableWidget	*tblStack;
+	QScrollBar		*scrollStackView;
+	QTableWidget	*tblRegView;
 
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
@@ -122,17 +142,21 @@ private:
 
 	static qtDLGNanomite *qtDLGMyWindow;
 	
+
+
 	void resizeEvent(QResizeEvent *event);
 	void InitListSizes();
 	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void UpdateStateBar(DWORD dwAction);
-	void LoadStackView(quint64 dwESP, DWORD dwStackSize);	
+	void LoadStackView(quint64 dwESP, DWORD dwStackSize);
+	void LoadWidgets();
 
 protected:
 	bool eventFilter(QObject *pOpject,QEvent *event);
 	void dragEnterEvent(QDragEnterEvent* pEvent);
 	void dropEvent(QDropEvent* pEvent);
+	void closeEvent(QCloseEvent* closeEvent);
 };
 
 #endif // QTDLGNANOMITE_H

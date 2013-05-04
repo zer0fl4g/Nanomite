@@ -10,7 +10,9 @@
 #include "clsAPIImport.h"
 #include "clsSymbolAndSyntax.h"
 #include "clsDBInterface.h"
+
 #include "clsMemManager.h"
+#include "clsAppSettings.h"
 
 using namespace std;
 
@@ -20,9 +22,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags)
 {
 	setupUi(this);
-	QWidget *midWid = new QWidget;
-	midWid->setLayout(mainLayout);
-	setCentralWidget(midWid);
+
 	setAcceptDrops(true);
 
 	QApplication::setStyle(new QPlastiqueStyle);
@@ -32,6 +32,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	qRegisterMetaType<wstring>("wstring");
 	qRegisterMetaType<BPStruct>("BPStruct");
 
+	LoadWidgets();
+	
 	clsAPIImport::LoadFunctions();
 
 	coreDebugger = new clsDebugger;
@@ -44,14 +46,12 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
 	dlgSourceViewer = new qtDLGSourceViewer(this,Qt::Window);
 	dlgTraceWindow = new qtDLGTrace(this,Qt::Window);
-	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;
-
-	InitListSizes();
+	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;	
 
 	qtDLGMyWindow = this;
 	lExceptionCount = 0;
 	clsHelperClass::ReadFromSettingsFile(coreDebugger,qtNanomiteDisAsColor);
-
+	
 	// Callbacks from Debugger Thread to GUI
 	connect(coreDebugger,SIGNAL(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),
 		NanomiteCallbacks,SLOT(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),Qt::QueuedConnection);
@@ -143,6 +143,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	tblStack->installEventFilter(this);
     tblStack->viewport()->installEventFilter(this);
+	
+	InitListSizes();
 }
 
 qtDLGNanomite::~qtDLGNanomite()
@@ -162,6 +164,34 @@ qtDLGNanomite::~qtDLGNanomite()
 qtDLGNanomite* qtDLGNanomite::GetInstance()
 {
 	return qtDLGMyWindow;
+}
+
+void qtDLGNanomite::LoadWidgets()
+{
+	this->cpuRegView	= new qtDLGRegisters(this);
+	this->callstackView = new qtDLGCallstack(this);
+	this->stackView		= new qtDLGStack(this);
+	this->logView		= new qtDLGLogView(this);
+
+	this->addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, this->cpuRegView);
+	this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, this->callstackView);
+
+	this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, this->stackView);
+	this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, this->logView);
+
+	clsAppSettings *settings = clsAppSettings::SharedInstance();
+
+	if (!settings->RestoreWindowState(this))
+	{
+		this->splitDockWidget(this->callstackView, this->stackView, Qt::Orientation::Vertical);
+		this->splitDockWidget(this->stackView, this->logView, Qt::Orientation::Horizontal);
+	}
+
+	this->tblRegView = this->cpuRegView->tblRegView;
+	this->tblCallstack = this->callstackView->tblCallstack;
+	this->tblStack = this->stackView->tblStack;
+	this->scrollStackView = this->stackView->scrollStackView;
+	this->tblLogBox = this->logView->tblLogBox;	
 }
 
 void qtDLGNanomite::OnDebuggerBreak()
@@ -319,9 +349,11 @@ void qtDLGNanomite::InitListSizes()
 	// List StackView
 	tblStack->horizontalHeader()->resizeSection(0,135);
 	tblStack->horizontalHeader()->resizeSection(1,135);
+	tblStack->horizontalHeader()->resizeSection(2,300);
 
 	// List LogBox
 	tblLogBox->horizontalHeader()->resizeSection(0,85);
+	tblLogBox->horizontalHeader()->resizeSection(1,300);
 
 	// List CallStack
 	tblCallstack->horizontalHeader()->resizeSection(0,135);
@@ -330,15 +362,18 @@ void qtDLGNanomite::InitListSizes()
 	tblCallstack->horizontalHeader()->resizeSection(3,135);
 	tblCallstack->horizontalHeader()->resizeSection(4,300);
 	tblCallstack->horizontalHeader()->resizeSection(5,75);
+	tblCallstack->horizontalHeader()->resizeSection(6,300);
 
 	// List DisAs
 	tblDisAs->horizontalHeader()->resizeSection(0,135);
 	tblDisAs->horizontalHeader()->resizeSection(1,250);
 	tblDisAs->horizontalHeader()->resizeSection(2,300);
+	tblDisAs->horizontalHeader()->resizeSection(3,300);
 
 	// List Register
 	tblRegView->horizontalHeader()->resizeSection(0,75);
-
+	tblRegView->horizontalHeader()->resizeSection(1,100);
+	
 	// List DetInfo  Processes
 	dlgDetInfo->tblPIDs->horizontalHeader()->resizeSection(0,135);
 	dlgDetInfo->tblPIDs->horizontalHeader()->resizeSection(1,135);
@@ -1034,8 +1069,9 @@ void qtDLGNanomite::OnCallstackDisplaySource(QTableWidgetItem *pItem)
 	return;
 }
 
-bool qtDLGNanomite::eventFilter(QObject *pObject,QEvent *event)
+bool qtDLGNanomite::eventFilter(QObject *pObject, QEvent *event)
 {
+	
 	if(event->type() == QEvent::Wheel)
 	{
 		QWheelEvent *pWheel = (QWheelEvent*)event;
@@ -1074,4 +1110,11 @@ void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
 		action_DebugStart();
 		pEvent->acceptProposedAction();
     }
+}
+
+void qtDLGNanomite::closeEvent(QCloseEvent* closeEvent)
+{
+	clsAppSettings::SharedInstance()->SaveWindowState(this);
+
+	closeEvent->accept();
 }
