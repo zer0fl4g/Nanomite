@@ -31,9 +31,11 @@ clsDebugger::clsDebugger()
 	_isDebugging = false;
 	tcLogString = (PTCHAR)malloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {false,false,0,0};
+	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
+	
+	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
 	EnableDebugFlag();
 }
 
@@ -44,9 +46,11 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_isDebugging = false;
 	tcLogString = (PTCHAR)malloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {false,false,0,0};
+	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
+
+	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
 	EnableDebugFlag();
 }
 
@@ -283,11 +287,19 @@ void clsDebugger::DebuggingLoop()
 
 				// Insert Main Thread to List
 				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateThread.lpStartAddress,false,0,true);
+				
+				if(dbgSettings.bBreakOnNewPID)
+					dwContinueStatus = CallBreakDebugger(&debug_event,0);
+
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
 			PBThreadInfo(debug_event.dwProcessId,debug_event.dwThreadId,(quint64)debug_event.u.CreateThread.lpStartAddress,false,0,true);
 			InitBP();
+
+			if(dbgSettings.bBreakOnNewTID)
+				dwContinueStatus = CallBreakDebugger(&debug_event,0);
+
 			break;
 
 		case EXIT_THREAD_DEBUG_EVENT:
@@ -339,6 +351,9 @@ void clsDebugger::DebuggingLoop()
 					swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Could not load symbols for DLL: %s",sDLLFileName);
 					PBLogInfo();
 				}
+
+				if(dbgSettings.bBreakOnNewDLL)
+					dwContinueStatus = CallBreakDebugger(&debug_event,0);
 			}
 			break;
 

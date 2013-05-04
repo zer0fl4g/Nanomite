@@ -64,7 +64,9 @@ void qtDLGOption::OnReload()
 	cbDebugChild->setChecked(true);
 	cbSuspendThread->setChecked(false);
 	cbIgEx->setChecked(false);
-
+	cbBreakOnNewDLL->setChecked(false);
+	cbBreakOnNewTID->setChecked(false);
+	cbBreakOnNewPID->setChecked(false);
 	cbIG_AVIOL->setChecked(true);
 	cbInvPriv->setChecked(true);
 	cbDivZero->setChecked(true);
@@ -120,6 +122,21 @@ void qtDLGOption::OnSave()
 		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 1;
 	else
 		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0;
+
+	if(cbBreakOnNewDLL->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = false;
+
+	if(cbBreakOnNewTID->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = true;	
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = false;
+
+	if(cbBreakOnNewPID->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
 
 	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
 	if(cbIG_AVIOL->isChecked())
@@ -192,6 +209,12 @@ void qtDLGOption::OnLoad()
 		cbSuspendThread->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode)
 		cbIgEx->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL)
+		cbBreakOnNewDLL->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID)
+		cbBreakOnNewTID->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID)
+		cbBreakOnNewPID->setChecked(true);
 
 	for(size_t i = 0;i < myMainWindow->coreDebugger->ExceptionHandler.size();i++)
 	{

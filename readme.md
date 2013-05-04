@@ -39,7 +39,7 @@
 + fixed a bug in options which didn´t save the correct settings
 + fixed display of exceptions if no symbols have been found
 + fixed a bug which made register editor not working in x64
-+ fixed a bug which displayed wrong modules for windows
++ fixed a bug which displayed wrong modules in window view
 + fixed a bug which didn´t display exceptions if a breakpoint was set on this offset
 + fixed a bug in disassembler which may caused application crashes due to wrong memory protection
 + improvements on AttachDlg
@@ -49,5 +49,10 @@
 + added display of mainthread in DetailView
 + added F5 Hotkey to reload in some views
 + added possibility to save debug log to file
++ added possibility to break on new Processes, Threads or DLL loads
+
+####Notes:
+	- You have now the possibility to patch the memory of a process. Currently it is not possible to save this
+	  changes to disk but this will be integrated also.
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

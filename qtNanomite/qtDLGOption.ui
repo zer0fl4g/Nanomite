@@ -10,7 +10,7 @@
     <x>0</x>
     <y>0</y>
     <width>356</width>
-    <height>429</height>
+    <height>440</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -26,7 +26,7 @@
      <x>3</x>
      <y>3</y>
      <width>351</width>
-     <height>391</height>
+     <height>401</height>
     </rect>
    </property>
    <property name="currentIndex">
@@ -40,7 +40,7 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>120</y>
+       <y>133</y>
        <width>321</width>
        <height>241</height>
       </rect>
@@ -58,7 +58,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>100</y>
+        <y>104</y>
         <width>301</width>
         <height>131</height>
        </rect>
@@ -110,8 +110,8 @@
      <widget class="QCheckBox" name="cbInvPriv">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>60</y>
+        <x>12</x>
+        <y>62</y>
         <width>171</width>
         <height>17</height>
        </rect>
@@ -129,8 +129,8 @@
      <widget class="QCheckBox" name="cbDivZero">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>40</y>
+        <x>12</x>
+        <y>42</y>
         <width>101</width>
         <height>17</height>
        </rect>
@@ -148,8 +148,8 @@
      <widget class="QCheckBox" name="cbIG_AVIOL">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>20</y>
+        <x>12</x>
+        <y>22</y>
         <width>110</width>
         <height>17</height>
        </rect>
@@ -167,8 +167,8 @@
      <widget class="QCheckBox" name="cbIgEx">
       <property name="geometry">
        <rect>
-        <x>10</x>
-        <y>80</y>
+        <x>12</x>
+        <y>82</y>
         <width>131</width>
         <height>17</height>
        </rect>
@@ -283,9 +283,9 @@
      <property name="geometry">
       <rect>
        <x>180</x>
-       <y>10</y>
+       <y>7</y>
        <width>151</width>
-       <height>81</height>
+       <height>131</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -352,6 +352,63 @@
       </property>
       <property name="text">
        <string>Use SuspendThread</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnNewPID">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>90</y>
+        <width>131</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Break on new PID</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnNewTID">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>110</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Break on new TID</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnNewDLL">
+      <property name="geometry">
+       <rect>
+        <x>20</x>
+        <y>70</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Break on new DLL</string>
       </property>
      </widget>
     </widget>
@@ -1002,7 +1059,7 @@
    <property name="geometry">
     <rect>
      <x>270</x>
-     <y>400</y>
+     <y>410</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -1021,7 +1078,7 @@
    <property name="geometry">
     <rect>
      <x>90</x>
-     <y>400</y>
+     <y>410</y>
      <width>80</width>
      <height>23</height>
     </rect>
@@ -1040,7 +1097,7 @@
    <property name="geometry">
     <rect>
      <x>180</x>
-     <y>400</y>
+     <y>410</y>
      <width>80</width>
      <height>23</height>
     </rect>

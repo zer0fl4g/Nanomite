@@ -64,36 +64,36 @@ void qtDLGTrace::OnShow(int delta)
 {
 	int iLines = NULL,
 		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 12) - 1;
-	QMap<DWORD64,TraceInfoRow>::const_iterator i;
+	QMap<DWORD64,TraceInfoRow>::iterator i;
 
 	scrollTrace->setMaximum(traceData.count());
 
 	if(delta < 0 && tblTraceLog->rowCount() > 0)
 	{
-		i = traceData.constFind(tblTraceLog->item(0,2)->text().toULongLong(0,16));
+		i = traceData.find(tblTraceLog->item(0,2)->text().toULongLong(0,16));
 		--i;
 		scrollTrace->setValue(scrollTrace->value() - 1);
 	}
 	else if(delta > 0 && tblTraceLog->rowCount() > 1)
 	{
-		i = traceData.constFind(tblTraceLog->item(1,2)->text().toULongLong(0,16));
+		i = traceData.find(tblTraceLog->item(1,2)->text().toULongLong(0,16));
 		scrollTrace->setValue(scrollTrace->value() + 1);
 	}
 	else if(delta == 0)
 	{
-		i = traceData.constBegin();
+		i = traceData.begin();
 		scrollTrace->setValue(0);
 	}
 	else
 		return;
 
-	if((QMapData::Node *)i == (QMapData::Node *)traceData.constEnd())
+	if((QMapData::Node *)i == (QMapData::Node *)traceData.end())
 		return;
 
 	tblTraceLog->setRowCount(0);
 	while(iLines <= iPossibleRowCount)
 	{
-		if((QMapData::Node *)i == (QMapData::Node *)traceData.constEnd())
+		if((QMapData::Node *)i == (QMapData::Node *)traceData.end())
 			return;
 
 		tblTraceLog->insertRow(tblTraceLog->rowCount());
@@ -107,6 +107,15 @@ void qtDLGTrace::OnShow(int delta)
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,2,
 			new QTableWidgetItem(QString("%1").arg(i.value().dwOffset,16,16,QChar('0'))));
 
+		if(i.value().asmInstruction.length() <= 0)
+		{
+			std::wstring *FuncName = new wstring(L""),*ModName = new wstring(L"");
+			clsHelperClass::LoadSymbolForAddr(*FuncName,*ModName,i.value().dwOffset,OpenProcess(PROCESS_ALL_ACCESS,false,i.value().PID));
+
+			QString funcName = QString().fromStdWString(*FuncName);
+			QString modName = QString().fromStdWString(*FuncName);
+			i.value().asmInstruction.append(modName).append(".").append(funcName);
+		}
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,3,
 			new QTableWidgetItem(i.value().asmInstruction));
 

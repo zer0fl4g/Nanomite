@@ -35,7 +35,12 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"AutoLoadSym",_coreDebugger->dbgSettings.bAutoLoadSymbols ? L"true" : L"false");
 	outfile.write(cTemp,wcslen(cTemp));
-
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnNewDLL",_coreDebugger->dbgSettings.bBreakOnNewDLL ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnNewTID",_coreDebugger->dbgSettings.bBreakOnNewTID ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnNewPID",_coreDebugger->dbgSettings.bBreakOnNewPID ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%d\n",L"SUSPENDTYPE",_coreDebugger->dbgSettings.dwSuspendType);
 	outfile.write(cTemp,wcslen(cTemp));
 
@@ -136,6 +141,27 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 				_coreDebugger->dbgSettings.bAutoLoadSymbols = true;
 			else
 				_coreDebugger->dbgSettings.bAutoLoadSymbols = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnNewDLL")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnNewDLL = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnNewDLL = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnNewTID")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnNewTID = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnNewTID = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnNewPID")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnNewPID = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnNewPID = false;
 		}
 		else if(sSettingLine[0] == L"EXCEPTION_ACCESS_VIOLATION")
 			_coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,_wtoi(sSettingLine[1].c_str()),NULL);
@@ -375,3 +401,31 @@ DWORD clsHelperClass::GetMainThread(DWORD ProcessID)
 	CloseHandle(hSnap);
 	return ThreadID;
 }
+
+//quint64 clsHelperClass::GetImageBaseFromModuleName(QString moduleName,bool is64Bit)
+//{
+//	qtDLGNanomite *pMainGUI = qtDLGNanomite::GetInstance();
+//
+//	for(int i = 0; i < pMainGUI->dlgDetInfo->tblModules->rowCount(); i++)
+//	{
+//		if(is64Bit)
+//		{
+//			if(pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().toLower().contains(moduleName.toLower()) &&
+//				pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().contains("System32") &&
+//				pMainGUI->dlgDetInfo->tblModules->item(i,2)->text().contains("Loaded"))
+//			{
+//				return pMainGUI->dlgDetInfo->tblModules->item(i,1)->text().toULongLong(0,16);
+//			}
+//		}
+//		else
+//		{
+//			if(pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().toLower().contains(moduleName.toLower()) &&
+//				pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().contains("WOW64") &&
+//				pMainGUI->dlgDetInfo->tblModules->item(i,2)->text().contains("Loaded"))
+//			{
+//				return pMainGUI->dlgDetInfo->tblModules->item(i,1)->text().toULongLong(0,16);
+//			}
+//		}
+//	}
+//	return 0;
+//}

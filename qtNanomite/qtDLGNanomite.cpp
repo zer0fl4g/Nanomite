@@ -856,7 +856,20 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Clear Log") == 0)
 		tblLogBox->setRowCount(0);	
-	
+	else if(QString().compare(pAction->text(),"Write Log to File") == 0)
+	{
+		QString fileName = QFileDialog::getSaveFileName(NULL,"Please select a place to save the Logfile",QDir::currentPath(),"Log Files (*.log)");
+		QFile tempOutput(fileName);
+		tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
+		QTextStream out(&tempOutput);
+
+		for(int i = 0; i < tblLogBox->rowCount(); i++)
+			out << tblLogBox->item(i,0)->text() << "\t" << tblLogBox->item(i,1)->text() << "\n";
+
+		tempOutput.close();
+		MessageBoxW(NULL,L"The log file has been written to disk!",L"Nanomite",MB_OK);
+	}
+
 	if(!coreDebugger->GetDebuggingState()) return;
 
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
@@ -933,20 +946,6 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 			dlgSourceViewer->show();
 		else
 			MessageBoxW(NULL,L"Sorry, there is no source available!",L"Nanomite",MB_OK);
-	}
-	else if(QString().compare(pAction->text(),"Write Log to File") == 0)
-	{
-		QString fileName = QFileDialog::getSaveFileName(NULL,"Please select a place to save the Logfile",QDir::currentPath(),"Log Files (*.log)");
-		QFile tempOutput(fileName);
-		tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
-		QTextStream out(&tempOutput);
-
-		for(int i = 0; i < tblLogBox->rowCount(); i++)
-		{
-			out << tblLogBox->item(i,0)->text() << "\t" << tblLogBox->item(i,1)->text() << "\r\n";
-		}
-
-		tempOutput.close();
 	}
 }
 
