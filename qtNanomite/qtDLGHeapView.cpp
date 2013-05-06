@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "qtDLGHeapView.h"
 #include "qtDLGHexView.h"
 
@@ -50,6 +66,7 @@ void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblHeapBlocks->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
 
 	menu.addAction(new QAction("Send Offset To HexView",this));
 	menu.addAction(new QAction("Dump Memory To File",this));
@@ -61,8 +78,6 @@ void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
 
 void qtDLGHeapView::MenuCallback(QAction* pAction)
 {
-	if(_iSelectedRow == -1) return;
-
 	if(QString().compare(pAction->text(),"Send Offset To HexView") == 0)
 	{
 		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblHeapBlocks->item(_iSelectedRow,0)->text().toULongLong(0,16),

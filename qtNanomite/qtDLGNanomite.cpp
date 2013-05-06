@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include <QShortcut>
 
 #include "qtDLGNanomite.h"
@@ -14,6 +30,8 @@
 #include "clsMemManager.h"
 #include "clsAppSettings.h"
 
+#include <QClipboard>
+
 using namespace std;
 
 qtDLGNanomite* qtDLGNanomite::qtDLGMyWindow = NULL;
@@ -26,6 +44,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	setAcceptDrops(true);
 
 	QApplication::setStyle(new QPlastiqueStyle);
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 
 	qRegisterMetaType<DWORD>("DWORD");
 	qRegisterMetaType<quint64>("quint64");
@@ -63,10 +82,12 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 		NanomiteCallbacks,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDll(std::wstring,DWORD,quint64,bool)),
 		NanomiteCallbacks,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
+
 	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),
-		NanomiteCallbacks,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
+		logView,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),
-		NanomiteCallbacks,SLOT(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),Qt::QueuedConnection);
+		callstackView,SLOT(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),Qt::QueuedConnection);
+
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
@@ -113,13 +134,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	// Actions on Window Events
 	connect(tblDisAs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomDisassemblerContextMenu(QPoint)));
-	connect(tblRegView,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnRegViewChangeRequest(QTableWidgetItem *)));
-	connect(tblCallstack,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnCallstackDisplaySource(QTableWidgetItem *)));
-	connect(tblCallstack,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomCallstackContextMenu(QPoint)));
-	connect(tblRegView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomRegViewContextMenu(QPoint)));
-	connect(tblLogBox,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomLogContextMenu(QPoint)));
-	connect(scrollStackView,SIGNAL(valueChanged(int)),this,SLOT(OnStackScroll(int)));
 	connect(scrollDisAs,SIGNAL(valueChanged(int)),this,SLOT(OnDisAsScroll(int)));
+	connect(callstackView,SIGNAL(DisplaySource(QString,int)),dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));
 
 	// GUI Shortcuts
 	connect(new QShortcut(QKeySequence("F2"),this),SIGNAL(activated()),this,SLOT(OnF2BreakPointPlace()));
@@ -131,20 +147,18 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
 
-	// Callbacks from GUI to SourceViewer
-	connect(this,SIGNAL(OnDisplaySource(QString,int)),dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));
-
 	// Callbacks from TraceView to GUI
 	connect(dlgTraceWindow,SIGNAL(OnDisplayDisassembly(quint64)),this,SLOT(OnDisplayDisassembly(quint64)));
 
 	// eventFilter for mouse scroll
 	tblDisAs->installEventFilter(this);
     tblDisAs->viewport()->installEventFilter(this);
-
-	tblStack->installEventFilter(this);
-    tblStack->viewport()->installEventFilter(this);
 	
-	InitListSizes();
+	// List DisAs
+	tblDisAs->horizontalHeader()->resizeSection(0,135);
+	tblDisAs->horizontalHeader()->resizeSection(1,250);
+	tblDisAs->horizontalHeader()->resizeSection(2,300);
+	tblDisAs->horizontalHeader()->resizeSection(3,300);
 }
 
 qtDLGNanomite::~qtDLGNanomite()
@@ -159,6 +173,10 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete dlgSourceViewer;
 	delete dlgTraceWindow;
 	delete qtNanomiteDisAsColor;
+	delete cpuRegView;
+	delete callstackView;
+	delete stackView;
+	delete logView;
 }
 
 qtDLGNanomite* qtDLGNanomite::GetInstance()
@@ -186,12 +204,6 @@ void qtDLGNanomite::LoadWidgets()
 		this->splitDockWidget(this->callstackView, this->stackView, Qt::Orientation::Vertical);
 		this->splitDockWidget(this->stackView, this->logView, Qt::Orientation::Horizontal);
 	}
-
-	this->tblRegView = this->cpuRegView->tblRegView;
-	this->tblCallstack = this->callstackView->tblCallstack;
-	this->tblStack = this->stackView->tblStack;
-	this->scrollStackView = this->stackView->scrollStackView;
-	this->tblLogBox = this->logView->tblLogBox;	
 }
 
 void qtDLGNanomite::OnDebuggerBreak()
@@ -202,11 +214,11 @@ void qtDLGNanomite::OnDebuggerBreak()
 	else
 	{
 		// display callstack
-		tblCallstack->setRowCount(0);
+		callstackView->tblCallstack->setRowCount(0);
 		coreDebugger->ShowCallStack();
 
 		// display Reg
-		LoadRegView();
+		cpuRegView->LoadRegView(coreDebugger);
 
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
@@ -216,16 +228,16 @@ void qtDLGNanomite::OnDebuggerBreak()
 		if(bIsWOW64)
 		{
 			dwEIP = coreDebugger->wowProcessContext.Eip;
-			LoadStackView(coreDebugger->wowProcessContext.Esp,4);
+			stackView->LoadStackView(coreDebugger->wowProcessContext.Esp,4);
 		}
 		else
 		{
 			dwEIP = coreDebugger->ProcessContext.Rip;
-			LoadStackView(coreDebugger->ProcessContext.Rsp,8);
+			stackView->LoadStackView(coreDebugger->ProcessContext.Rsp,8);
 		}
 #else
 		dwEIP = coreDebugger->ProcessContext.Eip;
-		LoadStackView(coreDebugger->ProcessContext.Esp,4);
+		stackView->LoadStackView(coreDebugger->ProcessContext.Esp,4);
 #endif
 		// Load SourceFile to Dlg
 		wstring FilePath; 
@@ -233,7 +245,7 @@ void qtDLGNanomite::OnDebuggerBreak()
 
 		clsHelperClass::LoadSourceForAddr(FilePath,LineNumber,dwEIP,coreDebugger->GetCurrentProcessHandle());
 		if(FilePath.length() > 0 && LineNumber > 0)
-			emit OnDisplaySource(QString::fromStdWString(FilePath),LineNumber);	
+			dlgSourceViewer->OnDisplaySource(QString::fromStdWString(FilePath),LineNumber);	
 
 		// Update Disassembler
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
@@ -267,188 +279,6 @@ void qtDLGNanomite::UpdateStateBar(DWORD dwAction)
 	stateBar->showMessage(qsStateMessage);
 }
 
-void qtDLGNanomite::LoadStackView(quint64 dwESP, DWORD dwStackSize)
-{
-	if(!coreDebugger->GetDebuggingState())
-		return;
-
-	bool bCheckVar = false;
-	SIZE_T dwBytesRead = NULL;
-	wstring sFuncName,sModName;
-	LPBYTE bBuffer;
-	PTCHAR sTemp;
-	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
-	DWORD dwOldProtect = NULL,
-		dwNewProtect = PAGE_EXECUTE_READWRITE,
-		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 11),
-		dwSize = dwRowCount * dwStackSize;
-	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
-		dwEndOffset = dwESP + dwStackSize * (dwRowCount / 2);
-
-	if(hProcess == INVALID_HANDLE_VALUE)
-		return;
-
-	if(!VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwNewProtect,&dwOldProtect))
-		return;
-
-	bBuffer = (LPBYTE)clsMemManager::CAlloc(dwSize);
-	if(bBuffer == NULL)
-		return;
-
-	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,&dwBytesRead))
-		return;
-
-	sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-
-	tblStack->setRowCount(0);
-	for(size_t i = 0; i < dwRowCount; i++)
-	{
-		tblStack->insertRow(tblStack->rowCount());
-		int itemIndex = tblStack->rowCount();
-
-		// Current Offset
-		wsprintf(sTemp,L"%016I64X",(dwStartOffset + i * dwStackSize));
-		tblStack->setItem(itemIndex - 1,0,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
-
-		// Value
-		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
-#ifdef _AMD64_
-		BOOL bIsWOW64 = false;
-		IsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-		if(bIsWOW64)
-			for(int id = 3;id != -1;id--)
-				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
-		else
-			for(int id = 7;id != -1;id--)
-				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
-
-#else
-		for(int id = 3;id != -1;id--)
-			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
-#endif
-		tblStack->setItem(itemIndex - 1,1,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
-
-		// Comment
-		clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,QString::fromWCharArray(sTemp).toULongLong(0,16),
-			coreDebugger->GetCurrentProcessHandle());
-		if(sFuncName.length() > 0 && sModName.length() > 0)
-			tblStack->setItem(itemIndex - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
-		else if(sFuncName.length() > 0)
-			tblStack->setItem(itemIndex - 1,2,new QTableWidgetItem(QString::fromStdWString(sFuncName)));	
-	}
-
-	bCheckVar = VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwOldProtect,NULL);
-	clsMemManager::CFree(bBuffer);
-	clsMemManager::CFree(sTemp);
-}
-
-void qtDLGNanomite::InitListSizes()
-{
-	// List StackView
-	tblStack->horizontalHeader()->resizeSection(0,135);
-	tblStack->horizontalHeader()->resizeSection(1,135);
-	tblStack->horizontalHeader()->resizeSection(2,300);
-
-	// List LogBox
-	tblLogBox->horizontalHeader()->resizeSection(0,85);
-	tblLogBox->horizontalHeader()->resizeSection(1,300);
-
-	// List CallStack
-	tblCallstack->horizontalHeader()->resizeSection(0,135);
-	tblCallstack->horizontalHeader()->resizeSection(1,135);
-	tblCallstack->horizontalHeader()->resizeSection(2,300);
-	tblCallstack->horizontalHeader()->resizeSection(3,135);
-	tblCallstack->horizontalHeader()->resizeSection(4,300);
-	tblCallstack->horizontalHeader()->resizeSection(5,75);
-	tblCallstack->horizontalHeader()->resizeSection(6,300);
-
-	// List DisAs
-	tblDisAs->horizontalHeader()->resizeSection(0,135);
-	tblDisAs->horizontalHeader()->resizeSection(1,250);
-	tblDisAs->horizontalHeader()->resizeSection(2,300);
-	tblDisAs->horizontalHeader()->resizeSection(3,300);
-
-	// List Register
-	tblRegView->horizontalHeader()->resizeSection(0,75);
-	tblRegView->horizontalHeader()->resizeSection(1,100);
-	
-	// List DetInfo  Processes
-	dlgDetInfo->tblPIDs->horizontalHeader()->resizeSection(0,135);
-	dlgDetInfo->tblPIDs->horizontalHeader()->resizeSection(1,135);
-	dlgDetInfo->tblPIDs->horizontalHeader()->resizeSection(2,135);
-
-	// List DetInfo  Threads
-	dlgDetInfo->tblTIDs->horizontalHeader()->resizeSection(0,135);
-	dlgDetInfo->tblTIDs->horizontalHeader()->resizeSection(1,135);
-	dlgDetInfo->tblTIDs->horizontalHeader()->resizeSection(2,135);
-	dlgDetInfo->tblTIDs->horizontalHeader()->resizeSection(3,135);
-
-	// List DetInfo  Exceptions
-	dlgDetInfo->tblExceptions->horizontalHeader()->resizeSection(0,135);
-	dlgDetInfo->tblExceptions->horizontalHeader()->resizeSection(1,135);
-	dlgDetInfo->tblExceptions->horizontalHeader()->resizeSection(2,140);
-
-	// List DetInfo  Modules
-	dlgDetInfo->tblModules->horizontalHeader()->resizeSection(0,135);
-	dlgDetInfo->tblModules->horizontalHeader()->resizeSection(1,135);
-	dlgDetInfo->tblModules->horizontalHeader()->resizeSection(2,135);
-
-	// List Debug Strings
-	dlgDbgStr->tblDebugStrings->horizontalHeader()->resizeSection(0,75);
-
-	// List BP Manager
-	dlgBPManager->tblBPs->horizontalHeader()->resizeSection(0,75);
-	dlgBPManager->tblBPs->horizontalHeader()->resizeSection(1,135);
-	dlgBPManager->tblBPs->horizontalHeader()->resizeSection(2,135);
-	dlgBPManager->tblBPs->horizontalHeader()->resizeSection(3,50);
-
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
-}
-
-void qtDLGNanomite::OnStackScroll(int iValue)
-{
-	if(iValue == 5) return;
-
-	DWORD dwStackSize = NULL;
-	quint64 dwOffset = NULL;
-	QString strTemp;
-
-#ifdef _AMD64_
-	BOOL bIsWOW64 = false;
-	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-	if(bIsWOW64) dwStackSize = 4;	
-	else dwStackSize = 8;
-#else
-	dwStackSize = 4;
-#endif
-
-	if(tblStack->rowCount() > 0)
-		strTemp = tblStack->item(0,0)->text();
-	if(tblStack->rowCount() <= 0 || QString().compare(strTemp,"0") == 0)
-#ifdef _AMD64_
-		dwOffset = coreDebugger->ProcessContext.Rsp;
-#else
-		dwOffset = coreDebugger->ProcessContext.Esp;
-#endif
-	else
-		dwOffset = strTemp.toULongLong(0,16);
-
-	if(iValue < 5)
-		LoadStackView(dwOffset,dwStackSize);
-	else
-	{
-		if(((tblStack->verticalHeader()->height() + 4) / 14) % 2)
-			LoadStackView(dwOffset + (dwStackSize * ((tblStack->verticalHeader()->height() + 4) / 14)),dwStackSize);
-		else
-			LoadStackView(dwOffset + (dwStackSize * (((tblStack->verticalHeader()->height() + 4) / 14) + 1)),dwStackSize);
-	}
-	scrollStackView->setValue(5);
-}
-
 void qtDLGNanomite::OnDisAsScroll(int iValue)
 {
 	if(iValue == 5 || tblDisAs->rowCount() <= 10) return;
@@ -467,230 +297,14 @@ void qtDLGNanomite::OnDisAsScroll(int iValue)
 	scrollDisAs->setValue(5);
 }
 
-void qtDLGNanomite::LoadRegView()
-{
-	tblRegView->setRowCount(0);
-	DWORD dwEFlags = NULL;
-
-#ifdef _AMD64_
-	BOOL bIsWOW64 = false;
-
-	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-	if(bIsWOW64)
-	{
-		dwEFlags = coreDebugger->wowProcessContext.EFlags;
-		// EAX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EAX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Eax,16,16,QChar('0'))));
-		// EBX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Ebx,16,16,QChar('0'))));
-		// ECX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ECX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Ecx,16,16,QChar('0'))));
-		// EDX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EDX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Edx,16,16,QChar('0'))));
-		// ESP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Esp,16,16,QChar('0'))));
-		// EBP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Ebp,16,16,QChar('0'))));
-		// ESI
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESI"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Esi,16,16,QChar('0'))));
-		// EIP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EIP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Eip,16,16,QChar('0'))));
-		// EFlags
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EFlags"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.EFlags,16,16,QChar('0'))));
-	}
-	else
-	{
-		dwEFlags = coreDebugger->ProcessContext.EFlags;
-		// RAX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RAX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rax,16,16,QChar('0'))));
-		// RBX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RBX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rbx,16,16,QChar('0'))));
-		// RCX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RCX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rcx,16,16,QChar('0'))));
-		// RDX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RDX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rdx,16,16,QChar('0'))));
-		// RSP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RSP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rsp,16,16,QChar('0'))));
-		// RBP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RBP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rbp,16,16,QChar('0'))));
-		// RSI
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RSI"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rsi,16,16,QChar('0'))));
-		// RIP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RIP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rip,16,16,QChar('0'))));
-		// R8
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R8"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R8,16,16,QChar('0'))));
-		// R9
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R9"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R9,16,16,QChar('0'))));
-		// R10
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R10"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R10,16,16,QChar('0'))));
-		// R11
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R11"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R11,16,16,QChar('0'))));
-		// R12
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R12"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R12,16,16,QChar('0'))));
-		// R13
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R13"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R13,16,16,QChar('0'))));
-		// R14
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R14"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R14,16,16,QChar('0'))));
-		// R15
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R15"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R15,16,16,QChar('0'))));
-		// EFlags
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EFlags"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.EFlags,8,16,QChar('0'))));
-	}
-#else
-	dwEFlags = coreDebugger->ProcessContext.EFlags;
-	// EAX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EAX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Eax,16,16,QChar('0'))));
-	// EBX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Ebx,16,16,QChar('0'))));
-	// ECX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ECX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Ecx,16,16,QChar('0'))));
-	// EDX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EDX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Edx,16,16,QChar('0'))));
-	// ESP
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESP"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Esp,16,16,QChar('0'))));
-	// EBP
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBP"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Ebp,16,16,QChar('0'))));
-	// ESI
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESI"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Esi,16,16,QChar('0'))));
-	// EIP
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EIP"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Eip,16,16,QChar('0'))));
-	// EFlags
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EFlags"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0'))));
-#endif
-
-	BOOL bCF = false, // Carry Flag
-		bPF = false, // Parity Flag
-		bAF = false, // Auxiliarty carry flag
-		bZF = false, // Zero Flag
-		bSF = false, // Sign Flag
-		bTF = false, // Trap Flag
-		bIF = false, // Interrupt Flag
-		bDF = false, // Direction Flag
-		bOF = false; // Overflow Flag
-
-	bOF = (dwEFlags & 0x800) ? true : false;
-	bDF = (dwEFlags & 0x400) ? true : false;
-	bTF = (dwEFlags & 0x100) ? true : false;
-	bSF = (dwEFlags & 0x80) ? true : false;
-	bZF = (dwEFlags & 0x40) ? true : false;
-	bAF = (dwEFlags & 0x10) ? true : false;
-	bPF = (dwEFlags & 0x4) ? true : false;
-	bCF = (dwEFlags & 0x1) ? true : false;
-
-	// OF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("OF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bOF)));
-	// DF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("DF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bDF)));
-	// TF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("TF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bTF)));
-	// SF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bSF)));
-	// ZF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ZF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bZF)));
-	// AF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("AF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bAF)));
-	// PF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("PF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bPF)));
-	// CF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("CF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bCF)));
-}
-
 void qtDLGNanomite::CleanGUI(bool bKeepLogBox)
 {
-	tblStack->setRowCount(0);
+	stackView->tblStack->setRowCount(0);
 	if(!bKeepLogBox)
-		tblLogBox->setRowCount(0);
-	tblCallstack->setRowCount(0);
+		logView->tblLogBox->setRowCount(0);
+	callstackView->tblCallstack->setRowCount(0);
 	tblDisAs->setRowCount(0);
-	tblRegView->setRowCount(0);
+	cpuRegView->tblRegView->setRowCount(0);
 
 	dlgDetInfo->tblPIDs->setRowCount(0);
 	dlgDetInfo->tblTIDs->setRowCount(0);
@@ -828,99 +442,36 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 	}
 }
 
-void qtDLGNanomite::OnCustomRegViewContextMenu(QPoint qPoint)
-{
-	QMenu menu;
-
-
-	_iSelectedRow = tblRegView->indexAt(qPoint).row();
-	_iSelectedAction = 1;
-
-	menu.addAction(new QAction("Send to StackView",this));
-	menu.addAction(new QAction("Send to Disassembler",this));
-	//menu.addAction(new QAction("Send to HexView",this));
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-
-	menu.exec(QCursor::pos());
-}
-
 void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
 	_iSelectedRow = tblDisAs->indexAt(qPoint).row();
-	_iSelectedAction = 0;
+	if(_iSelectedRow < 0) return;
+
 
 	menu.addAction(new QAction("Goto Offset",this));
 	menu.addAction(new QAction("Edit Instruction",this));
 	menu.addAction(new QAction("Show Source",this));
 	menu.addAction(new QAction("Set R/EIP to this",this));
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	submenu->addAction(new QAction("Line",this));
+	submenu->addAction(new QAction("Offset",this));
+	submenu->addAction(new QAction("OpCodes",this));
+	submenu->addAction(new QAction("Mnemonic",this));
+	submenu->addAction(new QAction("Comment",this));
+
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
 }
 
-void qtDLGNanomite::OnCustomLogContextMenu(QPoint qPoint)
+void qtDLGNanomite::CustomDisassemblerMenuCallback(QAction* pAction)
 {
-	QMenu menu;
-
-	_iSelectedRow = tblLogBox->indexAt(qPoint).row();
-	_iSelectedAction = 4;
-
-	menu.addAction(new QAction("Clear Log",this));
-	menu.addAction(new QAction("Write Log to File",this));
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-
-	menu.exec(QCursor::pos());
-}
-
-void qtDLGNanomite::OnCustomCallstackContextMenu(QPoint qPoint)
-{
-	QMenu menu;
-
-	_iSelectedRow = tblCallstack->indexAt(qPoint).row();
-	_iSelectedAction = 2;
-
-	menu.addAction(new QAction("Send to Disassembler",this));
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-
-	menu.exec(QCursor::pos());
-}
-
-void qtDLGNanomite::MenuCallback(QAction* pAction)
-{
-	if(QString().compare(pAction->text(),"Clear Log") == 0)
-		tblLogBox->setRowCount(0);	
-	else if(QString().compare(pAction->text(),"Write Log to File") == 0)
-	{
-		QString fileName = QFileDialog::getSaveFileName(NULL,"Please select a place to save the Logfile",QDir::currentPath(),"Log Files (*.log)");
-		QFile tempOutput(fileName);
-		tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
-		QTextStream out(&tempOutput);
-
-		for(int i = 0; i < tblLogBox->rowCount(); i++)
-			out << tblLogBox->item(i,0)->text() << "\t" << tblLogBox->item(i,1)->text() << "\n";
-
-		tempOutput.close();
-		MessageBoxW(NULL,L"The log file has been written to disk!",L"Nanomite",MB_OK);
-	}
-
 	if(!coreDebugger->GetDebuggingState()) return;
 
-	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
-	{
-		if(_iSelectedAction == 1)
-		{
-			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-				OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
-		}
-		else if(_iSelectedAction == 2)
-		{
-			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-				OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
-		}
-	}
-	else if(QString().compare(pAction->text(),"Set R/EIP to this") == 0)
+	if(QString().compare(pAction->text(),"Set R/EIP to this") == 0)
 	{
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
@@ -938,34 +489,10 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
 	{
-		if(_iSelectedAction == 0)
-		{
-			qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
-			connect(dlgAssembler,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
-			dlgAssembler->show();
-		}
+		qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
+		connect(dlgAssembler,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
+		dlgAssembler->show();
 	}
-	else if(QString().compare(pAction->text(),"Send to StackView") == 0)
-	{
-#ifdef _AMD64_
-		BOOL bIsWOW64 = false;
-		if(clsAPIImport::pIsWow64Process)
-			clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-		if(bIsWOW64)
-			LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),4);
-		else
-			LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),8);
-#else
-		LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),4);
-#endif
-	}
-	//else if(QString().compare(pAction->text(),"Send to HexView") == 0)
-	//{
-	//	qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,coreDebugger->GetCurrentPID(),
-	//		,);
-	//	newView->show();
-	//}
 	else if(QString().compare(pAction->text(),"Goto Offset") == 0)
 	{
 		bool bOk = false;
@@ -982,30 +509,35 @@ void qtDLGNanomite::MenuCallback(QAction* pAction)
 		else
 			MessageBoxW(NULL,L"Sorry, there is no source available!",L"Nanomite",MB_OK);
 	}
-}
-
-void qtDLGNanomite::OnRegViewChangeRequest(QTableWidgetItem *pItem)
-{
-	if(!coreDebugger->GetDebuggingState())
-		return;
-
-	qtDLGRegEdit *newRegEditWindow;
-#ifdef _AMD64_
-	BOOL bIsWOW64 = false;
-	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-	if(bIsWOW64)
-		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->wowProcessContext,false);
-	else
-		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->ProcessContext,true);			
-#else
-	newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&coreDebugger->ProcessContext,false);			
-#endif	
-
-	connect(newRegEditWindow,SIGNAL(OnUpdateRegView()),this,SLOT(LoadRegView()));
-	newRegEditWindow->exec();
-	// show qtDLGRegEdit
+	else if(QString().compare(pAction->text(),"Line") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(QString("%1:%2:%3:%4")
+			.arg(tblDisAs->item(_iSelectedRow,0)->text())
+			.arg(tblDisAs->item(_iSelectedRow,1)->text())
+			.arg(tblDisAs->item(_iSelectedRow,2)->text())
+			.arg(tblDisAs->item(_iSelectedRow,3)->text()));
+	}
+	else if(QString().compare(pAction->text(),"Offset") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblDisAs->item(_iSelectedRow,0)->text());
+	}
+	else if(QString().compare(pAction->text(),"OpCodes") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblDisAs->item(_iSelectedRow,1)->text());
+	}
+	else if(QString().compare(pAction->text(),"Mnemonic") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblDisAs->item(_iSelectedRow,2)->text());
+	}
+	else if(QString().compare(pAction->text(),"Comment") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblDisAs->item(_iSelectedRow,3)->text());
+	}
 }
 
 void qtDLGNanomite::resizeEvent(QResizeEvent *event)
@@ -1037,7 +569,7 @@ void qtDLGNanomite::OnDisAsReturnPressed()
 	quint64 dwSelectedVA = NULL;
 	QString tempSelectedString = currentSelectedItems.value(2)->text();
 
-	if(tempSelectedString.contains("dword ptr") || tempSelectedString.contains("qword ptr"))
+	if(tempSelectedString.contains("ptr") || tempSelectedString.contains("ptr"))
 		dwSelectedVA = tempSelectedString.split(" ")[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16);
 	else
 		dwSelectedVA = tempSelectedString.split(" ")[1].replace("h","").toULongLong(0,16);
@@ -1056,41 +588,15 @@ void qtDLGNanomite::OnDisAsReturn()
 	coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),_OffsetWalkHistory.takeLast());
 }
 
-void qtDLGNanomite::OnCallstackDisplaySource(QTableWidgetItem *pItem)
-{
-	QString sourcePath = tblCallstack->item(pItem->row(),6)->text();
-	int LineNumber = tblCallstack->item(pItem->row(),5)->text().toInt();
-
-	if(LineNumber <= 0 && sourcePath.isEmpty()) return;
-
-	emit OnDisplaySource(sourcePath,LineNumber);
-	dlgSourceViewer->show();
-
-	return;
-}
-
 bool qtDLGNanomite::eventFilter(QObject *pObject, QEvent *event)
-{
-	
-	if(event->type() == QEvent::Wheel)
+{	
+	if(event->type() == QEvent::Wheel && pObject == tblDisAs)
 	{
 		QWheelEvent *pWheel = (QWheelEvent*)event;
 		
-		if(pObject == tblDisAs)
-		{
-			OnDisAsScroll(pWheel->delta() * -1);
+		OnDisAsScroll(pWheel->delta() * -1);
 			return true;
-		}
-		else if(pObject == tblStack)
-		{
-			OnStackScroll(pWheel->delta() * -1);
-			return true;
-		}
 	}
-	//else if(event->type() == QEvent::Resize)
-	//{
-	//	OnDebuggerBreak();
-	//}
 	return false;
 }
 

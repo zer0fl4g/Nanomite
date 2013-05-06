@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #ifndef QTDLGNANOMITE_H
 #define QTDLGNANOMITE_H
 
@@ -64,16 +80,13 @@ public:
 	qtDLGStack		*stackView;
 	qtDLGLogView	*logView;	
 
-	QTableWidget	*tblLogBox;
-	QTableWidget	*tblCallstack;
-	QTableWidget	*tblStack;
-	QScrollBar		*scrollStackView;
-	QTableWidget	*tblRegView;
-
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
 	qtDLGNanomite(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGNanomite();
+
+public slots:
+	void OnDisplayDisassembly(quint64 dwEIP);
 
 private slots:
 	void action_FileOpenNewFile();
@@ -106,50 +119,27 @@ private slots:
 	void action_DebugTraceShow();
 
 	void OnF2BreakPointPlace();
-	void OnDisplayDisassembly(quint64 dwEIP);
 	void OnDisAsScroll(int iValue);
-	void OnStackScroll(int iValue);
-	void OnRegViewChangeRequest(QTableWidgetItem *pItem);
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
-	void OnCustomRegViewContextMenu(QPoint qPoint);
-	void OnCustomCallstackContextMenu(QPoint qPoint);
 	void OnCustomDisassemblerContextMenu(QPoint qPoint);
-	void OnCustomLogContextMenu(QPoint qPoint);
 	void OnDisAsReturnPressed();
 	void OnDisAsReturn();
-	void OnCallstackDisplaySource(QTableWidgetItem *pItem);
-	void LoadRegView();
 	void GenerateMenuCallback(QAction *qAction);
-	void MenuCallback(QAction*);
-
-signals:
-	void OnDisplaySource(QString,int);
+	void CustomDisassemblerMenuCallback(QAction*);
 
 private:
 	int _iMenuPID;
 	int _iSelectedRow;
-	int _iSelectedAction;
-	/*
-	0 = from Disassembler
-	1 = from RegView
-	2 = from Callstack
-	3 = from StackView
-	4 = from LogBox
-	*/
 
 	QList<quint64> _OffsetWalkHistory;
 
 	static qtDLGNanomite *qtDLGMyWindow;
-	
-
 
 	void resizeEvent(QResizeEvent *event);
-	void InitListSizes();
 	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void UpdateStateBar(DWORD dwAction);
-	void LoadStackView(quint64 dwESP, DWORD dwStackSize);
 	void LoadWidgets();
 
 protected:

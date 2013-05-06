@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "qtDLGNanomite.h"
 #include "qtDLGAbout.h"
 #include "qtDLGAttach.h"
@@ -257,7 +273,10 @@ void qtDLGNanomite::action_DebugStepOver()
 		((i.value().ASM.contains("jnb") || i.value().ASM.contains("jnc") || i.value().ASM.contains("jae")) && !bCF))
 	{
 		// jump conditions are set so lets step over jump
-		coreDebugger->StepOver(i.value().ASM.split(" ")[1].replace("h","").toULongLong(0,16));
+		if(i.value().ASM.contains("ptr"))
+			coreDebugger->StepOver(i.value().ASM.split(" ")[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16));	
+		else
+			coreDebugger->StepOver(i.value().ASM.split(" ")[1].replace("h","").toULongLong(0,16));
 	}
 	else
 	{
@@ -275,7 +294,7 @@ void qtDLGNanomite::action_DebugStepOut()
 	if(!coreDebugger->GetDebuggingState()) return;
 	qtDLGTrace::clearTraceData();
 
-	coreDebugger->StepOver(tblCallstack->item(0,3)->text().toULongLong(0,16));
+	coreDebugger->StepOver(callstackView->tblCallstack->item(0,3)->text().toULongLong(0,16));
 }
 
 void qtDLGNanomite::action_DebugRunToUserCode()
@@ -330,9 +349,9 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 		CurAddress += mbi.RegionSize;
 	}
 
-	for(int i = 0; i < tblCallstack->rowCount(); i++)
+	for(int i = 0; i < callstackView->tblCallstack->rowCount(); i++)
 	{
-		DWORD64 currentFunction = tblCallstack->item(i,3)->text().toULongLong(0,16);
+		DWORD64 currentFunction = callstackView->tblCallstack->item(i,3)->text().toULongLong(0,16);
 
 		if(currentFunction >= ModuleBase && currentFunction < (ModuleBase + ModuleSize))
 		{

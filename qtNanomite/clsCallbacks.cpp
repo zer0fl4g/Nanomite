@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "clsCallbacks.h"
 #include "clsMemManager.h"
 
@@ -11,26 +27,6 @@ using namespace std;
 clsCallbacks::clsCallbacks() {}
 
 clsCallbacks::~clsCallbacks(){}
-
-int clsCallbacks::OnLog(wstring sLog)
-{
-	time_t tTime;
-	tm* timeInfo;
-	time(&tTime);
-	timeInfo = localtime(&tTime);
-
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
-	myMainWindow->tblLogBox->insertRow(myMainWindow->tblLogBox->rowCount());
-	
-	myMainWindow->tblLogBox->setItem(myMainWindow->tblLogBox->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo->tm_hour,timeInfo->tm_min,timeInfo->tm_sec)));
-	
-	myMainWindow->tblLogBox->setItem(myMainWindow->tblLogBox->rowCount() - 1,1,
-		new QTableWidgetItem(QString::fromStdWString(sLog)));
-	
-	myMainWindow->tblLogBox->scrollToBottom();
-	return 0;
-}
 
 int clsCallbacks::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
 {
@@ -167,53 +163,6 @@ int clsCallbacks::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded)
 				QString().compare(myMainWindow->dlgDetInfo->tblModules->item(i,1)->text(),QString("%1").arg(dwEP,16,16,QChar('0'))) == 0)
 				myMainWindow->dlgDetInfo->tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
 	}
-	return 0;
-}
-
-int clsCallbacks::OnCallStack(quint64 dwStackAddr,
-						 quint64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
-						 quint64 dwEIP,wstring sFuncName,wstring sFuncModule,
-						 wstring sSourceFilePath,int iSourceLineNum)
-{
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
-	myMainWindow->tblCallstack->insertRow(myMainWindow->tblCallstack->rowCount());
-
-	// Stack Address
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,0,
-		new QTableWidgetItem(QString("%1").arg(dwStackAddr,16,16,QChar('0'))));
-
-	// Func Addr
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,1,
-		new QTableWidgetItem(QString("%1").arg(dwEIP,16,16,QChar('0'))));
-
-	// <mod.func>
-	if(sFuncModule.length() > 0 && sFuncName.length() > 0)
-		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString::fromStdWString(sFuncName))));
-	else if(sFuncModule.length() > 0 && sFuncName.length() <= 0)
-		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString("%1").arg(dwEIP,16,16,QChar('0')))));
-
-	// Return To
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,3,
-		new QTableWidgetItem(QString("%1").arg(dwReturnTo,16,16,QChar('0'))));
-
-	// Return To <mod.func>
-	if(sFuncName.length() > 0 && sModuleName.length() > 0)
-		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString::fromStdWString(sReturnToFunc))));
-	else if(sFuncName.length() <= 0 && sModuleName.length() > 0)
-		myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString("%1").arg(dwReturnTo,16,16,QChar('0')))));
-
-	// Source Line
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,5,
-		new QTableWidgetItem(QString().sprintf("%d",iSourceLineNum)));
-	
-	// Source File
-	myMainWindow->tblCallstack->setItem(myMainWindow->tblCallstack->rowCount() - 1,6,
-		new QTableWidgetItem(QString::fromStdWString(sSourceFilePath)));
-
 	return 0;
 }
 

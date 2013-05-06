@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "qtDLGDetailInfo.h"
 #include "qtDLGPEEditor.h"
 
@@ -13,6 +29,27 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
+
+	// List DetInfo  Processes
+	tblPIDs->horizontalHeader()->resizeSection(0,135);
+	tblPIDs->horizontalHeader()->resizeSection(1,135);
+	tblPIDs->horizontalHeader()->resizeSection(2,135);
+
+	// List DetInfo  Threads
+	tblTIDs->horizontalHeader()->resizeSection(0,135);
+	tblTIDs->horizontalHeader()->resizeSection(1,135);
+	tblTIDs->horizontalHeader()->resizeSection(2,135);
+	tblTIDs->horizontalHeader()->resizeSection(3,135);
+
+	// List DetInfo  Exceptions
+	tblExceptions->horizontalHeader()->resizeSection(0,135);
+	tblExceptions->horizontalHeader()->resizeSection(1,135);
+	tblExceptions->horizontalHeader()->resizeSection(2,140);
+
+	// List DetInfo  Modules
+	tblModules->horizontalHeader()->resizeSection(0,135);
+	tblModules->horizontalHeader()->resizeSection(1,135);
+	tblModules->horizontalHeader()->resizeSection(2,135);
 
 	connect(tblTIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomTIDContextMenu(QPoint)));
 	connect(tblPIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomPIDContextMenu(QPoint)));
@@ -32,6 +69,8 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblPIDs->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
 	_SelectedOffset = tblPIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
@@ -47,6 +86,8 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblTIDs->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
 	_SelectedOffset = tblTIDs->item(_iSelectedRow,2)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
@@ -72,6 +113,8 @@ void qtDLGDetailInfo::OnCustomExceptionContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblExceptions->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
 	_SelectedOffset = tblExceptions->item(_iSelectedRow,0)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
@@ -87,6 +130,8 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblModules->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
 	_SelectedOffset = tblModules->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));

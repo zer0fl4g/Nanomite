@@ -1,3 +1,19 @@
+/*
+ * 	This file is part of Nanomite.
+ *
+ *    Nanomite is free software: you can redistribute it and/or modify
+ *    it under the terms of the GNU General Public License as published by
+ *    the Free Software Foundation, either version 3 of the License, or
+ *    (at your option) any later version.
+ *
+ *    Nanomite is distributed in the hope that it will be useful,
+ *    but WITHOUT ANY WARRANTY; without even the implied warranty of
+ *    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+ *    GNU General Public License for more details.
+ *
+ *    You should have received a copy of the GNU General Public License
+ *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
+ */
 #include "qtDLGMemoryView.h"
 #include "qtDLGHexView.h"
 
@@ -50,10 +66,19 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 	QMenu menu;
 
 	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to HexView",this));
 	menu.addAction(new QAction("Dump to File",this));
+	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	submenu->addAction(new QAction("Line",this));
+	submenu->addAction(new QAction("Base Address",this));
+	submenu->addAction(new QAction("Size",this));
+	submenu->addAction(new QAction("Module",this));
+	submenu->addAction(new QAction("Type",this));
+	submenu->addAction(new QAction("Access",this));
 
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -76,6 +101,41 @@ void qtDLGMemoryView::MenuCallback(QAction* pAction)
 			(PTCHAR)tblMemoryView->item(_iSelectedRow,3)->text().utf16(),
 			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
 			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
+	}
+	else if(QString().compare(pAction->text(),"Line") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(QString("%1:%2:%3:%4:%5")
+			.arg(tblMemoryView->item(_iSelectedRow,0)->text())
+			.arg(tblMemoryView->item(_iSelectedRow,1)->text())
+			.arg(tblMemoryView->item(_iSelectedRow,2)->text())
+			.arg(tblMemoryView->item(_iSelectedRow,3)->text())
+			.arg(tblMemoryView->item(_iSelectedRow,4)->text()));
+	}
+	else if(QString().compare(pAction->text(),"Base Address") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblMemoryView->item(_iSelectedRow,1)->text());
+	}
+	else if(QString().compare(pAction->text(),"Size") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblMemoryView->item(_iSelectedRow,2)->text());
+	}
+	else if(QString().compare(pAction->text(),"Module") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblMemoryView->item(_iSelectedRow,3)->text());
+	}
+	else if(QString().compare(pAction->text(),"Type") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblMemoryView->item(_iSelectedRow,4)->text());
+	}
+	else if(QString().compare(pAction->text(),"Access") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblMemoryView->item(_iSelectedRow,5)->text());
 	}
 }
 
