@@ -30,9 +30,17 @@ public:
 	~qtDLGHandleView();
 
 private:
-	qint32 _iPID;
+	int _iPID,
+		_iForEntry,
+		_iForEnd,
+		_iSelectedRow;
 
 	void InsertDataIntoTable(DWORD dwPID,DWORD dwHandle,PTCHAR ptType,PTCHAR ptName);
+
+private slots:
+	void OnDisplayHandles();
+	void OnCustomContextMenuRequested(QPoint qPoint);
+	void MenuCallback(QAction* pAction);
 };
 
 #endif

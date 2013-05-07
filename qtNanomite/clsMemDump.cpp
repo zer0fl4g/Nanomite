@@ -15,26 +15,31 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "clsMemDump.h"
+#include "clsMemManager.h"
 
 clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD64 Size)
 {
 	DWORD	OldProtection	= NULL,
-			NewProtection	= PAGE_EXECUTE_READWRITE,
+			NewProtection	= PAGE_READWRITE,
 			BytesWrote		= NULL;
 	SIZE_T	BytesReaded		= NULL;
+	LPVOID pBuffer			= malloc(Size);
 
-	if(!VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,NewProtection,&OldProtection))
-	{
-		MessageBoxW(NULL,L"Failed to access Memory!",L"Nanomite",MB_OK);
-		return;
-	}
-	
-	LPVOID pBuffer = malloc(Size);
 	if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
 	{
-		MessageBoxW(NULL,L"Failed to read Memory!",L"Nanomite",MB_OK);
-		free(pBuffer);
-		return;
+		if(!VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,NewProtection,&OldProtection))
+		{
+			MessageBoxW(NULL,L"Failed to access Memory!",L"Nanomite",MB_OK);
+			free(pBuffer);
+			return;
+		}
+
+		if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
+		{
+			MessageBoxW(NULL,L"Failed to read Memory!",L"Nanomite",MB_OK);
+			free(pBuffer);
+			return;
+		}
 	}
 	
 	PTCHAR FileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));

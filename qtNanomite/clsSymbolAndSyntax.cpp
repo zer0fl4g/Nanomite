@@ -16,6 +16,7 @@
  */
 #include "clsSymbolAndSyntax.h"
 #include "clsHelperClass.h"
+#include "clsMemManager.h"
 
 #include <string>
 
@@ -69,10 +70,10 @@ bool clsSymbolAndSyntax::CreateDataForRow(DisAsDataRow *pDataRow)
 		bNeedsComment = true;
 	}
 	else if(strInstructions[0].compare("push") == 0 ||
-		strInstructions[0].compare("pushf") == 0 ||
-		strInstructions[0].compare("popf") == 0 ||
-		strInstructions[0].compare("pushfq") == 0 ||
-		strInstructions[0].compare("popfq") == 0 ||
+		strInstructions[0].compare("pushf") == 0	||
+		strInstructions[0].compare("popf") == 0		||
+		strInstructions[0].compare("pushfq") == 0	||
+		strInstructions[0].compare("popfq") == 0	||
 		strInstructions[0].compare("pop") == 0)
 	{
 		itemStyle |= COLOR_STACK;
@@ -89,23 +90,28 @@ bool clsSymbolAndSyntax::CreateDataForRow(DisAsDataRow *pDataRow)
 		itemStyle |= COLOR_MOVE;
 	}
 	else if(strInstructions[0].compare("add") == 0	||
-		strInstructions[0].compare("xor") == 0	||
-		strInstructions[0].compare("rol") == 0	||
-		strInstructions[0].compare("ror") == 0	||
-		strInstructions[0].compare("shl") == 0	||
-		strInstructions[0].compare("shr") == 0	||
-		strInstructions[0].compare("rcl") == 0	||
-		strInstructions[0].compare("rcr") == 0	||
-		strInstructions[0].compare("sar") == 0	||
-		strInstructions[0].compare("sal") == 0	||
-		strInstructions[0].compare("mul") == 0	||
+		strInstructions[0].compare("xor") == 0		||
+		strInstructions[0].compare("rol") == 0		||
+		strInstructions[0].compare("ror") == 0		||
+		strInstructions[0].compare("shl") == 0		||
+		strInstructions[0].compare("shr") == 0		||
+		strInstructions[0].compare("rcl") == 0		||
+		strInstructions[0].compare("rcr") == 0		||
+		strInstructions[0].compare("sar") == 0		||
+		strInstructions[0].compare("sal") == 0		||
+		strInstructions[0].compare("mul") == 0		||
 		strInstructions[0].compare("sub") == 0)
 	{
 		itemStyle |= COLOR_MATH;
 	}
 
 	if(bNeedsComment)
-		pDataRow->Comment = CreateSymbols(strInstructions[1].replace("h","").toULongLong(0,16));
+	{
+		if(strInstructions.count() > 3)
+			pDataRow->Comment = CreateSymbols(strInstructions[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16));
+		else
+			pDataRow->Comment = CreateSymbols(strInstructions[1].replace("h","").toULongLong(0,16));
+	}
 	else
 		pDataRow->Comment = "";
 

@@ -18,6 +18,9 @@
 
 #include "clsMemManager.h"
 
+#include <QClipboard>
+#include <QMenu>
+
 qtDLGDebugStrings::qtDLGDebugStrings(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
@@ -27,9 +30,44 @@ qtDLGDebugStrings::qtDLGDebugStrings(QWidget *parent, Qt::WFlags flags)
 	tblDebugStrings->horizontalHeader()->resizeSection(0,75);
 
 	setLayout(verticalLayout);
+
+	connect(tblDebugStrings,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 }
 
 qtDLGDebugStrings::~qtDLGDebugStrings()
 {
 
+}
+
+void qtDLGDebugStrings::OnCustomContextMenuRequested(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblDebugStrings->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
+	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	submenu->addAction(new QAction("Line",this));
+	submenu->addAction(new QAction("Debug String",this));
+
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));	
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGDebugStrings::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Line") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(QString("%1:%2")
+			.arg(tblDebugStrings->item(_iSelectedRow,0)->text())
+			.arg(tblDebugStrings->item(_iSelectedRow,1)->text()));
+	}
+	else if(QString().compare(pAction->text(),"Debug String") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblDebugStrings->item(_iSelectedRow,1)->text());
+	}
 }

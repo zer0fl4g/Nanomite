@@ -15,11 +15,15 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGStringView.h"
+
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
 #include <fstream>
 #include <sstream>
+
+#include <QMenu>
+#include <QClipboard>
 
 using namespace std;
 
@@ -47,6 +51,8 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
 			_iForEntry = i; _iForEnd = i +1;
 	}
+	
+	connect(tblStringView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayStrings()));
 
 	DisplayStrings();
@@ -171,8 +177,13 @@ void qtDLGStringView::DisplayStrings()
 					new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->PIDs[i].dwPID)));
 
 				// Offset
-				//tblStringView->setItem(tblStringView->rowCount() - 1,1,
-				//	new QTableWidgetItem(QString().sprintf("%08X",inputFile.tellg())));
+				int offset = inputFile.tellg();
+				if(offset > 0)
+					tblStringView->setItem(tblStringView->rowCount() - 1,1,
+						new QTableWidgetItem(QString("%1").arg(offset,8,16,QChar('0'))));
+				else 
+					tblStringView->setItem(tblStringView->rowCount() - 1,1,
+						new QTableWidgetItem(""));
 
 				// String
 				tblStringView->setItem(tblStringView->rowCount() - 1,2,
@@ -182,3 +193,44 @@ void qtDLGStringView::DisplayStrings()
 	}
 	clsMemManager::CFree(sTemp);
 }
+
+void qtDLGStringView::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Line") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(QString("%1:%2:%3")
+			.arg(tblStringView->item(_iSelectedRow,0)->text())
+			.arg(tblStringView->item(_iSelectedRow,1)->text())
+			.arg(tblStringView->item(_iSelectedRow,2)->text()));
+	}
+	else if(QString().compare(pAction->text(),"Offset") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblStringView->item(_iSelectedRow,1)->text());
+	}
+	else if(QString().compare(pAction->text(),"String") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblStringView->item(_iSelectedRow,2)->text());
+	}
+}
+
+void qtDLGStringView::OnCustomContextMenuRequested(QPoint qPoint)
+{
+	QMenu menu;
+
+	_iSelectedRow = tblStringView->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
+	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	submenu->addAction(new QAction("Line",this));
+	submenu->addAction(new QAction("Offset",this));
+	submenu->addAction(new QAction("String",this));
+
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+

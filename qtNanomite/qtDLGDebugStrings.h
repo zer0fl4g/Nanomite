@@ -26,6 +26,13 @@ class qtDLGDebugStrings : public QWidget, public Ui_qtDLGDebugStringsClass
 public:
 	qtDLGDebugStrings(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGDebugStrings();
+
+private:
+	int _iSelectedRow;
+
+	private slots:
+		void MenuCallback(QAction*);
+		void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
 #endif

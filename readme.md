@@ -43,6 +43,7 @@
 + fixed a bug which didn´t display exceptions if a breakpoint was set on this offset
 + fixed a bug in disassembler which may caused application crashes due to wrong memory protection
 + fixed a possible crash in context menus
++ fixed display of the offset in string view
 + improvements on AttachDlg
 + added cleanup on debugge termination
 + added process patching
@@ -53,9 +54,10 @@
 + added possibility to copy data to clipboard
 + added possibility to break on new Processes, Threads or DLL loads
 + added dockable widgets to the mainview
++ added save of window sizes and positions on close
 
 ####Notes:
-	- You have now the possibility to patch the memory of a process. Currently it is not possible to save this
+	- You have now the possibility to patch the memory of a process. Currently it is not possible to save the
 	  changes to disk but this will be integrated also.
 	- Some context menus offer the possibility to copy the data from the table to the clipboard
 

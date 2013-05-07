@@ -22,6 +22,8 @@
 
 #include <TlHelp32.h>
 
+#include <QClipboard>
+
 qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 	: QWidget(parent, flags)
 {
@@ -70,8 +72,16 @@ void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
 
 	menu.addAction(new QAction("Send Offset To HexView",this));
 	menu.addAction(new QAction("Dump Memory To File",this));
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	submenu->addAction(new QAction("Line",this));
+	submenu->addAction(new QAction("HeapID",this));
+	submenu->addAction(new QAction("Address",this));
+	submenu->addAction(new QAction("Block Size",this));
+	submenu->addAction(new QAction("Count",this));
+	submenu->addAction(new QAction("Flags",this));
 
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));	
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
 }
@@ -94,7 +104,42 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 			tblHeapBlocks->item(_iSelectedRow,2)->text().toULongLong(0,16),
 			tblHeapBlocks->item(_iSelectedRow,3)->text().toULongLong(0,16));
 	}
-	_iSelectedRow = -1;
+	else if(QString().compare(pAction->text(),"Line") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(QString("%1:%2:%3:%4:%5:%6")
+			.arg(tblHeapBlocks->item(_iSelectedRow,0)->text())
+			.arg(tblHeapBlocks->item(_iSelectedRow,1)->text())
+			.arg(tblHeapBlocks->item(_iSelectedRow,2)->text())
+			.arg(tblHeapBlocks->item(_iSelectedRow,3)->text())
+			.arg(tblHeapBlocks->item(_iSelectedRow,4)->text())
+			.arg(tblHeapBlocks->item(_iSelectedRow,5)->text()));
+	}
+	else if(QString().compare(pAction->text(),"HeapID") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,1)->text());
+	}
+	else if(QString().compare(pAction->text(),"Address") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,2)->text());
+	}
+	else if(QString().compare(pAction->text(),"Block Size") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,3)->text());
+	}
+	else if(QString().compare(pAction->text(),"Block Count") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,4)->text());
+	}
+	else if(QString().compare(pAction->text(),"Flags") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,5)->text());
+	}
 }
 
 void qtDLGHeapView::OnSelectionChanged()

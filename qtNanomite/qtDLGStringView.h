@@ -30,13 +30,16 @@ public:
 	~qtDLGStringView();
 
 private:
-	qint32 _iPID;
-	int _iForEntry;
-	int _iForEnd;
+	int _iPID,
+		_iForEntry,
+		_iForEnd,
+		_iSelectedRow;
 
 	qtDLGNanomite *myMainWindow;
 
 	private slots:
+		void OnCustomContextMenuRequested(QPoint qPoint);
+		void MenuCallback(QAction* pAction);
 		void DisplayStrings();
 };
 

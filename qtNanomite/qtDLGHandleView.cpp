@@ -21,6 +21,8 @@
 #include "NativeHeaders.h"
 #include "clsMemManager.h"
 
+#include <QClipboard>
+
 qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	: QWidget(parent, flags)
 {
@@ -30,24 +32,56 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 	_iPID = iPID;
 
+	connect(tblHandleView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
+	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(OnDisplayHandles()));
+
 	// Init List
 	tblHandleView->horizontalHeader()->resizeSection(0,75);
 	tblHandleView->horizontalHeader()->resizeSection(1,135);
 	tblHandleView->horizontalHeader()->resizeSection(2,135);
 
-	// Display
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
-	int iForEntry = 0;
-	int iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	_iForEntry = 0;
+	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
 	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			iForEntry = i; iForEnd = i + 1;
+			_iForEntry = i; _iForEnd = i + 1;
 	}
 
-	for(int i = iForEntry; i < iForEnd;i++)
+	OnDisplayHandles();
+}
+
+qtDLGHandleView::~qtDLGHandleView()
+{
+
+}
+
+void qtDLGHandleView::InsertDataIntoTable(DWORD dwPID,DWORD dwHandle,PTCHAR ptType,PTCHAR ptName)
+{
+	tblHandleView->insertRow(tblHandleView->rowCount());
+
+	tblHandleView->setItem(tblHandleView->rowCount() - 1,0,
+		new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+
+	tblHandleView->setItem(tblHandleView->rowCount() - 1,1,
+		new QTableWidgetItem(QString().sprintf("%08X",dwHandle)));
+
+	tblHandleView->setItem(tblHandleView->rowCount() - 1,2,
+		new QTableWidgetItem(QString::fromStdWString(ptType)));
+
+	tblHandleView->setItem(tblHandleView->rowCount() - 1,3,
+		new QTableWidgetItem(QString::fromStdWString(ptName)));
+}
+
+void qtDLGHandleView::OnDisplayHandles()
+{
+	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+
+	tblHandleView->setRowCount(0);
+	for(int i = _iForEntry; i < _iForEnd;i++)
 	{
 		NTSTATUS status;
 		ULONG handleInfoSize = 0x10000;
@@ -127,24 +161,48 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	}
 }
 
-qtDLGHandleView::~qtDLGHandleView()
+void qtDLGHandleView::OnCustomContextMenuRequested(QPoint qPoint)
 {
+	QMenu menu;
 
+	_iSelectedRow = tblHandleView->indexAt(qPoint).row();
+	if(_iSelectedRow < 0) return;
+
+	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	submenu->addAction(new QAction("Line",this));
+	submenu->addAction(new QAction("Handle",this));
+	submenu->addAction(new QAction("Type",this));
+	submenu->addAction(new QAction("Name",this));
+
+	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
 }
 
-void qtDLGHandleView::InsertDataIntoTable(DWORD dwPID,DWORD dwHandle,PTCHAR ptType,PTCHAR ptName)
+void qtDLGHandleView::MenuCallback(QAction* pAction)
 {
-	tblHandleView->insertRow(tblHandleView->rowCount());
-
-	tblHandleView->setItem(tblHandleView->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
-
-	tblHandleView->setItem(tblHandleView->rowCount() - 1,1,
-		new QTableWidgetItem(QString().sprintf("%08X",dwHandle)));
-
-	tblHandleView->setItem(tblHandleView->rowCount() - 1,2,
-		new QTableWidgetItem(QString::fromStdWString(ptType)));
-
-	tblHandleView->setItem(tblHandleView->rowCount() - 1,3,
-		new QTableWidgetItem(QString::fromStdWString(ptName)));
+	if(QString().compare(pAction->text(),"Line") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(QString("%1:%2:%3")
+			.arg(tblHandleView->item(_iSelectedRow,1)->text())
+			.arg(tblHandleView->item(_iSelectedRow,2)->text())
+			.arg(tblHandleView->item(_iSelectedRow,3)->text()));
+	}
+	else if(QString().compare(pAction->text(),"Handle") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHandleView->item(_iSelectedRow,1)->text());
+	}
+	else if(QString().compare(pAction->text(),"Type") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHandleView->item(_iSelectedRow,2)->text());
+	}
+	else if(QString().compare(pAction->text(),"Name") == 0)
+	{
+		QClipboard* clipboard = QApplication::clipboard();
+		clipboard->setText(tblHandleView->item(_iSelectedRow,3)->text());
+	}
 }

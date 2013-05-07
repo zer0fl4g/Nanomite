@@ -96,12 +96,11 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	// Callbacks from DetailInfo to PEManager
 	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
+	// Callbacks from DetailView to GUI
+	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),this,SLOT(OnDisplayDisassembly(quint64)));
 
 	// Callbacks from Disassambler Thread to GUI
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
-
-	// Callbacks from GUI to Disassembler
-	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 
 	// Actions for the MainMenu and Toolbar
 	connect(actionFile_OpenNew, SIGNAL(triggered()), this, SLOT(action_FileOpenNewFile()));
@@ -157,8 +156,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// List DisAs
 	tblDisAs->horizontalHeader()->resizeSection(0,135);
 	tblDisAs->horizontalHeader()->resizeSection(1,250);
-	tblDisAs->horizontalHeader()->resizeSection(2,300);
-	tblDisAs->horizontalHeader()->resizeSection(3,300);
+	tblDisAs->horizontalHeader()->resizeSection(2,310);
+	tblDisAs->horizontalHeader()->resizeSection(3,310);
 }
 
 qtDLGNanomite::~qtDLGNanomite()
