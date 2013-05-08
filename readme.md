@@ -44,6 +44,7 @@
 + fixed a bug in disassembler which may caused application crashes due to wrong memory protection
 + fixed a possible crash in context menus
 + fixed display of the offset in string view
++ fixed unvalid breakpoint offsets caused by alsr
 + improvements on AttachDlg
 + added cleanup on debugge termination
 + added process patching

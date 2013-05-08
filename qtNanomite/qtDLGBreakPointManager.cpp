@@ -52,7 +52,7 @@ void qtDLGBreakPointManager::OnClose()
 
 void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int iType)
 {
-	if(newBP.dwHandle != 0x2)
+	if(newBP.dwHandle == 0x1)
 	{
 		tblBPs->insertRow(tblBPs->rowCount());
 		tblBPs->setItem(tblBPs->rowCount() - 1,0,new QTableWidgetItem(QString("%1").arg(newBP.dwPID,8,16,QChar('0'))));
@@ -88,6 +88,19 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int iType)
 			break;
 		}
 		tblBPs->setItem(tblBPs->rowCount() - 1,4,new QTableWidgetItem(TempString));
+	}
+	else if(newBP.dwHandle == 0x3)
+	{ // BP got new Offset
+		for(int i = 0; i < tblBPs->rowCount(); i++)
+		{
+			if(tblBPs->item(i,1)->text().toULongLong(0,16) == newBP.dwOldOffset)
+			{
+				tblBPs->removeRow(i);
+			}
+		}
+		newBP.dwHandle = 0x1;
+
+		OnUpdate(newBP,iType);
 	}
 }
 

@@ -16,6 +16,7 @@
  */
 #include "clsDebugger.h"
 #include "clsMemManager.h"
+#include "clsHelperClass.h"
 
 #include <TlHelp32.h>
 
@@ -244,13 +245,13 @@ bool clsDebugger::InitBP()
 bool clsDebugger::RemoveBPs()
 {
 	for(size_t i = 0; i < SoftwareBPs.size(); i++)
-		dSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+		RemoveBPFromList(SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwTypeFlag);
 
 	for(size_t i = 0; i < MemoryBPs.size(); i++)
-		dSoftwareBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].bOrgByte);
+		RemoveBPFromList(MemoryBPs[i].dwOffset,MemoryBPs[i].dwTypeFlag);
 
 	for(size_t i = 0; i < HardwareBPs.size(); i++)	
-		dSoftwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].bOrgByte);
+		RemoveBPFromList(HardwareBPs[i].dwOffset,HardwareBPs[i].dwTypeFlag);
 
 	SoftwareBPs.clear();
 	HardwareBPs.clear();
@@ -268,6 +269,8 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
+				free(it->moduleName);
+
 				SoftwareBPs.erase(it);
 				it = SoftwareBPs.begin();
 
@@ -283,6 +286,8 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dMemoryBP(it->dwPID,it->dwOffset,it->dwSize);
+				free(it->moduleName);
+
 				MemoryBPs.erase(it);
 				it = MemoryBPs.begin();
 
@@ -298,6 +303,8 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dHardwareBP(it->dwPID,it->dwOffset,it->dwSlot);
+				free(it->moduleName);
+
 				HardwareBPs.erase(it);
 				it = HardwareBPs.begin();
 
@@ -361,6 +368,11 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.dwPID = dwPID;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
+				newBP.moduleName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
+
+				if(dwKeep == 0x1)
+					newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
 
 				SoftwareBPs.push_back(newBP);
 
@@ -381,6 +393,9 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
+				newBP.moduleName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
+				newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
 
 				MemoryBPs.push_back(newBP);
 				wMemoryBP(dwPID,dwOffset,dwSize,dwKeep);
@@ -403,6 +418,9 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
+				newBP.moduleName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
+				newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
 
 				bool bSlot1 = false,bSlot2 = false,bSlot3 = false,bSlot4 = false;
 				for(size_t i = 0;i < HardwareBPs.size();i++)
@@ -441,4 +459,88 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 	//	InitBP();
 
 	return bRetValue;
+}
+
+void clsDebugger::UpdateOffsetsBPs()
+{
+	for(size_t i = 0;i < SoftwareBPs.size(); i++)
+	{
+		if(SoftwareBPs[i].dwHandle != 0x1) continue;
+
+		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(SoftwareBPs[i].moduleName,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwPID);
+		if(newBaseOffset != SoftwareBPs[i].dwOffset && newBaseOffset != SoftwareBPs[i].dwBaseOffset)
+		{
+			if(SoftwareBPs[i].dwBaseOffset == NULL)
+			{
+				SoftwareBPs[i].dwOldOffset = SoftwareBPs[i].dwOffset;
+				SoftwareBPs[i].dwBaseOffset = newBaseOffset;
+			}
+			else
+			{
+				DWORD64 newOffset = (SoftwareBPs[i].dwOffset - SoftwareBPs[i].dwBaseOffset);
+
+				SoftwareBPs[i].dwOldOffset = SoftwareBPs[i].dwOffset;
+				SoftwareBPs[i].dwBaseOffset = newBaseOffset;
+				SoftwareBPs[i].dwOffset = newOffset + newBaseOffset;
+			}
+			
+			SoftwareBPs[i].dwHandle = 0x3;
+			emit OnNewBreakpointAdded(SoftwareBPs[i],0);
+			SoftwareBPs[i].dwHandle = 0x1;
+		}
+	}
+
+	for(size_t i = 0;i < MemoryBPs.size(); i++)
+	{
+		if(MemoryBPs[i].dwHandle != 0x1) continue;
+
+		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(MemoryBPs[i].moduleName,MemoryBPs[i].dwOffset,MemoryBPs[i].dwPID);
+		if(newBaseOffset != MemoryBPs[i].dwOffset && newBaseOffset != MemoryBPs[i].dwBaseOffset)
+		{
+			if(MemoryBPs[i].dwBaseOffset == NULL)
+			{
+				MemoryBPs[i].dwOldOffset = MemoryBPs[i].dwOffset;
+				MemoryBPs[i].dwBaseOffset = newBaseOffset;
+			}
+			else
+			{
+				DWORD64 newOffset = (MemoryBPs[i].dwOffset - MemoryBPs[i].dwBaseOffset);
+
+				MemoryBPs[i].dwOldOffset = MemoryBPs[i].dwOffset;
+				MemoryBPs[i].dwBaseOffset = newBaseOffset;
+				MemoryBPs[i].dwOffset = newOffset + newBaseOffset;
+			}
+
+			MemoryBPs[i].dwHandle = 0x3;
+			emit OnNewBreakpointAdded(MemoryBPs[i],1);
+			MemoryBPs[i].dwHandle = 0x1;
+		}
+	}
+
+	for(size_t i = 0;i < HardwareBPs.size(); i++)
+	{
+		if(HardwareBPs[i].dwHandle != 0x1) continue;
+
+		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(HardwareBPs[i].moduleName,HardwareBPs[i].dwOffset,HardwareBPs[i].dwPID);
+		if(newBaseOffset != HardwareBPs[i].dwOffset && newBaseOffset != HardwareBPs[i].dwBaseOffset)
+		{
+			if(HardwareBPs[i].dwBaseOffset == NULL)
+			{
+				HardwareBPs[i].dwOldOffset = HardwareBPs[i].dwOffset;
+				HardwareBPs[i].dwBaseOffset = newBaseOffset;
+			}
+			else
+			{
+				DWORD64 newOffset = (HardwareBPs[i].dwOffset - HardwareBPs[i].dwBaseOffset);
+
+				HardwareBPs[i].dwOldOffset = HardwareBPs[i].dwOffset;
+				HardwareBPs[i].dwBaseOffset = newBaseOffset;
+				HardwareBPs[i].dwOffset = newOffset + newBaseOffset;
+			}
+
+			HardwareBPs[i].dwHandle = 0x3;
+			emit OnNewBreakpointAdded(HardwareBPs[i],1);
+			HardwareBPs[i].dwHandle = 0x1;
+		}
+	}
 }

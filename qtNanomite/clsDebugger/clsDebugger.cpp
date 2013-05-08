@@ -440,6 +440,8 @@ void clsDebugger::DebuggingLoop()
 							if((quint64)exInfo.ExceptionRecord.ExceptionAddress == PIDs[iPid].dwEP)
 							{
 								bIsEP = true;
+								
+								UpdateOffsetsBPs();
 								InitBP();
 							}
 
@@ -956,7 +958,7 @@ HANDLE clsDebugger::GetCurrentProcessHandle(DWORD dwPID)
 		if(PIDs[i].dwPID == dwPID)
 			return PIDs[i].hProc;
 	}
-	return NULL;
+	return _pi.hProcess;
 }
 
 HANDLE clsDebugger::GetProcessHandleByPID(DWORD PID)

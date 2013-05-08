@@ -14,12 +14,15 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "qtDLGNanomite.h"
+
 #include "clsHelperClass.h"
 #include "clsDBManager.h"
 #include "clsMemManager.h"
 
-#include <dbghelp.h>
+#include "dbghelp.h"
 
+#include <Psapi.h>
 #include <TlHelp32.h>
 #include <fstream>
 #include <algorithm>
@@ -418,30 +421,69 @@ DWORD clsHelperClass::GetMainThread(DWORD ProcessID)
 	return ThreadID;
 }
 
-//quint64 clsHelperClass::GetImageBaseFromModuleName(QString moduleName,bool is64Bit)
-//{
-//	qtDLGNanomite *pMainGUI = qtDLGNanomite::GetInstance();
-//
-//	for(int i = 0; i < pMainGUI->dlgDetInfo->tblModules->rowCount(); i++)
-//	{
-//		if(is64Bit)
-//		{
-//			if(pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().toLower().contains(moduleName.toLower()) &&
-//				pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().contains("System32") &&
-//				pMainGUI->dlgDetInfo->tblModules->item(i,2)->text().contains("Loaded"))
-//			{
-//				return pMainGUI->dlgDetInfo->tblModules->item(i,1)->text().toULongLong(0,16);
-//			}
-//		}
-//		else
-//		{
-//			if(pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().toLower().contains(moduleName.toLower()) &&
-//				pMainGUI->dlgDetInfo->tblModules->item(i,3)->text().contains("WOW64") &&
-//				pMainGUI->dlgDetInfo->tblModules->item(i,2)->text().contains("Loaded"))
-//			{
-//				return pMainGUI->dlgDetInfo->tblModules->item(i,1)->text().toULongLong(0,16);
-//			}
-//		}
-//	}
-//	return 0;
-//}
+quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWORD PID)
+{
+	HANDLE hProc = clsDebugger::GetProcessHandleByPID(PID);
+	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	PTCHAR sTemp2 = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+
+	MODULEENTRY32 pModEntry;
+	pModEntry.dwSize = sizeof(MODULEENTRY32);
+	MEMORY_BASIC_INFORMATION mbi;
+
+	quint64 dwAddress = NULL,
+			dwBase = NULL;
+	
+	while(VirtualQueryEx(hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
+	{
+		// Path
+		int iModPos = NULL,
+			iModLen = NULL;
+
+		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
+		memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
+		GetMappedFileName(hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH * sizeof(TCHAR));
+
+		iModLen = wcslen(sTemp2);
+		if(iModLen > 0)
+		{
+			for(int i = iModLen; i > 0 ; i--)
+			{
+				if(sTemp2[i] == '\\')
+				{
+					iModPos = i;
+					break;
+				}
+			}
+						
+			memcpy(sTemp,(LPVOID)&sTemp2[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
+
+			if(dwBase == 0)
+				dwBase = (DWORD64)mbi.BaseAddress;
+
+			if(wcslen(moduleName) <= 0 && Offset > (DWORD64)mbi.BaseAddress && Offset < ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
+			{
+				wcscpy(moduleName,sTemp);
+				clsMemManager::CFree(sTemp2);
+				clsMemManager::CFree(sTemp);
+
+				return dwBase;
+			}
+			else if(wcscmp(moduleName,sTemp) == 0)
+			{
+				clsMemManager::CFree(sTemp2);
+				clsMemManager::CFree(sTemp);
+
+				return dwBase;
+			}
+		}
+		else
+			dwBase = 0;
+
+		dwAddress += mbi.RegionSize;
+	}
+
+	clsMemManager::CFree(sTemp2);
+	clsMemManager::CFree(sTemp);
+	return Offset;
+}

@@ -94,10 +94,14 @@ struct BPStruct
 	|	0x0 - don´t keep
 	|   0x1 - keep
 	|   0x2 - step , remove it
+	|   0x3 - offset changed
 	*/
 	quint64 dwOffset;
+	quint64 dwBaseOffset;
+	quint64 dwOldOffset;
 	BYTE bOrgByte;
 	bool bRestoreBP;
+	PTCHAR moduleName;
 };
 
 struct customException
@@ -214,6 +218,7 @@ private:
 	void AttachedDebugging(LPVOID pDebProc);
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
+	void UpdateOffsetsBPs();
 
 	static unsigned __stdcall DebuggingEntry(LPVOID pThis);
 

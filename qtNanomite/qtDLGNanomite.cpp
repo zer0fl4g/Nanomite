@@ -158,6 +158,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	tblDisAs->horizontalHeader()->resizeSection(1,250);
 	tblDisAs->horizontalHeader()->resizeSection(2,310);
 	tblDisAs->horizontalHeader()->resizeSection(3,310);
+
+	actionDebug_Trace_Stop->setDisabled(true);
 }
 
 qtDLGNanomite::~qtDLGNanomite()

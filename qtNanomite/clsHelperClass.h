@@ -43,6 +43,7 @@ public:
 	static std::wstring clsHelperClass::replaceAll(std::wstring orgString,std::wstring oldString,std::wstring newString);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
 	static QString LoadStyleSheet();
+	static quint64 CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWORD PID);
 	//static quint64 GetImageBaseFromModuleName(QString moduleName,bool is64Bit);
 };
 
