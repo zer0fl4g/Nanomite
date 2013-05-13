@@ -22,8 +22,7 @@
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGSourceViewer.h"
 #include "qtDLGTrace.h"
-#include <qdockwidget.h>
-#include <qmainwindow.h>
+#include "qtDLGPatchManager.h"
 
 // Dock Widget Classes
 #include "qtDLGRegisters.h"
@@ -38,12 +37,15 @@
 
 #include "ui_qtDLGNanomite.h"
 
+#include <QDockwidget>
+#include <QMainwindow>
 #include <QWheelEvent>
 
 Q_DECLARE_METATYPE (DWORD)
 Q_DECLARE_METATYPE (quint64)
 Q_DECLARE_METATYPE (std::wstring)
 Q_DECLARE_METATYPE (BPStruct)
+Q_DECLARE_METATYPE (HANDLE)
 
 struct qtNanomiteDisAsColorSettings
 { 
@@ -73,6 +75,7 @@ public:
 	qtDLGBreakPointManager *dlgBPManager;
 	qtDLGSourceViewer *dlgSourceViewer;
 	qtDLGTrace *dlgTraceWindow;
+	qtDLGPatchManager *dlgPatchManager;
 
 	// Docks
 	qtDLGRegisters	*cpuRegView;
@@ -106,6 +109,7 @@ private slots:
 	void action_OptionsOptions();
 	void action_WindowDetailInformation();
 	void action_WindowBreakpointManager();
+	void action_WindowPatches();
 	void action_WindowShowMemory();
 	void action_WindowShowHeap();
 	void action_WindowShowStrings();

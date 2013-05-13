@@ -386,6 +386,11 @@ void qtDLGNanomite::action_WindowBreakpointManager()
 	dlgBPManager->show();
 }
 
+void qtDLGNanomite::action_WindowPatches()
+{
+	dlgPatchManager->show();
+}
+
 void qtDLGNanomite::action_WindowShowMemory()
 {
 	if(coreDebugger->GetDebuggingState())

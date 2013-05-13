@@ -442,6 +442,8 @@ void clsDebugger::DebuggingLoop()
 								bIsEP = true;
 								
 								UpdateOffsetsBPs();
+								emit UpdateOffsetsPatches(PIDs[iPid].hProc,PIDs[iPid].dwPID);
+
 								InitBP();
 							}
 

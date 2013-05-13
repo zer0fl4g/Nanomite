@@ -50,6 +50,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	qRegisterMetaType<quint64>("quint64");
 	qRegisterMetaType<wstring>("wstring");
 	qRegisterMetaType<BPStruct>("BPStruct");
+	qRegisterMetaType<HANDLE>("HANDLE");
 
 	LoadWidgets();
 	
@@ -65,6 +66,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
 	dlgSourceViewer = new qtDLGSourceViewer(this,Qt::Window);
 	dlgTraceWindow = new qtDLGTrace(this,Qt::Window);
+	dlgPatchManager = new qtDLGPatchManager(this,Qt::Window);
 	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;	
 
 	qtDLGMyWindow = this;
@@ -93,6 +95,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgPatchManager,SLOT(UpdateOffsetPatch(HANDLE,int)),Qt::QueuedConnection);
 
 	// Callbacks from DetailInfo to PEManager
 	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
@@ -118,6 +121,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionOptions_Options, SIGNAL(triggered()), this, SLOT(action_OptionsOptions()));
 	connect(actionWindow_Detail_Information, SIGNAL(triggered()), this, SLOT(action_WindowDetailInformation()));
 	connect(actionWindow_Breakpoint_Manager, SIGNAL(triggered()), this, SLOT(action_WindowBreakpointManager()));
+	connect(actionWindow_Show_Patches, SIGNAL(triggered()), this, SLOT(action_WindowPatches()));
 	connect(actionWindow_Show_Memory, SIGNAL(triggered()), this, SLOT(action_WindowShowMemory()));
 	connect(actionWindow_Show_Heap, SIGNAL(triggered()), this, SLOT(action_WindowShowHeap()));
 	connect(actionWindow_Show_Strings, SIGNAL(triggered()), this, SLOT(action_WindowShowStrings()));
@@ -149,6 +153,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// Callbacks from TraceView to GUI
 	connect(dlgTraceWindow,SIGNAL(OnDisplayDisassembly(quint64)),this,SLOT(OnDisplayDisassembly(quint64)));
 
+	// Callbacks from PatchManager to GUI
+	connect(dlgPatchManager,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
+
 	// eventFilter for mouse scroll
 	tblDisAs->installEventFilter(this);
     tblDisAs->viewport()->installEventFilter(this);
@@ -173,6 +180,7 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete dlgBPManager;
 	delete dlgSourceViewer;
 	delete dlgTraceWindow;
+	delete dlgPatchManager;
 	delete qtNanomiteDisAsColor;
 	delete cpuRegView;
 	delete callstackView;

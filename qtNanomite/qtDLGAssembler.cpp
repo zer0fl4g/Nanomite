@@ -15,6 +15,7 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGAssembler.h"
+#include "qtDLGPatchManager.h"
 
 #include "clsMemManager.h"
 
@@ -43,10 +44,18 @@ qtDLGAssembler::~qtDLGAssembler()
 
 void qtDLGAssembler::InsertNewInstructions()
 {
-	if(lineEdit->text().length() <= 0) return;
+	if(lineEdit->text().length() <= 0)
+	{
+		close();
+		return;
+	}
 
 	QMap<QString,DisAsDataRow>::const_iterator i = _pDisAs->SectionDisAs.constFind(QString("%1").arg(_InstructionOffset,16,16,QChar('0')).toUpper());
-	if((QMapData::Node *)i == (QMapData::Node *)_pDisAs->SectionDisAs.constEnd()) return;
+	if((QMapData::Node *)i == (QMapData::Node *)_pDisAs->SectionDisAs.constEnd()) 
+	{
+		close();
+		return;
+	}
 
 	QString oldOpcodes = i.value().OpCodes;
 	int oldOpcodeLen = oldOpcodes.replace(" ", "").length() / 2,
@@ -74,7 +83,8 @@ void qtDLGAssembler::InsertNewInstructions()
 	if(!CreateProcess(NULL,szCommandLine,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&si,&pi)) 
     {
         MessageBoxW(NULL,L"Error, unable to launch assembler!",L"Nanomite",MB_OK);
-        return;
+		close();
+		return;
     }
 
     WaitForSingleObject(pi.hProcess,INFINITE);
@@ -83,12 +93,14 @@ void qtDLGAssembler::InsertNewInstructions()
 	DeleteFile(L"nanomite.asm");
 
 	DWORD	BytesWritten = NULL,
-			BytesRead = NULL,
-			NewProtection = PAGE_EXECUTE_READWRITE,
-			OldProtection = NULL;	
+			BytesRead = NULL;	
 
 	HANDLE hFile = CreateFileW(L"nanomite.bin",GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,NULL,NULL);
-	if(hFile == INVALID_HANDLE_VALUE) return;
+	if(hFile == INVALID_HANDLE_VALUE)
+	{
+		close();
+		return;
+	}
 
 	int iLen = GetFileSize(hFile,NULL);
 	LPVOID pFileBuffer = clsMemManager::CAlloc(iLen);
@@ -131,18 +143,8 @@ void qtDLGAssembler::InsertNewInstructions()
 	memset(pBuffer,0x90,newOpcodeLen);
 	memcpy(pBuffer,pFileBuffer,BytesRead);
 
-	VirtualProtectEx(_hProc,(LPVOID)_InstructionOffset,newOpcodeLen,NewProtection,&OldProtection);
-	if(!WriteProcessMemory(_hProc,(LPVOID)_InstructionOffset,pBuffer,newOpcodeLen,(SIZE_T*)&BytesWritten))
-	{
-		VirtualProtectEx(_hProc,(LPVOID)_InstructionOffset,newOpcodeLen,OldProtection,&NewProtection);
-		MessageBoxW(NULL,L"Error while writing the new Buffer!",L"Nanomite",MB_OK);
-		clsMemManager::CFree(pBuffer);
-		clsMemManager::CFree(pFileBuffer);
-		close();
-		return;
-	}
-	
-	VirtualProtectEx(_hProc,(LPVOID)_InstructionOffset,newOpcodeLen,OldProtection,&NewProtection);
+	qtDLGPatchManager::AddNewPatch(0,_hProc,_InstructionOffset,newOpcodeLen,pBuffer);
+
 	clsMemManager::CFree(pBuffer);
 	clsMemManager::CFree(pFileBuffer);
 	_pDisAs->SectionDisAs.clear();

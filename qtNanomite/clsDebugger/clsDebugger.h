@@ -194,6 +194,7 @@ signals:
 	void OnNewPID(std::wstring,int);
 	void DeletePEManagerObject(std::wstring,int);
 	void CleanPEManager();
+	void UpdateOffsetsPatches(HANDLE hProc, int PID);
 
 private:
 	static clsDebugger *pThis;

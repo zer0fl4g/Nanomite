@@ -90,11 +90,8 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 		memset(tcTempBuffer,0,sizeof(MAX_PATH * sizeof(TCHAR)));
 		for(size_t i = 0;i < dwStepSize;i++)
 		{
-			wsprintf(tcAsciiHexTemp,L"%02X ",*(PCHAR)((DWORD)pBuffer + dwCounter + i));
-			if(wcsstr(tcAsciiHexTemp,L"FFF") != NULL)
-				wcscat(tcTempBuffer,L"FF ");
-			else
-				wcscat(tcTempBuffer,tcAsciiHexTemp);
+			wsprintf(tcAsciiHexTemp,L"%02X ",*(LPBYTE)((DWORD)pBuffer + dwCounter + i));
+			wcscat(tcTempBuffer,tcAsciiHexTemp);
 		}
 		tblHexView->setItem(tblHexView->rowCount() - 1,2,
 			new QTableWidgetItem(QString::fromWCharArray(tcTempBuffer)));

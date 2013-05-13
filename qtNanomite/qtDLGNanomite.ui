@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-* 	This file is part of Nanomite.
-*
-*    Nanomite is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    Nanomite is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
-*/
--->
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>qtDLGNanomiteClass</class>
  <widget class="QMainWindow" name="qtDLGNanomiteClass">
@@ -305,6 +288,7 @@
    <addaction name="separator"/>
    <addaction name="actionWindow_Detail_Information"/>
    <addaction name="actionWindow_Breakpoint_Manager"/>
+   <addaction name="actionWindow_Show_Patches"/>
    <addaction name="separator"/>
    <addaction name="actionDebug_Trace_Start"/>
    <addaction name="actionDebug_Trace_Stop"/>
@@ -566,6 +550,16 @@
    </property>
    <property name="text">
     <string>Functions</string>
+   </property>
+  </action>
+  <action name="actionWindow_Show_Patches">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_PatchManager.ico</normaloff>
+     <normalon>:/DLGNanomite/Icons/ID_PatchManager.ico</normalon>:/DLGNanomite/Icons/ID_PatchManager.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Patches</string>
    </property>
   </action>
  </widget>
