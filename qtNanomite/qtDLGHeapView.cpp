@@ -199,6 +199,10 @@ void qtDLGHeapView::OnSelectionChanged()
 				tblHeapBlocks->setItem(tblHeapBlocks->rowCount() - 1,5,
 					new QTableWidgetItem(QString("LF32_MOVEABLE")));
 				break;
+			default:
+				tblHeapBlocks->setItem(tblHeapBlocks->rowCount() - 1,5,
+					new QTableWidgetItem(""));
+				break;
 			}
 
 			he.dwSize = sizeof(HEAPENTRY32);

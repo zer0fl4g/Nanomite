@@ -15,13 +15,14 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGAttach.h"
+
+#include "clsAPIImport.h"
 #include "clsHelperClass.h"
+#include "clsMemManager.h"
 
 #include <Windows.h>
 #include <Psapi.h>
 #include <TlHelp32.h>
-
-#include "clsMemManager.h"
 
 qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
@@ -57,7 +58,7 @@ void qtDLGAttach::FillProcessList()
 			do 
 			{
 				HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,pProcessEntry.th32ProcessID);
-				if(hProc != INVALID_HANDLE_VALUE)
+				if(hProc != NULL)
 				{
 					tblProcList->insertRow(tblProcList->rowCount());
 
@@ -70,6 +71,7 @@ void qtDLGAttach::FillProcessList()
 						new QTableWidgetItem(QString().sprintf("%d",pProcessEntry.th32ProcessID)));
 
 					// Process Path
+					memset(ProcessFile,0,MAX_PATH * sizeof(TCHAR));
 					if(GetModuleFileNameEx(hProc,NULL,ProcessFile,MAX_PATH) > 0)
 						tblProcList->setItem(tblProcList->rowCount() - 1,2,
 							new QTableWidgetItem(QString().fromWCharArray(ProcessFile)));

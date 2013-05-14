@@ -61,6 +61,7 @@ void qtDLGPatchManager::OnCustomContextMenuRequested(QPoint qPoint)
 	menu.addAction(new QAction("Remove All Patches",this));
 	menu.addAction(new QAction("Save Patch to File",this));
 	menu.addAction(new QAction("Save All Patches to File",this));
+	menu.addAction(new QAction("Send to Disassembler",this));
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Offset",this));
@@ -115,6 +116,10 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Save All Patches to File") == 0)
 	{
 
+	}
+	else if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
+	{
+		emit OnShowInDisassembler(tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
@@ -176,27 +181,27 @@ bool qtDLGPatchManager::AddNewPatch(int PID, HANDLE hProc, quint64 Offset, int P
 			return false;
 		}
 	}
-
+	
 	PatchData newPatch;
+	memset((LPVOID)&newPatch,0,sizeof(PatchData));
 	newPatch.hProc = hProc;
 	newPatch.Offset = Offset;
 	newPatch.PID = PID;
 	newPatch.PatchSize = PatchSize;
 	newPatch.ModuleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-	memset(newPatch.ModuleName,0,MAX_PATH * sizeof(TCHAR));
 	newPatch.newData = clsMemManager::CAlloc(PatchSize);
-	memcpy(newPatch.newData,newData,PatchSize);
 	newPatch.orgData = clsMemManager::CAlloc(PatchSize);
+
+	memset(newPatch.ModuleName,0,MAX_PATH * sizeof(TCHAR));
+	memcpy(newPatch.newData,newData,PatchSize);
+
+	newPatch.bWritten = false;
 	newPatch.bSaved = false;
-	if(pThis->WritePatchToProc(hProc,Offset,PatchSize,newData,newPatch.orgData))
-		newPatch.bWritten = true;
-	else
-		newPatch.bWritten = false;
 
 	pThis->patches.push_back(newPatch);
-
 	pThis->UpdateOffsetPatch(hProc,PID);
-	return newPatch.bWritten;
+
+	return true;
 }
 
 bool qtDLGPatchManager::RemovePatch(int PID, quint64 Offset)
@@ -235,7 +240,7 @@ bool qtDLGPatchManager::DeletePatch(int PID, quint64 Offset)
 			return true;
 		}
 	}
-	return true;
+	return false;
 }
 	
 void qtDLGPatchManager::ClearAllPatches()
@@ -335,6 +340,8 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 
 	for(QList<PatchData>::iterator i = patches.begin(); i != patches.end(); ++i)
 	{
+		i->bWritten = false;
+
 		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(i->ModuleName,i->Offset,newPID);
 		if(newBaseOffset != i->Offset && newBaseOffset != i->BaseOffset)
 		{
@@ -355,13 +362,17 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 			i->PID = newPID;
 			i->hProc = newProc;
 			bThingsChanged = WritePatchToProc(i->hProc,i->Offset,i->PatchSize,i->newData,NULL,true);
+			if(bThingsChanged)
+				i->bWritten = true;
+			else
+				i->bWritten = false;
 		}
 	}
 
 	if(bThingsChanged)
 	{
 		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		UpdatePatchTable();
 		emit pThis->OnReloadDebugger();
 	}
+	UpdatePatchTable();
 }

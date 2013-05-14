@@ -155,6 +155,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	// Callbacks from PatchManager to GUI
 	connect(dlgPatchManager,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
+	connect(dlgPatchManager,SIGNAL(OnShowInDisassembler(quint64)),this,SLOT(OnDisplayDisassembly(quint64)));
 
 	// eventFilter for mouse scroll
 	tblDisAs->installEventFilter(this);

@@ -63,7 +63,7 @@ void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	PTCHAR sTemp;
 	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
-		dwNewProtect = PAGE_EXECUTE_READWRITE,
+		dwNewProtect = PAGE_READWRITE,
 		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 11),
 		dwSize = dwRowCount * dwStackSize;
 	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
@@ -80,7 +80,10 @@ void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 		return;
 
 	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,&dwBytesRead))
+	{
+		clsMemManager::CFree(bBuffer);
 		return;
+	}
 
 	sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 

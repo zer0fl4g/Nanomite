@@ -37,7 +37,9 @@
 ## Changelog
 ###Version 0.1 beta 12
 + fixed a bug in Hex View which may showed wrong data
++ fixed a bug in Heap View which caused a crash when copying the while line to clipboard
 + added PatchManager
++ removed processes we can´t access from the attach dialog
 
 ####Notes:
 
