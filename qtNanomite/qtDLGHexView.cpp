@@ -38,7 +38,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 
 	SIZE_T dwBytesRead = NULL;
 	DWORD dwCounter = NULL,
-		dwProtection = NULL,
+	//	dwProtection = NULL,
 		dwStepSize = 0x10;
 	DWORD64	dwBaseOffset = StartOffset;
 	HANDLE hProcess = NULL;
@@ -55,7 +55,12 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	}
 
 	if(hProcess == INVALID_HANDLE_VALUE)
+	{
+		clsMemManager::CFree(pBuffer);
+		clsMemManager::CFree(tcAsciiHexTemp);
+		clsMemManager::CFree(tcTempBuffer);
 		return;
+	}
 
 	//if(!VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,PAGE_EXECUTE_READWRITE,&dwProtection))
 	//{

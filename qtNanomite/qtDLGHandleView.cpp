@@ -105,8 +105,7 @@ void qtDLGHandleView::OnDisplayHandles()
 			HANDLE dupHandle = NULL;
 			POBJECT_TYPE_INFORMATION objectTypeInfo;
 			PVOID objectNameInfo;
-			UNICODE_STRING objectName,
-				objectTypeName;
+			UNICODE_STRING objectName;
 			ULONG returnLength;
 			BOOL bWideBool = false;
 

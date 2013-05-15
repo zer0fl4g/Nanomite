@@ -40,7 +40,7 @@ public:
 	static std::vector<std::wstring> split(const std::wstring& s,const std::wstring& f);
 	static std::string convertWSTRtoSTR(std::wstring FileName);
 	static std::wstring convertSTRtoWSTR(std::string FileName);
-	static std::wstring clsHelperClass::replaceAll(std::wstring orgString,std::wstring oldString,std::wstring newString);
+	static std::wstring replaceAll(std::wstring orgString,std::wstring oldString,std::wstring newString);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
 	static QString LoadStyleSheet();
 	static quint64 CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWORD PID);

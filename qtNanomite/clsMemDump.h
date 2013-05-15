@@ -22,8 +22,8 @@
 class clsMemDump
 {
 public:
-	clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileName, DWORD64 BaseOffset, DWORD64 Size);
-	clsMemDump::~clsMemDump();
+	clsMemDump(HANDLE hProc, PTCHAR FileName, DWORD64 BaseOffset, DWORD64 Size);
+	~clsMemDump();
 };
 
 #endif

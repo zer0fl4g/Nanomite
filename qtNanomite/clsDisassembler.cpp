@@ -125,7 +125,6 @@ void clsDisassembler::run()
 		int iLen = 0;
 		DisAsDataRow newRow;
 		BYTE bBuffer;
-		wstring sFuncName,sModName;
 
 		memset(&newDisAss, 0, sizeof(DISASM));
 

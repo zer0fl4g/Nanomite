@@ -104,17 +104,21 @@ void qtDLGFunctions::ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddre
 	LPVOID lpBuffer = malloc(Size);
 	DWORD	//searchPattern	= NULL,
 			searchPattern2	= 0x90909090,
-			searchPattern3	= 0xCCCCCCCC,
-			dwOldProtection = NULL,
-			dwNewProtection = PAGE_EXECUTE_READWRITE;
+			searchPattern3	= 0xCCCCCCCC;
+	//		dwOldProtection = NULL,
+	//		dwNewProtection = PAGE_EXECUTE_READWRITE;
 
 	if(lpBuffer == NULL) return;
-	if(!VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwNewProtection,&dwOldProtection))
-		return;
-	if(!ReadProcessMemory(hProc,(LPVOID)BaseAddress,lpBuffer,Size,NULL))
-		return;
+//	if(!VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwNewProtection,&dwOldProtection))
+//		return;
 
-	VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwOldProtection,&dwNewProtection);
+	if(!ReadProcessMemory(hProc,(LPVOID)BaseAddress,lpBuffer,Size,NULL))
+	{
+		free(lpBuffer);
+		return;
+	}
+	
+	//VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwOldProtection,&dwNewProtection);
 
 	//functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern,lpBuffer,4));
 	functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern2,lpBuffer,4));

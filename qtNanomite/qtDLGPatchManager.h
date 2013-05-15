@@ -64,6 +64,7 @@ private:
 
 	bool WritePatchToProc(HANDLE hProc, quint64 Offset, int PatchSize, LPVOID DataToWrite, LPVOID OriginalData, bool bRemove = false);
 	
+	void SavePatchToFile(int PID, quint64 Offset);
 	void UpdatePatchTable();
 
 	private slots:

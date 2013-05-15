@@ -287,11 +287,9 @@ DWORD64 clsPEFile::dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS6
 	  DWORD64 sectionSize = pSectionHeader->Misc.VirtualSize;
 
 	  if ((sectionVA <= tableVA) && (tableVA < (sectionVA + sectionSize)))
-	  {
-		   return (DWORD64)(pBuffer + pSectionHeader->PointerToRawData + (tableVA-sectionVA));
-		   break;
-	  }
-	  pSectionHeader++;
+		return (DWORD64)(pBuffer + pSectionHeader->PointerToRawData + (tableVA-sectionVA));
+
+	   pSectionHeader++;
 	}
 	return 0;
 }
@@ -307,10 +305,7 @@ DWORD clsPEFile::dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 
 	  DWORD sectionSize = pSectionHeader->Misc.VirtualSize;
 
 	  if ((sectionVA <= tableVA) && (tableVA < (sectionVA + sectionSize)))
-	  {
 		   return (DWORD)(pBuffer + pSectionHeader->PointerToRawData + (tableVA-sectionVA));
-		   break;
-	  }
 	  pSectionHeader++;
 	}
 	return 0;

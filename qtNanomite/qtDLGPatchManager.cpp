@@ -20,6 +20,8 @@
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 
+#include <Psapi.h>
+
 #include <QMenu>
 #include <QClipboard>
 
@@ -111,11 +113,19 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Save Patch to File") == 0)
 	{
+		SavePatchToFile(tblPatches->item(_iSelectedRow,0)->text().toULongLong(0,16),
+			tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
 
+		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Save All Patches to File") == 0)
 	{
-
+		for(int i = 0; i < tblPatches->rowCount(); i++)
+		{
+			SavePatchToFile(tblPatches->item(_iSelectedRow,0)->text().toULongLong(0,16),
+			tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		}
+		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
@@ -195,7 +205,10 @@ bool qtDLGPatchManager::AddNewPatch(int PID, HANDLE hProc, quint64 Offset, int P
 	memset(newPatch.ModuleName,0,MAX_PATH * sizeof(TCHAR));
 	memcpy(newPatch.newData,newData,PatchSize);
 
-	newPatch.bWritten = false;
+	if(pThis->WritePatchToProc(hProc,Offset,PatchSize,newData,newPatch.orgData))
+		newPatch.bWritten = true;
+	else
+		newPatch.bWritten = false;
 	newPatch.bSaved = false;
 
 	pThis->patches.push_back(newPatch);
@@ -375,4 +388,89 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 		emit pThis->OnReloadDebugger();
 	}
 	UpdatePatchTable();
+}
+
+void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
+{
+	for(QList<PatchData>::iterator i = patches.begin(); i != patches.end(); ++i)
+	{
+		if(i->Offset == Offset)
+		{
+			PTCHAR pCurrentFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+
+			if(GetModuleFileNameEx(i->hProc,(HMODULE)i->BaseOffset,pCurrentFileName,MAX_PATH) < 0)
+			{
+				free(pCurrentFileName);
+				continue;
+			}
+
+			bool bNewFile = false;
+			HANDLE hFile = CreateFileW(pCurrentFileName,GENERIC_READ | GENERIC_WRITE,FILE_SHARE_WRITE | FILE_SHARE_READ,NULL,OPEN_EXISTING,NULL,NULL);
+			if(hFile == INVALID_HANDLE_VALUE)
+			{
+				bNewFile = true;
+
+				PTCHAR pNewFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				wcscpy(pNewFileName,pCurrentFileName);
+				wcscat(pNewFileName,L"_patched.exe");
+				CopyFile(pCurrentFileName,pNewFileName,false);
+				free(pCurrentFileName);
+				pCurrentFileName = pNewFileName;
+
+				hFile = CreateFileW(pCurrentFileName,GENERIC_READ | GENERIC_WRITE,FILE_SHARE_WRITE | FILE_SHARE_READ,NULL,OPEN_EXISTING,NULL,NULL);
+				if(hFile == INVALID_HANDLE_VALUE)
+				{
+					free(pCurrentFileName);
+					if(bNewFile)
+						DeleteFile(pCurrentFileName);
+					continue;
+				}
+			}
+		
+			HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READWRITE,NULL,NULL,NULL);
+			LPVOID lpFileBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ | FILE_MAP_WRITE,NULL,NULL,NULL);
+			if(lpFileBuffer == NULL)
+			{
+				free(pCurrentFileName);
+				CloseHandle(hFile);
+				CloseHandle(hFileMap);
+				if(bNewFile)
+					DeleteFile(pCurrentFileName);
+				continue;
+			}
+
+			DWORD64 fileDataOffset = i->Offset - i->BaseOffset + (DWORD64)lpFileBuffer;
+			if(memcmp((LPVOID)fileDataOffset,i->orgData,i->PatchSize) != 0)
+			{
+				UnmapViewOfFile(lpFileBuffer);
+				free(pCurrentFileName);
+				CloseHandle(hFile);
+				CloseHandle(hFileMap);
+				if(bNewFile)
+					DeleteFile(pCurrentFileName);
+				continue;
+			}
+
+			memcpy((LPVOID)fileDataOffset,i->newData,i->PatchSize);
+
+			DWORD BytesWritten = NULL;
+			if(!WriteFile(hFile,lpFileBuffer,GetFileSize(hFile,NULL),&BytesWritten,NULL))
+			{
+				UnmapViewOfFile(lpFileBuffer);
+				free(pCurrentFileName);
+				CloseHandle(hFile);
+				CloseHandle(hFileMap);
+				if(bNewFile)
+					DeleteFile(pCurrentFileName);
+				continue;
+			}
+
+			i->bSaved = true;
+
+			UnmapViewOfFile(lpFileBuffer);
+			free(pCurrentFileName);
+			CloseHandle(hFile);
+			CloseHandle(hFileMap);
+		}
+	}
 }

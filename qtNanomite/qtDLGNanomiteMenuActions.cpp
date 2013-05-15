@@ -88,6 +88,8 @@ void qtDLGNanomite::action_DebugStart()
 		{
 			if(!clsHelperClass::MenuLoadNewFile(coreDebugger))
 				return;
+
+			qtDLGPatchManager::ClearAllPatches();
 			coreDebugger->ClearCommandLine();
 		}
 
@@ -139,6 +141,8 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 			PEManager->CloseFile(coreDebugger->GetTarget(),0);
 			return;
 		}
+
+		qtDLGPatchManager::ClearAllPatches();
 
 		coreDebugger->SetTarget(*filePath);
 		coreDebugger->AttachToProcess(iPID);

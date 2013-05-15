@@ -34,11 +34,11 @@ qtDLGSourceViewer::~qtDLGSourceViewer()
 
 void qtDLGSourceViewer::OnDisplaySource(QString sourceFile,int LineNumber)
 {
-	int LineCounter = 1;
 	QFile file(sourceFile);
 	
 	if(file.open(QIODevice::ReadOnly))
 	{
+		int LineCounter = 1;
 		listSource->clear();
 		while(file.bytesAvailable() > 0)
 		{
