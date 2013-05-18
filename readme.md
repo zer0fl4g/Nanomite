@@ -42,5 +42,6 @@
 + removed processes we can´t access from the attach dialog
 
 ####Notes:
+	- Patches can be saved to file (only on the debugged one)
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

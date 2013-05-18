@@ -46,6 +46,9 @@ public:
 
 	bool isValidPEFile();
 
+	DWORD64 VAtoRaw64(quint64 Offset);
+	DWORD	VAtoRaw32(quint64 Offset);
+
 	QList<APIData> getImports();
 	QList<APIData> getExports();
 	QList<PESectionData> getSections();

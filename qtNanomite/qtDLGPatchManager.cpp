@@ -396,7 +396,8 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 	{
 		if(i->Offset == Offset)
 		{
-			PTCHAR pCurrentFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+			PTCHAR pCurrentFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
+				pOldName = NULL;
 
 			if(GetModuleFileNameEx(i->hProc,(HMODULE)i->BaseOffset,pCurrentFileName,MAX_PATH) < 0)
 			{
@@ -414,40 +415,69 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 				wcscpy(pNewFileName,pCurrentFileName);
 				wcscat(pNewFileName,L"_patched.exe");
 				CopyFile(pCurrentFileName,pNewFileName,false);
-				free(pCurrentFileName);
+				//free(pCurrentFileName);
+				pOldName = pCurrentFileName;
 				pCurrentFileName = pNewFileName;
 
-				hFile = CreateFileW(pCurrentFileName,GENERIC_READ | GENERIC_WRITE,FILE_SHARE_WRITE | FILE_SHARE_READ,NULL,OPEN_EXISTING,NULL,NULL);
+				hFile = CreateFileW(pCurrentFileName,GENERIC_READ | GENERIC_WRITE,NULL,NULL,OPEN_EXISTING,NULL,NULL);
 				if(hFile == INVALID_HANDLE_VALUE)
 				{
+					DeleteFile(pCurrentFileName);
 					free(pCurrentFileName);
-					if(bNewFile)
-						DeleteFile(pCurrentFileName);
+					free(pOldName);
+
 					continue;
 				}
 			}
 		
 			HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READWRITE,NULL,NULL,NULL);
-			LPVOID lpFileBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ | FILE_MAP_WRITE,NULL,NULL,NULL);
+			LPVOID lpFileBuffer = MapViewOfFile(hFileMap,FILE_MAP_WRITE | FILE_MAP_READ,NULL,NULL,NULL);
 			if(lpFileBuffer == NULL)
 			{
-				free(pCurrentFileName);
-				CloseHandle(hFile);
+				UnmapViewOfFile(lpFileBuffer);
 				CloseHandle(hFileMap);
+				CloseHandle(hFile);
+
 				if(bNewFile)
+				{
+					free(pOldName);
 					DeleteFile(pCurrentFileName);
+				}
+				free(pCurrentFileName);
+
 				continue;
 			}
 
-			DWORD64 fileDataOffset = i->Offset - i->BaseOffset + (DWORD64)lpFileBuffer;
+			DWORD64 fileDataOffset = (DWORD64)lpFileBuffer + clsPEManager::GetInstance()->VAtoRaw(pOldName,NULL,i->Offset - i->BaseOffset);
+			if(fileDataOffset <= NULL)
+			{
+				UnmapViewOfFile(lpFileBuffer);
+				CloseHandle(hFileMap);
+				CloseHandle(hFile);
+
+				if(bNewFile)
+				{
+					free(pOldName);
+					DeleteFile(pCurrentFileName);
+				}
+				free(pCurrentFileName);
+
+				continue;
+			}
+
 			if(memcmp((LPVOID)fileDataOffset,i->orgData,i->PatchSize) != 0)
 			{
 				UnmapViewOfFile(lpFileBuffer);
-				free(pCurrentFileName);
-				CloseHandle(hFile);
 				CloseHandle(hFileMap);
+				CloseHandle(hFile);
+
 				if(bNewFile)
+				{
+					free(pOldName);
 					DeleteFile(pCurrentFileName);
+				}
+				free(pCurrentFileName);
+
 				continue;
 			}
 
@@ -457,20 +487,28 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 			if(!WriteFile(hFile,lpFileBuffer,GetFileSize(hFile,NULL),&BytesWritten,NULL))
 			{
 				UnmapViewOfFile(lpFileBuffer);
-				free(pCurrentFileName);
-				CloseHandle(hFile);
 				CloseHandle(hFileMap);
+				CloseHandle(hFile);
+
 				if(bNewFile)
+				{
+					free(pOldName);
 					DeleteFile(pCurrentFileName);
+				}
+				free(pCurrentFileName);
+
 				continue;
 			}
 
 			i->bSaved = true;
 
 			UnmapViewOfFile(lpFileBuffer);
-			free(pCurrentFileName);
-			CloseHandle(hFile);
 			CloseHandle(hFileMap);
+			CloseHandle(hFile);
+
+			if(bNewFile)
+				free(pOldName);
+			free(pCurrentFileName);
 		}
 	}
 }

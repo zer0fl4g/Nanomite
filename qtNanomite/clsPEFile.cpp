@@ -276,6 +276,40 @@ QList<APIData> clsPEFile::getExports()
 	return exportsOfFile;
 }
 
+DWORD64 clsPEFile::VAtoRaw64(quint64 Offset)
+{
+	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD64)_lpBuffer + _pIDH->e_lfanew + sizeof(IMAGE_NT_HEADERS64));
+
+	for (WORD i = 0; i < _pINH64->FileHeader.NumberOfSections; i++)
+	{
+	  DWORD64 sectionVA = pSectionHeader->VirtualAddress;
+	  DWORD64 sectionSize = pSectionHeader->Misc.VirtualSize;
+
+	  if ((sectionVA <= Offset) && (Offset < (sectionVA + sectionSize)))
+		  return (DWORD64)(pSectionHeader->PointerToRawData + (Offset - sectionVA));
+
+	   pSectionHeader++;
+	}
+	return 0;
+}
+
+DWORD clsPEFile::VAtoRaw32(quint64 Offset)
+{
+	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD)_lpBuffer + _pIDH->e_lfanew + sizeof(IMAGE_NT_HEADERS32));
+
+	for (WORD i = 0; i < _pINH32->FileHeader.NumberOfSections; i++)
+	{
+	  DWORD sectionVA = pSectionHeader->VirtualAddress;
+	  DWORD sectionSize = pSectionHeader->Misc.VirtualSize;
+
+	  if ((sectionVA <= Offset) && (Offset < (sectionVA + sectionSize)))
+		  return (DWORD)(pSectionHeader->PointerToRawData + (Offset - sectionVA));
+
+	   pSectionHeader++;
+	}
+	return 0;
+}
+
 DWORD64 clsPEFile::dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS64 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer)
 {
 	DWORD64 tableVA = pINH->OptionalHeader.DataDirectory[iTableEntryNr].VirtualAddress;

@@ -35,6 +35,8 @@ public:
 	bool isValidPEFile(std::wstring FileName,int PID = 0);
 	bool is64BitFile(std::wstring FileName,int PID = 0);
 
+	DWORD64 VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset);
+
 	QList<APIData> getImports(std::wstring FileName,int PID = -1);
 	QList<APIData> getExports(std::wstring FileName,int PID = -1);
 	QList<PESectionData> getSections(std::wstring FileName,int PID = -1);

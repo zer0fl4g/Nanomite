@@ -66,7 +66,7 @@ private:
 	
 	void SavePatchToFile(int PID, quint64 Offset);
 	void UpdatePatchTable();
-
+	
 	private slots:
 		void MenuCallback(QAction*);
 		void UpdateOffsetPatch(HANDLE newOffset, int newPID);
