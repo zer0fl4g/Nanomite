@@ -26,16 +26,16 @@
 class clsMemPool
 {
 public:
-    clsMemPool(DWORD64 &PoolBufferBase, DWORD64 &PoolBufferSize, unsigned long lUnitNum = 50, unsigned long lUnitSize = 1024);
+    clsMemPool(DWORD64 &PoolBufferBase, DWORD64 &PoolBufferSize, size_t lUnitNum = 50, size_t lUnitSize = 1024);
     ~clsMemPool();
     
-    void* Alloc(unsigned long ulSize);
+    void* Alloc(size_t ulSize);
     void Free(void* p);
 
 	// need to override this here again 
 	// else the clsMemPool will not be able to create itself
-	void *operator new(size_t size) throw(std::bad_alloc);
-	void operator delete(void *p) throw();
+	void *operator new(size_t size);
+	void operator delete(void *p);
 
 private:
     struct _Unit
@@ -49,8 +49,8 @@ private:
     struct _Unit*    m_pAllocatedMemBlock;
     struct _Unit*    m_pFreeMemBlock;
 
-    unsigned long    m_ulUnitSize;
-    unsigned long    m_ulBlockSize;
+    size_t    m_ulUnitSize;
+    size_t    m_ulBlockSize;
 
 #ifdef _DEBUG
 	DWORD64 countAlloc,countFree,averageSize;

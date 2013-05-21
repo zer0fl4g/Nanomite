@@ -47,7 +47,7 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	_iForEntry = 0;
 	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
-	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
 			_iForEntry = i; _iForEnd = i +1;
@@ -149,7 +149,7 @@ void qtDLGMemoryView::DisplayMemory()
 	MEMORY_BASIC_INFORMATION mbi;
 
 	tblMemoryView->setRowCount(0);
-	for(int i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = _iForEntry; i < _iForEnd;i++)
 	{
 		quint64 dwAddress = NULL;
 		while(VirtualQueryEx(myMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
@@ -176,8 +176,8 @@ void qtDLGMemoryView::DisplayMemory()
 				new QTableWidgetItem(QString().fromStdWString(sTemp)));
 
 			// Path
-			int iModPos = NULL,
-				iModLen = NULL;
+			size_t	iModPos = NULL,
+					iModLen = NULL;
 
 			memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 			memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
@@ -186,7 +186,7 @@ void qtDLGMemoryView::DisplayMemory()
 			iModLen = wcslen(sTemp2);
 			if(iModLen > 0)
 			{
-				for(int i = iModLen; i > 0 ; i--)
+				for(size_t i = iModLen; i > 0 ; i--)
 				{
 					if(sTemp2[i] == '\\')
 					{
@@ -195,7 +195,7 @@ void qtDLGMemoryView::DisplayMemory()
 					}
 				}
 						
-				memcpy(sTemp,(LPVOID)&sTemp2[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
+				memcpy_s(sTemp,MAX_PATH,(LPVOID)&sTemp2[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
 
 				tblMemoryView->setItem(tblMemoryView->rowCount() -1,3,
 					new QTableWidgetItem(QString().fromStdWString(sTemp)));			

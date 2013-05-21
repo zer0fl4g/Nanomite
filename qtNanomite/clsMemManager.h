@@ -27,10 +27,10 @@ public:
     clsMemManager();
     ~clsMemManager();
     
-    void* Alloc(unsigned long ulSize, bool bUseMemPool);
+    void* Alloc(size_t ulSize);
     void Free(void* p);
 
-	static void* CAlloc(unsigned long ulSize, bool bUseMemPool = true);
+	static void* CAlloc(size_t ulSize);
 	static void CFree(void* p);
 
 private:

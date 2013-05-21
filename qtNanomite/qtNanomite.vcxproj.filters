@@ -649,6 +649,7 @@
   <ItemGroup>
     <None Include="..\readme.md" />
     <None Include="..\changelog.md" />
+    <None Include="..\Documentation\codeconvention.md" />
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="qtNanomite.rc" />

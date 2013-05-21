@@ -22,7 +22,7 @@
 class clsMemDump
 {
 public:
-	clsMemDump(HANDLE hProc, PTCHAR FileName, DWORD64 BaseOffset, DWORD64 Size);
+	clsMemDump(HANDLE hProc, PTCHAR FileName, DWORD64 BaseOffset, DWORD Size);
 	~clsMemDump();
 };
 

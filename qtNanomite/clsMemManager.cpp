@@ -42,15 +42,15 @@ clsMemManager::~clsMemManager()
 	delete pPool_50;
 }
 
-void* clsMemManager::Alloc(unsigned long ulSize, bool bUseMemPool)
+void* clsMemManager::Alloc(size_t ulSize)
 {
 	if(ulSize <= PoolUnitSize_200 && ulSize > PoolUnitSize_50) // huge pool
 		return pPool_200->Alloc(ulSize);
 	else if(ulSize <= PoolUnitSize_50 && ulSize > 0) // little pool
 		return pPool_50->Alloc(ulSize);
-	else if(!bUseMemPool) // don´t use pool 
-		return malloc(ulSize);
 	else if(ulSize > PoolUnitSize_200) // alloc request too huge
+		return malloc(ulSize);
+	else // don´t use pool 
 		return malloc(ulSize);
 }
 
@@ -70,50 +70,29 @@ void clsMemManager::CFree(void* p)
 	pThis->Free(p);
 }
 
-void* clsMemManager::CAlloc(unsigned long ulSize,bool bUseMemPool)
+void* clsMemManager::CAlloc(size_t ulSize)
 {
-	return pThis->Alloc(ulSize,bUseMemPool);
+	return pThis->Alloc(ulSize);
 }
-
-
 
 // override our new/delete
-void *operator new(size_t size) throw(std::bad_alloc)
+void *operator new(size_t size)
 {
     return clsMemManager::CAlloc(size);
 }
 
-void operator delete(void *p) throw()
+void operator delete(void *p)
 {
     return clsMemManager::CFree(p);
 }
 
-void *operator new(size_t size, const std::nothrow_t &) throw() 
+
+void *operator new[](size_t size)
 {
     return clsMemManager::CAlloc(size);
 }
 
-void operator delete(void *p, const std::nothrow_t &) throw() 
-{
-    return clsMemManager::CFree(p);
-}
-
-void *operator new[](size_t size) throw(std::bad_alloc)
-{
-    return clsMemManager::CAlloc(size);
-}
-
-void operator delete[](void *p) throw()
-{
-    return clsMemManager::CFree(p);
-}
-
-void *operator new[](size_t size, const std::nothrow_t &) throw() 
-{
-    return clsMemManager::CAlloc(size);
-}
-
-void operator delete[](void *p, const std::nothrow_t &) throw() 
+void operator delete[](void *p)
 {
     return clsMemManager::CFree(p);
 }

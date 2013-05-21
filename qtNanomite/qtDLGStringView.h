@@ -30,10 +30,10 @@ public:
 	~qtDLGStringView();
 
 private:
-	int _iPID,
-		_iForEntry,
-		_iForEnd,
-		_iSelectedRow;
+	size_t	_iPID,
+			_iForEntry,
+			_iForEnd;
+	int		_iSelectedRow;
 
 	qtDLGNanomite *myMainWindow;
 

@@ -20,7 +20,7 @@
 clsAppSettings::clsAppSettings()
 	: QObject()
 {
-	userSettings = new QSettings(QSettings::Format::NativeFormat, QSettings::Scope::UserScope, "Nanomite", "Nanomite");
+	userSettings = new QSettings(QSettings::NativeFormat, QSettings::UserScope, "Nanomite", "Nanomite");
 
 	readWriteMutex = new QMutex();
 }

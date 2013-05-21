@@ -72,7 +72,7 @@ bool clsDebugger::wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwKe
 
 bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag)
 {
-	int iBP = NULL;
+	size_t iBP = NULL;
 	DWORD dwThreadCounter = 0;
 	THREADENTRY32 threadEntry32;
 	threadEntry32.dwSize = sizeof(THREADENTRY32);
@@ -195,7 +195,7 @@ bool clsDebugger::dSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,BYTE btO
 	if(dwOffset == 0 && btOrgByte == 0x00)
 		return false;
 
-	SIZE_T dwBytesWritten,dwBytesRead;
+	SIZE_T dwBytesWritten;
 	HANDLE hPID = _pi.hProcess;
 
 	if(dwPID != -1)

@@ -412,8 +412,8 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 				bNewFile = true;
 
 				PTCHAR pNewFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
-				wcscpy(pNewFileName,pCurrentFileName);
-				wcscat(pNewFileName,L"_patched.exe");
+				wcscpy_s(pNewFileName,MAX_PATH,pCurrentFileName);
+				wcscat_s(pNewFileName,MAX_PATH,L"_patched.exe");
 				CopyFile(pCurrentFileName,pNewFileName,false);
 				//free(pCurrentFileName);
 				pOldName = pCurrentFileName;

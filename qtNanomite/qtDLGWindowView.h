@@ -32,9 +32,9 @@ public:
 	~qtDLGWindowView();
 
 private:
-	qint32 _iPID;
-	int _iForEntry;
-	int _iForEnd;
+	size_t	_iPID,
+			_iForEntry,
+			_iForEnd;
 
 	qtDLGNanomite *myMainWindow;
 

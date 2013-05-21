@@ -83,7 +83,7 @@ bool clsDBInterface::DBAPI_getSymbols(quint64 Key,std::wstring &ModName,std::wst
 	sqlite3_stmt *selectStmt;
 
 	char* symbolQuery = (char*)clsMemManager::CAlloc(120);
-	sprintf(symbolQuery,"select * from symbols where 'Offset' == %016I64X;",Key);
+	sprintf_s(symbolQuery,120,"select * from symbols where 'Offset' == %016I64X;",Key);
 
     sqlite3_prepare(pDB, symbolQuery, strlen(symbolQuery) + 1, &selectStmt, NULL);
     
@@ -113,7 +113,7 @@ bool clsDBInterface::DBAPI_insertSymbols(quint64 Key,std::wstring ModName,std::w
 	sqlite3_stmt *insertStmt;
 
 	char* insertQuery = (char*)clsMemManager::CAlloc(ModName.size() + FuncName.size() + 100);
-	sprintf(insertQuery,"INSERT INTO symbols (offset,modname,funcname) VALUES ('%016I64X', '%s','%s');",
+	sprintf_s(insertQuery,ModName.size() + FuncName.size() + 100,"INSERT INTO symbols (offset,modname,funcname) VALUES ('%016I64X', '%s','%s');",
 		Key,
 		clsHelperClass::convertWSTRtoSTR(ModName).c_str(),
 		clsHelperClass::convertWSTRtoSTR(FuncName).c_str());

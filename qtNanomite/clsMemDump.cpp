@@ -17,7 +17,7 @@
 #include "clsMemDump.h"
 #include "clsMemManager.h"
 
-clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD64 Size)
+clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD Size)
 {
 	DWORD	OldProtection	= NULL,
 			NewProtection	= PAGE_READWRITE,

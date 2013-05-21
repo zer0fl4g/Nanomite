@@ -32,10 +32,11 @@ public:
 	~qtDLGHeapView();
 
 private:
-	int _iPID,
-		_iSelectedRow,
-		_iForEntry,
-		_iForEnd;
+	size_t	_iPID,
+			_iForEntry,
+			_iForEnd;
+
+	int		_iSelectedRow;
 
 	qtDLGNanomite *myMainWindow;
 

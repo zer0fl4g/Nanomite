@@ -58,7 +58,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	}
 
 	QString oldOpcodes = i.value().OpCodes;
-	int oldOpcodeLen = oldOpcodes.replace(" ", "").length() / 2,
+	DWORD oldOpcodeLen = oldOpcodes.replace(" ", "").length() / 2,
 		newOpcodeLen = NULL;
 		
 	QFile tempOutput("nanomite.asm");
@@ -92,9 +92,6 @@ void qtDLGAssembler::InsertNewInstructions()
     CloseHandle(pi.hThread);
 	DeleteFile(L"nanomite.asm");
 
-	DWORD	BytesWritten = NULL,
-			BytesRead = NULL;	
-
 	HANDLE hFile = CreateFileW(L"nanomite.bin",GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,NULL,NULL);
 	if(hFile == INVALID_HANDLE_VALUE)
 	{
@@ -104,6 +101,7 @@ void qtDLGAssembler::InsertNewInstructions()
 
 	int iLen = GetFileSize(hFile,NULL);
 	LPVOID pFileBuffer = clsMemManager::CAlloc(iLen);
+	DWORD BytesRead = NULL;	
 	if(!ReadFile(hFile,pFileBuffer,iLen,&BytesRead,NULL))
 	{
 		CloseHandle(hFile);

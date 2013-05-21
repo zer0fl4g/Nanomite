@@ -96,7 +96,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 		for(size_t i = 0;i < dwStepSize;i++)
 		{
 			wsprintf(tcAsciiHexTemp,L"%02X ",*(LPBYTE)((DWORD)pBuffer + dwCounter + i));
-			wcscat(tcTempBuffer,tcAsciiHexTemp);
+			wcscat_s(tcTempBuffer,MAX_PATH,tcAsciiHexTemp);
 		}
 		tblHexView->setItem(tblHexView->rowCount() - 1,2,
 			new QTableWidgetItem(QString::fromWCharArray(tcTempBuffer)));
@@ -108,17 +108,17 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 		{
 			wsprintf(tcAsciiHexTemp,L"%c ",*(PCHAR)((DWORD)pBuffer + dwCounter + i));
 			if(wcsstr(tcAsciiHexTemp,L"  ") != NULL)
-				wcscat(tcTempBuffer,L". ");
+				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
 			else if(wcsstr(tcAsciiHexTemp,L"\r") != NULL)
-				wcscat(tcTempBuffer,L". ");
+				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
 			else if(wcsstr(tcAsciiHexTemp,L"\t") != NULL)
-				wcscat(tcTempBuffer,L". ");
+				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
 			else if(wcsstr(tcAsciiHexTemp,L"\n") != NULL)
-				wcscat(tcTempBuffer,L". ");
+				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
 			else if(*(PCHAR)((DWORD)pBuffer + dwCounter + i) ==  0x00)
-				wcscat(tcTempBuffer,L". ");
+				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
 			else
-				wcscat(tcTempBuffer,tcAsciiHexTemp);
+				wcscat_s(tcTempBuffer,MAX_PATH,tcAsciiHexTemp);
 		}
 		tblHexView->setItem(tblHexView->rowCount() - 1,3,
 			new QTableWidgetItem(QString::fromWCharArray(tcTempBuffer)));

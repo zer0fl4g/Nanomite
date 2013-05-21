@@ -21,7 +21,7 @@
 	#include <QDebug>
 #endif
 
-clsMemPool::clsMemPool(DWORD64 &PoolBufferBase, DWORD64 &PoolBufferSize, unsigned long ulUnitNum, unsigned long ulUnitSize) :
+clsMemPool::clsMemPool(DWORD64 &PoolBufferBase, DWORD64 &PoolBufferSize, size_t ulUnitNum, size_t ulUnitSize) :
     m_pMemBlock(NULL), m_pAllocatedMemBlock(NULL), m_pFreeMemBlock(NULL), 
     m_ulBlockSize(ulUnitNum * (ulUnitSize + sizeof(struct _Unit))), 
     m_ulUnitSize(ulUnitSize)
@@ -73,7 +73,7 @@ clsMemPool::~clsMemPool()
 	DeleteCriticalSection(&CriticalSection);
 }
 
-void* clsMemPool::Alloc(unsigned long ulSize)
+void* clsMemPool::Alloc(size_t ulSize)
 {
 	EnterCriticalSection(&CriticalSection);
     if(ulSize > m_ulUnitSize || NULL == m_pMemBlock || NULL == m_pFreeMemBlock)
@@ -157,7 +157,7 @@ void clsMemPool::Free(void* p)
 	LeaveCriticalSection(&CriticalSection);
 }
 
-void* clsMemPool::operator new(size_t size) throw(std::bad_alloc)
+void* clsMemPool::operator new(size_t size)
 {
 	return malloc(size);
 }

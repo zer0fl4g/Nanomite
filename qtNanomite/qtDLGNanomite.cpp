@@ -201,18 +201,18 @@ void qtDLGNanomite::LoadWidgets()
 	this->stackView		= new qtDLGStack(this);
 	this->logView		= new qtDLGLogView(this);
 
-	this->addDockWidget(Qt::DockWidgetArea::RightDockWidgetArea, this->cpuRegView);
-	this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, this->callstackView);
+	this->addDockWidget(Qt::RightDockWidgetArea, this->cpuRegView);
+	this->addDockWidget(Qt::BottomDockWidgetArea, this->callstackView);
 
-	this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, this->stackView);
-	this->addDockWidget(Qt::DockWidgetArea::BottomDockWidgetArea, this->logView);
+	this->addDockWidget(Qt::BottomDockWidgetArea, this->stackView);
+	this->addDockWidget(Qt::BottomDockWidgetArea, this->logView);
 
 	clsAppSettings *settings = clsAppSettings::SharedInstance();
 
 	if (!settings->RestoreWindowState(this))
 	{
-		this->splitDockWidget(this->callstackView, this->stackView, Qt::Orientation::Vertical);
-		this->splitDockWidget(this->stackView, this->logView, Qt::Orientation::Horizontal);
+		this->splitDockWidget(this->callstackView, this->stackView, Qt::Vertical);
+		this->splitDockWidget(this->stackView, this->logView, Qt::Horizontal);
 	}
 }
 

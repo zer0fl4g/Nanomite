@@ -104,14 +104,14 @@ void qtDLGLogView::MenuCallback(QAction* pAction)
 int qtDLGLogView::OnLog(wstring sLog)
 {
 	time_t tTime;
-	tm* timeInfo;
+	tm timeInfo;
 	time(&tTime);
-	timeInfo = localtime(&tTime);
+	localtime_s(&timeInfo,&tTime);
 
 	tblLogBox->insertRow(tblLogBox->rowCount());
 	
 	tblLogBox->setItem(tblLogBox->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo->tm_hour,timeInfo->tm_min,timeInfo->tm_sec)));
+		new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec)));
 	
 	tblLogBox->setItem(tblLogBox->rowCount() - 1,1,
 		new QTableWidgetItem(QString::fromStdWString(sLog)));

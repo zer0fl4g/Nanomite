@@ -72,6 +72,8 @@ bool clsDisassembler::IsNewInsertPossible()
 						{
 							case MEM_IMAGE:		
 							case MEM_MAPPED:
+								_dwBaseStart = dwBaseBegin;
+								_dwBaseEnd = dwBaseEnd;
 								return true;
 								break;
 						}
@@ -115,6 +117,7 @@ void clsDisassembler::run()
 			dwNewProtection = PAGE_EXECUTE_READWRITE;
 	LPVOID pBuffer = malloc(dwSize),
 			pOrgBuffer = pBuffer;
+	bool	IsFullRun = false;
 	clsSymbolAndSyntax DataVisualizer(_hProc);
 
 //	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwNewProtection,&dwOldProtection);	
@@ -128,14 +131,30 @@ void clsDisassembler::run()
 
 		memset(&newDisAss, 0, sizeof(DISASM));
 
-		DWORD	searchPattern	= 0x9090909090,
-				searchPattern2	= 0xCCCCCCCCCC;
+		DWORD	searchPattern	= 0x90909090,
+				searchPattern2	= 0xCCCCCCCC;
 
-		while(memcmp(pBuffer,&searchPattern,0x5) != 0 &&
-			memcmp(pBuffer,&searchPattern2,0x5) != 0)
+		while(memcmp(pBuffer,&searchPattern,0x4) != 0 &&
+			memcmp(pBuffer,&searchPattern2,0x4) != 0)
 		{
 			if((_dwStartOffset + 4) >= _dwEndOffset)
 			{
+				//if(!IsFullRun)
+				//{
+				//	_dwStartOffset = _dwBaseStart;
+				//	_dwEndOffset = _dwBaseEnd;
+				//	IsFullRun = true;
+
+				//	pBuffer = malloc(_dwBaseEnd - _dwBaseStart);
+				//	ReadProcessMemory(_hProc,(LPVOID)_dwStartOffset,pBuffer,_dwBaseEnd - _dwBaseStart,NULL);
+
+				//	break;
+				//}
+				//else
+				//{
+				//	free(pBuffer);
+				//}
+
 				pBuffer = pOrgBuffer;
 				_dwStartOffset = dwOrgStart;
 				break;
@@ -144,6 +163,11 @@ void clsDisassembler::run()
 			pBuffer = (LPVOID)((DWORD64)pBuffer + 1);
 			_dwStartOffset++;
 		}
+
+		//if(IsFullRun)
+		//{
+		//	free(pOrgBuffer);
+		//}
 
 		newDisAss.EIP = (quint64)pBuffer;
 		newDisAss.VirtualAddr = _dwStartOffset;

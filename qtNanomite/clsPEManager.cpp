@@ -178,6 +178,7 @@ PIMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getDosHeader();
 	}
+	return NULL;
 }
 
 PIMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
@@ -189,6 +190,7 @@ PIMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getNTHeader32();
 	}
+	return NULL;
 }
 
 PIMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
@@ -200,6 +202,7 @@ PIMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getNTHeader64();
 	}
+	return NULL;
 }
 
 bool clsPEManager::is64BitFile(std::wstring FileName,int PID)
@@ -232,4 +235,5 @@ DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
 			}
 		}
 	}
+	return NULL;
 }

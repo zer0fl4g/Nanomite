@@ -30,10 +30,10 @@ public:
 	~qtDLGHandleView();
 
 private:
-	int _iPID,
-		_iForEntry,
-		_iForEnd,
-		_iSelectedRow;
+	size_t	_iPID,
+			_iForEntry,
+			_iForEnd;
+	int		_iSelectedRow;
 
 	void InsertDataIntoTable(DWORD dwPID,DWORD dwHandle,PTCHAR ptType,PTCHAR ptName);
 

@@ -219,7 +219,7 @@ void qtDLGOption::OnLoad()
 
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
-	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds);
+	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds)
 		cbDebugChild->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.dwSuspendType)
 		cbSuspendThread->setChecked(true);
@@ -309,4 +309,5 @@ int qtDLGOption::getIndex(QString itemColor)
 		return 14;
 	else if(itemColor.compare("Light gray") == 0)
 		return 15;
+	return 0;
 }

@@ -297,9 +297,13 @@ void clsHelperClass::LoadSourceForAddr(wstring &FileName,int &LineNumber,quint64
 
 string clsHelperClass::convertWSTRtoSTR(wstring FileName)
 {
-	size_t newSize = wcstombs(NULL, FileName.c_str(), 0) + 2;
+	size_t newSize = NULL;
+	wcstombs_s(&newSize,NULL, NULL, FileName.c_str(), 0);
+
+	newSize += 2;
 	char* newStr = (char*)clsMemManager::CAlloc(newSize);
-	wcstombs(newStr, FileName.c_str(), newSize);
+
+	wcstombs_s(NULL, newStr, newSize, FileName.c_str(), newSize);
 	string str = newStr;
 	clsMemManager::CFree(newStr);
 	return str;
@@ -307,9 +311,13 @@ string clsHelperClass::convertWSTRtoSTR(wstring FileName)
 
 wstring clsHelperClass::convertSTRtoWSTR(string FileName)
 {
-	size_t newSize = mbstowcs(NULL, FileName.c_str(), 0) + 2;
+	size_t newSize = NULL;
+	mbstowcs_s(&newSize, NULL, NULL, FileName.c_str(), 0);
+
+	newSize += 2;
 	wchar_t* newStr = (wchar_t*)clsMemManager::CAlloc(newSize);
-	mbstowcs(newStr, FileName.c_str(), newSize);
+
+	mbstowcs_s(NULL, newStr, newSize, FileName.c_str(), newSize);
 	wstring str = newStr;
 	clsMemManager::CFree(newStr);
 	return str;
@@ -317,14 +325,14 @@ wstring clsHelperClass::convertSTRtoWSTR(string FileName)
 
 PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 {
-	int iModPos = NULL,
-		iModLen = NULL;
-	PTCHAR lpTempString = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	size_t	iModPos = NULL,
+			iModLen = NULL;
+	PTCHAR	lpTempString = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 	iModLen = wcslen(lpString);
 	if(iModLen > 0)
 	{
-		for(int i = iModLen; i > 0 ; i--)
+		for(size_t i = iModLen; i > 0 ; i--)
 		{
 			if(lpString[i] == lpSearchString)
 			{
@@ -437,8 +445,8 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 	while(VirtualQueryEx(hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
 	{
 		// Path
-		int iModPos = NULL,
-			iModLen = NULL;
+		size_t	iModPos = NULL,
+				iModLen = NULL;
 
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 		memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
@@ -447,7 +455,7 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 		iModLen = wcslen(sTemp2);
 		if(iModLen > 0)
 		{
-			for(int i = iModLen; i > 0 ; i--)
+			for(size_t i = iModLen; i > 0 ; i--)
 			{
 				if(sTemp2[i] == '\\')
 				{
@@ -456,14 +464,14 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 				}
 			}
 						
-			memcpy(sTemp,(LPVOID)&sTemp2[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
+			memcpy_s(sTemp,MAX_PATH,(LPVOID)&sTemp2[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
 
 			if(dwBase == 0)
 				dwBase = (DWORD64)mbi.BaseAddress;
 
 			if(wcslen(moduleName) <= 0 && Offset > (DWORD64)mbi.BaseAddress && Offset < ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
 			{
-				wcscpy(moduleName,sTemp);
+				wcscpy_s(moduleName,MAX_PATH,sTemp);
 				clsMemManager::CFree(sTemp2);
 				clsMemManager::CFree(sTemp);
 

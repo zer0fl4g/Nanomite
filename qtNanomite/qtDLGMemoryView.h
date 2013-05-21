@@ -30,10 +30,11 @@ public:
 	~qtDLGMemoryView();
 
 private:
-	qint32	_iPID,
-			_iSelectedRow;
-	int _iForEntry;
-	int _iForEnd;
+	size_t	_iPID,
+			_iForEntry,
+			_iForEnd;
+
+	int		_iSelectedRow;
 
 	qtDLGNanomite *myMainWindow;
 

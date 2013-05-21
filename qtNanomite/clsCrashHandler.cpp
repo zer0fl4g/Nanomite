@@ -34,15 +34,15 @@ LONG CALLBACK clsCrashHandler::ErrorReporter(PEXCEPTION_POINTERS pExceptionPtrs)
 	PTCHAR szCrashDumpName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 
 	time_t tTime;
-	tm* timeInfo;
+	tm timeInfo;
 	time(&tTime);
-	timeInfo = localtime(&tTime);
+	localtime_s(&timeInfo,&tTime);
 
 	swprintf_s(szCrashDumpName,MAX_PATH,L"Nanomite_%d-%d_%d.%d_crash.dmp",
-		timeInfo->tm_mday,
-		timeInfo->tm_mon + 1,
-		timeInfo->tm_hour,
-		timeInfo->tm_min);
+		timeInfo.tm_mday,
+		timeInfo.tm_mon + 1,
+		timeInfo.tm_hour,
+		timeInfo.tm_min);
 
 	HANDLE hFile = CreateFile(szCrashDumpName, GENERIC_READ | GENERIC_WRITE, NULL,
 		NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL); 

@@ -50,7 +50,10 @@ private:
 	HANDLE	_hProc;
 	quint64 _dwEIP,
 			_dwStartOffset,
-			_dwEndOffset;
+			_dwEndOffset,
+			_dwBaseStart,
+			_dwBaseEnd;
+
 	bool	_bEndOfSection,
 			_bStartOfSection;
 

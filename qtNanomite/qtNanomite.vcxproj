@@ -138,6 +138,7 @@
       <XMLDocumentationFileName>$(IntDir)</XMLDocumentationFileName>
       <BrowseInformationFile>$(IntDir)</BrowseInformationFile>
       <MultiProcessorCompilation>true</MultiProcessorCompilation>
+      <WarningLevel>Level3</WarningLevel>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -1422,6 +1423,7 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\changelog.md" />
+    <None Include="..\Documentation\codeconvention.md" />
     <None Include="..\readme.md" />
     <CustomBuild Include="qtDLGRegEdit86.ui">
       <FileType>Document</FileType>

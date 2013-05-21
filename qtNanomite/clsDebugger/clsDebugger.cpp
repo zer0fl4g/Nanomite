@@ -281,7 +281,7 @@ void clsDebugger::DebuggingLoop()
 
 				//clsDBManager::OpenNewFile(debug_event.dwProcessId,(wstring)tcDllFilepath);
 
-				int iPid = 0;
+				size_t iPid = 0;
 				for(size_t i = 0;i < PIDs.size();i++)
 				{
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
@@ -351,7 +351,7 @@ void clsDebugger::DebuggingLoop()
 				PBDLLInfo(sDLLFileName,debug_event.dwProcessId,(quint64)debug_event.u.LoadDll.lpBaseOfDll,true);
 
 				HANDLE hProc = 0;
-				int iPid = 0;
+				size_t iPid = 0;
 
 				for(size_t i = 0;i < PIDs.size();i++)
 				{
@@ -394,9 +394,11 @@ void clsDebugger::DebuggingLoop()
 					ReadProcessMemory(hProcess,debug_event.u.DebugString.lpDebugStringData,wMsg,debug_event.u.DebugString.nDebugStringLength,NULL);
 				else
 				{
+					size_t countConverted = NULL;
 					PCHAR Msg = (PCHAR)clsMemManager::CAlloc(debug_event.u.DebugString.nDebugStringLength * sizeof(CHAR));
+					
 					ReadProcessMemory(hProcess,debug_event.u.DebugString.lpDebugStringData,Msg,debug_event.u.DebugString.nDebugStringLength,NULL);	
-					mbstowcs(wMsg,Msg,debug_event.u.DebugString.nDebugStringLength);
+					mbstowcs_s(&countConverted,wMsg,debug_event.u.DebugString.nDebugStringLength,Msg,debug_event.u.DebugString.nDebugStringLength);
 					clsMemManager::CFree(Msg);
 				}
 				PBDbgString(wMsg,debug_event.dwProcessId);
@@ -408,7 +410,7 @@ void clsDebugger::DebuggingLoop()
 				EXCEPTION_DEBUG_INFO exInfo = debug_event.u.Exception;
 				bool bIsEP = false,bIsBP = false,bIsKernelBP = false;
 
-				int iPid = 0;
+				size_t iPid = 0;
 				for(size_t i = 0;i < PIDs.size(); i++)
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
 						iPid = i;
@@ -778,7 +780,7 @@ bool clsDebugger::CheckProcessState(DWORD dwPID)
 
 bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag)
 {
-	int iPID = NULL;
+	size_t iPID = NULL;
 	for(size_t i = 0;i < PIDs.size();i++)
 		if(PIDs[i].dwPID == dwPID)
 			iPID = i;

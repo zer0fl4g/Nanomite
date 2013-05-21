@@ -43,16 +43,16 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
-	int iForEntry = 0;
-	int iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	size_t	iForEntry = 0,
+			iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
-	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
 			iForEntry = i; iForEnd = i + 1;
 	}
 
-	for(int i = iForEntry; i < iForEnd;i++)
+	for(size_t i = iForEntry; i < iForEnd;i++)
 	{
 		GetValidMemoryParts((PTCHAR)myMainWindow->coreDebugger->GetTarget().c_str(),myMainWindow->coreDebugger->PIDs[i].hProc);
 		InsertSymbolsIntoLists(myMainWindow->coreDebugger->PIDs[i].hProc,

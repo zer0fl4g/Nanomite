@@ -46,7 +46,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	_iForEntry = 0;
 	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
-	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
 			_iForEntry = i; _iForEnd = i +1;
@@ -70,7 +70,7 @@ void qtDLGStringView::DisplayStrings()
 	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(WCHAR));
 	quint64 StartOffset = NULL,EndOffset = NULL;
 
-	for(int i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = _iForEntry; i < _iForEnd;i++)
 	{
 		//clsHelperClass::getStartAndEndOffsetOfPID(myMainWindow->coreDebugger->PIDs[i].dwPID,StartOffset,EndOffset);
 		//if(StartOffset == 0 || EndOffset == 0)

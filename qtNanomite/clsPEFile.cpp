@@ -423,7 +423,7 @@ QList<PESectionData> clsPEFile::getSections()
 		SectionCount = _pINH32->FileHeader.NumberOfSections;
 	}
 
-	for (int i = 0; i < SectionCount;i++)
+	for (DWORD i = 0; i < SectionCount;i++)
 	{
 		PESectionData newSection;
 		newSection.Characteristics = pSH->Characteristics;

@@ -81,7 +81,7 @@ void qtDLGHandleView::OnDisplayHandles()
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
 	tblHandleView->setRowCount(0);
-	for(int i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = _iForEntry; i < _iForEnd;i++)
 	{
 		NTSTATUS status;
 		ULONG handleInfoSize = 0x10000;
@@ -99,7 +99,7 @@ void qtDLGHandleView::OnDisplayHandles()
 			close();
 		}
 
-		for (int iCount = 0; iCount < handleInfo->HandleCount; iCount++)
+		for (DWORD iCount = 0; iCount < handleInfo->HandleCount; iCount++)
 		{
 			SYSTEM_HANDLE handle = handleInfo->Handles[iCount];
 			HANDLE dupHandle = NULL;

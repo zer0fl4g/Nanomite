@@ -218,7 +218,7 @@ bool clsDebugger::ShowCallStack()
 	IMAGEHLP_LINEW64 imgSource = {0};
 	IMAGEHLP_MODULEW64 imgMod = {0};
 	BOOL bSuccess;
-	int iPid = 0;
+	size_t iPid = 0;
 
 	for(size_t i = 0;i < PIDs.size(); i++)
 	{
