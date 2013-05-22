@@ -40,7 +40,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
 
 	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
-	//connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
+	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
 }
 
 qtDLGTrace::~qtDLGTrace()
@@ -79,21 +79,18 @@ void qtDLGTrace::showEvent(QShowEvent * event)
 void qtDLGTrace::OnShow(int delta)
 {
 	int iLines = NULL,
+		count = NULL,
 		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 12) - 1;
-	QMap<DWORD64,TraceInfoRow>::iterator i;
+	QMap<DWORD64,TraceInfoRow>::iterator i = traceData.begin();
 
 	scrollTrace->setMaximum(traceData.count());
 
-	if(delta < 0 && tblTraceLog->rowCount() > 0)
+	if(delta != 0 && tblTraceLog->rowCount() > 0 && scrollTrace->value() >= 0)
 	{
-		i = traceData.find(tblTraceLog->item(0,2)->text().toULongLong(0,16));
-		--i;
-		scrollTrace->setValue(scrollTrace->value() - 1);
-	}
-	else if(delta > 0 && tblTraceLog->rowCount() > 1)
-	{
-		i = traceData.find(tblTraceLog->item(1,2)->text().toULongLong(0,16));
-		scrollTrace->setValue(scrollTrace->value() + 1);
+		while(count <= (scrollTrace->value() - iPossibleRowCount - 2))
+		{
+			count++;++i;
+		}
 	}
 	else if(delta == 0)
 	{

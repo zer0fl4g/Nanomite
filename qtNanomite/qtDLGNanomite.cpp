@@ -20,7 +20,6 @@
 #include "qtDLGRegEdit.h"
 #include "qtDLGAssembler.h"
 
-#include "clsCallbacks.h"
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
@@ -60,7 +59,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	coreDisAs = new clsDisassembler;
 	PEManager = new clsPEManager;
 	DBManager = new clsDBManager;
-	clsCallbacks *NanomiteCallbacks = new clsCallbacks;
 	dlgDetInfo = new qtDLGDetailInfo(this,Qt::Window);
 	dlgDbgStr = new qtDLGDebugStrings(this,Qt::Window);
 	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
@@ -75,15 +73,15 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	
 	// Callbacks from Debugger Thread to GUI
 	connect(coreDebugger,SIGNAL(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),
-		NanomiteCallbacks,SLOT(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),Qt::QueuedConnection);
+		dlgDetInfo,SLOT(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnPID(DWORD,std::wstring,DWORD,quint64,bool)),
-		NanomiteCallbacks,SLOT(OnPID(DWORD,std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
+		dlgDetInfo,SLOT(OnPID(DWORD,std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),
-		NanomiteCallbacks,SLOT(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),Qt::QueuedConnection);
+		dlgDetInfo,SLOT(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDbgString(std::wstring,DWORD)),
-		NanomiteCallbacks,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
+		dlgDetInfo,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDll(std::wstring,DWORD,quint64,bool)),
-		NanomiteCallbacks,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
+		dlgDetInfo,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
 
 	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),
 		logView,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);

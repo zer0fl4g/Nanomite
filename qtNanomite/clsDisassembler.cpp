@@ -139,21 +139,24 @@ void clsDisassembler::run()
 		{
 			if((_dwStartOffset + 4) >= _dwEndOffset)
 			{
-				//if(!IsFullRun)
-				//{
-				//	_dwStartOffset = _dwBaseStart;
-				//	_dwEndOffset = _dwBaseEnd;
-				//	IsFullRun = true;
+				//IsFullRun = true;
 
-				//	pBuffer = malloc(_dwBaseEnd - _dwBaseStart);
-				//	ReadProcessMemory(_hProc,(LPVOID)_dwStartOffset,pBuffer,_dwBaseEnd - _dwBaseStart,NULL);
-
-				//	break;
-				//}
-				//else
+				//pBuffer = malloc(_dwBaseEnd - _dwBaseStart);
+				//if(!ReadProcessMemory(_hProc,(LPVOID)_dwBaseStart,pBuffer,_dwBaseEnd - _dwBaseStart,NULL))
 				//{
 				//	free(pBuffer);
+				//	IsFullRun = false;
+				//	pBuffer = pOrgBuffer;
+				//	break;
 				//}
+				//	
+				//free(pOrgBuffer);
+				//pOrgBuffer = pBuffer;
+
+				//_dwStartOffset = _dwBaseStart;
+				//_dwEndOffset = _dwBaseEnd;
+
+				//break;
 
 				pBuffer = pOrgBuffer;
 				_dwStartOffset = dwOrgStart;
@@ -163,11 +166,6 @@ void clsDisassembler::run()
 			pBuffer = (LPVOID)((DWORD64)pBuffer + 1);
 			_dwStartOffset++;
 		}
-
-		//if(IsFullRun)
-		//{
-		//	free(pOrgBuffer);
-		//}
 
 		newDisAss.EIP = (quint64)pBuffer;
 		newDisAss.VirtualAddr = _dwStartOffset;
@@ -187,7 +185,10 @@ void clsDisassembler::run()
 			if (iLen == OUT_OF_BLOCK)
 				bContinueDisAs = false;
 			else
-			{			
+			{	
+
+				//if(!IsFullRun)
+				//{
 				memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
 				
 				// OpCodez
@@ -211,6 +212,36 @@ void clsDisassembler::run()
 
 				newRow.Offset = QString("%1").arg(newDisAss.VirtualAddr,16,16,QChar('0')).toUpper();
 				SectionDisAs.insert(newRow.Offset,newRow);
+//				}
+				//else
+				//{
+				//	if(newDisAss.VirtualAddr >= (_dwEIP - 250))
+				//	{
+				//		memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
+				//
+				//		// OpCodez
+				//		int iTempLen = ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : ((iLen == UNKNOWN_OPCODE) ? 0 : iLen));
+				//		for(size_t i = 0;i < iTempLen;i++)
+				//		{
+				//			memcpy(&bBuffer,(LPVOID)((quint64)newDisAss.EIP + i),1);
+				//			wsprintf(sTemp,L"%s %02X",sTemp,bBuffer);
+				//		}
+				//		newRow.OpCodes = QString::fromWCharArray(sTemp);
+
+				//		// Instruction
+				//		if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
+				//			wsprintf(sTemp,L"%s",L"db 00");
+				//		else
+				//			wsprintf(sTemp,L"%S",newDisAss.CompleteInstr);	
+				//		newRow.ASM = QString::fromWCharArray(sTemp);
+				//
+				//		// Comment/Symbol && itemStyle		
+				//		DataVisualizer.CreateDataForRow(&newRow);
+
+				//		newRow.Offset = QString("%1").arg(newDisAss.VirtualAddr,16,16,QChar('0')).toUpper();
+				//		SectionDisAs.insert(newRow.Offset,newRow);
+				//	}
+				//}
 			}
 
 			newDisAss.EIP = newDisAss.EIP + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
@@ -230,8 +261,13 @@ void clsDisassembler::run()
 //	bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
 	free(pOrgBuffer);
 
-	QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
-	_dwEndOffset = iEnd.key().toULongLong(0,16);
+	if(SectionDisAs.count() > 0)
+	{
+		QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
+		_dwEndOffset = iEnd.key().toULongLong(0,16);
+	}
+	else
+		_dwEndOffset = 0;
 
 	emit DisAsFinished(_dwEIP);
 }

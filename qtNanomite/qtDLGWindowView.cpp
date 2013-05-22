@@ -16,7 +16,7 @@
  */
 #include "qtDLGWindowView.h"
 
-#include "clsCallbacks.h"
+#include "Psapi.h"
 
 qtDLGWindowView* qtDLGWindowView::pThis = NULL;
 
@@ -45,7 +45,7 @@ qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			_iForEntry = i; _iForEnd = i +1;
+			_iForEntry = i; _iForEnd = i + 1;
 	}
 
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(EnumWindow()));
@@ -64,6 +64,55 @@ void qtDLGWindowView::EnumWindow()
 
 	for(size_t i = _iForEntry; i < _iForEnd;i++)
 	{
-		EnumWindows((WNDENUMPROC)clsCallbacks::EnumWindowCallBack,(LPARAM)myMainWindow->coreDebugger->PIDs[i].dwPID);
+		EnumWindows((WNDENUMPROC)EnumWindowCallBack,(LPARAM)myMainWindow->coreDebugger->PIDs[i].dwPID);
 	}
+}
+
+bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
+{
+	DWORD dwHwPID = NULL;
+	GetWindowThreadProcessId(hWnd,&dwHwPID);
+	int iPid = (int)lParam;
+	
+	if(dwHwPID == iPid)
+	{
+		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,dwHwPID);
+		
+		pThis->tblWindowView->insertRow(pThis->tblWindowView->rowCount());
+		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+		// PID
+		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,0,
+			new QTableWidgetItem(QString("%1").arg(dwHwPID,8,16,QChar('0'))));
+
+		// GetWindowName
+		GetWindowText(hWnd,sTemp,MAX_PATH);
+		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,1,
+			new QTableWidgetItem(QString::fromStdWString(sTemp)));
+
+		// IsVisible
+		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,2,
+			new QTableWidgetItem(QString().sprintf("%s",(IsWindowVisible(hWnd) ? "TRUE" : "FALSE"))));
+
+		// hWnd
+		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,3,
+			new QTableWidgetItem(QString("%1").arg((int)hWnd,8,16,QChar('0'))));
+
+		// WndProc
+		//LONG_PTR wndproc = GetWindowLongPtr(hWnd,GWLP_ID);
+		//qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,4,
+		//	new QTableWidgetItem(QString("%1").arg(wndproc,8,16,QChar('0'))));
+
+		// GetModuleName
+		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
+		if(GetModuleFileNameEx(hProcess,NULL,sTemp,MAX_PATH) > 0)
+			pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,5,
+				new QTableWidgetItem(QString::fromStdWString(sTemp)));
+		else
+			pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,5,
+				new QTableWidgetItem(""));
+
+		CloseHandle(hProcess);
+		free(sTemp);
+	}
+	return true;
 }

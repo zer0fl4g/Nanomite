@@ -16,6 +16,7 @@
  */
 #include "qtDLGDetailInfo.h"
 #include "qtDLGPEEditor.h"
+#include "qtDLGNanomite.h"
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
@@ -23,6 +24,8 @@
 
 #include <QtCore>
 #include <QMenu>
+
+using namespace std;
 
 qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
@@ -204,4 +207,138 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_BELOW_NORMAL);
 	else if(QString().compare(pAction->text(),"Lowest") == 0)
 		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
+}
+
+int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
+{
+	if(!bFound)
+	{
+		tblTIDs->insertRow(tblTIDs->rowCount());
+		
+		tblTIDs->setItem(tblTIDs->rowCount() - 1,0,
+			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
+		
+		tblTIDs->setItem(tblTIDs->rowCount() - 1,1,
+			new QTableWidgetItem(QString("%1").arg(dwTID,8,16,QChar('0'))));
+	
+		tblTIDs->setItem(tblTIDs->rowCount() - 1,2,
+			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
+
+		tblTIDs->setItem(tblTIDs->rowCount() - 1,4,
+			new QTableWidgetItem("Running"));
+
+		tblTIDs->scrollToBottom();
+	} 
+	else
+	{
+		for(int i = 0; i < tblTIDs->rowCount();i++)
+			if(QString().compare(tblTIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0 &&
+				QString().compare(tblTIDs->item(i,1)->text(),QString("%1").arg(dwTID,8,16,QChar('0'))) == 0)
+			{
+				tblTIDs->setItem(i,4,new QTableWidgetItem(QString("Terminated")));
+				tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
+			}
+	}
+
+	return 0;
+}
+
+int qtDLGDetailInfo::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound)
+{
+	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+
+	if(!bFound)
+	{
+		tblPIDs->insertRow(tblPIDs->rowCount());
+		
+		tblPIDs->setItem(tblPIDs->rowCount() - 1,0,
+			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
+		
+		tblPIDs->setItem(tblPIDs->rowCount() - 1,1,
+			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
+
+		tblPIDs->setItem(tblPIDs->rowCount() - 1,3,
+			new QTableWidgetItem(QString::fromStdWString(sFile)));
+
+		tblPIDs->scrollToBottom();
+	}
+	else
+	{
+		for(int i = 0; i < tblPIDs->rowCount();i++)
+			if(QString().compare(tblPIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0)
+				tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
+	}
+	return 0;
+}
+
+int qtDLGDetailInfo::OnException(wstring sFuncName,wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
+{
+	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+	myMainWindow->lExceptionCount++;
+
+	tblExceptions->insertRow(tblExceptions->rowCount());
+		
+	tblExceptions->setItem(tblExceptions->rowCount() - 1,0,
+		new QTableWidgetItem(QString("%1").arg(dwOffset,16,16,QChar('0'))));
+		
+	tblExceptions->setItem(tblExceptions->rowCount() - 1,1,
+		new QTableWidgetItem(QString("%1").arg(dwExceptionCode,16,16,QChar('0'))));
+
+	tblExceptions->setItem(tblExceptions->rowCount() - 1,2,
+		new QTableWidgetItem(QString().sprintf("%08X / %08X",dwPID,dwTID)));
+
+	if(sFuncName.length() > 0 )
+		tblExceptions->setItem(tblExceptions->rowCount() - 1,3,
+			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
+
+	tblExceptions->scrollToBottom();
+
+	return 0;
+}
+
+int qtDLGDetailInfo::OnDbgString(wstring sMessage,DWORD dwPID)
+{
+	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+
+	myMainWindow->dlgDbgStr->tblDebugStrings->insertRow(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount());
+		
+	myMainWindow->dlgDbgStr->tblDebugStrings->setItem(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount() - 1,0,
+		new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+		
+	myMainWindow->dlgDbgStr->tblDebugStrings->setItem(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount() - 1,1,
+		new QTableWidgetItem(QString::fromStdWString(sMessage)));
+
+	myMainWindow->dlgDbgStr->tblDebugStrings->scrollToBottom();
+
+	return 0;
+}
+
+int qtDLGDetailInfo::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded)
+{
+	if(bLoaded)
+	{
+		tblModules->insertRow(tblModules->rowCount());
+		
+		tblModules->setItem(tblModules->rowCount() - 1,0,
+			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
+		
+		tblModules->setItem(tblModules->rowCount() - 1,1,
+			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
+
+		tblModules->setItem(tblModules->rowCount() - 1,2,
+			new QTableWidgetItem("Loaded"));
+
+		tblModules->setItem(tblModules->rowCount() - 1,3,
+			new QTableWidgetItem(QString::fromStdWString(sDLLPath)));
+
+		tblModules->scrollToBottom();
+	}
+	else
+	{
+		for(int i = 0; i < tblModules->rowCount();i++)
+			if(QString().compare(tblModules->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0 &&
+				QString().compare(tblModules->item(i,1)->text(),QString("%1").arg(dwEP,16,16,QChar('0'))) == 0)
+				tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
+	}
+	return 0;
 }

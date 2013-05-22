@@ -19,6 +19,9 @@
 
 #include "ui_qtDLGDetailInfo.h"
 
+#include <Windows.h>
+#include <string>
+
 class qtDLGDetailInfo : public QWidget, public Ui_qtDLGDetailInfoClass
 {
 	Q_OBJECT
@@ -30,6 +33,13 @@ public:
 signals:
 	void ShowInDisassembler(quint64 Offset);
 	void OpenFileInPEManager(std::wstring FileName,int PID);
+
+public slots:
+		int OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
+		int OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
+		int OnException(std::wstring sFuncName,std::wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
+		int OnDbgString(std::wstring sMessage,DWORD dwPID);
+		int OnDll(std::wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
 
 private:
 	int _iSelectedRow;
@@ -43,7 +53,6 @@ private slots:
 	void OnCustomPIDContextMenu(QPoint qPoint);
 	void OnCustomExceptionContextMenu(QPoint qPoint);
 	void OnCustomModuleContextMenu(QPoint qPoint);
-
 };
 
 #endif

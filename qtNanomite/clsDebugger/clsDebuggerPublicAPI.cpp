@@ -339,22 +339,6 @@ bool clsDebugger::ShowCallStack()
 	return false;
 }
 
-bool clsDebugger::ReadMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer)
-{
-	for(size_t i = 0;i < PIDs.size();i++)
-		if(PIDs[i].dwPID == dwPID)
-			return ReadProcessMemory(PIDs[i].hProc,(LPVOID)dwAddress,lpBuffer,dwSize,NULL);
-	return false;
-}
-
-bool clsDebugger::WriteMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer)
-{
-	for(size_t i = 0;i < PIDs.size();i++)
-		if(PIDs[i].dwPID == dwPID)
-			return WriteProcessMemory(PIDs[i].hProc,(LPVOID)dwAddress,lpBuffer,dwSize,NULL);
-	return false;
-}
-
 void clsDebugger::ClearTarget()
 {
 	_sTarget.clear();

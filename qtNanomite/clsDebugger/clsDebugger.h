@@ -152,8 +152,6 @@ public:
 	bool IsTargetSet();
 	bool RemoveBPFromList(quint64 dwOffset,DWORD dwType); //,DWORD dwPID);
 	bool RemoveBPs();
-	bool ReadMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
-	bool WriteMemoryFromDebugee(DWORD dwPID,quint64 dwAddress,DWORD dwSize,LPVOID lpBuffer);
 	bool AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep);
 	bool SetTraceFlagForPID(DWORD dwPID, bool bIsEnabled);
 

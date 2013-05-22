@@ -683,14 +683,13 @@ void clsDebugger::DebuggingLoop()
 		ContinueDebugEvent(debug_event.dwProcessId,debug_event.dwThreadId,dwContinueStatus);
 		dwContinueStatus = DBG_CONTINUE;
 	}
+	_isDebugging = false;
 
 	memset(tcLogString,0x00,LOGBUFFER);
 	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Debugging finished!");
 	PBLogInfo();
 	CleanWorkSpace();
-
-	_isDebugging = false;
-
+	
 	emit CleanPEManager();
 	emit OnDebuggerTerminated();
 }

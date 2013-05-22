@@ -27,7 +27,7 @@ class qtDLGWindowView : public QWidget, public Ui_qtDLGWindowViewClass
 
 public:
 	static qtDLGWindowView *pThis;
-	
+
 	qtDLGWindowView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 iPID = 0);
 	~qtDLGWindowView();
 
@@ -37,6 +37,8 @@ private:
 			_iForEnd;
 
 	qtDLGNanomite *myMainWindow;
+
+	static bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam);
 
 	private slots:
 		void EnumWindow();

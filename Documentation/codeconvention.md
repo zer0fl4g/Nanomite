@@ -28,6 +28,7 @@ other developers to read our code and make things easier for us.
 ##Functions
 - if a functions purpose is to return a value then name it like this
 - order parameters first input then output
+- after each parameter there has to be a space
 - do not return large objects, use references or pointers instead
 - choose describing function names
 

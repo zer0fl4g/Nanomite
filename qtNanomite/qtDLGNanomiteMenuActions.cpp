@@ -47,8 +47,7 @@ void qtDLGNanomite::action_FileTerminateGUI()
 
 void qtDLGNanomite::action_FileOpenNewFile()
 {
-	if(coreDebugger->GetDebuggingState())
-		coreDebugger->StopDebuggingAll();
+	action_DebugStop();
 
 	coreDebugger->RemoveBPs();
 	coreDebugger->ClearTarget();
@@ -156,13 +155,11 @@ void qtDLGNanomite::action_DebugStop()
 {
 	if(coreDebugger->GetDebuggingState())
 		coreDebugger->StopDebuggingAll();
-	PEManager->CleanPEManager();
 }
 
 void qtDLGNanomite::action_DebugRestart()
 {
 	action_DebugStop();
-	Sleep(50);
 	action_DebugStart();
 }
 
