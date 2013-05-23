@@ -39,6 +39,7 @@ public:
 
 private:
 	QStringList completerList;
+	QCompleter *APICompleter;
 
 	private slots:
 		void OnClose();

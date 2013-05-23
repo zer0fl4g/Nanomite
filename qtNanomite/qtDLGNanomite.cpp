@@ -29,6 +29,8 @@
 #include "clsMemManager.h"
 #include "clsAppSettings.h"
 
+#include <Psapi.h>
+
 #include <QClipboard>
 
 using namespace std;
@@ -82,7 +84,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 		dlgDetInfo,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDll(std::wstring,DWORD,quint64,bool)),
 		dlgDetInfo,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
-
 	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),
 		logView,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),
@@ -166,6 +167,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	tblDisAs->horizontalHeader()->resizeSection(3,310);
 
 	actionDebug_Trace_Stop->setDisabled(true);
+
+	ParseCommandLineArgs();
 }
 
 qtDLGNanomite::~qtDLGNanomite()
@@ -469,7 +472,7 @@ void qtDLGNanomite::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	submenu->addAction(new QAction("Mnemonic",this));
 	submenu->addAction(new QAction("Comment",this));
 
-	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
+	menu.addMenu(submenu);
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -631,4 +634,61 @@ void qtDLGNanomite::closeEvent(QCloseEvent* closeEvent)
 	clsAppSettings::SharedInstance()->SaveWindowState(this);
 
 	closeEvent->accept();
+}
+
+void qtDLGNanomite::ParseCommandLineArgs()
+{
+	PTCHAR currentCommandLine = GetCommandLineW();
+	QStringList splittedCommandLine = QString::fromWCharArray(currentCommandLine,wcslen(currentCommandLine)).split(" ");
+
+	for(QStringList::const_iterator i = splittedCommandLine.constBegin(); i != splittedCommandLine.constEnd(); ++i)
+	{
+		if(i->compare("-p") == 0)
+		{
+			i++;
+			if(i == splittedCommandLine.constEnd()) return;
+			int PID = i->toULongLong(0,16);
+
+			HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,PID);
+			if(hProc == NULL) return;
+
+			PTCHAR processFile = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+			if(GetModuleFileNameEx(hProc,NULL,processFile,MAX_PATH) <= 0)
+			{
+				CloseHandle(hProc);
+				free(processFile);
+				return;
+			}
+			QString procFile = QString::fromWCharArray(processFile,MAX_PATH);
+
+			CloseHandle(hProc);
+			free(processFile);
+			action_DebugAttachStart(PID,procFile);
+			return;
+		}
+		else if(i->compare("-s") == 0)
+		{
+			i++;
+			if(i == splittedCommandLine.constEnd()) return;
+
+			wstring *pTarget = new wstring(i->toStdWString());
+			coreDebugger->SetTarget(*pTarget);
+
+			for(QStringList::const_iterator commandLineSearch = splittedCommandLine.constBegin(); commandLineSearch != splittedCommandLine.constEnd(); ++commandLineSearch)
+			{
+				if(commandLineSearch->compare("-c") == 0)
+				{
+					commandLineSearch++;
+					if(commandLineSearch == splittedCommandLine.constEnd()) break;
+
+					wstring *pCommand = new wstring(commandLineSearch->toStdWString());
+					coreDebugger->SetCommandLine(*pCommand);
+				}
+			}
+
+			action_DebugStart();
+			return;
+		}
+	}
+	return;
 }

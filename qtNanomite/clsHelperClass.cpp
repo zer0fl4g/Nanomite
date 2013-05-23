@@ -388,18 +388,6 @@ wstring clsHelperClass::replaceAll(wstring orgString, wstring oldString, wstring
 	return *ret;
 }
 
-bool clsHelperClass::SetThreadPriorityByTid(DWORD ThreadID, int threadPrio)
-{
-	HANDLE hThread = OpenThread(THREAD_SET_INFORMATION,false,ThreadID);
-	if(hThread == INVALID_HANDLE_VALUE) return false;
-
-	bool bSuccess = false;
-	if(!(bSuccess = SetThreadPriority(hThread,threadPrio)))
-		MessageBoxW(NULL,L"ERROR, could not set the thread priority",L"Nanomite",MB_OK);
-	CloseHandle(hThread);
-	return bSuccess;
-}
-
 DWORD clsHelperClass::GetMainThread(DWORD ProcessID)
 {
 	DWORD ThreadID = NULL;

@@ -145,6 +145,7 @@ private:
 	void GenerateMenu(bool isAllEnabled = true);
 	void UpdateStateBar(DWORD dwAction);
 	void LoadWidgets();
+	void ParseCommandLineArgs();
 
 protected:
 	bool eventFilter(QObject *pOpject,QEvent *event);

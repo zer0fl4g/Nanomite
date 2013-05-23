@@ -50,7 +50,7 @@ void qtDLGDebugStrings::OnCustomContextMenuRequested(QPoint qPoint)
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Debug String",this));
 
-	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));	
+	menu.addMenu(submenu);
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());

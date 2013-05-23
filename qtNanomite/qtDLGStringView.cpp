@@ -228,7 +228,7 @@ void qtDLGStringView::OnCustomContextMenuRequested(QPoint qPoint)
 	submenu->addAction(new QAction("Offset",this));
 	submenu->addAction(new QAction("String",this));
 
-	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	menu.addMenu(submenu);
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());

@@ -60,8 +60,7 @@ void qtDLGLogView::OnContextMenu(QPoint qPoint)
 	submenu->addAction(new QAction("Time",this));
 	submenu->addAction(new QAction("Text",this));
 
-	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-
+	menu.addMenu(submenu);
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());

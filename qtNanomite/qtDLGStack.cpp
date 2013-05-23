@@ -205,7 +205,7 @@ void qtDLGStack::OnContextMenu(QPoint qPoint)
 	submenu->addAction(new QAction("Mnemonic",this));
 	submenu->addAction(new QAction("Comment",this));
 
-	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	menu.addMenu(submenu);
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());

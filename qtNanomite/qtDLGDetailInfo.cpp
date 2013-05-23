@@ -77,7 +77,64 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 	_SelectedOffset = tblPIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	int ProcessPriority = GetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16));
+	if(ProcessPriority != 0)
+	{
+		QMenu *submenu = menu.addMenu("Set Process Priority");
+
+		QAction *newProcessPrioReal = new QAction("Realtime",this);
+		if(ProcessPriority == REALTIME_PRIORITY_CLASS)
+		{
+			newProcessPrioReal->setCheckable(true);
+			newProcessPrioReal->setChecked(true);
+		}
+
+		QAction *newProcessPrioHigh = new QAction("High",this);
+		if(ProcessPriority == HIGH_PRIORITY_CLASS)
+		{
+			newProcessPrioHigh->setCheckable(true);
+			newProcessPrioHigh->setChecked(true);
+		}
+
+		QAction *newProcessPrioAbNormal = new QAction("Above Normal",this);
+		if(ProcessPriority == ABOVE_NORMAL_PRIORITY_CLASS)
+		{
+			newProcessPrioAbNormal->setCheckable(true);
+			newProcessPrioAbNormal->setChecked(true);
+		}
+
+		QAction *newProcessPrioNormal = new QAction("Normal",this);
+		if(ProcessPriority == NORMAL_PRIORITY_CLASS)
+		{
+			newProcessPrioNormal->setCheckable(true);
+			newProcessPrioNormal->setChecked(true);
+		}
+
+		QAction *newProcessPrioBeNormal = new QAction("Below Normal",this);
+		if(ProcessPriority == BELOW_NORMAL_PRIORITY_CLASS)
+		{
+			newProcessPrioBeNormal->setCheckable(true);
+			newProcessPrioBeNormal->setChecked(true);
+		}
+
+		QAction *newProcessPrioLowest = new QAction("Idle",this);
+		if(ProcessPriority == IDLE_PRIORITY_CLASS)
+		{
+			newProcessPrioLowest->setCheckable(true);
+			newProcessPrioLowest->setChecked(true);
+		}
+
+		submenu->addAction(newProcessPrioReal);
+		submenu->addAction(newProcessPrioHigh);
+		submenu->addAction(newProcessPrioAbNormal);
+		submenu->addAction(newProcessPrioNormal);
+		submenu->addAction(newProcessPrioBeNormal);
+		submenu->addAction(newProcessPrioLowest);
+		menu.addMenu(submenu);
+	}
+
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(PIDMenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
 }
@@ -96,14 +153,55 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 	menu.addAction(new QAction("Show Offset in disassembler",this));
 	menu.addAction(new QAction("Suspend",this));
 	menu.addAction(new QAction("Resume",this));
-	QMenu *submenu = menu.addMenu("Set Thread Priority");
-	submenu->addAction(new QAction("Highest",this));
-	submenu->addAction(new QAction("Above Normal",this));
-	submenu->addAction(new QAction("Normal",this));
-	submenu->addAction(new QAction("Below Normal",this));
-	submenu->addAction(new QAction("Lowest",this));
 
-	connect(submenu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	int ThreadPriority = GetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16));
+	if(ThreadPriority != THREAD_PRIORITY_ERROR_RETURN)
+	{
+		QMenu *submenu = menu.addMenu("Set Thread Priority");
+
+		QAction *newThreadPrioHigh = new QAction("Highest",this);
+		if(ThreadPriority == THREAD_PRIORITY_HIGHEST)
+		{
+			newThreadPrioHigh->setCheckable(true);
+			newThreadPrioHigh->setChecked(true);
+		}
+
+		QAction *newThreadPrioAbNormal = new QAction("Above Normal",this);
+		if(ThreadPriority == THREAD_PRIORITY_ABOVE_NORMAL)
+		{
+			newThreadPrioAbNormal->setCheckable(true);
+			newThreadPrioAbNormal->setChecked(true);
+		}
+
+		QAction *newThreadPrioNormal = new QAction("Normal",this);
+		if(ThreadPriority == THREAD_PRIORITY_NORMAL)
+		{
+			newThreadPrioNormal->setCheckable(true);
+			newThreadPrioNormal->setChecked(true);
+		}
+
+		QAction *newThreadPrioBeNormal = new QAction("Below Normal",this);
+		if(ThreadPriority == THREAD_PRIORITY_BELOW_NORMAL)
+		{
+			newThreadPrioBeNormal->setCheckable(true);
+			newThreadPrioBeNormal->setChecked(true);
+		}
+
+		QAction *newThreadPrioLowest = new QAction("Lowest",this);
+		if(ThreadPriority == THREAD_PRIORITY_BELOW_NORMAL)
+		{
+			newThreadPrioLowest->setCheckable(true);
+			newThreadPrioLowest->setChecked(true);
+		}
+
+		submenu->addAction(newThreadPrioHigh);
+		submenu->addAction(newThreadPrioAbNormal);
+		submenu->addAction(newThreadPrioNormal);
+		submenu->addAction(newThreadPrioBeNormal);
+		submenu->addAction(newThreadPrioLowest);
+		menu.addMenu(submenu);
+	}
+	
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -144,7 +242,7 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 	menu.exec(QCursor::pos());
 }
 
-void qtDLGDetailInfo::MenuCallback(QAction* pAction)
+void qtDLGDetailInfo::PIDMenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
 	{
@@ -154,7 +252,23 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 			_SelectedOffset = NULL;
 		}
 	}
-	else if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
+	else if(QString().compare(pAction->text(),"Realtime") == 0)
+		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),REALTIME_PRIORITY_CLASS);
+	else if(QString().compare(pAction->text(),"High") == 0)
+		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),HIGH_PRIORITY_CLASS);
+	else if(QString().compare(pAction->text(),"Above Normal") == 0)
+		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),ABOVE_NORMAL_PRIORITY_CLASS);
+	else if(QString().compare(pAction->text(),"Normal") == 0)
+		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),NORMAL_PRIORITY_CLASS);
+	else if(QString().compare(pAction->text(),"Below Normal") == 0)
+		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),BELOW_NORMAL_PRIORITY_CLASS);
+	else if(QString().compare(pAction->text(),"Idle") == 0)
+		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),IDLE_PRIORITY_CLASS);
+}
+
+void qtDLGDetailInfo::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
 	{
 		std::wstring *temp = new std::wstring(tblModules->item(_iSelectedRow,3)->text().toStdWString());
 		emit OpenFileInPEManager(*temp,-1);
@@ -198,15 +312,15 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		CloseHandle(hThread);
 	}
 	else if(QString().compare(pAction->text(),"Highest") == 0)
-		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_HIGHEST);
+		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_HIGHEST);
 	else if(QString().compare(pAction->text(),"Above Normal") == 0)
-		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_ABOVE_NORMAL);
+		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_ABOVE_NORMAL);
 	else if(QString().compare(pAction->text(),"Normal") == 0)
-		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_NORMAL);
+		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_NORMAL);
 	else if(QString().compare(pAction->text(),"Below Normal") == 0)
-		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_BELOW_NORMAL);
+		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_BELOW_NORMAL);
 	else if(QString().compare(pAction->text(),"Lowest") == 0)
-		clsHelperClass::SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
+		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
 }
 
 int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
@@ -245,7 +359,6 @@ int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspend
 
 int qtDLGDetailInfo::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound)
 {
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
 	if(!bFound)
 	{
@@ -341,4 +454,46 @@ int qtDLGDetailInfo::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 				tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
 	}
 	return 0;
+}
+
+bool qtDLGDetailInfo::SetThreadPriorityByTid(DWORD ThreadID, int threadPrio)
+{
+	HANDLE hThread = OpenThread(THREAD_SET_INFORMATION,false,ThreadID);
+	if(hThread == INVALID_HANDLE_VALUE) return false;
+
+	bool bSuccess = false;
+	if(!(bSuccess = SetThreadPriority(hThread,threadPrio)))
+		MessageBoxW(NULL,L"ERROR, could not set the thread priority",L"Nanomite",MB_OK);
+	CloseHandle(hThread);
+	return bSuccess;
+}
+
+bool qtDLGDetailInfo::SetProcessPriorityByPid(DWORD PID, int processPrio)
+{
+	HANDLE hProc = OpenProcess(PROCESS_SET_INFORMATION,false,PID);
+	if(hProc == INVALID_HANDLE_VALUE) return false;
+
+	bool bSuccess = false;
+	if(!(bSuccess = SetPriorityClass(hProc,processPrio)))
+		MessageBoxW(NULL,L"ERROR, could not set the process priority",L"Nanomite",MB_OK);
+	CloseHandle(hProc);
+	return bSuccess;
+}
+
+int qtDLGDetailInfo::GetThreadPriorityByTid(DWORD ThreadID)
+{
+	HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,ThreadID);
+	if(hThread == INVALID_HANDLE_VALUE) return THREAD_PRIORITY_ERROR_RETURN;
+	int iPriority = GetThreadPriority(hThread);
+	CloseHandle(hThread);
+	return iPriority;
+}
+
+int qtDLGDetailInfo::GetProcessPriorityByPid(DWORD PID)
+{
+	HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION,false,PID);
+	if(hProc == INVALID_HANDLE_VALUE) return 0;
+	int iPriority = GetPriorityClass(hProc);
+	CloseHandle(hProc);
+	return iPriority;
 }

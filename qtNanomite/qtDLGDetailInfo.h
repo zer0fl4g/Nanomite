@@ -42,13 +42,20 @@ public slots:
 		int OnDll(std::wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
 
 private:
-	int _iSelectedRow;
-	int _iSelectedTable;
+	int _iSelectedRow,
+		_iSelectedTable;
 
 	quint64 _SelectedOffset;
 
+	bool SetThreadPriorityByTid(DWORD ThreadID, int threadPrio);
+	bool SetProcessPriorityByPid(DWORD PID, int processPrio);
+
+	int GetThreadPriorityByTid(DWORD ThreadID);
+	int GetProcessPriorityByPid(DWORD PID);
+
 private slots:
 	void MenuCallback(QAction* pAction);
+	void PIDMenuCallback(QAction* pAction);
 	void OnCustomTIDContextMenu(QPoint qPoint);
 	void OnCustomPIDContextMenu(QPoint qPoint);
 	void OnCustomExceptionContextMenu(QPoint qPoint);

@@ -38,6 +38,8 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(pbAddUpdate,SIGNAL(clicked()),this,SLOT(OnAddUpdate()));
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
+
+	APICompleter = new QCompleter(completerList, this);
 }
 
 qtDLGBreakPointManager::~qtDLGBreakPointManager()
@@ -225,14 +227,18 @@ void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID)
 		completerList.append(newImports.value(i).APIName);
 	}
 	
-	QCompleter *completer = new QCompleter(completerList, this);
-	completer->setCaseSensitivity(Qt::CaseInsensitive);
-	leOffset->setCompleter(completer);
+	delete APICompleter;
+	APICompleter = new QCompleter(completerList, this);
+
+	APICompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	leOffset->setCompleter(APICompleter);
 }
 
 void qtDLGBreakPointManager::DeleteCompleterContent()
 {
 	completerList.clear();
+	delete APICompleter;
+	APICompleter = new QCompleter(completerList, this);
 }
 
 void qtDLGBreakPointManager::OnDelete(quint64 bpOffset)
