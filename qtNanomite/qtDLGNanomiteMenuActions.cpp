@@ -47,13 +47,21 @@ void qtDLGNanomite::action_FileTerminateGUI()
 
 void qtDLGNanomite::action_FileOpenNewFile()
 {
-	action_DebugStop();
-
-	coreDebugger->RemoveBPs();
-	coreDebugger->ClearTarget();
-	coreDebugger->ClearCommandLine();
-	
-	action_DebugStart();
+	if(coreDebugger->GetDebuggingState())
+	{
+		m_IsRestart = true;
+		action_DebugStop();
+		coreDebugger->RemoveBPs();
+		coreDebugger->ClearTarget();
+		coreDebugger->ClearCommandLine();
+	}
+	else
+	{
+		coreDebugger->RemoveBPs();
+		coreDebugger->ClearTarget();
+		coreDebugger->ClearCommandLine();
+		action_DebugStart();
+	}
 }
 
 void qtDLGNanomite::action_FileAttachTo()
@@ -159,8 +167,9 @@ void qtDLGNanomite::action_DebugStop()
 
 void qtDLGNanomite::action_DebugRestart()
 {
+	m_IsRestart = true;
 	action_DebugStop();
-	action_DebugStart();
+	//action_DebugStart();
 }
 
 void qtDLGNanomite::action_DebugSuspend()

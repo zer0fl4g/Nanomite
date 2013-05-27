@@ -30,7 +30,7 @@ clsMemManager::clsMemManager()
 	PoolBufferEnd_200 = PoolBufferBase_200 + PoolBufferSize_200;
 
 	// Create a 50000x50Byte Pool
-	PoolUnitCount_50 = 50000;
+	PoolUnitCount_50 = 75000;
 	PoolUnitSize_50 = 50;
 	pPool_50 = new clsMemPool(PoolBufferBase_50,PoolBufferSize_50,PoolUnitCount_50,PoolUnitSize_50);
 	PoolBufferEnd_50 = PoolBufferBase_50 + PoolBufferSize_50;

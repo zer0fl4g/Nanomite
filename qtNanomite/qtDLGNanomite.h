@@ -136,6 +136,8 @@ private:
 	int _iMenuPID;
 	int _iSelectedRow;
 
+	bool m_IsRestart;
+
 	QList<quint64> _OffsetWalkHistory;
 
 	static qtDLGNanomite *qtDLGMyWindow;

@@ -37,6 +37,10 @@ private:
 
 	qtDLGNanomite *myMainWindow;
 
+	void GetAsciiString();
+	void GetUnicodeString();
+	void PrintStringToList(int PID,QString StringToPrint, int StringOffset);
+
 	private slots:
 		void OnCustomContextMenuRequested(QPoint qPoint);
 		void MenuCallback(QAction* pAction);

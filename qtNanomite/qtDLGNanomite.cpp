@@ -38,7 +38,8 @@ using namespace std;
 qtDLGNanomite* qtDLGNanomite::qtDLGMyWindow = NULL;
 
 qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
-	: QMainWindow(parent, flags)
+	: QMainWindow(parent, flags),
+	m_IsRestart(false)
 {
 	setupUi(this);
 
@@ -340,6 +341,12 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	CleanGUI(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow"));
 	UpdateStateBar(0x3);
+	
+	if(m_IsRestart)
+	{
+		m_IsRestart = false;
+		action_DebugStart();
+	}
 }
 
 void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
@@ -647,7 +654,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 		{
 			i++;
 			if(i == splittedCommandLine.constEnd()) return;
-			int PID = i->toULongLong(0,16);
+			int PID = i->toULong();
 
 			HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,PID);
 			if(hProc == NULL) return;
