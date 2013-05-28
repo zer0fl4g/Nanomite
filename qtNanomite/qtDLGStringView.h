@@ -21,6 +21,8 @@
 
 #include "qtDLGNanomite.h"
 
+#include "clsStringViewWorker.h"
+
 class qtDLGStringView : public QWidget, public Ui_qtDLGStringViewClass
 {
 	Q_OBJECT
@@ -37,14 +39,19 @@ private:
 
 	qtDLGNanomite *myMainWindow;
 
-	void GetAsciiString();
-	void GetUnicodeString();
+	clsStringViewWorker *m_pStringProcessor;
+
 	void PrintStringToList(int PID,QString StringToPrint, int StringOffset);
 
 	private slots:
+		void InsertDataFrom(int position);
+		void DataProcessing();
 		void OnCustomContextMenuRequested(QPoint qPoint);
 		void MenuCallback(QAction* pAction);
 		void DisplayStrings();
-};
 
+protected:
+	void wheelEvent(QWheelEvent * event);
+	void resizeEvent(QResizeEvent *event);
+};
 #endif

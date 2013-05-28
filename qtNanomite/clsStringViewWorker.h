@@ -14,33 +14,36 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef QTDLGHEXVIEW_H
-#define QTDLGHEXVIEW_H
+#ifndef CLSSTRINGVIEWWORKER_H
+#define CLSSTRINGVIEWWORKER_H
 
-#include "ui_qtDLGHexView.h"
+#include <Windows.h>
 
-#include "clsHexViewWorker.h"
+#include <QThread>
+#include <QMap>
 
-#include <QTCore>
+struct StringData
+{
+	QString DataString;
+	DWORD64 StringOffset;
+	int PID;
+};
 
-class qtDLGHexView : public QWidget, public Ui_qtDLGHexViewClass
+class clsStringViewWorker : public QThread
 {
 	Q_OBJECT
 
 public:
-	qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID, unsigned long long StartOffset,unsigned long long Size);
-	~qtDLGHexView();
+	QMap<DWORD64,StringData> stringList;
+	
+	clsStringViewWorker(QMap<int,PTCHAR> dataForProcessing);
+	~clsStringViewWorker();
 
 private:
-	clsHexViewWorker *m_pHexDataWorker;
-
-private slots:
-	void DisplayData();
-	void InsertDataFrom(int position);
+	QMap<int,PTCHAR> m_processingData;
 
 protected:
-	void wheelEvent(QWheelEvent * event);
-	void resizeEvent(QResizeEvent *event);
+	void run();
 };
 
 #endif

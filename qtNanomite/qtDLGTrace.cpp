@@ -78,32 +78,27 @@ void qtDLGTrace::showEvent(QShowEvent * event)
 
 void qtDLGTrace::OnShow(int delta)
 {
+	tblTraceLog->setRowCount(0);
 	int iLines = NULL,
 		count = NULL,
 		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 12) - 1;
 	QMap<DWORD64,TraceInfoRow>::iterator i = traceData.begin();
 
-	scrollTrace->setMaximum(traceData.count());
+	scrollTrace->setMaximum(traceData.count() + 2 - iPossibleRowCount);
 
-	if(delta != 0 && tblTraceLog->rowCount() > 0 && scrollTrace->value() >= 0)
+	if(delta != 0 && scrollTrace->value() >= 0)
 	{
-		while(count <= (scrollTrace->value() - iPossibleRowCount - 2))
+		while(count < scrollTrace->value())// && count <= (scrollTrace->value() - ((tblTraceLog->verticalHeader()->height() + 4) / 12)))
 		{
 			count++;++i;
 		}
 	}
-	else if(delta == 0)
+	else
 	{
 		i = traceData.begin();
 		scrollTrace->setValue(0);
 	}
-	else
-		return;
 
-	if((QMapData::Node *)i == (QMapData::Node *)traceData.end())
-		return;
-
-	tblTraceLog->setRowCount(0);
 	while(iLines <= iPossibleRowCount)
 	{
 		if((QMapData::Node *)i == (QMapData::Node *)traceData.end())
@@ -128,7 +123,11 @@ void qtDLGTrace::OnShow(int delta)
 			QString funcName = QString().fromStdWString(*FuncName);
 			QString modName = QString().fromStdWString(*FuncName);
 			i.value().asmInstruction.append(modName).append(".").append(funcName);
+
+			delete FuncName;
+			delete ModName;
 		}
+
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,3,
 			new QTableWidgetItem(i.value().asmInstruction));
 
@@ -142,8 +141,17 @@ void qtDLGTrace::OnShow(int delta)
 void qtDLGTrace::wheelEvent(QWheelEvent *event)
 {
 	QWheelEvent *pWheel = (QWheelEvent*)event;
-		
-	OnShow(pWheel->delta() * -1);
+
+	if(pWheel->delta() > 0)
+	{
+		scrollTrace->setValue(scrollTrace->value() - 1);
+		OnShow(-1);
+	}
+	else
+	{
+		scrollTrace->setValue(scrollTrace->value() + 1);
+		OnShow(1);
+	}
 }
 
 void qtDLGTrace::resizeEvent(QResizeEvent *event)

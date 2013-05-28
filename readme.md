@@ -37,17 +37,19 @@
 ## Changelog
 ###Version 0.1 beta 12
 + fixed a bug which lead to incorrect restarts on slow systems
-+ fixed scrollbar in Trace View
++ fixed scrollbar in trace view
 + fixed display of ascii strings in ascii view
 + fixed a possible crash in disassembler
++ fixed a memory leak in trace view
 + fixed a bug which caused double calling of some functions in context menus
-+ fixed a bug in Hex View which may showed wrong data
-+ fixed a bug in Heap View which caused a crash when copying the whole line to clipboard
++ fixed a bug in hex view which may showed wrong data
++ fixed a bug in heap view which caused a crash when copying the whole line to clipboard
 + added PatchManager
 + added commandline options
 + added possibility to set process priorities
 + added display of current priority in detail view - context menu
-+ added display of segment registers in Reg View
++ added display of segment registers in reg View
++ added background worker to string view and hex view
 + removed processes we can´t access from the attach dialog
 
 ####Notes:

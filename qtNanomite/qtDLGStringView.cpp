@@ -16,11 +16,7 @@
  */
 #include "qtDLGStringView.h"
 
-#include "clsHelperClass.h"
 #include "clsMemManager.h"
-
-#include <fstream>
-#include <sstream>
 
 #include <QMenu>
 #include <QClipboard>
@@ -32,8 +28,10 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
-	this->setLayout(verticalLayout);
+	this->setLayout(horizontalLayout);
+	tblStringView->setRowCount(0);
 	
+	m_pStringProcessor = NULL;
 	_iPID = iPID;
 
 	// Init List
@@ -52,22 +50,89 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 			_iForEntry = i; _iForEnd = i + 1;
 	}
 	
+	connect(stringScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
 	connect(tblStringView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
-	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayStrings()));
+	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DataProcessing()));
 
-	DisplayStrings();
+	DataProcessing();
 }
 
 qtDLGStringView::~qtDLGStringView()
 {
+	delete m_pStringProcessor;
+}
 
+void qtDLGStringView::DataProcessing()
+{
+	QMap<int,PTCHAR> dataForProcessing;
+	for(size_t i = _iForEntry; i < _iForEnd; i++)
+	{
+		dataForProcessing.insert(myMainWindow->coreDebugger->PIDs[_iForEntry].dwPID,
+			myMainWindow->coreDebugger->PIDs[_iForEntry].sFileName);
+	}
+
+	if(m_pStringProcessor != NULL)
+		delete m_pStringProcessor;
+	m_pStringProcessor = new clsStringViewWorker(dataForProcessing);
+	connect(m_pStringProcessor,SIGNAL(finished()),this,SLOT(DisplayStrings()),Qt::QueuedConnection);
 }
 
 void qtDLGStringView::DisplayStrings()
 {
-	tblStringView->setRowCount(0);
+	stringScroll->setValue(0);
+	stringScroll->setMaximum(m_pStringProcessor->stringList.count() - ((tblStringView->verticalHeader()->height() + 4) / 15) + 1);
 
-	GetAsciiString();
+	InsertDataFrom(0);
+}
+
+void qtDLGStringView::InsertDataFrom(int position)
+{
+	tblStringView->setRowCount(0);
+	int numberOfLines = 0,
+		possibleRowCount = ((tblStringView->verticalHeader()->height() + 4) / 15) - 2,
+		count = 0;
+	QMap<DWORD64,StringData>::const_iterator i = m_pStringProcessor->stringList.constBegin();
+
+	if(position != 0)
+	{
+		while(count < stringScroll->value()) // && count <= (stringScroll->value() - ((tblStringView->verticalHeader()->height() + 4) / 15)))
+		{
+			count++;++i;
+		}
+	}
+	else
+	{
+		i = m_pStringProcessor->stringList.begin();
+		stringScroll->setValue(0);
+	}
+
+	while(numberOfLines <= possibleRowCount)
+	{
+		if(i == m_pStringProcessor->stringList.constEnd())
+			break;
+		else
+		{
+			tblStringView->insertRow(tblStringView->rowCount());
+
+			// PID
+			tblStringView->setItem(tblStringView->rowCount() - 1,0,
+				new QTableWidgetItem(QString().sprintf("%08X",i->PID)));
+
+			// Offset
+			if(i->StringOffset > 0)
+				tblStringView->setItem(tblStringView->rowCount() - 1,1,
+				new QTableWidgetItem(QString("%1").arg(i->StringOffset,8,16,QChar('0'))));
+			else 
+				tblStringView->setItem(tblStringView->rowCount() - 1,1,
+				new QTableWidgetItem(""));
+
+			// String
+			tblStringView->setItem(tblStringView->rowCount() - 1,2,
+				new QTableWidgetItem(i->DataString));
+
+			++i;numberOfLines++;
+		}
+	}
 }
 
 void qtDLGStringView::MenuCallback(QAction* pAction)
@@ -110,121 +175,23 @@ void qtDLGStringView::OnCustomContextMenuRequested(QPoint qPoint)
 	menu.exec(QCursor::pos());
 }
 
-void qtDLGStringView::GetAsciiString()
+void qtDLGStringView::resizeEvent(QResizeEvent *event)
 {
-	for(size_t i = _iForEntry; i < _iForEnd;i++)
-	{
-		bool	bNotEndOfFile = true,
-				isNullPadding = false;
-		ifstream inputFile;
-	
-		inputFile.open(myMainWindow->coreDebugger->PIDs[i].sFileName,ifstream::binary);
-
-		if(!inputFile.is_open())
-		{
-			MessageBox(NULL,myMainWindow->coreDebugger->PIDs[i].sFileName,L"Error opening File!",MB_OKCANCEL);
-			bNotEndOfFile = false;
-			close();
-		}
-
-		while(bNotEndOfFile && inputFile.good())
-		{
-			QString asciiChar;
-			CHAR sT = '\0';
-			
-			inputFile.get(sT);
-			while(inputFile.good())
-			{
-				if(((int)sT >= 0x41 && (int)sT <= 0x5a)		||
-					((int)sT >= 0x61 && (int)sT <= 0x7a)	||
-					((int)sT >= 0x30 && (int)sT <= 0x39)	|| 
-					((int)sT == 0x20)						||
-					((int)sT == 0xA))
-					asciiChar.append(sT);
-				else
-				{
-					break;
-				}
-
-				inputFile.get(sT);
-			}
-
-			if((int)sT == 0 && asciiChar.length() > 3)
-			{
-				PrintStringToList(myMainWindow->coreDebugger->PIDs[i].dwPID,asciiChar,inputFile.tellg());
-			}
-		}
-
-		inputFile.close();
-	}
+	InsertDataFrom(stringScroll->value());
 }
 
-void qtDLGStringView::GetUnicodeString()
+void qtDLGStringView::wheelEvent(QWheelEvent *event)
 {
-	for(size_t i = _iForEntry; i < _iForEnd;i++)
+	QWheelEvent *pWheel = (QWheelEvent*)event;
+
+	if(pWheel->delta() > 0)
 	{
-		bool	bNotEndOfFile = true,
-				isNullPadding = false;
-		wifstream inputFile;
-	
-		inputFile.open(myMainWindow->coreDebugger->PIDs[i].sFileName,ifstream::binary);
-
-		if(!inputFile.is_open())
-		{
-			MessageBox(NULL,myMainWindow->coreDebugger->PIDs[i].sFileName,L"Error opening File!",MB_OKCANCEL);
-			bNotEndOfFile = false;
-			close();
-		}
-
-		while(bNotEndOfFile && inputFile.good())
-		{
-			QString unicodeChar;
-			TCHAR sT = '\0';
-			
-			inputFile.get(sT);
-			while(inputFile.good())
-			{
-				if(((int)sT >= 0x41 && (int)sT <= 0x5a)		||
-					((int)sT >= 0x61 && (int)sT <= 0x7a)	||
-					((int)sT >= 0x30 && (int)sT <= 0x39)	|| 
-					((int)sT == 0x20)						||
-					((int)sT == 0xA))
-					unicodeChar.append(sT);
-				else
-				{
-					break;
-				}
-
-				inputFile.get(sT);
-			}
-
-			if((int)sT == 0 && unicodeChar.length() > 3)
-			{
-				PrintStringToList(myMainWindow->coreDebugger->PIDs[i].dwPID,unicodeChar,inputFile.tellg());
-			}
-		}
-
-		inputFile.close();
+		stringScroll->setValue(stringScroll->value() - 1);
+		InsertDataFrom(-1);
 	}
-}
-
-void qtDLGStringView::PrintStringToList(int PID, QString StringToPrint, int StringOffset)
-{
-	tblStringView->insertRow(tblStringView->rowCount());
-						
-	// PID
-	tblStringView->setItem(tblStringView->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("%08X",PID)));
-
-	// Offset
-	if(StringOffset > 0)
-		tblStringView->setItem(tblStringView->rowCount() - 1,1,
-			new QTableWidgetItem(QString("%1").arg(StringOffset,8,16,QChar('0'))));
-	else 
-		tblStringView->setItem(tblStringView->rowCount() - 1,1,
-			new QTableWidgetItem(""));
-
-	// String
-	tblStringView->setItem(tblStringView->rowCount() - 1,2,
-		new QTableWidgetItem(StringToPrint));
+	else
+	{
+		stringScroll->setValue(stringScroll->value() + 1);
+		InsertDataFrom(1);
+	}
 }

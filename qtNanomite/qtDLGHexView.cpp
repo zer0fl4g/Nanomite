@@ -26,7 +26,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
-	this->setLayout(verticalLayout);
+	this->setLayout(horizontalLayout);
 	this->setWindowTitle(QString("[ Nanomite ] - Show Memory - PID - %1 - From: %2 - To: %3").arg(dwPID,8,16,QChar('0')).arg(StartOffset,8,16,QChar('0')).arg(StartOffset + Size,8,16,QChar('0')));
 
 	tblHexView->horizontalHeader()->resizeSection(0,75);
@@ -36,105 +36,96 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 
 	qtDLGNanomite *MyMainWindow = qtDLGNanomite::GetInstance();
 
-	SIZE_T dwBytesRead = NULL;
-	DWORD dwCounter = NULL,
-	//	dwProtection = NULL,
-		dwStepSize = 0x10;
-	DWORD64	dwBaseOffset = StartOffset;
-	HANDLE hProcess = NULL;
-	LPVOID pBuffer = malloc(Size);
-	TCHAR *tcTempBuffer = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),
-		*tcAsciiHexTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-
 	tblHexView->setRowCount(0);
 
+	HANDLE hProcess = NULL;
 	for(size_t i = 0;i < MyMainWindow->coreDebugger->PIDs.size();i++)
 	{
 		if(dwPID == MyMainWindow->coreDebugger->PIDs[i].dwPID)
 			hProcess = MyMainWindow->coreDebugger->PIDs[i].hProc;
 	}
 
-	if(hProcess == INVALID_HANDLE_VALUE)
-	{
-		clsMemManager::CFree(pBuffer);
-		clsMemManager::CFree(tcAsciiHexTemp);
-		clsMemManager::CFree(tcTempBuffer);
-		return;
-	}
-
-	//if(!VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,PAGE_EXECUTE_READWRITE,&dwProtection))
-	//{
-	//	clsMemManager::CFree(pBuffer);
-	//	clsMemManager::CFree(tcAsciiHexTemp);
-	//	clsMemManager::CFree(tcTempBuffer);
-	//	return;
-	//}
-
-	if(!ReadProcessMemory(hProcess,(LPVOID)StartOffset,(LPVOID)pBuffer,Size,&dwBytesRead))
-	{
-		clsMemManager::CFree(pBuffer);
-		clsMemManager::CFree(tcAsciiHexTemp);
-		clsMemManager::CFree(tcTempBuffer);
-		return;
-	}
-
-	for(int iLineStep = 0; iLineStep < (Size / dwStepSize); iLineStep++)
-	{
-		if(StartOffset > (dwBaseOffset + Size))
-			break;
-
-		tblHexView->insertRow(tblHexView->rowCount());
-		tblHexView->setItem(tblHexView->rowCount() - 1,0,
-			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
-
-		// Offset
-		tblHexView->setItem(tblHexView->rowCount() - 1,1,
-			new QTableWidgetItem(QString("%1").arg(StartOffset,16,16,QChar('0'))));
-
-		// Hexiss
-		memset(tcTempBuffer,0,sizeof(MAX_PATH * sizeof(TCHAR)));
-		for(size_t i = 0;i < dwStepSize;i++)
-		{
-			wsprintf(tcAsciiHexTemp,L"%02X ",*(LPBYTE)((DWORD)pBuffer + dwCounter + i));
-			wcscat_s(tcTempBuffer,MAX_PATH,tcAsciiHexTemp);
-		}
-		tblHexView->setItem(tblHexView->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromWCharArray(tcTempBuffer)));
-
-		//Acsii
-		memset(tcTempBuffer,0,sizeof(MAX_PATH * sizeof(TCHAR)));
-		memset(tcAsciiHexTemp,0,sizeof(MAX_PATH * sizeof(TCHAR)));
-		for(size_t i = 0;i < dwStepSize;i++)
-		{
-			wsprintf(tcAsciiHexTemp,L"%c ",*(PCHAR)((DWORD)pBuffer + dwCounter + i));
-			if(wcsstr(tcAsciiHexTemp,L"  ") != NULL)
-				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
-			else if(wcsstr(tcAsciiHexTemp,L"\r") != NULL)
-				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
-			else if(wcsstr(tcAsciiHexTemp,L"\t") != NULL)
-				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
-			else if(wcsstr(tcAsciiHexTemp,L"\n") != NULL)
-				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
-			else if(*(PCHAR)((DWORD)pBuffer + dwCounter + i) ==  0x00)
-				wcscat_s(tcTempBuffer,MAX_PATH,L". ");
-			else
-				wcscat_s(tcTempBuffer,MAX_PATH,tcAsciiHexTemp);
-		}
-		tblHexView->setItem(tblHexView->rowCount() - 1,3,
-			new QTableWidgetItem(QString::fromWCharArray(tcTempBuffer)));
-
-		StartOffset += dwStepSize;
-		dwCounter += dwStepSize;
-	}
-
-	//VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,dwProtection,NULL);
-
-	clsMemManager::CFree(pBuffer);
-	clsMemManager::CFree(tcAsciiHexTemp);
-	clsMemManager::CFree(tcTempBuffer);
+	m_pHexDataWorker = new clsHexViewWorker(dwPID,hProcess,StartOffset,Size);
+	connect(m_pHexDataWorker,SIGNAL(finished()),this,SLOT(DisplayData()),Qt::QueuedConnection);
+	connect(memoryScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
 }
 
 qtDLGHexView::~qtDLGHexView()
 {
+	delete m_pHexDataWorker;
+}
 
+void qtDLGHexView::DisplayData()
+{
+	memoryScroll->setValue(0);
+	memoryScroll->setMaximum(m_pHexDataWorker->dataList.count() - ((tblHexView->verticalHeader()->height() + 4) / 11) + 1);
+
+	InsertDataFrom(0);
+}
+
+void qtDLGHexView::InsertDataFrom(int position)
+{
+	tblHexView->setRowCount(0);
+	int numberOfLines = 0,
+		possibleRowCount = ((tblHexView->verticalHeader()->height() + 4) / 11) - 2,
+		count = 0;
+	QMap<DWORD64,HexData>::const_iterator i = m_pHexDataWorker->dataList.constBegin();
+
+	if(position != 0)
+	{
+		while(count < memoryScroll->value()) // && count <= (memoryScroll->value() - ((tblHexView->verticalHeader()->height() + 4) / 11)))
+		{
+			count++;++i;
+		}
+	}
+	else
+	{
+		i = m_pHexDataWorker->dataList.begin();
+		memoryScroll->setValue(0);
+	}
+
+	while(numberOfLines <= possibleRowCount)
+	{
+		if(i == m_pHexDataWorker->dataList.constEnd())
+			break;
+		else
+		{
+			tblHexView->insertRow(tblHexView->rowCount());
+
+			tblHexView->setItem(tblHexView->rowCount() - 1,0,
+				new QTableWidgetItem(QString("%1").arg(i->PID,8,16,QChar('0'))));
+
+			tblHexView->setItem(tblHexView->rowCount() - 1,1,
+				new QTableWidgetItem(QString("%1").arg(i->hexOffset,16,16,QChar('0'))));
+
+			tblHexView->setItem(tblHexView->rowCount() - 1,2,
+				new QTableWidgetItem(i->hexString));
+
+			tblHexView->setItem(tblHexView->rowCount() - 1,3,
+				new QTableWidgetItem(i->asciiData));
+
+			++i;numberOfLines++;
+		}
+	}	
+}
+
+void qtDLGHexView::resizeEvent(QResizeEvent *event)
+{
+	InsertDataFrom(memoryScroll->value());
+}
+
+void qtDLGHexView::wheelEvent(QWheelEvent *event)
+{
+	QWheelEvent *pWheel = (QWheelEvent*)event;
+
+	if(pWheel->delta() > 0)
+	{
+		memoryScroll->setValue(memoryScroll->value() - 1);
+		InsertDataFrom(-1);
+	}
+	else
+	{
+		memoryScroll->setValue(memoryScroll->value() + 1);
+		InsertDataFrom(1);
+	}
 }
