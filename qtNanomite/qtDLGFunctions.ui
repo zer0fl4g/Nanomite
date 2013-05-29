@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-* 	This file is part of Nanomite.
-*
-*    Nanomite is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    Nanomite is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
-*/
--->
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>qtDLGFunctionsClass</class>
  <widget class="QWidget" name="qtDLGFunctionsClass">
@@ -23,7 +6,7 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>684</width>
+    <width>731</width>
     <height>560</height>
    </rect>
   </property>
@@ -34,20 +17,29 @@
    <iconset resource="qtDLGNanomite.qrc">
     <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QWidget" name="horizontalLayoutWidget">
    <property name="geometry">
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>691</width>
+     <width>731</width>
      <height>561</height>
     </rect>
    </property>
-   <layout class="QVBoxLayout" name="verticalLayout">
+   <layout class="QHBoxLayout" name="horizontalLayout">
+    <property name="spacing">
+     <number>0</number>
+    </property>
     <item>
      <widget class="QTableWidget" name="tblFunctions">
       <property name="contextMenuPolicy">
        <enum>Qt::CustomContextMenu</enum>
+      </property>
+      <property name="verticalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
+      </property>
+      <property name="horizontalScrollBarPolicy">
+       <enum>Qt::ScrollBarAlwaysOff</enum>
       </property>
       <property name="editTriggers">
        <set>QAbstractItemView::NoEditTriggers</set>
@@ -62,7 +54,7 @@
        <bool>false</bool>
       </attribute>
       <attribute name="verticalHeaderDefaultSectionSize">
-       <number>12</number>
+       <number>11</number>
       </attribute>
       <attribute name="verticalHeaderMinimumSectionSize">
        <number>11</number>
@@ -90,6 +82,13 @@
         <string>Length</string>
        </property>
       </column>
+     </widget>
+    </item>
+    <item>
+     <widget class="QScrollBar" name="functionScroll">
+      <property name="orientation">
+       <enum>Qt::Vertical</enum>
+      </property>
      </widget>
     </item>
    </layout>

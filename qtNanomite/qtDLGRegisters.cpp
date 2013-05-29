@@ -139,231 +139,98 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	if(bIsWOW64)
 	{
 		dwEFlags = coreDebugger->wowProcessContext.EFlags;
-		// EAX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EAX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Eax,16,16,QChar('0'))));
-		// EBX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Ebx,16,16,QChar('0'))));
-		// ECX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ECX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Ecx,16,16,QChar('0'))));
-		// EDX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EDX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Edx,16,16,QChar('0'))));
-		// ESP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Esp,16,16,QChar('0'))));
-		// EBP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Ebp,16,16,QChar('0'))));
-		// ESI
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESI"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Esi,16,16,QChar('0'))));
-		// EIP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EIP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.Eip,16,16,QChar('0'))));
 
-		// SegCs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegCs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.SegCs,16,16,QChar('0'))));
-		// SegDs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegDs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.SegDs,16,16,QChar('0'))));
-		// SegEs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegEs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.SegEs,16,16,QChar('0'))));
-		// SegFs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegFs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.SegFs,16,16,QChar('0'))));
-		// SegGs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegGs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.SegGs,16,16,QChar('0'))));
-		// SegSs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegSs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.SegSs,16,16,QChar('0'))));
+		PrintValueInTable("EAX",QString("%1").arg(coreDebugger->wowProcessContext.Eax,16,16,QChar('0')));
+		PrintValueInTable("EBX",QString("%1").arg(coreDebugger->wowProcessContext.Ebx,16,16,QChar('0')));
+		PrintValueInTable("ECX",QString("%1").arg(coreDebugger->wowProcessContext.Ecx,16,16,QChar('0')));
+		PrintValueInTable("EDX",QString("%1").arg(coreDebugger->wowProcessContext.Edx,16,16,QChar('0')));
+		PrintValueInTable("ESP",QString("%1").arg(coreDebugger->wowProcessContext.Esp,16,16,QChar('0')));
+		PrintValueInTable("EBP",QString("%1").arg(coreDebugger->wowProcessContext.Ebp,16,16,QChar('0')));
+		PrintValueInTable("ESI",QString("%1").arg(coreDebugger->wowProcessContext.Esi,16,16,QChar('0')));
+		PrintValueInTable("EIP",QString("%1").arg(coreDebugger->wowProcessContext.Eip,16,16,QChar('0')));
+		PrintValueInTable("SegCs",QString("%1").arg(coreDebugger->wowProcessContext.SegCs,16,16,QChar('0')));
+		PrintValueInTable("SegDs",QString("%1").arg(coreDebugger->wowProcessContext.SegDs,16,16,QChar('0')));
+		PrintValueInTable("SegEs",QString("%1").arg(coreDebugger->wowProcessContext.SegEs,16,16,QChar('0')));
+		PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->wowProcessContext.SegFs,16,16,QChar('0')));
+		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->wowProcessContext.SegGs,16,16,QChar('0')));
+		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->wowProcessContext.SegSs,16,16,QChar('0')));
+
+		//for(int i = 0; i < 8; i++)
+		//{
+		//	// MMX
+		//	DWORD64* pMMX = (DWORD64*)&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i];
+		//	PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX,16,16,QChar('0')));
+		//}
 
 		// EFlags
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EFlags"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->wowProcessContext.EFlags,16,16,QChar('0'))));
+		PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->wowProcessContext.EFlags,16,16,QChar('0')));
 	}
 	else
 	{
 		dwEFlags = coreDebugger->ProcessContext.EFlags;
-		// RAX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RAX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rax,16,16,QChar('0'))));
-		// RBX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RBX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rbx,16,16,QChar('0'))));
-		// RCX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RCX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rcx,16,16,QChar('0'))));
-		// RDX
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RDX"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rdx,16,16,QChar('0'))));
-		// RSP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RSP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rsp,16,16,QChar('0'))));
-		// RBP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RBP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rbp,16,16,QChar('0'))));
-		// RSI
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RSI"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rsi,16,16,QChar('0'))));
-		// RIP
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("RIP"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Rip,16,16,QChar('0'))));
-		// R8
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R8"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R8,16,16,QChar('0'))));
-		// R9
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R9"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R9,16,16,QChar('0'))));
-		// R10
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R10"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R10,16,16,QChar('0'))));
-		// R11
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R11"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R11,16,16,QChar('0'))));
-		// R12
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R12"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R12,16,16,QChar('0'))));
-		// R13
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R13"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R13,16,16,QChar('0'))));
-		// R14
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R14"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R14,16,16,QChar('0'))));
-		// R15
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("R15"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.R15,16,16,QChar('0'))));
+		
+		PrintValueInTable("RAX",QString("%1").arg(coreDebugger->ProcessContext.Rax,16,16,QChar('0')));
+		PrintValueInTable("RBX",QString("%1").arg(coreDebugger->ProcessContext.Rbx,16,16,QChar('0')));
+		PrintValueInTable("RCX",QString("%1").arg(coreDebugger->ProcessContext.Rcx,16,16,QChar('0')));
+		PrintValueInTable("RDX",QString("%1").arg(coreDebugger->ProcessContext.Rdx,16,16,QChar('0')));
+		PrintValueInTable("RSP",QString("%1").arg(coreDebugger->ProcessContext.Rsp,16,16,QChar('0')));
+		PrintValueInTable("RBP",QString("%1").arg(coreDebugger->ProcessContext.Rbp,16,16,QChar('0')));
+		PrintValueInTable("RSI",QString("%1").arg(coreDebugger->ProcessContext.Rsi,16,16,QChar('0')));
+		PrintValueInTable("RIP",QString("%1").arg(coreDebugger->ProcessContext.Rip,16,16,QChar('0')));
+		PrintValueInTable("R8",QString("%1").arg(coreDebugger->ProcessContext.R8,16,16,QChar('0')));
+		PrintValueInTable("R9",QString("%1").arg(coreDebugger->ProcessContext.R9,16,16,QChar('0')));
+		PrintValueInTable("R10",QString("%1").arg(coreDebugger->ProcessContext.R10,16,16,QChar('0')));
+		PrintValueInTable("R11",QString("%1").arg(coreDebugger->ProcessContext.R11,16,16,QChar('0')));
+		PrintValueInTable("R12",QString("%1").arg(coreDebugger->ProcessContext.R12,16,16,QChar('0')));
+		PrintValueInTable("R13",QString("%1").arg(coreDebugger->ProcessContext.R13,16,16,QChar('0')));
+		PrintValueInTable("R14",QString("%1").arg(coreDebugger->ProcessContext.R14,16,16,QChar('0')));
+		PrintValueInTable("R15",QString("%1").arg(coreDebugger->ProcessContext.R15,16,16,QChar('0')));		
+		PrintValueInTable("SegCs",QString("%1").arg(coreDebugger->ProcessContext.SegCs,16,16,QChar('0')));
+		PrintValueInTable("SegDs",QString("%1").arg(coreDebugger->ProcessContext.SegDs,16,16,QChar('0')));
+		PrintValueInTable("SegEs",QString("%1").arg(coreDebugger->ProcessContext.SegEs,16,16,QChar('0')));
+		PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->ProcessContext.SegFs,16,16,QChar('0')));
+		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,16,16,QChar('0')));
+		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,16,16,QChar('0')));
 
-		// SegCs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegCs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegCs,16,16,QChar('0'))));
-		// SegDs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegDs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegDs,16,16,QChar('0'))));
-		// SegEs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegEs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegEs,16,16,QChar('0'))));
-		// SegFs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegFs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegFs,16,16,QChar('0'))));
-		// SegGs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegGs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegGs,16,16,QChar('0'))));
-		// SegSs
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegSs"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegSs,16,16,QChar('0'))));
+		//for(int i = 0; i < 8; i++)
+		//{
+		//	// MMX
+		//	DWORD64 MMX_LOW = coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low;
+		//	DWORD64 MMX_HIGH = coreDebugger->ProcessContext.FltSave.FloatRegisters[i].High;
+
+		//	PrintValueInTable(QString("MMX%1").arg(i),QString("%1 %2").arg(MMX_LOW,16,16,QChar('0')).arg(MMX_HIGH,16,16,QChar('0')));
+		//}
 
 		// EFlags
-		tblRegView->insertRow(tblRegView->rowCount());
-		tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EFlags"));
-		tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.EFlags,8,16,QChar('0'))));
+		PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0')));
 	}
 #else
 	dwEFlags = coreDebugger->ProcessContext.EFlags;
-	// EAX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EAX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Eax,16,16,QChar('0'))));
-	// EBX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Ebx,16,16,QChar('0'))));
-	// ECX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ECX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Ecx,16,16,QChar('0'))));
-	// EDX
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EDX"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Edx,16,16,QChar('0'))));
-	// ESP
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESP"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Esp,16,16,QChar('0'))));
-	// EBP
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EBP"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Ebp,16,16,QChar('0'))));
-	// ESI
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ESI"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Esi,16,16,QChar('0'))));
-	// EIP
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EIP"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.Eip,16,16,QChar('0'))));
 
-	// SegCs
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegCs"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegCs,16,16,QChar('0'))));
-	// SegDs
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegDs"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegDs,16,16,QChar('0'))));
-	// SegEs
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegEs"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegEs,16,16,QChar('0'))));
-	// SegFs
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegFs"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegFs,16,16,QChar('0'))));
-	// SegGs
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegGs"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegGs,16,16,QChar('0'))));
-	// SegSs
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SegSs"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.SegSs,16,16,QChar('0'))));
+	PrintValueInTable("EAX",QString("%1").arg(coreDebugger->ProcessContext.Eax,8,16,QChar('0')));
+	PrintValueInTable("EBX",QString("%1").arg(coreDebugger->ProcessContext.Ebx,8,16,QChar('0')));
+	PrintValueInTable("ECX",QString("%1").arg(coreDebugger->ProcessContext.Ecx,8,16,QChar('0')));
+	PrintValueInTable("EDX",QString("%1").arg(coreDebugger->ProcessContext.Edx,8,16,QChar('0')));
+	PrintValueInTable("ESP",QString("%1").arg(coreDebugger->ProcessContext.Esp,8,16,QChar('0')));
+	PrintValueInTable("EBP",QString("%1").arg(coreDebugger->ProcessContext.Ebp,8,16,QChar('0')));
+	PrintValueInTable("ESI",QString("%1").arg(coreDebugger->ProcessContext.Esi,8,16,QChar('0')));
+	PrintValueInTable("EIP",QString("%1").arg(coreDebugger->ProcessContext.Eip,8,16,QChar('0')));
+	PrintValueInTable("SegCs",QString("%1").arg(coreDebugger->ProcessContext.SegCs,8,16,QChar('0')));
+	PrintValueInTable("SegDs",QString("%1").arg(coreDebugger->ProcessContext.SegDs,8,16,QChar('0')));
+	PrintValueInTable("SegEs",QString("%1").arg(coreDebugger->ProcessContext.SegEs,8,16,QChar('0')));
+	PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->ProcessContext.SegFs,8,16,QChar('0')));
+	PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,8,16,QChar('0')));
+	PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,8,16,QChar('0')));
+
+	//for(int i = 0; i < 8; i++)
+	//{
+		// MMX
+		//DWORD64* pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i];
+		//PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX,16,16,QChar('0')));
+	//}
 
 	// EFlags
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("EFlags"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0'))));
+	PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0')));
 #endif
 
 	BOOL bCF = false, // Carry Flag
@@ -385,36 +252,19 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	bPF = (dwEFlags & 0x4) ? true : false;
 	bCF = (dwEFlags & 0x1) ? true : false;
 
-	// OF
+	PrintValueInTable("OF",QString("%1").arg(bOF));
+	PrintValueInTable("DF",QString("%1").arg(bDF));
+	PrintValueInTable("TF",QString("%1").arg(bTF));
+	PrintValueInTable("SF",QString("%1").arg(bSF));
+	PrintValueInTable("ZF",QString("%1").arg(bZF));
+	PrintValueInTable("AF",QString("%1").arg(bAF));
+	PrintValueInTable("PF",QString("%1").arg(bPF));
+	PrintValueInTable("CF",QString("%1").arg(bCF));
+}
+
+void qtDLGRegisters::PrintValueInTable(QString regName, QString regValue)
+{
 	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("OF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bOF)));
-	// DF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("DF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bDF)));
-	// TF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("TF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bTF)));
-	// SF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("SF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bSF)));
-	// ZF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("ZF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bZF)));
-	// AF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("AF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bAF)));
-	// PF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("PF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bPF)));
-	// CF
-	tblRegView->insertRow(tblRegView->rowCount());
-	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem("CF"));
-	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(bCF)));
+	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem(regName));
+	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(regValue));
 }

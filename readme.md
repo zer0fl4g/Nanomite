@@ -39,6 +39,7 @@
 + fixed a bug which lead to incorrect restarts on slow systems
 + fixed scrollbar in trace view
 + fixed display of ascii strings in ascii view
++ fixed a bug which could cause wrong run to user code if debugging more than one process
 + fixed a possible crash in disassembler
 + fixed a memory leak in trace view
 + fixed a bug which caused double calling of some functions in context menus
@@ -49,7 +50,7 @@
 + added possibility to set process priorities
 + added display of current priority in detail view - context menu
 + added display of segment registers in reg View
-+ added background worker to string view and hex view
++ added background worker to string view, hex view and functions view
 + removed processes we can´t access from the attach dialog
 
 ####Notes:

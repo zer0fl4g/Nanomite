@@ -167,9 +167,13 @@ void qtDLGNanomite::action_DebugStop()
 
 void qtDLGNanomite::action_DebugRestart()
 {
-	m_IsRestart = true;
-	action_DebugStop();
-	//action_DebugStart();
+	if(coreDebugger->GetDebuggingState())
+	{
+		m_IsRestart = true;
+		action_DebugStop();
+	}
+	else
+		action_DebugStart();
 }
 
 void qtDLGNanomite::action_DebugSuspend()
@@ -316,12 +320,27 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 			ModuleSize = NULL,
 			CurAddress = NULL;
 	HANDLE	hProcess = coreDebugger->GetCurrentProcessHandle();
-	PTCHAR	lpFileName = (PTCHAR)malloc(MAX_PATH *sizeof(TCHAR)),
-			lpCurrentName = (PTCHAR)coreDebugger->GetTarget().c_str(),
+	PTCHAR	lpFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
+			lpCurrentName = NULL,
 			lpCurrentFileName = NULL;
 	bool	bWeGotIt = false;
 
-	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentName,'/');
+	for(size_t i = 0; i < coreDebugger->PIDs.size(); i++)
+	{
+		if(coreDebugger->PIDs[i].hProc == hProcess)
+		{
+			lpCurrentName = coreDebugger->PIDs[i].sFileName;
+			break;
+		}
+	}
+
+	if(lpCurrentName == NULL) 
+	{
+		free(lpFileName);
+		return;
+	}
+
+	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentName,'\\');
 
 	MODULEENTRY32 pModEntry;
 	pModEntry.dwSize = sizeof(MODULEENTRY32);

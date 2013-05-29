@@ -36,6 +36,8 @@ public:
 private:
 	int _iSelectedRow;
 
+	void PrintValueInTable(QString regName, QString regValue);
+
 private slots:
 	void OnContextMenu(QPoint);
 	void OnChangeRequest(QTableWidgetItem *pItem);
