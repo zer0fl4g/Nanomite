@@ -40,8 +40,7 @@ void clsStringViewWorker::run()
 	for(QMap<int,PTCHAR>::const_iterator i = m_processingData.constBegin(); i != m_processingData.constEnd(); ++i)
 	{
 		
-		bool	bNotEndOfFile = true,
-				isNullPadding = false;
+		bool bNotEndOfFile = true;
 		ifstream inputFile;
 	
 		inputFile.open(i.value(),ifstream::binary);

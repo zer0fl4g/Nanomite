@@ -79,6 +79,79 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 	submenu->addAction(new QAction("Access",this));
 
 	menu.addMenu(submenu);
+
+	DWORD currentProtection = GetPageProtectionFlags();
+	if(currentProtection != -1)
+	{
+		QMenu *protectionMenu = menu.addMenu("Page Protection");
+
+		QAction *execute = new QAction("PAGE_EXECUTE",this);
+		if(currentProtection == PAGE_EXECUTE)
+		{
+			execute->setCheckable(true);
+			execute->setChecked(true);
+		}
+
+		QAction *executeRead = new QAction("PAGE_EXECUTE_READ",this);
+		if(currentProtection == PAGE_EXECUTE_READ)
+		{
+			executeRead->setCheckable(true);
+			executeRead->setChecked(true);
+		}
+
+		QAction *executeReadWrite = new QAction("PAGE_EXECUTE_READWRITE",this);
+		if(currentProtection == PAGE_EXECUTE_READWRITE)
+		{
+			executeReadWrite->setCheckable(true);
+			executeReadWrite->setChecked(true);
+		}
+
+		QAction *executeWriteCopy = new QAction("PAGE_EXECUTE_WRITECOPY",this);
+		if(currentProtection == PAGE_EXECUTE_WRITECOPY)
+		{
+			executeWriteCopy->setCheckable(true);
+			executeWriteCopy->setChecked(true);
+		}
+
+		QAction *noaccess = new QAction("PAGE_NOACCESS",this);
+		if(currentProtection == PAGE_NOACCESS)
+		{
+			noaccess->setCheckable(true);
+			noaccess->setChecked(true);
+		}
+
+		QAction *readonly = new QAction("PAGE_READONLY",this);
+		if(currentProtection == PAGE_READONLY)
+		{
+			readonly->setCheckable(true);
+			readonly->setChecked(true);
+		}
+
+		QAction *writecopy = new QAction("PAGE_WRITECOPY",this);
+		if(currentProtection == PAGE_WRITECOPY)
+		{
+			writecopy->setCheckable(true);
+			writecopy->setChecked(true);
+		}
+
+		QAction *readwrite = new QAction("PAGE_READWRITE",this);
+		if(currentProtection == PAGE_READWRITE)
+		{
+			readwrite->setCheckable(true);
+			readwrite->setChecked(true);
+		}
+
+		protectionMenu->addAction(execute);
+		protectionMenu->addAction(executeRead);
+		protectionMenu->addAction(executeReadWrite);
+		protectionMenu->addAction(executeWriteCopy);
+		protectionMenu->addAction(noaccess);
+		protectionMenu->addAction(readonly);
+		protectionMenu->addAction(writecopy);
+		protectionMenu->addAction(readwrite);
+		menu.addMenu(protectionMenu);
+	}
+
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -137,6 +210,22 @@ void qtDLGMemoryView::MenuCallback(QAction* pAction)
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblMemoryView->item(_iSelectedRow,5)->text());
 	}
+	else if(QString().compare(pAction->text(),"PAGE_EXECUTE") == 0)
+		SetPageProctection(PAGE_EXECUTE);
+	else if(QString().compare(pAction->text(),"PAGE_EXECUTE_READ") == 0)
+		SetPageProctection(PAGE_EXECUTE_READ);
+	else if(QString().compare(pAction->text(),"PAGE_EXECUTE_READWRITE") == 0)
+		SetPageProctection(PAGE_EXECUTE_READWRITE);
+	else if(QString().compare(pAction->text(),"PAGE_EXECUTE_WRITECOPY") == 0)
+		SetPageProctection(PAGE_EXECUTE_WRITECOPY);
+	else if(QString().compare(pAction->text(),"PAGE_NOACCESS") == 0)
+		SetPageProctection(PAGE_NOACCESS);
+	else if(QString().compare(pAction->text(),"PAGE_READONLY") == 0)
+		SetPageProctection(PAGE_READONLY);
+	else if(QString().compare(pAction->text(),"PAGE_WRITECOPY") == 0)
+		SetPageProctection(PAGE_WRITECOPY);	
+	else if(QString().compare(pAction->text(),"PAGE_READWRITE") == 0)
+		SetPageProctection(PAGE_READWRITE);
 }
 
 void qtDLGMemoryView::DisplayMemory()
@@ -226,7 +315,7 @@ void qtDLGMemoryView::DisplayMemory()
 			// Access
 			wsprintf(sTemp,L"%s",L"Unknown");
 			if(mbi.State == MEM_FREE) mbi.Protect = PAGE_NOACCESS;
-			if(mbi.State == MEM_RESERVE) mbi.Protect = mbi.AllocationProtect;
+			if(mbi.State == MEM_RESERVE) mbi.Protect = PAGE_NOACCESS;
 			switch (mbi.Protect & ~(PAGE_GUARD | PAGE_NOCACHE | PAGE_WRITECOMBINE))
 			{
 			case PAGE_READONLY:          wsprintf(sTemp,L"%s",L"-R--"); break;
@@ -246,4 +335,36 @@ void qtDLGMemoryView::DisplayMemory()
 	}
 	clsMemManager::CFree(sTemp2);
 	clsMemManager::CFree(sTemp);
+}
+
+DWORD qtDLGMemoryView::GetPageProtectionFlags()
+{
+	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, tblMemoryView->item(_iSelectedRow, 0)->text().toULongLong(0,16));
+	if(hProcess == INVALID_HANDLE_VALUE || hProcess == NULL) return -1;
+
+	MEMORY_BASIC_INFORMATION MBI;
+
+	if(!VirtualQueryEx(hProcess, (LPVOID)tblMemoryView->item(_iSelectedRow, 1)->text().toULongLong(0,16),&MBI,sizeof(MBI)))
+	{
+		CloseHandle(hProcess);
+		return -1;
+	}
+	
+	CloseHandle(hProcess);
+	return MBI.Protect;
+}
+
+void qtDLGMemoryView::SetPageProctection(DWORD protectionFlag)
+{
+	HANDLE hProcess = OpenProcess(PROCESS_VM_OPERATION, false, tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
+	if(hProcess == INVALID_HANDLE_VALUE || hProcess == NULL) return;
+
+	DWORD oldProtection = NULL;
+	if(!VirtualProtectEx(hProcess, (LPVOID)tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
+		tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16), protectionFlag, &oldProtection))
+	{
+		MessageBoxW(NULL, L"ERROR, Failed to change the Page protection!", L"Nanomite", MB_OK);
+	}
+	else
+		DisplayMemory();
 }

@@ -118,6 +118,7 @@ private slots:
 	void action_WindowShowWindows();
 	void action_WindowShowPEEditor();
 	void action_WindowShowFunctions();
+	void action_WindowShowPrivileges();
 	void action_DebugTraceStart();
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();

@@ -46,8 +46,10 @@
 + fixed a bug in hex view which may showed wrong data
 + fixed a bug in heap view which caused a crash when copying the whole line to clipboard
 + added PatchManager
++ added process privilege view
 + added commandline options
 + added possibility to set process priorities
++ added possibility to set memory protection
 + added display of current priority in detail view - context menu
 + added display of segment registers in reg View
 + added background worker to string view, hex view and functions view
@@ -55,6 +57,7 @@
 
 ####Notes:
 	- Patches can be saved to file (only on the debugged one)
+	- In the memory view you can set the protection of a page using the context menu
 	- Commandline options
 		- "-s": specifies a file
 		- "-c": specifies the commandline for the target if not given you will be asked later

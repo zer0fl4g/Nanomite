@@ -107,7 +107,6 @@ void qtDLGHandleView::OnDisplayHandles()
 			PVOID objectNameInfo;
 			UNICODE_STRING objectName;
 			ULONG returnLength;
-			BOOL bWideBool = false;
 
 			if (handle.ProcessId != dwPID)
 				continue;

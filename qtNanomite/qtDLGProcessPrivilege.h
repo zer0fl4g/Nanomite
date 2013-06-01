@@ -14,38 +14,33 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef QTDLGMEMORY_H
-#define QTDLGMEMORY_H
+#ifndef QTDLGPROCESSPRIVILEGE_H
+#define QTDLGPROCESSPRIVILEGE_H
 
-#include "ui_qtDLGMemoryView.h"
+#include "ui_qtDLGProcessPrivilege.h"
 
 #include "qtDLGNanomite.h"
 
-class qtDLGMemoryView : public QWidget, public Ui_qtDLGMemoryViewClass
+class qtDLGProcessPrivilege : public QWidget, public Ui_qtDLGProcessPrivilegeClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGMemoryView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 iPID = 0);
-	~qtDLGMemoryView();
+	qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags,qint32 iPID);
+	~qtDLGProcessPrivilege();
 
 private:
-	size_t	_iPID,
-			_iForEntry,
-			_iForEnd;
-
-	int		_iSelectedRow;
+	int _PID,
+		_SelectedRow;
+	size_t	_ForEntry,
+			_ForEnd;
 
 	qtDLGNanomite *myMainWindow;
 
-	DWORD GetPageProtectionFlags();
-
-	void SetPageProctection(DWORD protectionFlag);
-
-	private slots:
-		void DisplayMemory();
-		void MenuCallback(QAction*);
-		void OnCustomContextMenuRequested(QPoint qPoint);
+private slots:
+	void DisplayPrivileges();
+	void MenuCallback(QAction*);
+	void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
-#endif
+#endif // QTDLGREGISTERS_H

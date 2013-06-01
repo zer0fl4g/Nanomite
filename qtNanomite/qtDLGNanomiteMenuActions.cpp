@@ -27,6 +27,7 @@
 #include "qtDLGRegEdit.h"
 #include "qtDLGPEEditor.h"
 #include "qtDLGFunctions.h"
+#include "qtDLGProcessPrivilege.h"
 
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
@@ -541,6 +542,26 @@ void qtDLGNanomite::action_WindowShowPEEditor()
 		}
 
 		actionWindow_Show_PEEditor->setEnabled(true);
+		_iMenuPID = -1;
+	}
+}
+
+void qtDLGNanomite::action_WindowShowPrivileges()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		_iMenuPID = -1;
+		actionWindow_Show_Privileges->setDisabled(true);
+
+		GenerateMenu(false);
+
+		if(_iMenuPID >= 0)
+		{
+			qtDLGProcessPrivilege *dlgProcPrivs = new qtDLGProcessPrivilege(this,Qt::Window,_iMenuPID);
+			dlgProcPrivs->show();
+		}
+
+		actionWindow_Show_Privileges->setEnabled(true);
 		_iMenuPID = -1;
 	}
 }

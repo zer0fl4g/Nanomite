@@ -377,6 +377,15 @@
     <ClCompile Include="clsFunctionsViewWorker.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGProcessPrivilege.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGProcessPrivilege.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGProcessPrivilege.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -556,6 +565,12 @@
     <CustomBuild Include="clsFunctionsViewWorker.h">
       <Filter>Header Dateien</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGProcessPrivilege.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGProcessPrivilege.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -667,6 +682,9 @@
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_qtDLGPatchManager.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGProcessPrivilege.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
   </ItemGroup>

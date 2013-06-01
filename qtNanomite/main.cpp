@@ -15,12 +15,13 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGNanomite.h"
+
 #include "clsCrashHandler.h"
 #include "clsMemManager.h"
+
 #include <WinBase.h>
 
 #include <QtGui/QApplication>
-//#include <QDebug>
 
 BOOL IsUserAdmin()
 {
@@ -39,6 +40,35 @@ BOOL IsUserAdmin()
     return _isUserAdmin;
 }
 
+bool EnableDebugFlag()
+{
+	TOKEN_PRIVILEGES tkpNewPriv;
+	LUID luid;
+	HANDLE hToken = NULL;
+
+	if(!OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES,&hToken))
+		return false;
+
+	if (!LookupPrivilegeValue(NULL,SE_DEBUG_NAME,&luid))
+	{
+		CloseHandle(hToken);
+		return false;
+	}
+
+	tkpNewPriv.PrivilegeCount = 1;
+	tkpNewPriv.Privileges[0].Luid = luid;
+	tkpNewPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
+
+	if(!AdjustTokenPrivileges(hToken,0,&tkpNewPriv,0,0,0))
+	{
+		CloseHandle(hToken);
+		return false;
+	}
+	
+	CloseHandle(hToken);
+	return true;
+}
+
 int main(int argc, char *argv[])
 {
 	AddVectoredExceptionHandler(1,clsCrashHandler::ErrorReporter);
@@ -48,43 +78,12 @@ int main(int argc, char *argv[])
         MessageBoxW(NULL,L"You didn´t start the debugger with admin rights!\r\nThis could cause problems with some features!",L"Nanomite",MB_OK);
     }
 
+	if(!EnableDebugFlag())
+	{
+		MessageBoxW(NULL,L"ERROR, Unable to enable Debug Privilege!\r\nThis could cause problems with some features",L"Nanomite",MB_OK);
+	}
+
 	clsMemManager clsMManage = clsMemManager();
-	//Tests - 500bytes, 100000 rounds
-	//Test using malloc and free:  8750 
-	//Test using clsMemManager:  31
-	//
-	//Test - 1014bytes, 100000 rounds
-	//Test using malloc and free:  9187 
-	//Test using clsMemManager:  31
-
-	//DWORD dwStartTick = GetTickCount();
-
-	//DWORD pMem[100000];
-	//for(int i = 0; i < 100000; i++)
-	//{
-	//	pMem[i] = (DWORD)malloc(512);
-	//}
-
-	//for(int i = 0; i < 100000; i++)
-	//{
-	//	free((void*)pMem[i]);
-	//}
-	//qDebug() << "Test using malloc and free: " << GetTickCount() - dwStartTick;
-
-	//
-	//dwStartTick = GetTickCount();
-	//for(int i = 0; i < 100000; i++)
-	//{
-	//	pMem[i] = (DWORD)clsMemManager::CAlloc(512);
-	//}
-	//
-	//for(int i = 0; i < 100000; i++)
-	//{
-	//	clsMemManager::CFree((void*)pMem[i]);
-	//}
-	//qDebug() << "Test using clsMemManager: " << GetTickCount() - dwStartTick;
-
-	
 	QApplication a(argc, argv);
 	qtDLGNanomite w;
 	w.show();

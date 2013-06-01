@@ -237,7 +237,6 @@ private:
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
-	bool EnableDebugFlag();
 	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);
 
 	HANDLE GetCurrentProcessHandle(DWORD dwPID);

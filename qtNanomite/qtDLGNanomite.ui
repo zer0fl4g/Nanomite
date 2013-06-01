@@ -32,7 +32,7 @@
    </size>
   </property>
   <property name="windowTitle">
-   <string>[Nanomite v 0.1] - MainWindow</string>
+   <string>[Nanomite v 0.1]</string>
   </property>
   <property name="windowIcon">
    <iconset resource="qtDLGNanomite.qrc">
@@ -258,6 +258,7 @@
     <addaction name="actionWindow_Show_PEEditor"/>
     <addaction name="actionDebug_Trace_Show"/>
     <addaction name="actionWindow_Show_Functions"/>
+    <addaction name="actionWindow_Show_Privileges"/>
    </widget>
    <addaction name="menuFile"/>
    <addaction name="menuDebug"/>
@@ -302,6 +303,7 @@
    <addaction name="actionWindow_Show_Windows"/>
    <addaction name="actionWindow_Show_PEEditor"/>
    <addaction name="actionWindow_Show_Functions"/>
+   <addaction name="actionWindow_Show_Privileges"/>
   </widget>
   <widget class="QStatusBar" name="stateBar">
    <property name="sizePolicy">
@@ -560,6 +562,16 @@
    </property>
    <property name="text">
     <string>Patches</string>
+   </property>
+  </action>
+  <action name="actionWindow_Show_Privileges">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Privileges.ico</normaloff>
+     <normalon>:/DLGNanomite/Icons/ID_Privileges.ico</normalon>:/DLGNanomite/Icons/ID_Privileges.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Privileges</string>
    </property>
   </action>
  </widget>

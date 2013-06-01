@@ -129,6 +129,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Handles, SIGNAL(triggered()), this, SLOT(action_WindowShowHandles()));
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
 	connect(actionWindow_Show_Functions, SIGNAL(triggered()), this, SLOT(action_WindowShowFunctions()));
+	connect(actionWindow_Show_Privileges, SIGNAL(triggered()), this, SLOT(action_WindowShowPrivileges()));
 	connect(action_Debug_Run_to_UserCode,SIGNAL(triggered()), this, SLOT(action_DebugRunToUserCode()));
 	connect(actionDebug_Trace_Start, SIGNAL(triggered()), this, SLOT(action_DebugTraceStart()));
 	connect(actionDebug_Trace_Stop, SIGNAL(triggered()), this, SLOT(action_DebugTraceStop()));
@@ -339,7 +340,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	qtDLGTrace::clearTraceData();
 	actionDebug_Trace_Start->setEnabled(true);
 	CleanGUI(true);
-	this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow"));
+	this->setWindowTitle(QString("[Nanomite v 0.1]"));
 	UpdateStateBar(0x3);
 	
 	if(m_IsRestart)
@@ -452,7 +453,7 @@ void qtDLGNanomite::OnDisplayDisassembly(quint64 dwEIP)
 		// Update Window Title
 		wstring ModName,FuncName;
 		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
-		this->setWindowTitle(QString("[Nanomite v 0.1] - MainWindow -[PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
+		this->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName),QString().fromStdWString(FuncName)));
 	}
 	else
 	{

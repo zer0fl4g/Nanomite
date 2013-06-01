@@ -50,9 +50,6 @@ clsDebugger::clsDebugger()
 	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
-	
-	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
-	EnableDebugFlag();
 }
 
 clsDebugger::clsDebugger(wstring sTarget)
@@ -65,9 +62,6 @@ clsDebugger::clsDebugger(wstring sTarget)
 	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
-
-	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
-	EnableDebugFlag();
 }
 
 clsDebugger::~clsDebugger()
@@ -872,27 +866,6 @@ void clsDebugger::CustomExceptionRemove(DWORD dwExceptionType)
 void clsDebugger::CustomExceptionRemoveAll()
 {
 	ExceptionHandler.clear();
-}
-
-bool clsDebugger::EnableDebugFlag()
-{
-	TOKEN_PRIVILEGES tkpNewPriv;
-	LUID luid;
-	HANDLE hToken = NULL;
-
-	if(!OpenProcessToken(GetCurrentProcess(),TOKEN_ADJUST_PRIVILEGES,&hToken))
-		return false;
-
-	if (!LookupPrivilegeValue(NULL,SE_DEBUG_NAME,&luid))
-		return false;
-
-	tkpNewPriv.PrivilegeCount = 1;
-	tkpNewPriv.Privileges[0].Luid = luid;
-	tkpNewPriv.Privileges[0].Attributes = SE_PRIVILEGE_ENABLED;
-
-	if(!AdjustTokenPrivileges(hToken,0,&tkpNewPriv,0,0,0))
-		return false;
-	return true;
 }
 
 bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dwThreadID, DWORD dwPID)
