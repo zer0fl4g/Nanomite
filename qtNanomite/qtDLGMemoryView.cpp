@@ -367,4 +367,6 @@ void qtDLGMemoryView::SetPageProctection(DWORD protectionFlag)
 	}
 	else
 		DisplayMemory();
+
+	CloseHandle(hProcess);
 }

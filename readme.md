@@ -24,6 +24,7 @@
 	- threads
 	- (child)processes
 	- exceptions
+	- process privileges
 	- loaded modules
 	- strings
 	- callstack
@@ -51,7 +52,7 @@
 + added possibility to set process priorities
 + added possibility to set memory protection
 + added display of current priority in detail view - context menu
-+ added display of segment registers in reg View
++ added display of segment registers in reg view
 + added background worker to string view, hex view and functions view
 + removed processes we can´t access from the attach dialog
 

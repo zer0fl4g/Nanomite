@@ -80,7 +80,7 @@ void qtDLGCallstack::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
 		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-				pMainWindow->OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
+				emit OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
 	}	
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
@@ -140,7 +140,7 @@ void qtDLGCallstack::OnDisplaySource(QTableWidgetItem *pItem)
 
 	emit DisplaySource(sourcePath,LineNumber);
 
-	qtDLGNanomite::GetInstance()->dlgSourceViewer->show();
+	qtDLGNanomite::GetInstance()->DisAsGUI->dlgSourceViewer->show();
 	return;
 }
 

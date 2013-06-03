@@ -33,6 +33,9 @@ public:
 
 	void LoadRegView(clsDebugger *coreDebugger);
 
+signals:
+	void OnDisplayDisassembly(quint64 dwEIP);
+
 private:
 	int _iSelectedRow;
 

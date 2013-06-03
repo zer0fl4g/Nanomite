@@ -26,6 +26,17 @@
 #define COLOR_STACK		16
 #define COLOR_MATH		32
 
+
+struct qtNanomiteDisAsColorSettings
+{ 
+	QString colorBP;
+	QString colorCall;
+	QString colorMove;
+	QString colorJump;
+	QString colorStack;
+	QString colorMath;
+};
+
 class clsSymbolAndSyntax
 {
 public:

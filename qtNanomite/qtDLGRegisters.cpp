@@ -71,7 +71,7 @@ void qtDLGRegisters::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
 		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-			pMainWindow->OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
+			emit OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
 	}
 	else if(QString().compare(pAction->text(),"Send to StackView") == 0)
 	{

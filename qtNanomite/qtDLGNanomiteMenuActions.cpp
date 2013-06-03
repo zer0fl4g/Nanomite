@@ -626,7 +626,7 @@ void qtDLGNanomite::action_WindowShowFunctions()
 		if(_iMenuPID >= 0)
 		{
 			qtDLGFunctions *dlgFunctions = new qtDLGFunctions(this,Qt::Window,_iMenuPID);
-			connect(dlgFunctions,SIGNAL(ShowInDisAs(quint64)),this,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
+			connect(dlgFunctions,SIGNAL(ShowInDisAs(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 			dlgFunctions->show();
 		}
 

@@ -20,7 +20,6 @@
 #include "qtDLGDetailInfo.h"
 #include "qtDLGDebugStrings.h"
 #include "qtDLGBreakPointManager.h"
-#include "qtDLGSourceViewer.h"
 #include "qtDLGTrace.h"
 #include "qtDLGPatchManager.h"
 
@@ -29,6 +28,7 @@
 #include "qtDLGCallstack.h"
 #include "qtDLGStack.h"
 #include "qtDLGLogView.h"
+#include "qtDLGDisassembler.h"
 
 #include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
@@ -39,23 +39,12 @@
 
 #include <QDockwidget>
 #include <QMainwindow>
-#include <QWheelEvent>
 
 Q_DECLARE_METATYPE (DWORD)
 Q_DECLARE_METATYPE (quint64)
 Q_DECLARE_METATYPE (std::wstring)
 Q_DECLARE_METATYPE (BPStruct)
 Q_DECLARE_METATYPE (HANDLE)
-
-struct qtNanomiteDisAsColorSettings
-{ 
-	QString colorBP;
-	QString colorCall;
-	QString colorMove;
-	QString colorJump;
-	QString colorStack;
-	QString colorMath;
-};
 
 class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
 {
@@ -73,7 +62,6 @@ public:
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;
 	qtDLGBreakPointManager *dlgBPManager;
-	qtDLGSourceViewer *dlgSourceViewer;
 	qtDLGTrace *dlgTraceWindow;
 	qtDLGPatchManager *dlgPatchManager;
 
@@ -82,14 +70,12 @@ public:
 	qtDLGCallstack	*callstackView;
 	qtDLGStack		*stackView;
 	qtDLGLogView	*logView;	
+	qtDLGDisassembler *DisAsGUI;
 
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
 	qtDLGNanomite(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGNanomite();
-
-public slots:
-	void OnDisplayDisassembly(quint64 dwEIP);
 
 private slots:
 	void action_FileOpenNewFile();
@@ -123,23 +109,15 @@ private slots:
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();
 
-	void OnF2BreakPointPlace();
-	void OnDisAsScroll(int iValue);
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
-	void OnCustomDisassemblerContextMenu(QPoint qPoint);
-	void OnDisAsReturnPressed();
-	void OnDisAsReturn();
 	void GenerateMenuCallback(QAction *qAction);
-	void CustomDisassemblerMenuCallback(QAction*);
 
 private:
 	int _iMenuPID;
 	int _iSelectedRow;
 
 	bool m_IsRestart;
-
-	QList<quint64> _OffsetWalkHistory;
 
 	static qtDLGNanomite *qtDLGMyWindow;
 
@@ -151,7 +129,6 @@ private:
 	void ParseCommandLineArgs();
 
 protected:
-	bool eventFilter(QObject *pOpject,QEvent *event);
 	void dragEnterEvent(QDragEnterEvent* pEvent);
 	void dropEvent(QDropEvent* pEvent);
 	void closeEvent(QCloseEvent* closeEvent);

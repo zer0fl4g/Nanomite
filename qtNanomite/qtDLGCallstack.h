@@ -18,6 +18,7 @@
 #define QTDLGCALLSTACK_H
 
 #include <string>
+#include <Windows.h>
 
 #include <QDockWidget>
 
@@ -41,6 +42,7 @@ public slots:
 	int OnCallStack(quint64 dwStackAddr,quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,std::wstring sSourceFilePath,int iSourceLineNum);
 
 signals:
+	void OnDisplayDisassembly(quint64 dwEIP);
 	void DisplaySource(QString,int);
 
 };
