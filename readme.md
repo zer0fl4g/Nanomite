@@ -37,14 +37,14 @@
 
 ## Changelog
 ###Version 0.1 beta 12
-+ fixed a bug which lead to incorrect restarts on slow systems
 + fixed scrollbar in trace view
-+ fixed a small memory leak in the window settings
++ fixed a possible crash in disassembler
++ fixed a memory leak in the window settings
 + fixed a memory leak in dll and process name receiving
++ fixed a memory leak in trace view
 + fixed display of ascii strings in ascii view
 + fixed a bug which could cause wrong run to user code if debugging more than one process
-+ fixed a possible crash in disassembler
-+ fixed a memory leak in trace view
++ fixed a bug which lead to incorrect restarts on slow systems
 + fixed a bug which caused double calling of some functions in context menus
 + fixed a bug in hex view which may showed wrong data
 + fixed a bug in heap view which caused a crash when copying the whole line to clipboard

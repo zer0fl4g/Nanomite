@@ -34,7 +34,7 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 			free(pBuffer);
 			return;
 		}
-		isProtectionChanged = false;
+		isProtectionChanged = true;
 
 		if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
 		{

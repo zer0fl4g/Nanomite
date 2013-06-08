@@ -110,12 +110,10 @@ void clsDisassembler::run()
 	if(_dwStartOffset == 0 || _dwEndOffset == 0)
 		return;
 
-	quint64 dwSize = _dwEndOffset - _dwStartOffset,
-		dwOrgStart = _dwStartOffset;
+	quint64 dwSize = _dwEndOffset - _dwStartOffset;
 	DWORD	dwOldProtection = 0,
 			dwNewProtection = PAGE_EXECUTE_READWRITE;
-	LPVOID pBuffer = malloc(dwSize),
-			pOrgBuffer = pBuffer;
+	LPVOID pBuffer = malloc(dwSize);
 	bool	IsFullRun = false;
 	clsSymbolAndSyntax DataVisualizer(_hProc);
 
@@ -129,23 +127,6 @@ void clsDisassembler::run()
 		BYTE bBuffer;
 
 		memset(&newDisAss, 0, sizeof(DISASM));
-
-		DWORD	searchPattern	= 0x90909090,
-				searchPattern2	= 0xCCCCCCCC;
-
-		while(memcmp(pBuffer,&searchPattern,0x4) != 0 &&
-			memcmp(pBuffer,&searchPattern2,0x4) != 0)
-		{
-			if((_dwStartOffset + 4) >= _dwEndOffset)
-			{
-				pBuffer = pOrgBuffer;
-				_dwStartOffset = dwOrgStart;
-				break;
-			}
-
-			pBuffer = (LPVOID)((DWORD64)pBuffer + 1);
-			_dwStartOffset++;
-		}
 
 		newDisAss.EIP = (quint64)pBuffer;
 		newDisAss.VirtualAddr = _dwStartOffset;
@@ -191,8 +172,11 @@ void clsDisassembler::run()
 				SectionDisAs.insert(newRow.Offset,newRow);
 			}
 
-			newDisAss.EIP = newDisAss.EIP + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
-			newDisAss.VirtualAddr = newDisAss.VirtualAddr + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
+			newDisAss.EIP += (iLen == UNKNOWN_OPCODE) ? 1 : iLen;
+			newDisAss.VirtualAddr += (iLen == UNKNOWN_OPCODE) ? 1 : iLen;
+
+			//newDisAss.EIP = newDisAss.EIP + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
+			//newDisAss.VirtualAddr = newDisAss.VirtualAddr + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
 			if (newDisAss.VirtualAddr >= _dwEndOffset)
 				bContinueDisAs = false;
 		}
@@ -206,7 +190,7 @@ void clsDisassembler::run()
 	}
 
 //	bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
-	free(pOrgBuffer);
+	free(pBuffer);
 
 	if(SectionDisAs.count() > 0)
 	{
