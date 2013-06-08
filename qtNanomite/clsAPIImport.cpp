@@ -15,6 +15,7 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "clsAPIImport.h"
+#include "clsMemManager.h"
 #include "clsHelperClass.h"
 
 MyWow64GetThreadContext clsAPIImport::pWow64GetThreadContext = NULL;
@@ -38,7 +39,7 @@ clsAPIImport::~clsAPIImport()
 
 bool clsAPIImport::LoadFunctions()
 {
-	PTCHAR szWarning = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	PTCHAR szWarning = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 	bool bGotAFail = false;
 
 #ifdef _AMD64_
@@ -94,6 +95,6 @@ bool clsAPIImport::LoadFunctions()
 		MessageBoxW(NULL,szWarning,L"Nanomite",MB_OK);
 	}
 
-	free(szWarning);
+	clsMemManager::CFree(szWarning);
 	return !bGotAFail;
 }

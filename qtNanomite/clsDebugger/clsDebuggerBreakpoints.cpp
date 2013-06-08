@@ -269,7 +269,7 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
-				free(it->moduleName);
+				clsMemManager::CFree(it->moduleName);
 
 				SoftwareBPs.erase(it);
 				it = SoftwareBPs.begin();
@@ -286,7 +286,7 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dMemoryBP(it->dwPID,it->dwOffset,it->dwSize);
-				free(it->moduleName);
+				clsMemManager::CFree(it->moduleName);
 
 				MemoryBPs.erase(it);
 				it = MemoryBPs.begin();
@@ -303,7 +303,7 @@ bool clsDebugger::RemoveBPFromList(quint64 dwOffset,DWORD dwType) //,DWORD dwPID
 			if(it->dwOffset == dwOffset /* && it->dwPID == dwPID */)
 			{
 				dHardwareBP(it->dwPID,it->dwOffset,it->dwSlot);
-				free(it->moduleName);
+				clsMemManager::CFree(it->moduleName);
 
 				HardwareBPs.erase(it);
 				it = HardwareBPs.begin();
@@ -368,7 +368,7 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.dwPID = dwPID;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
-				newBP.moduleName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
 
 				if(dwKeep == 0x1)
@@ -393,7 +393,7 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
-				newBP.moduleName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
 				newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
 
@@ -418,7 +418,7 @@ bool clsDebugger::AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPI
 				newBP.bOrgByte = NULL;
 				newBP.bRestoreBP = false;
 				newBP.dwTypeFlag = dwTypeFlag;
-				newBP.moduleName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
 				newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
 

@@ -23,7 +23,7 @@
  
 // use "MEMLEAKTRACE" only to trace memory leaks. It will slowdown the debugger
 // and increase ram usage a lot!
-#define MEMLEAKTRACE 
+//#define MEMLEAKTRACE 
 #ifdef MEMLEAKTRACE   
 #include <dbghelp.h> 
 #include <string> 

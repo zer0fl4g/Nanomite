@@ -34,6 +34,7 @@
 #include "clsDebugger/clsDebugger.h"
 #include "clsPEManager.h"
 #include "clsDBManager.h"
+#include "clsAppSettings.h"
 
 #include "ui_qtDLGNanomite.h"
 
@@ -58,6 +59,7 @@ public:
 	clsDisassembler *coreDisAs;
 	clsPEManager *PEManager;
 	clsDBManager *DBManager;
+	clsAppSettings *settings;
 
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;

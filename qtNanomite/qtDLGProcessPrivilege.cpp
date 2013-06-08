@@ -91,7 +91,7 @@ void qtDLGProcessPrivilege::DisplayPrivileges()
 			continue;
 		}
 
-		PTCHAR pPrivilegeName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+		PTCHAR pPrivilegeName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 		DWORD nameSize = NULL;
 		int	PID	= myMainWindow->coreDebugger->PIDs[i].dwPID;
 		
@@ -135,7 +135,7 @@ void qtDLGProcessPrivilege::DisplayPrivileges()
 			}
 		}
 
-		free(pPrivilegeName);
+		clsMemManager::CFree(pPrivilegeName);
 		clsMemManager::CFree(pTokenBuffer);
 		CloseHandle(hToken);
 	}

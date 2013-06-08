@@ -396,12 +396,12 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 	{
 		if(i->Offset == Offset)
 		{
-			PTCHAR pCurrentFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
+			PTCHAR pCurrentFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),
 				pOldName = NULL;
 
 			if(GetModuleFileNameEx(i->hProc,(HMODULE)i->BaseOffset,pCurrentFileName,MAX_PATH) < 0)
 			{
-				free(pCurrentFileName);
+				clsMemManager::CFree(pCurrentFileName);
 				continue;
 			}
 
@@ -411,7 +411,7 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 			{
 				bNewFile = true;
 
-				PTCHAR pNewFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+				PTCHAR pNewFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				wcscpy_s(pNewFileName,MAX_PATH,pCurrentFileName);
 				wcscat_s(pNewFileName,MAX_PATH,L"_patched.exe");
 				CopyFile(pCurrentFileName,pNewFileName,false);
@@ -423,8 +423,8 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 				if(hFile == INVALID_HANDLE_VALUE)
 				{
 					DeleteFile(pCurrentFileName);
-					free(pCurrentFileName);
-					free(pOldName);
+					clsMemManager::CFree(pCurrentFileName);
+					clsMemManager::CFree(pOldName);
 
 					continue;
 				}
@@ -440,10 +440,10 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 
 				if(bNewFile)
 				{
-					free(pOldName);
+					clsMemManager::CFree(pOldName);
 					DeleteFile(pCurrentFileName);
 				}
-				free(pCurrentFileName);
+				clsMemManager::CFree(pCurrentFileName);
 
 				continue;
 			}
@@ -460,7 +460,7 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 					free(pOldName);
 					DeleteFile(pCurrentFileName);
 				}
-				free(pCurrentFileName);
+				clsMemManager::CFree(pCurrentFileName);
 
 				continue;
 			}
@@ -473,10 +473,10 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 
 				if(bNewFile)
 				{
-					free(pOldName);
+					clsMemManager::CFree(pOldName);
 					DeleteFile(pCurrentFileName);
 				}
-				free(pCurrentFileName);
+				clsMemManager::CFree(pCurrentFileName);
 
 				continue;
 			}
@@ -492,10 +492,10 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 
 				if(bNewFile)
 				{
-					free(pOldName);
+					clsMemManager::CFree(pOldName);
 					DeleteFile(pCurrentFileName);
 				}
-				free(pCurrentFileName);
+				clsMemManager::CFree(pCurrentFileName);
 
 				continue;
 			}
@@ -507,8 +507,8 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 			CloseHandle(hFile);
 
 			if(bNewFile)
-				free(pOldName);
-			free(pCurrentFileName);
+				clsMemManager::CFree(pOldName);
+			clsMemManager::CFree(pCurrentFileName);
 		}
 	}
 }

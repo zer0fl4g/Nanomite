@@ -33,6 +33,9 @@ public:
 
 	static clsAppSettings* SharedInstance();
 
+	clsAppSettings();
+	~clsAppSettings();
+
 protected:
 	//QSettings *appSettings;
 	QSettings *userSettings;
@@ -40,9 +43,6 @@ protected:
 private:
 	static clsAppSettings *instance;
 	QMutex *readWriteMutex;
-
-	clsAppSettings();
-	~clsAppSettings();
 };
 
 #endif // CLSAPPSETTINGS_H

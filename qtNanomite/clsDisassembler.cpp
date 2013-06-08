@@ -16,6 +16,7 @@
  */
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
+#include "clsMemManager.h"
 #include "clsHelperClass.h"
 #include "clsSymbolAndSyntax.h"
 
@@ -154,7 +155,7 @@ void clsDisassembler::run()
 		newDisAss.Archi = 0;
 #endif
 
-		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+		PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 		while(bContinueDisAs)
 		{
 			newDisAss.SecurityBlock = (int)_dwEndOffset - newDisAss.VirtualAddr;
@@ -195,7 +196,7 @@ void clsDisassembler::run()
 			if (newDisAss.VirtualAddr >= _dwEndOffset)
 				bContinueDisAs = false;
 		}
-		free(sTemp);
+		clsMemManager::CFree(sTemp);
 	}
 	else
 	{

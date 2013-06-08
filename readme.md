@@ -39,6 +39,8 @@
 ###Version 0.1 beta 12
 + fixed a bug which lead to incorrect restarts on slow systems
 + fixed scrollbar in trace view
++ fixed a small memory leak in the window settings
++ fixed a memory leak in dll and process name receiving
 + fixed display of ascii strings in ascii view
 + fixed a bug which could cause wrong run to user code if debugging more than one process
 + fixed a possible crash in disassembler

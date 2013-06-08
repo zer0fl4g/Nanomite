@@ -321,7 +321,7 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 			ModuleSize = NULL,
 			CurAddress = NULL;
 	HANDLE	hProcess = coreDebugger->GetCurrentProcessHandle();
-	PTCHAR	lpFileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR)),
+	PTCHAR	lpFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),
 			lpCurrentName = NULL,
 			lpCurrentFileName = NULL;
 	bool	bWeGotIt = false;
@@ -337,7 +337,7 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 
 	if(lpCurrentName == NULL) 
 	{
-		free(lpFileName);
+		clsMemManager::CFree(lpFileName);
 		return;
 	}
 
@@ -390,8 +390,8 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 		}
 	}
 
-	free(lpCurrentName);
-	free(lpFileName);
+	clsMemManager::CFree(lpCurrentName);
+	clsMemManager::CFree(lpFileName);
 }
 
 void qtDLGNanomite::action_OptionsAbout()

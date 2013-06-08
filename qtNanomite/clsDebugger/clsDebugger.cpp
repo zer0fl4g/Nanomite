@@ -45,7 +45,7 @@ clsDebugger::clsDebugger()
 {
 	_NormalDebugging = true;
 	_isDebugging = false;
-	tcLogString = (PTCHAR)malloc(LOGBUFFER);
+	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
 	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
 	dbgSettings = tempSet;
@@ -57,7 +57,7 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_sTarget = sTarget;
 	_NormalDebugging = true;
 	_isDebugging = false;
-	tcLogString = (PTCHAR)malloc(LOGBUFFER);
+	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
 	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
 	dbgSettings = tempSet;
@@ -67,13 +67,22 @@ clsDebugger::clsDebugger(wstring sTarget)
 clsDebugger::~clsDebugger()
 {
 	CleanWorkSpace();
-	free(tcLogString);
+	clsMemManager::CFree(tcLogString);
 }
 
 void clsDebugger::CleanWorkSpace()
 {
-	for(size_t i = 0;i < PIDs.size();i++)
-		SymCleanup(PIDs[i].hProc);
+	for(vector<PIDStruct>::const_iterator i = PIDs.cbegin(); i != PIDs.cend(); ++i)
+	{
+		SymCleanup(i->hProc);
+		clsMemManager::CFree(i->sFileName);
+	}
+
+	for(vector<DLLStruct>::const_iterator i = DLLs.cbegin(); i != DLLs.cend(); ++i)
+	{
+		clsMemManager::CFree(i->sPath);
+	}
+
 
 	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it)
 	{

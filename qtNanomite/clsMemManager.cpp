@@ -109,7 +109,8 @@ void* clsMemManager::CAlloc(size_t ulSize)
     newAlloc.dataOffset = (DWORD64) newAllocOffset; 
     newAlloc.dataSize = ulSize; 
   
-    HANDLE hProc,hThread = GetCurrentThread(); 
+    HANDLE	hProc = GetCurrentProcess(),
+			hThread = GetCurrentThread(); 
     PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)pThis->Alloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME); 
 #ifdef _AMD64_
     DWORD dwMaschineMode = IMAGE_FILE_MACHINE_AMD64; 
@@ -129,23 +130,24 @@ void* clsMemManager::CAlloc(size_t ulSize)
     quint64 dwReturnTo, 
         dwEIP, 
         dwDisplacement; 
-    BOOL bSuccess; 
-    size_t iPid = 0; 
+    BOOL bSuccess = SymInitialize(hProc,NULL,true); 
   
-    hProc = GetCurrentProcess(); 
-    bSuccess = SymInitialize(hProc,NULL,true); 
-  
-    dwMaschineMode = IMAGE_FILE_MACHINE_AMD64; 
     CONTEXT context; 
     pContext = &context; 
     context.ContextFlags = CONTEXT_ALL; 
     RtlCaptureContext(&context); 
 	
+#ifdef _AMD64_
 	stackFr.AddrPC.Offset = context.Rip; 
     stackFr.AddrFrame.Offset = context.Rbp; 
     stackFr.AddrStack.Offset = context.Rsp;  
-  
-    do
+#else
+	stackFr.AddrPC.Offset = context.Eip; 
+	stackFr.AddrFrame.Offset = context.Ebp; 
+	stackFr.AddrStack.Offset = context.Esp;  
+#endif  
+
+	do
     { 
         bSuccess = StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0); 
   

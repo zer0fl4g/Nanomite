@@ -16,6 +16,8 @@
  */
 #include "qtDLGWindowView.h"
 
+#include "clsMemManager.h"
+
 #include "Psapi.h"
 
 qtDLGWindowView* qtDLGWindowView::pThis = NULL;
@@ -79,7 +81,7 @@ bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,dwHwPID);
 		
 		pThis->tblWindowView->insertRow(pThis->tblWindowView->rowCount());
-		PTCHAR sTemp = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+		PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 		// PID
 		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,0,
 			new QTableWidgetItem(QString("%1").arg(dwHwPID,8,16,QChar('0'))));
@@ -112,7 +114,7 @@ bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 				new QTableWidgetItem(""));
 
 		CloseHandle(hProcess);
-		free(sTemp);
+		clsMemManager::CFree(sTemp);
 	}
 	return true;
 }

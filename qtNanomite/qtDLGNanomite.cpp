@@ -26,7 +26,6 @@
 #include "clsAPIImport.h"
 #include "clsDBInterface.h"
 #include "clsMemManager.h"
-#include "clsAppSettings.h"
 
 #include <Psapi.h>
 
@@ -100,11 +99,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	// Callbacks from DetailInfo to PEManager
 	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
-	// Callbacks from DetailView to GUI
-	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
-
-	// Callbacks from Disassambler Thread to GUI
-	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 
 	// Actions for the MainMenu and Toolbar
 	connect(actionFile_OpenNew, SIGNAL(triggered()), this, SLOT(action_FileOpenNewFile()));
@@ -145,14 +139,15 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
 
-	// Callbacks from TraceView to GUI
+	// Callbacks to display disassembly
 	connect(dlgTraceWindow,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
-
 	connect(cpuRegView,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
-
+	connect(dlgPatchManager,SIGNAL(OnShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
+	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
+	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
+	
 	// Callbacks from PatchManager to GUI
 	connect(dlgPatchManager,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
-	connect(dlgPatchManager,SIGNAL(OnShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 
 	actionDebug_Trace_Stop->setDisabled(true);
 
@@ -165,6 +160,7 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete coreDisAs;
 	delete PEManager;
 	delete DBManager;
+	delete settings;
 	delete dlgDetInfo;
 	delete dlgDbgStr;
 	delete dlgBPManager;
@@ -196,7 +192,7 @@ void qtDLGNanomite::LoadWidgets()
 	this->addDockWidget(Qt::BottomDockWidgetArea, this->stackView);
 	this->addDockWidget(Qt::BottomDockWidgetArea, this->logView);
 
-	clsAppSettings *settings = clsAppSettings::SharedInstance();
+	settings = clsAppSettings::SharedInstance();
 
 	if (!settings->RestoreWindowState(this))
 	{
