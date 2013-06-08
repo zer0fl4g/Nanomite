@@ -207,6 +207,10 @@ bool clsDebugger::ShowCallStack()
 	DWORD dwMaschineMode = NULL;
 	LPVOID pContext;
 	STACKFRAME64 stackFr = {0};
+	stackFr.AddrPC.Mode = AddrModeFlat;
+	stackFr.AddrFrame.Mode = AddrModeFlat;
+	stackFr.AddrStack.Mode = AddrModeFlat;
+
 	wstring sFuncName,
 		sFuncMod,
 		sReturnToFunc,
@@ -231,7 +235,6 @@ bool clsDebugger::ShowCallStack()
 
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
-	HANDLE hProcess = NULL;
 
 	if(clsAPIImport::pIsWow64Process)
 		clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
@@ -244,9 +247,6 @@ bool clsDebugger::ShowCallStack()
 		wowContext.ContextFlags = WOW64_CONTEXT_ALL;
 		clsAPIImport::pWow64GetThreadContext(hThread,&wowContext);
 
-		stackFr.AddrPC.Mode = AddrModeFlat;
-		stackFr.AddrFrame.Mode = AddrModeFlat;
-		stackFr.AddrStack.Mode = AddrModeFlat;
 		stackFr.AddrPC.Offset = wowContext.Eip;
 		stackFr.AddrFrame.Offset = wowContext.Ebp;
 		stackFr.AddrStack.Offset = wowContext.Esp;
@@ -259,9 +259,6 @@ bool clsDebugger::ShowCallStack()
 		context.ContextFlags = CONTEXT_ALL;
 		GetThreadContext(hThread, &context);
 
-		stackFr.AddrPC.Mode = AddrModeFlat;
-		stackFr.AddrFrame.Mode = AddrModeFlat;
-		stackFr.AddrStack.Mode = AddrModeFlat;
 		stackFr.AddrPC.Offset = context.Rip;
 		stackFr.AddrFrame.Offset = context.Rbp;
 		stackFr.AddrStack.Offset = context.Rsp;	
@@ -273,9 +270,6 @@ bool clsDebugger::ShowCallStack()
 	context.ContextFlags = CONTEXT_ALL;
 	GetThreadContext(hThread, &context);
 
-	stackFr.AddrPC.Mode = AddrModeFlat;
-	stackFr.AddrFrame.Mode = AddrModeFlat;
-	stackFr.AddrStack.Mode = AddrModeFlat;
 	stackFr.AddrPC.Offset = context.Eip;
 	stackFr.AddrFrame.Offset = context.Ebp;
 	stackFr.AddrStack.Offset = context.Esp;
