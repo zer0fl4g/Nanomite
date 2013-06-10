@@ -10,6 +10,12 @@
     <height>239</height>
    </rect>
   </property>
+  <property name="minimumSize">
+   <size>
+    <width>0</width>
+    <height>0</height>
+   </size>
+  </property>
   <property name="features">
    <set>QDockWidget::DockWidgetFloatable|QDockWidget::DockWidgetMovable</set>
   </property>
@@ -31,8 +37,8 @@
       </property>
       <property name="minimumSize">
        <size>
-        <width>300</width>
-        <height>140</height>
+        <width>0</width>
+        <height>0</height>
        </size>
       </property>
       <property name="maximumSize">

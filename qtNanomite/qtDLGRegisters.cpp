@@ -147,6 +147,7 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("ESP",QString("%1").arg(coreDebugger->wowProcessContext.Esp,16,16,QChar('0')));
 		PrintValueInTable("EBP",QString("%1").arg(coreDebugger->wowProcessContext.Ebp,16,16,QChar('0')));
 		PrintValueInTable("ESI",QString("%1").arg(coreDebugger->wowProcessContext.Esi,16,16,QChar('0')));
+		PrintValueInTable("EDI",QString("%1").arg(coreDebugger->wowProcessContext.Edi,16,16,QChar('0')));
 		PrintValueInTable("EIP",QString("%1").arg(coreDebugger->wowProcessContext.Eip,16,16,QChar('0')));
 		PrintValueInTable("SegCs",QString("%1").arg(coreDebugger->wowProcessContext.SegCs,16,16,QChar('0')));
 		PrintValueInTable("SegDs",QString("%1").arg(coreDebugger->wowProcessContext.SegDs,16,16,QChar('0')));
@@ -176,6 +177,7 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("RSP",QString("%1").arg(coreDebugger->ProcessContext.Rsp,16,16,QChar('0')));
 		PrintValueInTable("RBP",QString("%1").arg(coreDebugger->ProcessContext.Rbp,16,16,QChar('0')));
 		PrintValueInTable("RSI",QString("%1").arg(coreDebugger->ProcessContext.Rsi,16,16,QChar('0')));
+		PrintValueInTable("RDI",QString("%1").arg(coreDebugger->ProcessContext.Rdi,16,16,QChar('0')));
 		PrintValueInTable("RIP",QString("%1").arg(coreDebugger->ProcessContext.Rip,16,16,QChar('0')));
 		PrintValueInTable("R8",QString("%1").arg(coreDebugger->ProcessContext.R8,16,16,QChar('0')));
 		PrintValueInTable("R9",QString("%1").arg(coreDebugger->ProcessContext.R9,16,16,QChar('0')));
@@ -214,6 +216,7 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	PrintValueInTable("ESP",QString("%1").arg(coreDebugger->ProcessContext.Esp,8,16,QChar('0')));
 	PrintValueInTable("EBP",QString("%1").arg(coreDebugger->ProcessContext.Ebp,8,16,QChar('0')));
 	PrintValueInTable("ESI",QString("%1").arg(coreDebugger->ProcessContext.Esi,8,16,QChar('0')));
+	PrintValueInTable("EDI",QString("%1").arg(coreDebugger->ProcessContext.Edi,8,16,QChar('0')));
 	PrintValueInTable("EIP",QString("%1").arg(coreDebugger->ProcessContext.Eip,8,16,QChar('0')));
 	PrintValueInTable("SegCs",QString("%1").arg(coreDebugger->ProcessContext.SegCs,8,16,QChar('0')));
 	PrintValueInTable("SegDs",QString("%1").arg(coreDebugger->ProcessContext.SegDs,8,16,QChar('0')));

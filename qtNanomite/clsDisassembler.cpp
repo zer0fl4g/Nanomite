@@ -142,41 +142,41 @@ void clsDisassembler::run()
 			newDisAss.SecurityBlock = (int)_dwEndOffset - newDisAss.VirtualAddr;
 
 			iLen = Disasm(&newDisAss);
-
 			if (iLen == OUT_OF_BLOCK)
 				bContinueDisAs = false;
-			else
+			else if(iLen != UNKNOWN_OPCODE)
 			{	
 				memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
 				
 				// OpCodez
-				int iTempLen = ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : ((iLen == UNKNOWN_OPCODE) ? 0 : iLen));
-				for(size_t i = 0;i < iTempLen;i++)
+				int iTempLen = ((iLen == UNKNOWN_OPCODE) ? 0 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : iLen));
+				if(iTempLen > 0) 
 				{
-					memcpy(&bBuffer,(LPVOID)((quint64)newDisAss.EIP + i),1);
-					wsprintf(sTemp,L"%s %02X",sTemp,bBuffer);
-				}
-				newRow.OpCodes = QString::fromWCharArray(sTemp);
+					for(size_t i = 0;i < iTempLen;i++)
+					{
+						memcpy(&bBuffer,(LPVOID)((quint64)newDisAss.EIP + i),1);
+						wsprintf(sTemp,L"%s %02X",sTemp,bBuffer);
+					}
+					newRow.OpCodes = QString::fromWCharArray(sTemp);
 
-				// Instruction
-				if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
-					wsprintf(sTemp,L"%s",L"db 00");
-				else
-					wsprintf(sTemp,L"%S",newDisAss.CompleteInstr);	
-				newRow.ASM = QString::fromWCharArray(sTemp);
+					// Instruction
+					if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
+						wsprintf(sTemp,L"%s",L"db 00");
+					else
+						wsprintf(sTemp,L"%S",newDisAss.CompleteInstr);	
+					newRow.ASM = QString::fromWCharArray(sTemp);
 				
-				// Comment/Symbol && itemStyle		
-				DataVisualizer.CreateDataForRow(&newRow);
+					// Comment/Symbol && itemStyle		
+					DataVisualizer.CreateDataForRow(&newRow);
 
-				newRow.Offset = QString("%1").arg(newDisAss.VirtualAddr,16,16,QChar('0')).toUpper();
-				SectionDisAs.insert(newRow.Offset,newRow);
+					newRow.Offset = QString("%1").arg(newDisAss.VirtualAddr,16,16,QChar('0')).toUpper();
+					SectionDisAs.insert(newRow.Offset,newRow);
+				}
 			}
 
-			newDisAss.EIP += (iLen == UNKNOWN_OPCODE) ? 1 : iLen;
-			newDisAss.VirtualAddr += (iLen == UNKNOWN_OPCODE) ? 1 : iLen;
+			newDisAss.EIP += ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
+			newDisAss.VirtualAddr += ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
 
-			//newDisAss.EIP = newDisAss.EIP + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
-			//newDisAss.VirtualAddr = newDisAss.VirtualAddr + ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
 			if (newDisAss.VirtualAddr >= _dwEndOffset)
 				bContinueDisAs = false;
 		}

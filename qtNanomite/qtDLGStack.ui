@@ -18,8 +18,8 @@
   </property>
   <property name="minimumSize">
    <size>
-    <width>317</width>
-    <height>93</height>
+    <width>0</width>
+    <height>0</height>
    </size>
   </property>
   <property name="features">
@@ -46,7 +46,7 @@
      <widget class="QTableWidget" name="tblStack">
       <property name="minimumSize">
        <size>
-        <width>300</width>
+        <width>0</width>
         <height>0</height>
        </size>
       </property>
