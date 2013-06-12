@@ -67,6 +67,20 @@ clsDebugger::clsDebugger(wstring sTarget)
 clsDebugger::~clsDebugger()
 {
 	CleanWorkSpace();
+
+	for(vector<BPStruct>::const_iterator i = SoftwareBPs.cbegin(); i != SoftwareBPs.cend(); ++i)
+		clsMemManager::CFree(i->moduleName);
+
+	for(vector<BPStruct>::const_iterator i = MemoryBPs.cbegin(); i != MemoryBPs.cend(); ++i)
+		clsMemManager::CFree(i->moduleName);
+
+	for(vector<BPStruct>::const_iterator i = HardwareBPs.cbegin(); i != HardwareBPs.cend(); ++i)
+		clsMemManager::CFree(i->moduleName);
+
+	SoftwareBPs.clear();
+	MemoryBPs.clear();
+	HardwareBPs.clear();
+
 	clsMemManager::CFree(tcLogString);
 }
 
@@ -82,12 +96,12 @@ void clsDebugger::CleanWorkSpace()
 	{
 		clsMemManager::CFree(i->sPath);
 	}
-
-
+	
 	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it)
 	{
 		if(it->dwHandle == 0x2)
 		{
+			clsMemManager::CFree(it->moduleName);
 			SoftwareBPs.erase(it);
 			it = SoftwareBPs.begin();
 		}

@@ -24,7 +24,7 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 {
 	setupUi(this);
 	
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setFixedSize(this->width(),this->height());
 
@@ -96,7 +96,7 @@ void qtDLGPEEditor::LoadPEView()
 
 void qtDLGPEEditor::InsertImports()
 {
-	QTreeWidgetItem* topElement = new QTreeWidgetItem();
+	QTreeWidgetItem* topElement;// = new QTreeWidgetItem();
 	QList<APIData> imports = _PEManager->getImports(_currentFile);
 	QString lastTopElement;
 
@@ -120,7 +120,7 @@ void qtDLGPEEditor::InsertImports()
 
 void qtDLGPEEditor::InsertExports()
 {
-	QTreeWidgetItem* topElement = new QTreeWidgetItem();
+	QTreeWidgetItem* topElement;// = new QTreeWidgetItem();
 	QList<APIData> exports = _PEManager->getExports(_currentFile);
 	QString lastTopElement;
 

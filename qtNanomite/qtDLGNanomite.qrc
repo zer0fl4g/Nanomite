@@ -26,4 +26,7 @@
     <file>../Icons/IDI_STOP.ico</file>
     <file>../Icons/IDI_SUSPEND.ico</file>
   </qresource>
+  <qresource prefix="Fonts">
+    <file>../Fonts/ProggyClean.ttf</file>
+  </qresource>
 </RCC>

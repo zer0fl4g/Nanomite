@@ -45,7 +45,7 @@ wstring clsPEManager::getFilenameFromPID(int PID)
 
 void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -62,7 +62,7 @@ void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 
 bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -87,7 +87,7 @@ bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
 
 bool clsPEManager::isValidPEFile(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -101,7 +101,7 @@ void clsPEManager::CloseFile(std::wstring FileName,int PID)
 {
 	if(PEFiles.size() <= 0) return;
 
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 	for(vector<PEManager>::const_iterator it = PEFiles.cbegin(); it != PEFiles.cend(); ++it)
 	{
 		if(it->FileName.compare(newFileName) == 0  /* || PEFiles[i].PID == PID */)
@@ -120,7 +120,7 @@ QList<APIData> clsPEManager::getImportsFromFile(std::wstring FileName)
 
 QList<APIData> clsPEManager::getImports(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -133,7 +133,7 @@ QList<APIData> clsPEManager::getImports(std::wstring FileName,int PID)
 
 QList<APIData> clsPEManager::getExports(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -146,7 +146,7 @@ QList<APIData> clsPEManager::getExports(std::wstring FileName,int PID)
 
 QList<PESectionData> clsPEManager::getSections(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -171,7 +171,7 @@ void clsPEManager::CleanPEManager()
 
 PIMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -183,7 +183,7 @@ PIMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
 
 PIMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -195,7 +195,7 @@ PIMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
 
 PIMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -207,7 +207,7 @@ PIMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
 
 bool clsPEManager::is64BitFile(std::wstring FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{
@@ -219,7 +219,7 @@ bool clsPEManager::is64BitFile(std::wstring FileName,int PID)
 
 DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
 	for(size_t i = 0; i < PEFiles.size(); i++)
 	{

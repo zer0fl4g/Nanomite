@@ -44,7 +44,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	setAcceptDrops(true);
 
 	QApplication::setStyle(new QPlastiqueStyle);
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
 
 	qRegisterMetaType<DWORD>("DWORD");
 	qRegisterMetaType<quint64>("quint64");

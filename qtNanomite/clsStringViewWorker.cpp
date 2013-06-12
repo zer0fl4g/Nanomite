@@ -39,24 +39,20 @@ void clsStringViewWorker::run()
 
 	for(QMap<int,PTCHAR>::const_iterator i = m_processingData.constBegin(); i != m_processingData.constEnd(); ++i)
 	{
-		
-		bool bNotEndOfFile = true;
 		ifstream inputFile;
 	
 		inputFile.open(i.value(),ifstream::binary);
-
 		if(!inputFile.is_open())
 		{
 			MessageBox(NULL,i.value(),L"Error opening File!",MB_OKCANCEL);
-			bNotEndOfFile = false;
 			return;
 		}
 
-		while(bNotEndOfFile && inputFile.good())
-		{
-			QString asciiChar;
-			CHAR sT = '\0';
-			
+		QString asciiChar;
+		CHAR sT = '\0';
+		while(inputFile.good())
+		{	
+			asciiChar.clear();
 			inputFile.get(sT);
 			while(inputFile.good())
 			{
@@ -84,8 +80,44 @@ void clsStringViewWorker::run()
 				stringList.insert(inputFile.tellg(),newStringData);
 			}
 		}
-
 		inputFile.close();
+		
+		//wifstream uniInputFile;
+		//uniInputFile.open(i.value(),wifstream::binary);
+		//QString uniChar;
+		//
+		//TCHAR uniTempChar[1] = {'\0'};
+		//while(uniInputFile.good())
+		//{
+		//	uniChar.clear();
+		//	uniInputFile.read(uniTempChar,2);
+		//	while(uniInputFile.good())
+		//	{
+		//		if(((short)uniTempChar[0] >= 0x0041 && (short)uniTempChar[0] <= 0x005a)		||
+		//			((short)uniTempChar[0] >= 0x0061 && (short)uniTempChar[0] <= 0x007a)	||
+		//			((short)uniTempChar[0] >= 0x0030 && (short)uniTempChar[0] <= 0x0039)	|| 
+		//			((short)uniTempChar[0] == 0x0020)										||
+		//			((short)uniTempChar[0] == 0x000A))
+		//			uniChar.append(uniTempChar[0]);
+		//		else
+		//		{
+		//			break;
+		//		}
+
+		//		uniInputFile.read(uniTempChar,2);
+		//	}
+
+		//	if((short)uniTempChar[0] == 0x0000 && uniChar.length() > 4)
+		//	{
+		//		StringData newStringData;
+		//		newStringData.DataString = uniChar;
+		//		newStringData.PID = i.key();
+		//		newStringData.StringOffset = uniInputFile.tellg();
+
+		//		stringList.insert(uniInputFile.tellg(),newStringData);
+		//	}
+		//}
+		//uniInputFile.close();
 	}
 
 	return;

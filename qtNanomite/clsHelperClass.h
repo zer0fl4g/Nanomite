@@ -40,9 +40,9 @@ public:
 	static std::vector<std::wstring> split(const std::wstring& s,const std::wstring& f);
 	static std::string convertWSTRtoSTR(std::wstring FileName);
 	static std::wstring convertSTRtoWSTR(std::string FileName);
-	static std::wstring replaceAll(std::wstring orgString,std::wstring oldString,std::wstring newString);
+	static std::wstring replaceAll(std::wstring orgString,wchar_t oldString,wchar_t newString);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
-	static QString LoadStyleSheet();
+	static QString LoadStyleSheet(QWidget *pCurrent);
 	static quint64 CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWORD PID);
 	//static quint64 GetImageBaseFromModuleName(QString moduleName,bool is64Bit);
 };

@@ -350,7 +350,7 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 	}
 }
 
-QString clsHelperClass::LoadStyleSheet()
+QString clsHelperClass::LoadStyleSheet(QWidget *pCurrent)
 {
 	//QFile File("stylesheet.qss");
 	//File.open(QFile::ReadOnly);
@@ -358,12 +358,17 @@ QString clsHelperClass::LoadStyleSheet()
 	//File.close();
 	//return styleSheet;
 
-	return	"QTableWidget, QTreeWidget"
-			"{ "
-			"	background: rgb(230, 235, 230);"
-			"	font-family: Consolas;"
-			"	font-size: 12;"
-			"}";
+	int fontID = QFontDatabase::addApplicationFont(":/Fonts/Fonts/ProggyClean.ttf");
+	QString newFont = "Consolas";
+	if(fontID >= 0)
+		QString newFont = QFontDatabase::applicationFontFamilies(fontID).at(0);
+
+	return QString("%1%2%3%4%5%6%7%8").arg("QTableWidget, QTreeWidget")
+		.arg("{ ")
+		.arg("	background: rgb(230, 235, 230);")
+		.arg("	font-family: ").arg(newFont).arg(";")
+		.arg("	font-size: 12;")
+		.arg("}");
 }
 
 bool clsHelperClass::IsWindowsXP()
@@ -378,14 +383,15 @@ bool clsHelperClass::IsWindowsXP()
 	return false;
 }
 
-wstring clsHelperClass::replaceAll(wstring orgString, wstring oldString, wstring newString)
+wstring clsHelperClass::replaceAll(wstring orgString, wchar_t oldString, wchar_t newString)
 {
-	QString org = QString().fromStdWString(orgString);
-	QString old = QString().fromStdWString(oldString);
-	QString news = QString().fromStdWString(newString);
+	for(int i = 0; i < orgString.length(); i++)
+	{
+		if(orgString.c_str()[i] == oldString)
+			orgString._Myptr()[i] = newString;
+	}
 
-	wstring* ret = new wstring(org.replace(old,news).toStdWString()); 
-	return *ret;
+	return orgString;
 }
 
 DWORD clsHelperClass::GetMainThread(DWORD ProcessID)

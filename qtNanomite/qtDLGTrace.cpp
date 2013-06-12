@@ -30,7 +30,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(horizontalLayout);
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
 	pThis = this;
 
 	tblTraceLog->horizontalHeader()->resizeSection(0,80); //PID

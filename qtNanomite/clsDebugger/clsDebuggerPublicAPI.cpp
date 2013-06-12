@@ -151,9 +151,12 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 		if(it->dwHandle == 0x2)
 		{
 			dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
+			clsMemManager::CFree(it->moduleName);
+
 			SoftwareBPs.erase(it);
 			it = SoftwareBPs.begin();
 		}
+
 		if(SoftwareBPs.size() <= 0)
 			break;
 	}
@@ -165,6 +168,7 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 	newBP.dwSize = 0x1;
 	newBP.bOrgByte = NULL;
 	newBP.dwPID = _dwCurPID;
+	newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
 	wSoftwareBP(newBP.dwPID,newBP.dwOffset,newBP.dwHandle,newBP.dwSize,newBP.bOrgByte);
 
@@ -174,6 +178,8 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 		PulseEvent(_hDbgEvent);
 		return true;
 	}
+
+	clsMemManager::CFree(newBP.moduleName);
 	return false;
 }
 

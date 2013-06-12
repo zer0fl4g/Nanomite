@@ -29,7 +29,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
 
 	tblProcList->horizontalHeader()->resizeSection(0,135);
 	tblProcList->horizontalHeader()->resizeSection(1,50);

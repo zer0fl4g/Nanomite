@@ -21,7 +21,7 @@ using namespace std;
 
 clsPEFile::clsPEFile(wstring FileName,bool *bLoaded)
 {
-	_FileName = clsHelperClass::replaceAll(FileName,L"\\",L"/");
+	_FileName = clsHelperClass::replaceAll(FileName,'\\','/');
 	*bLoaded = LoadFile(_FileName);
 }
 
