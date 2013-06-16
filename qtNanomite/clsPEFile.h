@@ -45,7 +45,8 @@ public:
 	~clsPEFile();
 
 	bool isValidPEFile();
-
+	
+	DWORD64 getTLSCallbackOffset();
 	DWORD64 VAtoRaw64(quint64 Offset);
 	DWORD	VAtoRaw32(quint64 Offset);
 
@@ -78,6 +79,9 @@ private:
 
 	DWORD dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
 	DWORD64 dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS64 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
+
+	DWORD64 getTLSCallbackOffset64();
+	DWORD getTLSCallbackOffset32();
 };
 
 #endif

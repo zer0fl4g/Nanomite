@@ -16,6 +16,7 @@
  */
 #include "clsPEFile.h"
 #include "clsHelperClass.h"
+#include "clsMemManager.h"
 
 using namespace std;
 
@@ -343,6 +344,65 @@ DWORD clsPEFile::dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 
 	  pSectionHeader++;
 	}
 	return 0;
+}
+
+DWORD64 clsPEFile::getTLSCallbackOffset64()
+{
+	if(_pINH64 == NULL) return 0;
+
+	DWORD vaOfTLSDir = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_TLS,_pINH64,_pIDH,(PBYTE)_lpBuffer);
+	if(vaOfTLSDir == NULL) return 0;
+
+	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD64)vaOfTLSDir);
+	
+	if(pTLS->AddressOfCallBacks == NULL) return 0;
+	return pTLS->AddressOfCallBacks - _pINH32->OptionalHeader.ImageBase;
+}
+
+DWORD clsPEFile::getTLSCallbackOffset32()
+{
+	if(_pINH32 == NULL) return 0;
+
+	DWORD64 rvaOfTLSDir = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
+	DWORD64 vaOfTLSDir = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_TLS,_pINH32,_pIDH,(PBYTE)_lpBuffer);
+	if(vaOfTLSDir == NULL) return 0;
+
+	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD64)vaOfTLSDir);
+	
+	if(pTLS->AddressOfCallBacks == NULL) return 0;
+	return pTLS->AddressOfCallBacks - _pINH32->OptionalHeader.ImageBase;
+}
+
+DWORD64 clsPEFile::getTLSCallbackOffset()
+{
+	HANDLE hFile = CreateFileW(_FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
+	if(hFile == INVALID_HANDLE_VALUE) return 0;
+
+	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
+	LPVOID lpOrgBuffer = _lpBuffer;
+
+	_lpBuffer = MapViewOfFile(hFileMap,FILE_MAP_READ,NULL,NULL,NULL);
+	if(_lpBuffer == NULL)
+	{
+		CloseHandle(hFile);
+		CloseHandle(hFileMap);
+		UnmapViewOfFile(_lpBuffer);
+		_lpBuffer = lpOrgBuffer;
+		return 0;
+	}
+
+	DWORD tlsValue = NULL;
+	if(_is64Bit)
+		tlsValue = getTLSCallbackOffset64();
+	else
+		tlsValue = getTLSCallbackOffset32();
+
+	UnmapViewOfFile(_lpBuffer);
+	_lpBuffer = lpOrgBuffer;
+	CloseHandle(hFile);
+	CloseHandle(hFileMap);
+
+	return tlsValue;
 }
 
 bool clsPEFile::CheckPEType(LPVOID pBuffer)

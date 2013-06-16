@@ -316,6 +316,11 @@ void clsDebugger::DebuggingLoop()
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
 				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
+				
+				//DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
+				//if(tlsCallback > 0 /* && dbgSettings.*/)
+				//	AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,0x2);
+				//
 				InitBP();
 
 				// Insert Main Thread to List
@@ -439,11 +444,13 @@ void clsDebugger::DebuggingLoop()
 				{
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
 					if(PIDs[iPid].bKernelBP && !PIDs[iPid].bWOW64KernelBP && dbgSettings.dwBreakOnEPMode == 1)
+					{
 						dwContinueStatus = CallBreakDebugger(&debug_event,0);
 					
-					PIDs[iPid].bWOW64KernelBP = true;
-					bIsKernelBP = true;
-				
+						PIDs[iPid].bWOW64KernelBP = true;
+						bIsKernelBP = true;
+					}
+
 				case EXCEPTION_BREAKPOINT:
 					{
 						bool bStepOver = false;

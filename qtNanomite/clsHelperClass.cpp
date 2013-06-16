@@ -350,7 +350,7 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 	}
 }
 
-QString clsHelperClass::LoadStyleSheet(QWidget *pCurrent)
+QString clsHelperClass::LoadStyleSheet()
 {
 	//QFile File("stylesheet.qss");
 	//File.open(QFile::ReadOnly);
@@ -358,17 +358,12 @@ QString clsHelperClass::LoadStyleSheet(QWidget *pCurrent)
 	//File.close();
 	//return styleSheet;
 
-	int fontID = QFontDatabase::addApplicationFont(":/Fonts/Fonts/ProggyClean.ttf");
-	QString newFont = "Consolas";
-	if(fontID >= 0)
-		QString newFont = QFontDatabase::applicationFontFamilies(fontID).at(0);
-
-	return QString("%1%2%3%4%5%6%7%8").arg("QTableWidget, QTreeWidget")
-		.arg("{ ")
-		.arg("	background: rgb(230, 235, 230);")
-		.arg("	font-family: ").arg(newFont).arg(";")
-		.arg("	font-size: 12;")
-		.arg("}");
+	return  "QTableWidget, QTreeWidget"
+			"{ "
+			"	background: rgb(230, 235, 230);"
+			"	font-family: Consolas;"
+			"	font-size: 8;"
+			"}";
 }
 
 bool clsHelperClass::IsWindowsXP()

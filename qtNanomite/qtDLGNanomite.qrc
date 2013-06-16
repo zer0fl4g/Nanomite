@@ -27,6 +27,7 @@
     <file>../Icons/IDI_SUSPEND.ico</file>
   </qresource>
   <qresource prefix="Fonts">
-    <file>../Fonts/ProggyClean.ttf</file>
+    <file>../Fonts/consola.ttf</file>
+    <file>../Fonts/SourceCodePro-Regular.ttf</file>
   </qresource>
 </RCC>

@@ -45,7 +45,7 @@ qtDLGRegEdit::qtDLGRegEdit(QWidget *parent, Qt::WFlags flags,LPVOID pProcessCont
 	FillGUI();
 
 	this->setFixedSize(this->width(),this->height());
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 }
 
 qtDLGRegEdit::~qtDLGRegEdit()

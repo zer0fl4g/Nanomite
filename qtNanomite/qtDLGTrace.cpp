@@ -30,7 +30,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(horizontalLayout);
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	pThis = this;
 
 	tblTraceLog->horizontalHeader()->resizeSection(0,80); //PID
@@ -117,15 +117,14 @@ void qtDLGTrace::OnShow(int delta)
 
 		if(i.value().asmInstruction.length() <= 0)
 		{
-			std::wstring *FuncName = new wstring(L""),*ModName = new wstring(L"");
-			clsHelperClass::LoadSymbolForAddr(*FuncName,*ModName,i.value().dwOffset,OpenProcess(PROCESS_ALL_ACCESS,false,i.value().PID));
+			std::wstring FuncName,ModName;
+			clsHelperClass::LoadSymbolForAddr(FuncName,ModName,i.value().dwOffset,OpenProcess(PROCESS_ALL_ACCESS,false,i.value().PID));
 
-			QString funcName = QString().fromStdWString(*FuncName);
-			QString modName = QString().fromStdWString(*FuncName);
-			i.value().asmInstruction.append(modName).append(".").append(funcName);
+			QString funcName = QString().fromStdWString(FuncName);
+			QString modName = QString().fromStdWString(ModName);
 
-			delete FuncName;
-			delete ModName;
+			if(modName.length() > 0 && funcName.length() > 0)
+				i.value().asmInstruction.append(modName).append(".").append(funcName);
 		}
 
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,3,

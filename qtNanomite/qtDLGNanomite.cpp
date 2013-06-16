@@ -44,7 +44,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	setAcceptDrops(true);
 
 	QApplication::setStyle(new QPlastiqueStyle);
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
+	QFontDatabase::addApplicationFont(":/Fonts/Fonts/consola.ttf");
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 
 	qRegisterMetaType<DWORD>("DWORD");
 	qRegisterMetaType<quint64>("quint64");
@@ -262,15 +263,19 @@ void qtDLGNanomite::UpdateStateBar(DWORD dwAction)
 	switch(dwAction)
 	{
 	case 0x1: // Running
+		stateBar->setStyleSheet("background-color: green");
 		qsStateMessage.append("Running");
 		break;
 	case 0x2: // Suspended
+		stateBar->setStyleSheet("background-color: yellow");
 		qsStateMessage.append("Suspended");
 		break;
 	case 0x3: // Terminated
+		stateBar->setStyleSheet("background-color: red");
 		qsStateMessage.append("Terminated");
 		break;
 	}
+
 	stateBar->showMessage(qsStateMessage);
 }
 

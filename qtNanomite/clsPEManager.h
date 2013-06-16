@@ -26,7 +26,10 @@ class clsPEManager: public QObject
 	Q_OBJECT
 public:
 	static QList<APIData> getImportsFromFile(std::wstring FileName);
+
 	static clsPEManager* GetInstance();
+
+	static DWORD64 getTLSCallbackOffset(std::wstring FileName,int PID);
 
 	clsPEManager();
 	~clsPEManager();

@@ -38,6 +38,8 @@
 ## Changelog
 ###Version 0.1 beta 13
 + fixed some memory leaks
++ added colors to the state bar
 + added missing edi/rdi register
++ updated PE-Editor layout
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

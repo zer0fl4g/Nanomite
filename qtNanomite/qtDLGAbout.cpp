@@ -23,7 +23,7 @@ qtDLGAbout::qtDLGAbout(QWidget *parent, Qt::WFlags flags)
 {
 	ui.setupUi(this);
 	this->setFixedSize(this->width(),this->height());
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 }
 
 qtDLGAbout::~qtDLGAbout()

@@ -15,6 +15,7 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "clsPEManager.h"
+#include "clsMemManager.h"
 #include "clsHelperClass.h"
 
 using namespace std;
@@ -233,6 +234,20 @@ DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
 			{
 				return PEFiles[i].PEFile->VAtoRaw32(RVAOffset);
 			}
+		}
+	}
+	return NULL;
+}
+
+DWORD64 clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
+{
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
+
+	for(size_t i = 0; i < pThis->PEFiles.size(); i++)
+	{
+		if(pThis->PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		{
+			return pThis->PEFiles[i].PEFile->getTLSCallbackOffset();
 		}
 	}
 	return NULL;

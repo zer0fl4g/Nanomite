@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-* 	This file is part of Nanomite.
-*
-*    Nanomite is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    Nanomite is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
-*/
--->
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>qtDLGPEEditorClass</class>
  <widget class="QWidget" name="qtDLGPEEditorClass">
@@ -23,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>541</width>
-    <height>471</height>
+    <width>882</width>
+    <height>472</height>
    </rect>
   </property>
   <property name="windowTitle">
@@ -39,7 +22,7 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>541</width>
+     <width>881</width>
      <height>471</height>
     </rect>
    </property>
@@ -48,335 +31,35 @@
      <number>0</number>
     </property>
     <item>
-     <widget class="QTabWidget" name="tab_3">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>445</height>
-       </size>
-      </property>
-      <property name="currentIndex">
-       <number>0</number>
-      </property>
-      <widget class="QWidget" name="tab">
-       <attribute name="title">
-        <string>Imports</string>
-       </attribute>
-       <widget class="QTreeWidget" name="treeImport">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>0</y>
-          <width>541</width>
-          <height>441</height>
-         </rect>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <attribute name="headerVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="headerDefaultSectionSize">
-         <number>50</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Modul / API</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Offset</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_2">
-       <attribute name="title">
-        <string>Exports</string>
-       </attribute>
-       <widget class="QTreeWidget" name="treeExports">
-        <property name="geometry">
-         <rect>
-          <x>-2</x>
-          <y>-1</y>
-          <width>541</width>
-          <height>441</height>
-         </rect>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <attribute name="headerVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="headerDefaultSectionSize">
-         <number>100</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Modul / API</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Offset</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_6">
-       <attribute name="title">
-        <string>Sections</string>
-       </attribute>
-       <widget class="QTableWidget" name="tblSections">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>-1</y>
-          <width>541</width>
-          <height>441</height>
-         </rect>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <attribute name="horizontalHeaderDefaultSectionSize">
-         <number>75</number>
-        </attribute>
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>13</number>
-        </attribute>
-        <attribute name="verticalHeaderMinimumSectionSize">
-         <number>13</number>
-        </attribute>
-        <attribute name="verticalHeaderStretchLastSection">
-         <bool>false</bool>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>VAddress</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>VSize</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Ptr. to Data</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Size of Data</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Characteristics</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_4">
-       <attribute name="title">
-        <string>Dos Header</string>
-       </attribute>
-       <widget class="QTableWidget" name="tblDOS">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>-1</y>
-          <width>541</width>
-          <height>441</height>
-         </rect>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <property name="alternatingRowColors">
-         <bool>false</bool>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>13</number>
-        </attribute>
-        <attribute name="verticalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderMinimumSectionSize">
-         <number>13</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Value</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="tab_5">
-       <attribute name="title">
-        <string>File Header</string>
-       </attribute>
-       <widget class="QTableWidget" name="tblFH">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>-1</y>
-          <width>541</width>
-          <height>441</height>
-         </rect>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>13</number>
-        </attribute>
-        <attribute name="verticalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderMinimumSectionSize">
-         <number>13</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Value</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-      <widget class="QWidget" name="widget">
-       <attribute name="title">
-        <string>Optional Header</string>
-       </attribute>
-       <widget class="QTableWidget" name="tblOH">
-        <property name="geometry">
-         <rect>
-          <x>-1</x>
-          <y>-1</y>
-          <width>541</width>
-          <height>441</height>
-         </rect>
-        </property>
-        <property name="editTriggers">
-         <set>QAbstractItemView::NoEditTriggers</set>
-        </property>
-        <property name="selectionBehavior">
-         <enum>QAbstractItemView::SelectRows</enum>
-        </property>
-        <attribute name="horizontalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="horizontalHeaderStretchLastSection">
-         <bool>true</bool>
-        </attribute>
-        <attribute name="verticalHeaderVisible">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderDefaultSectionSize">
-         <number>13</number>
-        </attribute>
-        <attribute name="verticalHeaderHighlightSections">
-         <bool>false</bool>
-        </attribute>
-        <attribute name="verticalHeaderMinimumSectionSize">
-         <number>13</number>
-        </attribute>
-        <column>
-         <property name="text">
-          <string>Name</string>
-         </property>
-        </column>
-        <column>
-         <property name="text">
-          <string>Value</string>
-         </property>
-        </column>
-       </widget>
-      </widget>
-     </widget>
-    </item>
-    <item>
-     <widget class="QLabel" name="loadedFile">
-      <property name="minimumSize">
-       <size>
-        <width>0</width>
-        <height>14</height>
-       </size>
-      </property>
-      <property name="maximumSize">
-       <size>
-        <width>16777215</width>
-        <height>14</height>
-       </size>
-      </property>
-      <property name="font">
-       <font>
-        <pointsize>9</pointsize>
-        <weight>50</weight>
-        <bold>false</bold>
-       </font>
-      </property>
-      <property name="text">
-       <string/>
-      </property>
+     <widget class="QTreeWidget" name="treePE">
+      <attribute name="headerVisible">
+       <bool>false</bool>
+      </attribute>
+      <column>
+       <property name="text">
+        <string>1</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>2</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>3</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>4</string>
+       </property>
+      </column>
+      <column>
+       <property name="text">
+        <string>5</string>
+       </property>
+      </column>
      </widget>
     </item>
    </layout>

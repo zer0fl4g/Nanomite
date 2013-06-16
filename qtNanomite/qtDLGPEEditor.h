@@ -39,7 +39,7 @@ private:
 	void InsertDosHeader();
 	void InsertFileHeader();
 	void InsertOptionalHeader();
-	void InsertHeaderData(QTableWidget* tblHeaderTable,QString ValueName,quint64 dwValue);
+	void InsertHeaderData(QTreeWidgetItem *topElement,QString ValueName,quint64 dwValue);
 	void InsertExports();
 	void InsertImports();
 	void InsertSections();

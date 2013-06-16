@@ -24,7 +24,7 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet(this));
+	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	//this->setAttribute(Qt::WA_DeleteOnClose,true);
 
 	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
