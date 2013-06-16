@@ -317,10 +317,13 @@ void clsDebugger::DebuggingLoop()
 
 				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
 				
-				//DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
-				//if(tlsCallback > 0 /* && dbgSettings.*/)
-				//	AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,0x2);
-				//
+				if(dbgSettings.dwBreakOnEPMode == 0x2)
+				{
+					DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
+					if(tlsCallback > 0)
+						AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,0x2);
+				}
+				
 				InitBP();
 
 				// Insert Main Thread to List
@@ -443,10 +446,13 @@ void clsDebugger::DebuggingLoop()
 				switch (exInfo.ExceptionRecord.ExceptionCode)
 				{
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
-					if(PIDs[iPid].bKernelBP && !PIDs[iPid].bWOW64KernelBP && dbgSettings.dwBreakOnEPMode == 1)
+					if(PIDs[iPid].bKernelBP && !PIDs[iPid].bWOW64KernelBP)
 					{
-						dwContinueStatus = CallBreakDebugger(&debug_event,0);
-					
+						if(dbgSettings.dwBreakOnEPMode == 1)
+							dwContinueStatus = CallBreakDebugger(&debug_event,0);
+						else
+							dwContinueStatus = CallBreakDebugger(&debug_event,3);
+
 						PIDs[iPid].bWOW64KernelBP = true;
 						bIsKernelBP = true;
 					}
@@ -455,9 +461,13 @@ void clsDebugger::DebuggingLoop()
 					{
 						bool bStepOver = false;
 
-						if(!PIDs[iPid].bKernelBP && dbgSettings.dwBreakOnEPMode == 1)
+						if(!PIDs[iPid].bKernelBP)
 						{
-							dwContinueStatus = CallBreakDebugger(&debug_event,0);
+							if(dbgSettings.dwBreakOnEPMode == 1)
+								dwContinueStatus = CallBreakDebugger(&debug_event,0);
+							else
+								dwContinueStatus = CallBreakDebugger(&debug_event,3);
+
 							PIDs[iPid].bKernelBP = true;
 							bIsKernelBP = true;
 						}
@@ -520,11 +530,6 @@ void clsDebugger::DebuggingLoop()
 									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 								}
 							}
-						}
-						else
-						{
-							PIDs[iPid].bKernelBP = true;
-							bIsKernelBP = true;
 						}
 						break;
 					}
@@ -770,6 +775,8 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 		return DBG_EXCEPTION_NOT_HANDLED;
 	case 2:
 		return DBG_CONTINUE;
+	case 3:
+		return DBG_EXCEPTION_HANDLED;
 	default:
 		return DBG_EXCEPTION_NOT_HANDLED;
 	}

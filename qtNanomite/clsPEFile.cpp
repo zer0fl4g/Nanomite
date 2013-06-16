@@ -350,27 +350,32 @@ DWORD64 clsPEFile::getTLSCallbackOffset64()
 {
 	if(_pINH64 == NULL) return 0;
 
-	DWORD vaOfTLSDir = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_TLS,_pINH64,_pIDH,(PBYTE)_lpBuffer);
+	DWORD64 vaOfTLSDir = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_TLS,_pINH64,_pIDH,(PBYTE)_lpBuffer);
 	if(vaOfTLSDir == NULL) return 0;
 
-	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD64)vaOfTLSDir);
-	
+	PIMAGE_TLS_DIRECTORY64 pTLS = (PIMAGE_TLS_DIRECTORY64)((DWORD64)vaOfTLSDir);
+
 	if(pTLS->AddressOfCallBacks == NULL) return 0;
-	return pTLS->AddressOfCallBacks - _pINH32->OptionalHeader.ImageBase;
+
+	DWORD64 rvaTLS = VAtoRaw64(pTLS->AddressOfCallBacks - _pINH64->OptionalHeader.ImageBase);
+	DWORD64 callbackOffset = (DWORD64)*(PDWORD64)((DWORD64)_lpBuffer + rvaTLS);
+	return callbackOffset - _pINH64->OptionalHeader.ImageBase;
 }
 
 DWORD clsPEFile::getTLSCallbackOffset32()
 {
 	if(_pINH32 == NULL) return 0;
 
-	DWORD64 rvaOfTLSDir = _pINH32->OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
-	DWORD64 vaOfTLSDir = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_TLS,_pINH32,_pIDH,(PBYTE)_lpBuffer);
+	DWORD vaOfTLSDir = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_TLS,_pINH32,_pIDH,(PBYTE)_lpBuffer);
 	if(vaOfTLSDir == NULL) return 0;
 
-	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD64)vaOfTLSDir);
+	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD)vaOfTLSDir);
 	
 	if(pTLS->AddressOfCallBacks == NULL) return 0;
-	return pTLS->AddressOfCallBacks - _pINH32->OptionalHeader.ImageBase;
+
+	DWORD rvaTLS = VAtoRaw32(pTLS->AddressOfCallBacks - _pINH32->OptionalHeader.ImageBase);
+	DWORD callbackOffset = (DWORD)*(PDWORD)((DWORD)_lpBuffer + rvaTLS);
+	return callbackOffset - _pINH32->OptionalHeader.ImageBase;
 }
 
 DWORD64 clsPEFile::getTLSCallbackOffset()
