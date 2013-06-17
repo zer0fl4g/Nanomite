@@ -395,6 +395,24 @@
     <ClCompile Include="GeneratedFiles\Release\moc_qtDLGDisassembler.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGTIBView.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGTIBView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGTIBView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="qtDLGPEBView.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGPEBView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGPEBView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -586,6 +604,18 @@
     <CustomBuild Include="qtDLGDisassembler.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGTIBView.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGTIBView.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGPEBView.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGPEBView.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
@@ -703,6 +733,12 @@
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
     <ClInclude Include="GeneratedFiles\ui_qtDLGDisassembler.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGTIBView.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="GeneratedFiles\ui_qtDLGPEBView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
   </ItemGroup>

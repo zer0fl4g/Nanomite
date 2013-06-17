@@ -1,17 +1,17 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qtDLGPEEditorClass</class>
- <widget class="QWidget" name="qtDLGPEEditorClass">
+ <class>qtDLGTIBViewClass</class>
+ <widget class="QWidget" name="qtDLGTIBViewClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>961</width>
-    <height>472</height>
+    <width>410</width>
+    <height>329</height>
    </rect>
   </property>
   <property name="windowTitle">
-   <string>[ Nanomite ] - PEEditor</string>
+   <string>[ Nanomite ] - TIB View</string>
   </property>
   <property name="windowIcon">
    <iconset resource="qtDLGNanomite.qrc">
@@ -22,47 +22,27 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>961</width>
-     <height>471</height>
+     <width>411</width>
+     <height>331</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
     <item>
-     <widget class="QTreeWidget" name="treePE">
+     <widget class="QTreeWidget" name="treeTIB">
+      <property name="columnCount">
+       <number>2</number>
+      </property>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>
       <column>
        <property name="text">
-        <string>1</string>
+        <string notr="true">1</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>2</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>3</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>4</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>5</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>6</string>
+        <string notr="true">2</string>
        </property>
       </column>
      </widget>

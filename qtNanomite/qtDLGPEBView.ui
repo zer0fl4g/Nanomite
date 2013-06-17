@@ -1,17 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
- <class>qtDLGPEEditorClass</class>
- <widget class="QWidget" name="qtDLGPEEditorClass">
+ <class>qtDLGPEBViewClass</class>
+ <widget class="QWidget" name="qtDLGPEBViewClass">
   <property name="geometry">
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>961</width>
-    <height>472</height>
+    <width>372</width>
+    <height>572</height>
    </rect>
   </property>
+  <property name="contextMenuPolicy">
+   <enum>Qt::CustomContextMenu</enum>
+  </property>
   <property name="windowTitle">
-   <string>[ Nanomite ] - PEEditor</string>
+   <string>[ Nanomite ] - PEB View</string>
   </property>
   <property name="windowIcon">
    <iconset resource="qtDLGNanomite.qrc">
@@ -22,47 +25,27 @@
     <rect>
      <x>0</x>
      <y>0</y>
-     <width>961</width>
-     <height>471</height>
+     <width>371</width>
+     <height>571</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
-    <property name="spacing">
-     <number>0</number>
-    </property>
     <item>
-     <widget class="QTreeWidget" name="treePE">
+     <widget class="QTreeWidget" name="treePEB">
+      <property name="columnCount">
+       <number>2</number>
+      </property>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>
       <column>
        <property name="text">
-        <string>1</string>
+        <string notr="true">1</string>
        </property>
       </column>
       <column>
        <property name="text">
-        <string>2</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>3</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>4</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>5</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
-        <string>6</string>
+        <string notr="true">2</string>
        </property>
       </column>
      </widget>

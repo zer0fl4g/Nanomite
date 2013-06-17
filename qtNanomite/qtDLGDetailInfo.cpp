@@ -17,10 +17,14 @@
 #include "qtDLGDetailInfo.h"
 #include "qtDLGPEEditor.h"
 #include "qtDLGNanomite.h"
+#include "qtDLGRegEdit.h"
+#include "qtDLGTIBView.h"
+#include "qtDLGPEBView.h"
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 #include "clsPEManager.h"
+#include "clsAPIImport.h"
 
 #include <QtCore>
 #include <QMenu>
@@ -77,6 +81,7 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 	_SelectedOffset = tblPIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
+	menu.addAction(new QAction("Show PBI/PEB",this));
 
 	int ProcessPriority = GetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16));
 	if(ProcessPriority != 0)
@@ -151,6 +156,8 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 	_SelectedOffset = tblTIDs->item(_iSelectedRow,2)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
+	menu.addAction(new QAction("Show Registers",this));
+	menu.addAction(new QAction("Show TBI/TEB",this));
 	menu.addAction(new QAction("Suspend",this));
 	menu.addAction(new QAction("Resume",this));
 
@@ -252,6 +259,14 @@ void qtDLGDetailInfo::PIDMenuCallback(QAction* pAction)
 			_SelectedOffset = NULL;
 		}
 	}
+	else if(QString().compare(pAction->text(),"Show PBI/PEB") == 0)
+	{
+		DWORD selectedPID = tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+		HANDLE selectedProcessHandle = qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(selectedPID);
+
+		qtDLGPEBView *newPEB = new qtDLGPEBView(selectedProcessHandle, this, Qt::Window);
+		newPEB->show();
+	}
 	else if(QString().compare(pAction->text(),"Realtime") == 0)
 		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),REALTIME_PRIORITY_CLASS);
 	else if(QString().compare(pAction->text(),"High") == 0)
@@ -310,6 +325,75 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 			MessageBoxW(NULL,L"ERROR, have not been able to resume this Thread!",L"Nanomite",MB_OK);
 
 		CloseHandle(hThread);
+	}
+	else if(QString().compare(pAction->text(),"Show TBI/TEB") == 0)
+	{
+		DWORD	ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),
+				procID = tblTIDs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+
+		HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,ThreadID);
+		if(hThread == INVALID_HANDLE_VALUE) 
+		{
+			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			return;
+		}
+
+		qtDLGTIBView *newTIBView = new qtDLGTIBView(qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(procID),hThread,this,Qt::Window);
+		newTIBView->show();
+
+		CloseHandle(hThread);
+	}
+	else if(QString().compare(pAction->text(),"Show Registers") == 0)
+	{
+		DWORD ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
+		HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,ThreadID);
+		HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION,false,tblTIDs->item(_iSelectedRow,0)->text().toULongLong(0,16));
+
+		if(hThread == INVALID_HANDLE_VALUE && hProc == NULL) 
+		{
+			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			return;
+		}
+		
+		qtDLGRegEdit *newRegEditWindow;
+		
+		SuspendThread(hThread);
+
+#ifdef _AMD64_
+		BOOL bIsWOW64 = false;
+		if(clsAPIImport::pIsWow64Process)
+			clsAPIImport::pIsWow64Process(hProc,&bIsWOW64);
+
+		if(bIsWOW64)
+		{
+			WOW64_CONTEXT pContext;
+			pContext.ContextFlags = CONTEXT_ALL;
+			clsAPIImport::pWow64GetThreadContext(hThread,&pContext);
+
+			newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pContext,false);
+		}
+		else
+		{
+			CONTEXT pContext;
+			pContext.ContextFlags = CONTEXT_ALL;
+			GetThreadContext(hThread,&pContext);
+
+			newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pContext,true);
+		}
+#else
+		{
+			CONTEXT pContext;
+			pContext.ContextFlags = CONTEXT_ALL;
+			GetThreadContext(hThread,&pContext);
+
+			newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pContext,false);
+		}
+#endif		
+		ResumeThread(hThread);
+		
+		newRegEditWindow->show();
+		CloseHandle(hThread);
+		CloseHandle(hProc);
 	}
 	else if(QString().compare(pAction->text(),"Highest") == 0)
 		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_HIGHEST);

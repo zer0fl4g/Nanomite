@@ -24,6 +24,8 @@ MyIsWow64Process clsAPIImport::pIsWow64Process = NULL;
 MyNtQuerySystemInformation clsAPIImport::pNtQuerySystemInformation = NULL;
 MyNtDuplicateObject clsAPIImport::pNtDuplicateObject = NULL;
 MyNtQueryObject clsAPIImport::pNtQueryObject = NULL;
+MyNtQueryInformationThread clsAPIImport::pNtQueryInformationThread = NULL;
+MyNtQueryInformationProcess clsAPIImport::pNtQueryInformationProcess = NULL;
 //MyRtlCreateQueryDebugBuffer clsAPIImport::pRtlCreateQueryDebugBuffer = NULL;
 //MyRtlQueryProcessDebugInformation clsAPIImport::pRtlQueryProcessDebugInformation = NULL;
 //MyRtlDestroyQueryDebugBuffer clsAPIImport::pRtlDestroyQueryDebugBuffer = NULL;
@@ -50,6 +52,8 @@ bool clsAPIImport::LoadFunctions()
 	pNtQuerySystemInformation = (MyNtQuerySystemInformation)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQuerySystemInformation");
 	pNtDuplicateObject = (MyNtDuplicateObject)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtDuplicateObject");
 	pNtQueryObject = (MyNtQueryObject)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryObject");
+	pNtQueryInformationThread = (MyNtQueryInformationThread)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryInformationThread");
+	pNtQueryInformationProcess = (MyNtQueryInformationProcess)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryInformationProcess");
 	//pRtlCreateQueryDebugBuffer = (MyRtlCreateQueryDebugBuffer)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"RtlCreateQueryDebugBuffer");
 	//pRtlQueryProcessDebugInformation = (MyRtlQueryProcessDebugInformation)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"RtlQueryProcessDebugInformation");
 	//pRtlDestroyQueryDebugBuffer = (MyRtlDestroyQueryDebugBuffer)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"RtlDestroyQueryDebugBuffer");
@@ -87,6 +91,16 @@ bool clsAPIImport::LoadFunctions()
 	{
 		bGotAFail = true;
 		wcscat_s(szWarning,MAX_PATH,L"ntdll.dll::NtQueryObject\r\n");
+	}
+	if(!pNtQueryInformationThread)
+	{
+		bGotAFail = true;
+		wcscat_s(szWarning,MAX_PATH,L"ntdll.dll::NtQueryInformationThread\r\n");
+	}
+	if(!pNtQueryInformationProcess)
+	{
+		bGotAFail = true;
+		wcscat_s(szWarning,MAX_PATH,L"ntdll.dll::NtQueryInformationProcess\r\n");
 	}
 
 	if(bGotAFail)

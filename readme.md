@@ -40,6 +40,10 @@
 + fixed some memory leaks
 + added colors to the state bar
 + added missing edi/rdi register
++ added option break on tls callback
++ added possibility to show registers of a thread in detailview
++ added possibility to show TEB/TBI of a thread in detailview
++ added possibility to show PEB/PBI of a process in detailview
 + updated PE-Editor layout
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

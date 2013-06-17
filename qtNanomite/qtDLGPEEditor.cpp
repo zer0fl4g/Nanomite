@@ -291,6 +291,11 @@ void qtDLGPEEditor::InsertSections()
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Sections");
+	topElement->setText(1,"VA");
+	topElement->setText(2,"Virtual Size");
+	topElement->setText(3,"Ptr. Raw Data");
+	topElement->setText(4,"Size of Raw");
+	topElement->setText(5,"Characteristics");
 	treePE->addTopLevelItem(topElement);
 
 	for(int i = 0; i < sections.size(); i++)

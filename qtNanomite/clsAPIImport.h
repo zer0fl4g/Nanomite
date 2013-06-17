@@ -27,6 +27,8 @@ typedef BOOL (_stdcall *MyWow64SetThreadContext) (HANDLE hThread,const WOW64_CON
 typedef NTSTATUS (_stdcall *MyNtQuerySystemInformation) (ULONG SystemInformationClass,PVOID SystemInformation,ULONG SystemInformationLength,PULONG ReturnLength);
 typedef NTSTATUS (_stdcall *MyNtDuplicateObject) (HANDLE SourceProcessHandle,HANDLE SourceHandle,HANDLE TargetProcessHandle,PHANDLE TargetHandle,ACCESS_MASK DesiredAccess,ULONG HandleAttributes,ULONG Options);
 typedef NTSTATUS (_stdcall *MyNtQueryObject)(HANDLE Handle,ULONG ObjectInformationClass,PVOID ObjectInformation,ULONG ObjectInformationLength,PULONG ReturnLength);
+typedef NTSTATUS (_stdcall *MyNtQueryInformationThread)(HANDLE ThreadHandle,ULONG ThreadInformationClass,PVOID ThreadInformation,ULONG ThreadInformationLength,PULONG ReturnLength);
+typedef NTSTATUS (_stdcall *MyNtQueryInformationProcess)(HANDLE ProcessHandle,ULONG ProcessInformationClass,PVOID ProcessInformation,ULONG ProcessInformationLength,PULONG ReturnLength);
 //typedef ULONG (_stdcall *MyRtlCreateQueryDebugBuffer)(ULONG Size,bool EventPair);
 //typedef NTSTATUS (_stdcall *MyRtlQueryProcessDebugInformation)(ULONG ProcessId,ULONG DebugInfoClassMask,ULONG DebugBuffer);
 //typedef NTSTATUS (_stdcall *MyRtlDestroyQueryDebugBuffer)(ULONG DebugBuffer);
@@ -43,6 +45,8 @@ public:
 	static MyNtQuerySystemInformation pNtQuerySystemInformation;
 	static MyNtDuplicateObject pNtDuplicateObject;
 	static MyNtQueryObject pNtQueryObject;
+	static MyNtQueryInformationThread pNtQueryInformationThread;
+	static MyNtQueryInformationProcess pNtQueryInformationProcess;
 	//static MyRtlCreateQueryDebugBuffer pRtlCreateQueryDebugBuffer;
 	//static MyRtlQueryProcessDebugInformation pRtlQueryProcessDebugInformation;
 	//static MyRtlDestroyQueryDebugBuffer pRtlDestroyQueryDebugBuffer;
