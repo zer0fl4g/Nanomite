@@ -222,10 +222,8 @@ bool clsHelperClass::MenuLoadNewFile(clsDebugger *_coreDebugger)
 {
 	QString fileName = QFileDialog::getOpenFileName(NULL,"Please select a Target",QDir::currentPath(),"Executables (*.exe)");
 
-	wstring *pFile = new wstring(fileName.toStdWString());
-
 	if(!fileName.isEmpty())
-		_coreDebugger->SetTarget(*pFile);
+		_coreDebugger->SetTarget(fileName.toStdWString());
 	else
 	{
 		//MessageBox(NULL,L"Error while selecting your file!",L"Nanomite",MB_OK);

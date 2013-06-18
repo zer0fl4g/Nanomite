@@ -233,7 +233,7 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	//}
 
 	// EFlags
-	PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0')));
+	PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,8,16,QChar('0')));
 #endif
 
 	BOOL bCF = false, // Carry Flag

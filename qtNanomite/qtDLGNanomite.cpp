@@ -363,8 +363,7 @@ void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
 { 
 	if(pEvent->mimeData()->hasUrls())
     {
-		wstring* filePath = new wstring(QString(pEvent->mimeData()->data("FileName")).toStdWString());
-		coreDebugger->SetTarget(*filePath);
+		coreDebugger->SetTarget(QString(pEvent->mimeData()->data("FileName")).toStdWString());
 		action_DebugStart();
 		pEvent->acceptProposedAction();
     }
@@ -412,8 +411,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 			i++;
 			if(i == splittedCommandLine.constEnd()) return;
 
-			wstring *pTarget = new wstring(i->toStdWString());
-			coreDebugger->SetTarget(*pTarget);
+			coreDebugger->SetTarget(i->toStdWString());
 
 			for(QStringList::const_iterator commandLineSearch = splittedCommandLine.constBegin(); commandLineSearch != splittedCommandLine.constEnd(); ++commandLineSearch)
 			{
@@ -422,8 +420,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 					commandLineSearch++;
 					if(commandLineSearch == splittedCommandLine.constEnd()) break;
 
-					wstring *pCommand = new wstring(commandLineSearch->toStdWString());
-					coreDebugger->SetCommandLine(*pCommand);
+					coreDebugger->SetCommandLine(commandLineSearch->toStdWString());
 				}
 			}
 

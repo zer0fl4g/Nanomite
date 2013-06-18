@@ -55,9 +55,9 @@ void qtDLGPEBView::ShowPEBForProcess(HANDLE hProc)
 		return;
 	}
 		
-	PPEB pPEB = (PPEB)clsMemManager::CAlloc(sizeof(PEB));
+	PPEB pPEB = (PPEB)clsMemManager::CAlloc(sizeof(_PEB));
 	SIZE_T bytesRead = NULL;
-	if(!ReadProcessMemory(hProc,pPBI.PebBaseAddress,pPEB,sizeof(PEB),&bytesRead))
+	if(!ReadProcessMemory(hProc,pPBI.PebBaseAddress,pPEB,sizeof(_PEB),&bytesRead))
 	{
 		MessageBoxW(NULL,L"ERROR, Read from process memory to get PEB failed!",L"Nanomite",MB_OK);
 		clsMemManager::CFree(pPEB);
@@ -81,12 +81,78 @@ void qtDLGPEBView::ShowPEBForProcess(HANDLE hProc)
 	topElement->setText(0,"PEB");
 	treePEB->addTopLevelItem(topElement);
 
-	//InsertDataIntoTable(topElement, "AffinityMask", pPBI.AffinityMask);
-	//InsertDataIntoTable(topElement, "BasePriority", pPBI.BasePriority);
-	//InsertDataIntoTable(topElement, "ExitStatus", pPBI.ExitStatus);
-	//InsertDataIntoTable(topElement, "InheritedFromUniqueProcessId", pPBI.InheritedFromUniqueProcessId);
-	//InsertDataIntoTable(topElement, "PebBaseAddress", (DWORD64)pPBI.PebBaseAddress);
-	//InsertDataIntoTable(topElement, "UniqueProcessId", pPBI.UniqueProcessId);
+	InsertDataIntoTable(topElement, "ActivationContextData", pPEB->ActivationContextData);
+	InsertDataIntoTable(topElement, "AnsiCodePageData", pPEB->AnsiCodePageData);
+//	InsertDataIntoTable(topElement, "AppCompatFlags", pPEB->AppCompatFlags);
+//	InsertDataIntoTable(topElement, "AppCompatFlagsUser", pPEB->AppCompatFlagsUser);
+	InsertDataIntoTable(topElement, "AppCompatInfo", pPEB->AppCompatInfo);
+	InsertDataIntoTable(topElement, "BeingDebugged", pPEB->BeingDebugged);
+//	InsertDataIntoTable(topElement, "CriticalSectionTimeout", pPEB->CriticalSectionTimeout);
+//	InsertDataIntoTable(topElement, "AffinityMask", pPEB->CSDVersion.Buffer);
+	InsertDataIntoTable(topElement, "EnviromentUpdateCount", pPEB->EnviromentUpdateCount);
+	InsertDataIntoTable(topElement, "FastPebLock", pPEB->FastPebLock);
+	InsertDataIntoTable(topElement, "FastPebLockRoutine", pPEB->FastPebLockRoutine);
+	InsertDataIntoTable(topElement, "FastPebUnlockRoutine", pPEB->FastPebUnlockRoutine);
+	InsertDataIntoTable(topElement, "FlsBitmap", pPEB->FlsBitmap);
+	InsertDataIntoTable(topElement, "FlsBitmapBits", *pPEB->FlsBitmapBits);
+	InsertDataIntoTable(topElement, "FlsCallback", pPEB->FlsCallback);
+	InsertDataIntoTable(topElement, "FlsHighIndex", pPEB->FlsHighIndex);
+	InsertDataIntoTable(topElement, "FlsListHead_Blink", pPEB->FlsListHead_Blink);
+	InsertDataIntoTable(topElement, "FlsListHead_Flink", pPEB->FlsListHead_Flink);
+	InsertDataIntoTable(topElement, "FreeList", pPEB->FreeList);
+	InsertDataIntoTable(topElement, "GdiDCAttributeList", pPEB->GdiDCAttributeList);
+	InsertDataIntoTable(topElement, "GdiHandleBuffer", *pPEB->GdiHandleBuffer);
+	InsertDataIntoTable(topElement, "GdiSharedHandleTable", pPEB->GdiSharedHandleTable);
+	InsertDataIntoTable(topElement, "HeapDeCommitFreeBlockThreshold", pPEB->HeapDeCommitFreeBlockThreshold);
+	InsertDataIntoTable(topElement, "HeapDeCommitTotalFreeThreshold", pPEB->HeapDeCommitTotalFreeThreshold);
+	InsertDataIntoTable(topElement, "HeapSegmentCommit", pPEB->HeapSegmentCommit);
+	InsertDataIntoTable(topElement, "HeapSegmentReserve", pPEB->HeapSegmentReserve);
+	InsertDataIntoTable(topElement, "ImageBaseAddress", pPEB->ImageBaseAddress);
+	InsertDataIntoTable(topElement, "ImageProcessAffinityMask", pPEB->ImageProcessAffinityMask);
+	InsertDataIntoTable(topElement, "ImageSubsystem", pPEB->ImageSubsystem);
+	InsertDataIntoTable(topElement, "ImageSubsystemMajorVersion", pPEB->ImageSubsystemMajorVersion);
+	InsertDataIntoTable(topElement, "ImageSubsystemMinorVersion", pPEB->ImageSubsystemMinorVersion);
+	InsertDataIntoTable(topElement, "InheritedAddressSpace", pPEB->InheritedAddressSpace);
+	InsertDataIntoTable(topElement, "KernelCallbackTable", pPEB->KernelCallbackTable);
+	InsertDataIntoTable(topElement, "LoaderData", pPEB->LoaderData);
+	InsertDataIntoTable(topElement, "LoaderLock", pPEB->LoaderLock);
+	InsertDataIntoTable(topElement, "MaximumNumberOfHeaps", pPEB->MaximumNumberOfHeaps);
+	InsertDataIntoTable(topElement, "MinimumStackCommit", pPEB->MinimumStackCommit);
+	InsertDataIntoTable(topElement, "Mutant", pPEB->Mutant);
+	InsertDataIntoTable(topElement, "NtGlobalFlag", pPEB->NtGlobalFlag);
+	InsertDataIntoTable(topElement, "NumberOfHeaps", pPEB->NumberOfHeaps);
+	InsertDataIntoTable(topElement, "NumberOfProcessors", pPEB->NumberOfProcessors);
+	InsertDataIntoTable(topElement, "OemCodePageData", pPEB->OemCodePageData);
+	InsertDataIntoTable(topElement, "OSBuildNumber", pPEB->OSBuildNumber);
+	InsertDataIntoTable(topElement, "OSCSDVersion", pPEB->OSCSDVersion);
+	InsertDataIntoTable(topElement, "OSMajorVersion", pPEB->OSMajorVersion);
+	InsertDataIntoTable(topElement, "OSMinorVersion", pPEB->OSMinorVersion);
+	InsertDataIntoTable(topElement, "OSPlatformId", pPEB->OSPlatformId);
+	InsertDataIntoTable(topElement, "PostProcessInitRoutine", pPEB->PostProcessInitRoutine);
+	InsertDataIntoTable(topElement, "ProcessAssemblyStorageMap", pPEB->ProcessAssemblyStorageMap);
+	InsertDataIntoTable(topElement, "ProcessHeap", pPEB->ProcessHeap);
+	InsertDataIntoTable(topElement, "ProcessHeaps", pPEB->ProcessHeaps);
+	InsertDataIntoTable(topElement, "ProcessParameters", pPEB->ProcessParameters);
+	InsertDataIntoTable(topElement, "ProcessStarterHelper", pPEB->ProcessStarterHelper);
+	InsertDataIntoTable(topElement, "pShimData", pPEB->pShimData);
+	InsertDataIntoTable(topElement, "ReadImageFileExecOptions", pPEB->ReadImageFileExecOptions);
+	InsertDataIntoTable(topElement, "ReadOnlySharedMemoryBase", pPEB->ReadOnlySharedMemoryBase);
+	InsertDataIntoTable(topElement, "ReadOnlySharedMemoryHeap", pPEB->ReadOnlySharedMemoryHeap);
+	InsertDataIntoTable(topElement, "ReadOnlyStaticServerData", pPEB->ReadOnlyStaticServerData);
+	InsertDataIntoTable(topElement, "Reserved", pPEB->Reserved);
+	InsertDataIntoTable(topElement, "SessionId", pPEB->SessionId);
+	InsertDataIntoTable(topElement, "SpareBool", pPEB->SpareBool);
+	InsertDataIntoTable(topElement, "SubSystemData", pPEB->SubSystemData);
+	InsertDataIntoTable(topElement, "SystemAssemblyStorageMap", pPEB->SystemAssemblyStorageMap);
+	InsertDataIntoTable(topElement, "SystemDefaultActivationContextData", pPEB->SystemDefaultActivationContextData);
+	InsertDataIntoTable(topElement, "ThunksOrOptions", pPEB->ThunksOrOptions);
+	InsertDataIntoTable(topElement, "TlsBitmap", pPEB->TlsBitmap);
+	InsertDataIntoTable(topElement, "TlsBitmapBits", *pPEB->TlsBitmapBits);
+	InsertDataIntoTable(topElement, "TlsExpansionBitmap", pPEB->TlsExpansionBitmap);
+	InsertDataIntoTable(topElement, "TlsExpansionBitmapBits", *pPEB->TlsExpansionBitmapBits);
+	InsertDataIntoTable(topElement, "TlsExpansionCounter", pPEB->TlsExpansionCounter);
+	InsertDataIntoTable(topElement, "UnicodeCaseTableData", pPEB->UnicodeCaseTableData);
+	InsertDataIntoTable(topElement, "UserSharedInfoPtr", pPEB->UserSharedInfoPtr);
 
 	clsMemManager::CFree(pPEB);
 	return;

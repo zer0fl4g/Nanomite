@@ -117,8 +117,7 @@ void qtDLGNanomite::action_DebugStart()
 
 			if(bOk && !strNewCommandLine.isEmpty())
 			{
-				wstring *tempStr = new wstring(strNewCommandLine.toStdWString());
-				coreDebugger->SetCommandLine(*tempStr);
+				coreDebugger->SetCommandLine(strNewCommandLine.toStdWString());
 			}
 		}
 
@@ -140,10 +139,10 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 	{
 		CleanGUI();
 
-		wstring *filePath = new wstring(FilePath.toStdWString());
+		wstring filePath = FilePath.toStdWString();
 
-		PEManager->OpenFile(*filePath);
-		if(!PEManager->isValidPEFile(*filePath))
+		PEManager->OpenFile(filePath);
+		if(!PEManager->isValidPEFile(filePath))
 		{
 			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
 			PEManager->CloseFile(coreDebugger->GetTarget(),0);
@@ -152,7 +151,7 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 
 		qtDLGPatchManager::ClearAllPatches();
 
-		coreDebugger->SetTarget(*filePath);
+		coreDebugger->SetTarget(filePath);
 		coreDebugger->AttachToProcess(iPID);
 		coreDebugger->start();
 

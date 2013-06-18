@@ -285,11 +285,9 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
 	{
-		std::wstring *temp = new std::wstring(tblModules->item(_iSelectedRow,3)->text().toStdWString());
-		emit OpenFileInPEManager(*temp,-1);
-		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,
-			-1,
-			*temp);
+		std::wstring temp = tblModules->item(_iSelectedRow,3)->text().toStdWString();
+		emit OpenFileInPEManager(temp,-1);
+		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
 		dlgPEEditor->show();
 	}
 	else if(QString().compare(pAction->text(),"Suspend") == 0)
