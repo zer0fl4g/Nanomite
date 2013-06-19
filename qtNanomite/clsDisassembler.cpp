@@ -185,7 +185,7 @@ void clsDisassembler::run()
 	else
 	{
 		free(pBuffer);
-		MessageBox(NULL,L"Access Denied! Can´t disassemble this buffer :(",L"Nanomite",MB_OK);
+		MessageBox(NULL,L"Access Denied! Can not disassemble this buffer :(",L"Nanomite",MB_OK);
 		return;
 	}
 

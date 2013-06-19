@@ -124,7 +124,7 @@ void qtDLGHandleView::OnDisplayHandles()
 			
 			if (handle.GrantedAccess == 0x0012019f)
 			{
-				InsertDataIntoTable(dwPID,(DWORD)handle.Handle,objectTypeInfo->Name.Buffer,L"Didn´t get name");
+				InsertDataIntoTable(dwPID,(DWORD)handle.Handle,objectTypeInfo->Name.Buffer,L"Did not get name");
 				free(objectTypeInfo);
 				CloseHandle(dupHandle);
 				continue;
@@ -136,7 +136,7 @@ void qtDLGHandleView::OnDisplayHandles()
 				objectNameInfo = realloc(objectNameInfo, returnLength);
 				if (!NT_SUCCESS(clsAPIImport::pNtQueryObject(dupHandle,ObjectNameInformation,objectNameInfo,returnLength,NULL)))
 				{
-					InsertDataIntoTable(dwPID,(DWORD)handle.Handle,objectTypeInfo->Name.Buffer,L"Couldn´t get name");
+					InsertDataIntoTable(dwPID,(DWORD)handle.Handle,objectTypeInfo->Name.Buffer,L"Could not get name");
 					free(objectTypeInfo);
 					free(objectNameInfo);
 					CloseHandle(dupHandle);

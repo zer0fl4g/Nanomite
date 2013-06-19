@@ -73,6 +73,8 @@ void qtDLGLogView::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Write Log to File") == 0)
 	{
 		QString fileName = QFileDialog::getSaveFileName(NULL,"Please select a place to save the Logfile",QDir::currentPath(),"Log Files (*.log)");
+		if(fileName.length() <= 0) return;
+		
 		QFile tempOutput(fileName);
 		tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
 		QTextStream out(&tempOutput);

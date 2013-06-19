@@ -75,7 +75,7 @@ int main(int argc, char *argv[])
 
     if (!IsUserAdmin())
     {
-        MessageBoxW(NULL,L"You didn´t start the debugger with admin rights!\r\nThis could cause problems with some features!",L"Nanomite",MB_OK);
+        MessageBoxW(NULL,L"You did not start the debugger with admin rights!\r\nThis could cause problems with some features!",L"Nanomite",MB_OK);
     }
 
 	if(!EnableDebugFlag())

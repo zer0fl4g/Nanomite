@@ -33,6 +33,9 @@ public:
 
 	void LoadRegView(clsDebugger *coreDebugger);
 
+public slots:
+	void LoadRegView();
+
 signals:
 	void OnDisplayDisassembly(quint64 dwEIP);
 

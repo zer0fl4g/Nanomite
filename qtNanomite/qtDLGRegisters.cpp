@@ -121,8 +121,13 @@ void qtDLGRegisters::OnChangeRequest(QTableWidgetItem *pItem)
 	newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pMainWindow->coreDebugger->ProcessContext,false);			
 #endif	
 
-	connect(newRegEditWindow,SIGNAL(OnUpdateRegView()),pMainWindow,SLOT(LoadRegView()));
+	connect(newRegEditWindow,SIGNAL(OnUpdateRegView()),this,SLOT(LoadRegView()));
 	newRegEditWindow->exec();
+}
+
+void qtDLGRegisters::LoadRegView()
+{
+	LoadRegView(qtDLGNanomite::GetInstance()->coreDebugger);
 }
 
 void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)

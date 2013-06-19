@@ -21,6 +21,8 @@
 
 #include "qtDLGNanomite.h"
 
+#include <string>
+
 class qtDLGOption : public QDialog, public Ui_qtDLGOptionClass
 {
 	Q_OBJECT
@@ -34,8 +36,13 @@ public:
 		void OnClose();
 		void OnReload();
 		void OnSave();
+		void OnSetNanomiteDefault();
+		void OnRestoreOrg();
+
 
 private:
+	std::wstring m_originalJIT;
+
 	void OnLoad();
 
 	int getIndex(QString itemColor);

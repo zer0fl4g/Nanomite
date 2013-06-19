@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-* 	This file is part of Nanomite.
-*
-*    Nanomite is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    Nanomite is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
-*/
--->
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>qtDLGOptionClass</class>
  <widget class="QDialog" name="qtDLGOptionClass">
@@ -1069,6 +1052,83 @@
      <property name="text">
       <string>Math</string>
      </property>
+    </widget>
+   </widget>
+   <widget class="QWidget" name="tab">
+    <attribute name="title">
+     <string>JIT - Debugger</string>
+    </attribute>
+    <widget class="QPushButton" name="pbRestoreOrg">
+     <property name="geometry">
+      <rect>
+       <x>160</x>
+       <y>110</y>
+       <width>181</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Restore Original</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="pbSetNanomite">
+     <property name="geometry">
+      <rect>
+       <x>6</x>
+       <y>110</y>
+       <width>151</width>
+       <height>23</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Set Nanomite</string>
+     </property>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_4">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>10</y>
+       <width>331</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Current - Just in Time Debugger:</string>
+     </property>
+     <widget class="QLineEdit" name="lineCurrent">
+      <property name="geometry">
+       <rect>
+        <x>5</x>
+        <y>15</y>
+        <width>321</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+    </widget>
+    <widget class="QGroupBox" name="groupBox_5">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>60</y>
+       <width>331</width>
+       <height>41</height>
+      </rect>
+     </property>
+     <property name="title">
+      <string>Original - Just in Time Debugger:</string>
+     </property>
+     <widget class="QLineEdit" name="lineOrg">
+      <property name="geometry">
+       <rect>
+        <x>6</x>
+        <y>16</y>
+        <width>320</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
     </widget>
    </widget>
   </widget>

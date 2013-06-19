@@ -44,6 +44,7 @@
 + added possibility to show registers of a thread in detailview
 + added possibility to show TEB/TBI of a thread in detailview
 + added possibility to show PEB/PBI of a process in detailview
++ added possibility to set Nanomite as default JIT
 + updated PE-Editor layout
 
 ####Notes:

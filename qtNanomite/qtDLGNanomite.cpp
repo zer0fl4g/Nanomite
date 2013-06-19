@@ -70,7 +70,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	qtDLGMyWindow = this;
 	lExceptionCount = 0;
-	clsHelperClass::ReadFromSettingsFile(coreDebugger,qtNanomiteDisAsColor);
+
+	wstring originalJIT;
+	clsHelperClass::ReadFromSettingsFile(coreDebugger,qtNanomiteDisAsColor,originalJIT);
 
 	DisAsGUI = new qtDLGDisassembler(this);
 	this->setCentralWidget(DisAsGUI);
@@ -97,6 +99,11 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgPatchManager,SLOT(UpdateOffsetPatch(HANDLE,int)),Qt::QueuedConnection);
+
+	// Callbacks from Debugger to PEManager
+	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
 
 	// Callbacks from DetailInfo to PEManager
 	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
@@ -135,11 +142,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// Actions on Window Events
 	connect(callstackView,SIGNAL(DisplaySource(QString,int)),DisAsGUI->dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));
 
-	// Callbacks from Debugger to PEManager
-	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
-
 	// Callbacks to display disassembly
 	connect(dlgTraceWindow,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 	connect(cpuRegView,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
@@ -149,6 +151,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	
 	// Callbacks from PatchManager to GUI
 	connect(dlgPatchManager,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
+
+	// Callbacks from Disassembler GUI to GUI
+	connect(DisAsGUI,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()));
 
 	actionDebug_Trace_Stop->setDisabled(true);
 

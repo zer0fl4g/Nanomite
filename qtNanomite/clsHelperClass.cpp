@@ -40,7 +40,7 @@ clsHelperClass::~clsHelperClass()
 {
 }
 
-bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor)
+bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor, wstring originalJIT)
 {
 	wofstream outfile;
 	outfile.open("NanomiteConfig.ini");
@@ -126,12 +126,15 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	wsprintf(cTemp,L"%s=%s\n",L"COLOR_MATH",qtNanomiteDisAsColor->colorMath.data());
 	outfile.write(cTemp,wcslen(cTemp));
 
+	wsprintf(cTemp,L"%s=%s\n",L"defaultJIT",originalJIT.c_str());
+	outfile.write(cTemp,wcslen(cTemp));
+
 	outfile.close();
 	clsMemManager::CFree(cTemp);
 	return true;
 }
 
-bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor)
+bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor, wstring& originalJIT)
 {
 	wstring sLine;
 	wifstream infile;
@@ -213,6 +216,8 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 			qtNanomiteDisAsColor->colorStack = QString::fromStdWString(sSettingLine[1]);
 		else if(sSettingLine[0] == L"COLOR_MATH")
 			qtNanomiteDisAsColor->colorMath = QString::fromStdWString(sSettingLine[1]);
+		else if(sSettingLine[0] == L"defaultJIT")
+			originalJIT = sSettingLine[1];
 	}
 	infile.close();
 	return true;

@@ -38,6 +38,8 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	connect(btnClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(btnReload,SIGNAL(clicked()),this,SLOT(OnReload()));
 	connect(btnSave,SIGNAL(clicked()),this,SLOT(OnSave()));
+	connect(pbSetNanomite,SIGNAL(clicked()),this,SLOT(OnSetNanomiteDefault()));
+	connect(pbRestoreOrg,SIGNAL(clicked()),this,SLOT(OnRestoreOrg()));
 }
 
 qtDLGOption::~qtDLGOption()
@@ -101,13 +103,20 @@ void qtDLGOption::OnReload()
 	comboStack->setCurrentIndex(4);
 	comboMath->setCurrentIndex(9);
 
-	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
+	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
 
 	OnLoad();
 }
 
 void qtDLGOption::OnSave()
 {
+	QSettings newJIT("HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug",QSettings::NativeFormat);
+	newJIT.setValue("Debugger",lineCurrent->text());
+	newJIT.setValue("Auto","0");
+	newJIT.sync();
+	if(newJIT.status() != QSettings::NoError)
+		MessageBoxW(NULL,L"ERROR, could not write the default jit!\r\nDo you have Admin rights?",L"Nanomite",MB_OK);
+	
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
 
 	if(rbSystemEP->isChecked())
@@ -192,15 +201,15 @@ void qtDLGOption::OnSave()
 	myMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
 	myMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
 
-	if(clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor))
+	if(clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT))
 		MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
 }
 
 void qtDLGOption::OnLoad()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor);
-
+	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
+	
 	switch(myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode)
 	{
 	case 0:
@@ -273,6 +282,22 @@ void qtDLGOption::OnLoad()
 
 	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorMath)) != -1)
 		comboMath->setCurrentIndex(itemIndex);
+
+	// Read JIT Settings
+	QSettings JIT("HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug",QSettings::NativeFormat);
+	QString JITString = JIT.value("Debugger",0).toString();
+	if(!JITString.contains("Nanomite.exe"))
+	{
+		lineOrg->setText(JITString);
+		lineCurrent->setText(JITString);
+		m_originalJIT = JITString.toStdWString();
+		// save org jit to settings
+	}
+	else
+	{
+		lineOrg->setText(QString::fromStdWString(m_originalJIT));
+		lineCurrent->setText(JITString);
+	}
 }
 
 int qtDLGOption::getIndex(QString itemColor)
@@ -310,4 +335,14 @@ int qtDLGOption::getIndex(QString itemColor)
 	else if(itemColor.compare("Light gray") == 0)
 		return 15;
 	return 0;
+}
+
+void qtDLGOption::OnSetNanomiteDefault()
+{
+	lineCurrent->setText(QString("\"%1\" %2").arg(QCoreApplication::applicationFilePath()).arg("-p %ld"));
+}
+
+void qtDLGOption::OnRestoreOrg()
+{
+	lineCurrent->setText(lineOrg->text());
 }
