@@ -71,6 +71,8 @@ bool EnableDebugFlag()
 
 int main(int argc, char *argv[])
 {
+	clsMemManager clsMManage = clsMemManager();
+	
 	AddVectoredExceptionHandler(1,clsCrashHandler::ErrorReporter);
 
     if (!IsUserAdmin())
@@ -83,7 +85,6 @@ int main(int argc, char *argv[])
 		MessageBoxW(NULL,L"ERROR, Unable to enable Debug Privilege!\r\nThis could cause problems with some features",L"Nanomite",MB_OK);
 	}
 
-	clsMemManager clsMManage = clsMemManager();
 	QApplication a(argc, argv);
 	qtDLGNanomite w;
 	w.show();

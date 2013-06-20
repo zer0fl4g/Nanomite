@@ -85,7 +85,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),
 		dlgDetInfo,SLOT(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDbgString(std::wstring,DWORD)),
-		dlgDetInfo,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
+		dlgDbgStr,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDll(std::wstring,DWORD,quint64,bool)),
 		dlgDetInfo,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),

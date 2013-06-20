@@ -435,6 +435,20 @@ int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspend
 				tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
 			}
 	}
+	
+
+	QString logMessage;
+
+	if(bFound)
+		logMessage = QString("[-] Exit Thread(%1) in Process(%2) with Exitcode: %3").arg(dwTID,8,16,QChar('0'))
+		.arg(dwPID,8,16,QChar('0'))
+		.arg(dwExitCode,8,16,QChar('0'));
+	else
+		logMessage = QString("[+] New Thread(%1) in Process(%2) with Entrypoint: %3").arg(dwTID,8,16,QChar('0'))
+		.arg(dwPID,8,16,QChar('0'))
+		.arg(dwEP,16,16,QChar('0'));
+
+	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
 
 	return 0;
 }
@@ -463,6 +477,18 @@ int qtDLGDetailInfo::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dw
 			if(QString().compare(tblPIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0)
 				tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
 	}
+
+	QString logMessage;
+
+	if(bFound)
+		logMessage = QString("[-] Exit Process(%1) with Exitcode: %2").arg(dwPID,8,16,QChar('0'))
+		.arg(dwExitCode,8,16,QChar('0'));
+	else
+		logMessage = QString("[+] New Process(%1) Entrypoint: %2").arg(dwPID,16,16,QChar('0'))
+		.arg(dwEP,16,16,QChar('0'));
+
+	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
+
 	return 0;
 }
 
@@ -488,22 +514,25 @@ int qtDLGDetailInfo::OnException(wstring sFuncName,wstring sModName,quint64 dwOf
 
 	tblExceptions->scrollToBottom();
 
-	return 0;
-}
 
-int qtDLGDetailInfo::OnDbgString(wstring sMessage,DWORD dwPID)
-{
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
+	QString logMessage;
 
-	myMainWindow->dlgDbgStr->tblDebugStrings->insertRow(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount());
-		
-	myMainWindow->dlgDbgStr->tblDebugStrings->setItem(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
-		
-	myMainWindow->dlgDbgStr->tblDebugStrings->setItem(myMainWindow->dlgDbgStr->tblDebugStrings->rowCount() - 1,1,
-		new QTableWidgetItem(QString::fromStdWString(sMessage)));
+	if(sFuncName.length() > 0 && sModName.length() > 0)
+		logMessage = QString("[!] %1@%2 ExceptionCode: %3 ExceptionOffset: %4 PID: %5 TID: %6")
+		.arg(QString::fromStdWString(sFuncName))
+		.arg(QString::fromStdWString(sModName))
+		.arg(dwExceptionCode,16,16,QChar('0'))
+		.arg(dwOffset,16,16,QChar('0'))
+		.arg(dwPID,8,16,QChar('0'))
+		.arg(dwTID,8,16,QChar('0'));
+	else
+		logMessage = QString("[!] ExceptionCode: %1 ExceptionOffset: %2 PID: %3 TID: %4")
+		.arg(dwExceptionCode,16,16,QChar('0'))
+		.arg(dwOffset,16,16,QChar('0'))
+		.arg(dwPID,8,16,QChar('0'))
+		.arg(dwTID,8,16,QChar('0'));
 
-	myMainWindow->dlgDbgStr->tblDebugStrings->scrollToBottom();
+	myMainWindow->logView->OnLog(logMessage.toStdWString());
 
 	return 0;
 }
@@ -535,6 +564,21 @@ int qtDLGDetailInfo::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 				QString().compare(tblModules->item(i,1)->text(),QString("%1").arg(dwEP,16,16,QChar('0'))) == 0)
 				tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
 	}
+
+	QString logMessage;
+
+	if(bLoaded)
+		logMessage = QString("[+] PID(%1) - Loaded DLL: %2 Entrypoint: %3")
+		.arg(dwPID,8,16,QChar('0'))
+		.arg(QString::fromStdWString(sDLLPath))
+		.arg(dwEP,16,16,QChar('0'));
+	else
+		logMessage = QString("[+] PID(%1) - Unloaded DLL: %2")
+		.arg(dwPID,8,16,QChar('0'))
+		.arg(QString::fromStdWString(sDLLPath));
+
+	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
+
 	return 0;
 }
 

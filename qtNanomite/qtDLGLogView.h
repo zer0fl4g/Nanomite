@@ -31,14 +31,13 @@ public:
 	qtDLGLogView(QWidget *parent = 0);
 	~qtDLGLogView();
 
+public slots:
+	void OnContextMenu(QPoint);
+	void MenuCallback(QAction* pAction);
+	int OnLog(std::wstring sLog);
+
 private:
 	int _iSelectedRow;
-
-	public slots:
-		void OnContextMenu(QPoint);
-		void MenuCallback(QAction* pAction);
-		int OnLog(std::wstring sLog);
-
 };
 
 #endif // QTDLGLOGVIEW_H

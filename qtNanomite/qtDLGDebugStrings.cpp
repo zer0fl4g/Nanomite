@@ -21,6 +21,8 @@
 #include <QClipboard>
 #include <QMenu>
 
+using namespace std;
+
 qtDLGDebugStrings::qtDLGDebugStrings(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
@@ -70,4 +72,19 @@ void qtDLGDebugStrings::MenuCallback(QAction* pAction)
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblDebugStrings->item(_iSelectedRow,1)->text());
 	}
+}
+
+int qtDLGDebugStrings::OnDbgString(wstring sMessage,DWORD dwPID)
+{
+	tblDebugStrings->insertRow(tblDebugStrings->rowCount());
+
+	tblDebugStrings->setItem(tblDebugStrings->rowCount() - 1,0,
+		new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+
+	tblDebugStrings->setItem(tblDebugStrings->rowCount() - 1,1,
+		new QTableWidgetItem(QString::fromStdWString(sMessage)));
+
+	tblDebugStrings->scrollToBottom();
+
+	return 0;
 }

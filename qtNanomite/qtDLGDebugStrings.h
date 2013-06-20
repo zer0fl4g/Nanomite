@@ -19,6 +19,9 @@
 
 #include "Ui_qtDLGDebugStrings.h"
 
+#include <string>
+#include <Windows.h>
+
 class qtDLGDebugStrings : public QWidget, public Ui_qtDLGDebugStringsClass
 {
 	Q_OBJECT
@@ -26,6 +29,9 @@ class qtDLGDebugStrings : public QWidget, public Ui_qtDLGDebugStringsClass
 public:
 	qtDLGDebugStrings(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGDebugStrings();
+
+	public slots:
+		int OnDbgString(std::wstring sMessage,DWORD dwPID);
 
 private:
 	int _iSelectedRow;
