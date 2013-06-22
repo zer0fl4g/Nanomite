@@ -403,7 +403,7 @@ void clsDebugger::DebuggingLoop()
 			{
 				if(DLLs[i].dwBaseAdr == (quint64)debug_event.u.UnloadDll.lpBaseOfDll && DLLs[i].dwPID == debug_event.dwProcessId)
 				{
-					PBDLLInfo(DLLs[i].sPath,DLLs[i].dwPID,DLLs[i].dwBaseAdr,false);
+					PBDLLInfo(DLLs[i].sPath,DLLs[i].dwPID,DLLs[i].dwBaseAdr,false, i);
 					SymUnloadModule64(GetCurrentProcessHandle(DLLs[i].dwPID),DLLs[i].dwBaseAdr);
 					break;
 				}

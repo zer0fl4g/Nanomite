@@ -106,20 +106,16 @@ bool clsDebugger::PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionC
 	return true;
 }
 
-bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded)
+bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, int foundDLL)
 {
 	if(sDLLPath == NULL) return false;
-	bool bFound = false;
-	for(size_t i = 0;i < DLLs.size(); i++)
-	{
-		if(wcscmp(DLLs[i].sPath,sDLLPath) == NULL && DLLs[i].dwPID == dwPID)
-		{
-			DLLs[i].bLoaded = bLoaded;
-			bFound = true;
-		}
-	}
 
-	if(!bFound)
+	if(!bLoaded && foundDLL != -1)
+	{
+		DLLs[foundDLL].bLoaded = false;
+		emit OnDll(DLLs[foundDLL].sPath,DLLs[foundDLL].dwPID,DLLs[foundDLL].dwBaseAdr,DLLs[foundDLL].bLoaded);
+	}
+	else
 	{
 		DLLStruct newDLL;
 		newDLL.bLoaded = bLoaded;
@@ -128,9 +124,8 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 		newDLL.dwPID = dwPID;
 
 		DLLs.push_back(newDLL);
-	}
-
-	emit OnDll(sDLLPath,dwPID,dwEP,bLoaded);
+		emit OnDll(newDLL.sPath,newDLL.dwPID,newDLL.dwBaseAdr,newDLL.bLoaded);
+	}	
 
 	return true;
 }
