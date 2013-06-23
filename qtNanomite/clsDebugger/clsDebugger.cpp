@@ -317,7 +317,7 @@ void clsDebugger::DebuggingLoop()
 
 				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
 				
-				if(dbgSettings.dwBreakOnEPMode == 0x2)
+				if(dbgSettings.bBreakOnTLS)
 				{
 					DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
 					if(tlsCallback > 0)
@@ -448,7 +448,7 @@ void clsDebugger::DebuggingLoop()
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
 					if(PIDs[iPid].bKernelBP && !PIDs[iPid].bWOW64KernelBP)
 					{
-						if(dbgSettings.dwBreakOnEPMode == 1)
+						if(dbgSettings.bBreakOnModuleEP)
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
 						else
 							dwContinueStatus = CallBreakDebugger(&debug_event,3);
@@ -463,7 +463,7 @@ void clsDebugger::DebuggingLoop()
 
 						if(!PIDs[iPid].bKernelBP)
 						{
-							if(dbgSettings.dwBreakOnEPMode == 1)
+							if(dbgSettings.bBreakOnSystemEP)
 								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							else
 								dwContinueStatus = CallBreakDebugger(&debug_event,3);
@@ -508,7 +508,7 @@ void clsDebugger::DebuggingLoop()
 								PIDs[iPid].bTrapFlag = true;
 								PIDs[iPid].dwBPRestoreFlag = 0x2;
 
-								if(bIsEP && dbgSettings.dwBreakOnEPMode == 3)
+								if(bIsEP && !dbgSettings.bBreakOnModuleEP)
 									dwContinueStatus = CallBreakDebugger(&debug_event,2);
 								else
 								{

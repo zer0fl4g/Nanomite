@@ -36,11 +36,13 @@
 struct clsDebuggerSettings
 {
 	DWORD dwSuspendType;
-	DWORD dwBreakOnEPMode;
 	DWORD dwDefaultExceptionMode;
 	bool bBreakOnNewDLL;
 	bool bBreakOnNewPID;
 	bool bBreakOnNewTID;
+	bool bBreakOnModuleEP;
+	bool bBreakOnSystemEP;
+	bool bBreakOnTLS;
 	bool bDebugChilds;
 	bool bAutoLoadSymbols;
 };

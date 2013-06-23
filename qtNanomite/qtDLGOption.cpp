@@ -65,11 +65,16 @@ void qtDLGOption::OnReload()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
 
-	myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode = 0;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = true;
 	myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = true;
 	myMainWindow->coreDebugger->dbgSettings.bDebugChilds = true;
 	myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 0;
 	myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = false;
 
 	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,1,NULL);
@@ -77,7 +82,9 @@ void qtDLGOption::OnReload()
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,1,NULL);
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,1,NULL);
 
-	rbModuleEP->setChecked(true);
+	cbModuleEP->setChecked(false);
+	cbSystemEP->setChecked(false);
+	cbTLS->setChecked(false);
 	cbLoadSym->setChecked(true);
 	cbDebugChild->setChecked(true);
 	cbSuspendThread->setChecked(false);
@@ -119,14 +126,20 @@ void qtDLGOption::OnSave()
 	
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
 
-	if(rbSystemEP->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode = 1;
-	else if(rbModuleEP->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode = 0;
-	else if(rbTlsCallback->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode = 2;
-	else if(rbDirect->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode = 3;
+	if(cbModuleEP->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = false;
+
+	if(cbSystemEP->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = false;
+
+	if(cbTLS->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = false;
 
 	if(cbLoadSym->isChecked())
 		myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = true;
@@ -210,22 +223,6 @@ void qtDLGOption::OnLoad()
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
 	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
 	
-	switch(myMainWindow->coreDebugger->dbgSettings.dwBreakOnEPMode)
-	{
-	case 0:
-		rbModuleEP->setChecked(true);
-		break;
-	case 1:
-		rbSystemEP->setChecked(true);
-		break;
-	case 2:
-		rbTlsCallback->setChecked(true);
-		break;
-	case 3:
-		rbDirect->setChecked(true);
-		break;
-	}
-
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds)
@@ -240,6 +237,12 @@ void qtDLGOption::OnLoad()
 		cbBreakOnNewTID->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID)
 		cbBreakOnNewPID->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP)
+		cbModuleEP->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP)
+		cbSystemEP->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS)
+		cbTLS->setChecked(true);
 
 	for(size_t i = 0;i < myMainWindow->coreDebugger->ExceptionHandler.size();i++)
 	{

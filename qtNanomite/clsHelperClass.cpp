@@ -60,6 +60,14 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"BreakOnNewPID",_coreDebugger->dbgSettings.bBreakOnNewPID ? L"true" : L"false");
 	outfile.write(cTemp,wcslen(cTemp));
+
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnModuleEP",_coreDebugger->dbgSettings.bBreakOnModuleEP ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnSystemEP",_coreDebugger->dbgSettings.bBreakOnSystemEP ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnTLS",_coreDebugger->dbgSettings.bBreakOnTLS ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+
 	wsprintf(cTemp,L"%s=%d\n",L"SUSPENDTYPE",_coreDebugger->dbgSettings.dwSuspendType);
 	outfile.write(cTemp,wcslen(cTemp));
 
@@ -103,9 +111,6 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	}
 
 	wsprintf(cTemp,L"%s=%d\n",L"DefaultExceptionMode",_coreDebugger->dbgSettings.dwDefaultExceptionMode);
-	outfile.write(cTemp,wcslen(cTemp));
-
-	wsprintf(cTemp,L"%s=%d\n",L"BreakOnEPMode",_coreDebugger->dbgSettings.dwBreakOnEPMode);
 	outfile.write(cTemp,wcslen(cTemp));
 
 	wsprintf(cTemp,L"%s=%s\n",L"COLOR_BP",qtNanomiteDisAsColor->colorBP.data());
@@ -185,6 +190,27 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 			else
 				_coreDebugger->dbgSettings.bBreakOnNewPID = false;
 		}
+		else if(sSettingLine[0] == L"BreakOnModuleEP")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnModuleEP = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnModuleEP = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnSystemEP")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnSystemEP = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnSystemEP = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnTLS")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnTLS = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnTLS = false;
+		}
 		else if(sSettingLine[0] == L"EXCEPTION_ACCESS_VIOLATION")
 			_coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"EXCEPTION_PRIV_INSTRUCTION")
@@ -193,8 +219,6 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 			_coreDebugger->CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"EXCEPTION_INT_DIVIDE_BY_ZERO")
 			_coreDebugger->CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,_wtoi(sSettingLine[1].c_str()),NULL);
-		else if(sSettingLine[0] == L"BreakOnEPMode")
-			_coreDebugger->dbgSettings.dwBreakOnEPMode = _wtoi(sSettingLine[1].c_str());
 		else if(sSettingLine[0] == L"DefaultExceptionMode")
 			_coreDebugger->dbgSettings.dwDefaultExceptionMode = _wtoi(sSettingLine[1].c_str());
 		else if(sSettingLine[0] == L"SUSPENDTYPE")

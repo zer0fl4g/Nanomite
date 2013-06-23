@@ -184,13 +184,13 @@
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox">
+    <widget class="QGroupBox" name="groupBox_3">
      <property name="geometry">
       <rect>
        <x>10</x>
        <y>0</y>
-       <width>161</width>
-       <height>111</height>
+       <width>191</width>
+       <height>131</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -200,14 +200,14 @@
       </sizepolicy>
      </property>
      <property name="title">
-      <string>Entry - BreakOn</string>
+      <string>Break on</string>
      </property>
-     <widget class="QRadioButton" name="rbSystemEP">
+     <widget class="QCheckBox" name="cbBreakOnNewPID">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>20</y>
-        <width>141</width>
+        <y>90</y>
+        <width>131</width>
         <height>17</height>
        </rect>
       </property>
@@ -218,15 +218,72 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>System EP</string>
+       <string>create Process</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="rbModuleEP">
+     <widget class="QCheckBox" name="cbBreakOnNewTID">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>40</y>
-        <width>140</width>
+        <y>110</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>create Thread</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnNewDLL">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>load DLL</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbSystemEP">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>12</y>
+        <width>91</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Kernel EP</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbModuleEP">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>32</y>
+        <width>131</width>
         <height>17</height>
        </rect>
       </property>
@@ -240,12 +297,12 @@
        <string>Module EP</string>
       </property>
      </widget>
-     <widget class="QRadioButton" name="rbTlsCallback">
+     <widget class="QCheckBox" name="cbTLS">
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>60</y>
-        <width>140</width>
+        <y>50</y>
+        <width>121</width>
         <height>17</height>
        </rect>
       </property>
@@ -256,52 +313,27 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>TLS - Callback</string>
-      </property>
-     </widget>
-     <widget class="QRadioButton" name="rbDirect">
-      <property name="geometry">
-       <rect>
-        <x>10</x>
-        <y>80</y>
-        <width>131</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Direct Run</string>
+       <string>TLS Callback</string>
       </property>
      </widget>
     </widget>
-    <widget class="QGroupBox" name="groupBox_3">
+    <widget class="QGroupBox" name="groupBox">
      <property name="geometry">
       <rect>
-       <x>180</x>
-       <y>7</y>
-       <width>151</width>
+       <x>204</x>
+       <y>0</y>
+       <width>140</width>
        <height>131</height>
       </rect>
      </property>
-     <property name="sizePolicy">
-      <sizepolicy hsizetype="Fixed" vsizetype="Preferred">
-       <horstretch>0</horstretch>
-       <verstretch>0</verstretch>
-      </sizepolicy>
-     </property>
      <property name="title">
-      <string/>
+      <string>Settings</string>
      </property>
      <widget class="QCheckBox" name="cbLoadSym">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>10</y>
+        <x>10</x>
+        <y>46</y>
         <width>91</width>
         <height>17</height>
        </rect>
@@ -319,8 +351,8 @@
      <widget class="QCheckBox" name="cbDebugChild">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>30</y>
+        <x>10</x>
+        <y>12</y>
         <width>131</width>
         <height>17</height>
        </rect>
@@ -338,8 +370,8 @@
      <widget class="QCheckBox" name="cbSuspendThread">
       <property name="geometry">
        <rect>
-        <x>20</x>
-        <y>50</y>
+        <x>10</x>
+        <y>29</y>
         <width>121</width>
         <height>17</height>
        </rect>
@@ -351,64 +383,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Use SuspendThread</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbBreakOnNewPID">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>90</y>
-        <width>131</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Break on new PID</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbBreakOnNewTID">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>110</y>
-        <width>121</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Break on new TID</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbBreakOnNewDLL">
-      <property name="geometry">
-       <rect>
-        <x>20</x>
-        <y>70</y>
-        <width>121</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Break on new DLL</string>
+       <string>use SuspendThread</string>
       </property>
      </widget>
     </widget>
