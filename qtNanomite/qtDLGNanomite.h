@@ -111,6 +111,7 @@ private slots:
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();
 
+	void AskForException(DWORD exceptionCode);
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
 	void GenerateMenuCallback(QAction *qAction);

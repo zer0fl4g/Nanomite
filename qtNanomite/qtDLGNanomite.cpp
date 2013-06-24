@@ -20,6 +20,7 @@
 #include "qtDLGRegEdit.h"
 #include "qtDLGAssembler.h"
 #include "qtDLGDisassembler.h"
+#include "qtDLGExceptionAsk.h"
 
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
@@ -92,7 +93,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 		logView,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),
 		callstackView,SLOT(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),Qt::QueuedConnection);
-
+	connect(coreDebugger,SIGNAL(AskForException(DWORD)),this,SLOT(AskForException(DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
@@ -434,4 +435,12 @@ void qtDLGNanomite::ParseCommandLineArgs()
 		}
 	}
 	return;
+}
+
+void qtDLGNanomite::AskForException(DWORD exceptionCode)
+{
+	qtDLGExceptionAsk *newException = new qtDLGExceptionAsk(exceptionCode, this, Qt::Window);
+	connect(newException,SIGNAL(ContinueException(int)),coreDebugger,SLOT(HandleForException(int)),Qt::QueuedConnection);
+
+	newException->exec();
 }

@@ -14,44 +14,31 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef QTDLGOPTION_H
-#define QTDLGOPTION_H
+#ifndef QTDLGEXCEPTIONASK_H
+#define QTDLGEXCEPTIONASK_H
 
-#include "ui_qtDLGOption.h"
+#include "ui_qtDLGExceptionAsk.h"
 
-#include "qtDLGNanomite.h"
+#include <Windows.h>
 
-#include <string>
-
-class qtDLGOption : public QDialog, public Ui_qtDLGOptionClass
+class qtDLGExceptionAsk : public QDialog, Ui_qtDLGExceptionAskClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGOption(QWidget *parent = 0, Qt::WFlags flags = 0);
-	~qtDLGOption();
+	qtDLGExceptionAsk(DWORD exceptionCode, QWidget *parent = 0, Qt::WFlags flags = 0);
+	~qtDLGExceptionAsk();
 
-	private slots:
-		void OnRightClickCustomException(const QPoint &);
-		void OnClose();
-		void OnReload();
-		void OnSave();
-		void OnSetNanomiteDefault();
-		void OnRestoreOrg();
-		void OnExceptionRemove();
+signals:
+	void ContinueException(int handleException);
 
-
-private:
-	std::wstring m_originalJIT;
-
-	bool m_NoRead;
-
-	void OnLoad();
-
-	int getIndex(QString itemColor);
+private slots:
+	void ExceptionIgnore();
+	void ExceptionSendToApp();
+	void ExceptionBreak();
 
 protected:
-	void showEvent(QShowEvent *event);
+	void closeEvent(QCloseEvent *event);
 };
 
 #endif

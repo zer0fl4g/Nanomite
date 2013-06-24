@@ -47,9 +47,11 @@ clsDebugger::clsDebugger()
 	_isDebugging = false;
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
+	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
+	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
+	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 }
 
 clsDebugger::clsDebugger(wstring sTarget)
@@ -59,9 +61,11 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_isDebugging = false;
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {0,0,0,false,false,false,false,false};
+	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
+	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
+	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 }
 
 clsDebugger::~clsDebugger()
@@ -82,6 +86,9 @@ clsDebugger::~clsDebugger()
 	HardwareBPs.clear();
 
 	clsMemManager::CFree(tcLogString);
+
+	CloseHandle(m_waitForGUI);
+	CloseHandle(_hDbgEvent);
 }
 
 void clsDebugger::CleanWorkSpace()
@@ -229,8 +236,6 @@ void clsDebugger::AttachedDebugging(LPVOID pDebProc)
 {
 	if(CheckProcessState(_dwPidToAttach) && DebugActiveProcess(_dwPidToAttach))
 	{
-		_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
-
 		memset(tcLogString,0x00,LOGBUFFER);
 		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] Attached to Process");
 		PBLogInfo();
@@ -251,7 +256,6 @@ void clsDebugger::NormalDebugging(LPVOID pDebProc)
 	ZeroMemory(&_pi, sizeof(_pi));
 
 	DWORD dwCreationFlag = 0x2;
-	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
 	if(dbgSettings.bDebugChilds == true)
 		dwCreationFlag = 0x1;
@@ -345,6 +349,10 @@ void clsDebugger::DebuggingLoop()
 
 		case EXIT_THREAD_DEBUG_EVENT:
 			PBThreadInfo(debug_event.dwProcessId,debug_event.dwThreadId,NULL,false,debug_event.u.ExitThread.dwExitCode,false);
+
+			if(dbgSettings.bBreakOnExTID)
+				dwContinueStatus = CallBreakDebugger(&debug_event,0);
+
 			break;
 
 		case EXIT_PROCESS_DEBUG_EVENT:
@@ -367,6 +375,9 @@ void clsDebugger::DebuggingLoop()
 
 				if(!bStillOneRunning)
 					bContinueDebugging = false;
+
+				if(dbgSettings.bBreakOnExPID)
+					dwContinueStatus = CallBreakDebugger(&debug_event,0);
 			}
 			break;
 
@@ -408,6 +419,10 @@ void clsDebugger::DebuggingLoop()
 					break;
 				}
 			}
+
+			if(dbgSettings.bBreakOnExDLL)
+				dwContinueStatus = CallBreakDebugger(&debug_event,0);
+
 			break;
 
 		case OUTPUT_DEBUG_STRING_EVENT:
@@ -448,7 +463,7 @@ void clsDebugger::DebuggingLoop()
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
 					if(PIDs[iPid].bKernelBP && !PIDs[iPid].bWOW64KernelBP)
 					{
-						if(dbgSettings.bBreakOnModuleEP)
+						if(dbgSettings.bBreakOnSystemEP)
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
 						else
 							dwContinueStatus = CallBreakDebugger(&debug_event,3);
@@ -705,7 +720,23 @@ void clsDebugger::DebuggingLoop()
 					}
 				}
 				if(!bExceptionHandler && !bIsBP && !bIsEP && !bIsKernelBP)
-					dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwDefaultExceptionMode);
+				{
+					if(dbgSettings.dwDefaultExceptionMode == 1)
+						dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwDefaultExceptionMode);
+					else
+					{
+						emit AskForException((DWORD)debug_event.u.Exception.ExceptionRecord.ExceptionCode);
+						WaitForSingleObject(m_waitForGUI,INFINITE);
+
+						if(m_continueWithException >= 10)
+						{
+							m_continueWithException -= 10;
+							CustomExceptionAdd((DWORD)debug_event.u.Exception.ExceptionRecord.ExceptionCode,m_continueWithException,NULL);
+						}
+
+						dwContinueStatus = CallBreakDebugger(&debug_event,m_continueWithException);
+					}
+				}
 			}			
 			break;
 		}
@@ -1020,4 +1051,10 @@ bool clsDebugger::IsOffsetEIP(quint64 Offset)
 		return true;
 #endif	
 	return false;
+}
+
+void clsDebugger::HandleForException(int handleException)
+{
+	m_continueWithException = handleException;
+	PulseEvent(m_waitForGUI);
 }

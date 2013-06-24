@@ -41,7 +41,7 @@
       <rect>
        <x>10</x>
        <y>133</y>
-       <width>321</width>
+       <width>331</width>
        <height>241</height>
       </rect>
      </property>
@@ -58,9 +58,9 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>104</y>
-        <width>301</width>
-        <height>131</height>
+        <y>20</y>
+        <width>311</width>
+        <height>191</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -107,68 +107,11 @@
        </property>
       </column>
      </widget>
-     <widget class="QCheckBox" name="cbInvPriv">
-      <property name="geometry">
-       <rect>
-        <x>12</x>
-        <y>62</y>
-        <width>171</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Invalid or Privileged Instruction</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbDivZero">
-      <property name="geometry">
-       <rect>
-        <x>12</x>
-        <y>42</y>
-        <width>101</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Division by zero</string>
-      </property>
-     </widget>
-     <widget class="QCheckBox" name="cbIG_AVIOL">
-      <property name="geometry">
-       <rect>
-        <x>12</x>
-        <y>22</y>
-        <width>110</width>
-        <height>17</height>
-       </rect>
-      </property>
-      <property name="sizePolicy">
-       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
-        <horstretch>0</horstretch>
-        <verstretch>0</verstretch>
-       </sizepolicy>
-      </property>
-      <property name="text">
-       <string>Access Violation</string>
-      </property>
-     </widget>
      <widget class="QCheckBox" name="cbIgEx">
       <property name="geometry">
        <rect>
-        <x>12</x>
-        <y>82</y>
+        <x>13</x>
+        <y>218</y>
         <width>131</width>
         <height>17</height>
        </rect>
@@ -205,9 +148,9 @@
      <widget class="QCheckBox" name="cbBreakOnNewPID">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>70</x>
         <y>90</y>
-        <width>131</width>
+        <width>51</width>
         <height>17</height>
        </rect>
       </property>
@@ -218,15 +161,15 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>create Process</string>
+       <string>create</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="cbBreakOnNewTID">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>70</x>
         <y>110</y>
-        <width>121</width>
+        <width>51</width>
         <height>17</height>
        </rect>
       </property>
@@ -237,15 +180,15 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>create Thread</string>
+       <string>create</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="cbBreakOnNewDLL">
       <property name="geometry">
        <rect>
-        <x>10</x>
+        <x>70</x>
         <y>70</y>
-        <width>121</width>
+        <width>51</width>
         <height>17</height>
        </rect>
       </property>
@@ -256,7 +199,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>load DLL</string>
+       <string>load</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="cbSystemEP">
@@ -314,6 +257,102 @@
       </property>
       <property name="text">
        <string>TLS Callback</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnExTID">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>110</y>
+        <width>41</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>exit</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnExDLL">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>70</y>
+        <width>61</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>unload</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbBreakOnExPID">
+      <property name="geometry">
+       <rect>
+        <x>130</x>
+        <y>90</y>
+        <width>51</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>exit</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>70</y>
+        <width>61</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>DLL:</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_2">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>87</y>
+        <width>70</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Process :</string>
+      </property>
+     </widget>
+     <widget class="QLabel" name="label_3">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>108</y>
+        <width>70</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string>Thread :</string>
       </property>
      </widget>
     </widget>

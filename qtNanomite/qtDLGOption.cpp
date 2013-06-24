@@ -34,12 +34,13 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	OnLoad();
 
 	// Events for the GUI
-	connect(tblCustomExceptions,SIGNAL(customContextMenuRequested(const QPoint &)),this,SLOT(OnRightClickCustomException(const QPoint &)));
+	//connect(tblCustomExceptions,SIGNAL(customContextMenuRequested(const QPoint &)),this,SLOT(OnRightClickCustomException(const QPoint &)));
 	connect(btnClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(btnReload,SIGNAL(clicked()),this,SLOT(OnReload()));
 	connect(btnSave,SIGNAL(clicked()),this,SLOT(OnSave()));
 	connect(pbSetNanomite,SIGNAL(clicked()),this,SLOT(OnSetNanomiteDefault()));
 	connect(pbRestoreOrg,SIGNAL(clicked()),this,SLOT(OnRestoreOrg()));
+	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnExceptionRemove()));
 }
 
 qtDLGOption::~qtDLGOption()
@@ -75,12 +76,19 @@ void qtDLGOption::OnReload()
 	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = false;
 	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
 	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = false;
+	myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = false;
 
 	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,1,NULL);
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,1,NULL);
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,1,NULL);
 	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,1,NULL);
+	tblCustomExceptions->setRowCount(0);
+	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
+	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(""));
+	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,	new QTableWidgetItem(""));
 
 	cbModuleEP->setChecked(false);
 	cbSystemEP->setChecked(false);
@@ -92,9 +100,9 @@ void qtDLGOption::OnReload()
 	cbBreakOnNewDLL->setChecked(false);
 	cbBreakOnNewTID->setChecked(false);
 	cbBreakOnNewPID->setChecked(false);
-	cbIG_AVIOL->setChecked(true);
-	cbInvPriv->setChecked(true);
-	cbDivZero->setChecked(true);
+	cbBreakOnExDLL->setChecked(false);
+	cbBreakOnExTID->setChecked(false);
+	cbBreakOnExPID->setChecked(false);
 
 	myMainWindow->qtNanomiteDisAsColor->colorBP = "Red";
 	myMainWindow->qtNanomiteDisAsColor->colorCall = "Green";
@@ -176,17 +184,22 @@ void qtDLGOption::OnSave()
 	else
 		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
 
-	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
-	if(cbIG_AVIOL->isChecked())
-		myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,1,NULL);
-	if(cbDivZero->isChecked())
-		myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,1,NULL);
-	if(cbInvPriv->isChecked())
-	{
-		myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,1,NULL);
-		myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,1,NULL);
-	}
+	if(cbBreakOnExDLL->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = false;
 
+	if(cbBreakOnExTID->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = true;	
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = false;
+
+	if(cbBreakOnExPID->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = false;
+
+	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
 	for(int i = 0; i < tblCustomExceptions->rowCount(); i++)
 	{	
 		if(tblCustomExceptions->item(i,0)->text().length() > 0 && tblCustomExceptions->item(i,1)->text().length() > 0)
@@ -202,7 +215,7 @@ void qtDLGOption::OnSave()
 				myMainWindow->coreDebugger->CustomExceptionAdd(tblCustomExceptions->item(i,0)->text().toULong(0,16),
 				tblCustomExceptions->item(i,1)->text().toInt(),NULL);
 			else
-				MessageBox(NULL,QString().sprintf("The exception : %08X does already exists!",tblCustomExceptions->item(i,0)->text().toULong()).toStdWString().c_str(),
+				MessageBox(NULL,QString("The exception : %1 does already exists!").arg(tblCustomExceptions->item(i,0)->text().toULong(0,16)).toStdWString().c_str(),
 				L"Nanomite - Option",MB_OK);
 		}
 	}
@@ -221,7 +234,8 @@ void qtDLGOption::OnSave()
 void qtDLGOption::OnLoad()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
+	if(!m_NoRead)
+		clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
 	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
@@ -237,6 +251,12 @@ void qtDLGOption::OnLoad()
 		cbBreakOnNewTID->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID)
 		cbBreakOnNewPID->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL)
+		cbBreakOnExDLL->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID)
+		cbBreakOnExTID->setChecked(true);
+	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID)
+		cbBreakOnExPID->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP)
 		cbModuleEP->setChecked(true);
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP)
@@ -244,30 +264,22 @@ void qtDLGOption::OnLoad()
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS)
 		cbTLS->setChecked(true);
 
+	tblCustomExceptions->setRowCount(0);
 	for(size_t i = 0;i < myMainWindow->coreDebugger->ExceptionHandler.size();i++)
 	{
-		if(myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_ACCESS_VIOLATION)
-			cbIG_AVIOL->setChecked(true);
-		else if(myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_PRIV_INSTRUCTION)
-			cbInvPriv->setChecked(true);
-		else if(myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_ILLEGAL_INSTRUCTION)
-			cbInvPriv->setChecked(true);
-		else if(myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_INT_DIVIDE_BY_ZERO)
-			cbDivZero->setChecked(true);
-		else
-		{
-			tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
+		tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 
-			tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,
-				new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType)));
+		tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,
+			new QTableWidgetItem(QString("%1").arg(myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType,8,16,QChar('0'))));
 
-			tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,
-				new QTableWidgetItem(QString().sprintf("%d",myMainWindow->coreDebugger->ExceptionHandler[i].dwAction)));
-		}
+		tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,
+			new QTableWidgetItem(QString().sprintf("%d",myMainWindow->coreDebugger->ExceptionHandler[i].dwAction)));
 	}
+	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
+	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(""));
+	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,	new QTableWidgetItem(""));
 
 	int itemIndex = NULL;
-
 	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
 		comboBP->setCurrentIndex(itemIndex);
 
@@ -348,4 +360,23 @@ void qtDLGOption::OnSetNanomiteDefault()
 void qtDLGOption::OnRestoreOrg()
 {
 	lineCurrent->setText(lineOrg->text());
+}
+
+void qtDLGOption::showEvent(QShowEvent *event)
+{
+	m_NoRead = true;
+	OnLoad();
+	m_NoRead = false;
+}
+
+void qtDLGOption::OnExceptionRemove()
+{
+	QList<QTableWidgetItem *>selectedItems = tblCustomExceptions->selectedItems();
+	if(selectedItems.count() <= 0) return;
+
+	for(int i = 0; i < tblCustomExceptions->rowCount(); i++)
+	{
+		if(tblCustomExceptions->item(i,0)->text().toULong(0,16) == selectedItems.value(0)->text().toULong(0,16))
+			tblCustomExceptions->removeRow(i);
+	}
 }

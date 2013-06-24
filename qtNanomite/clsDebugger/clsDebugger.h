@@ -40,6 +40,9 @@ struct clsDebuggerSettings
 	bool bBreakOnNewDLL;
 	bool bBreakOnNewPID;
 	bool bBreakOnNewTID;
+	bool bBreakOnExDLL;
+	bool bBreakOnExPID;
+	bool bBreakOnExTID;
 	bool bBreakOnModuleEP;
 	bool bBreakOnSystemEP;
 	bool bBreakOnTLS;
@@ -108,8 +111,8 @@ struct BPStruct
 
 struct customException
 {
-	DWORD dwExceptionType;
 	DWORD dwAction;
+	DWORD dwExceptionType;
 	quint64 dwHandler;
 };
 
@@ -164,7 +167,6 @@ public:
 	void ClearCommandLine();
 	void SetTarget(std::wstring sTarget);
 	void SetCommandLine(std::wstring sCommandLine);
-
 	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,quint64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
 	void CustomExceptionRemoveAll();
@@ -175,10 +177,13 @@ public:
 	std::wstring GetTarget();
 	std::wstring GetCMDLine();
 
+public slots:
+	void HandleForException(int handleException);
+
 signals:
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
-
+	void AskForException(DWORD exceptionCode);
 	void OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
 	void OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
 	void OnException(std::wstring sFuncName,std::wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
@@ -211,9 +216,12 @@ private:
 	bool _bSingleStepFlag;
 	HANDLE _hDbgEvent;
 	HANDLE _hCurProc;
+	HANDLE m_waitForGUI;
 	DWORD _dwPidToAttach;
 	DWORD _dwCurPID;
 	DWORD _dwCurTID;
+	 
+	int m_continueWithException;
 
 	void DebuggingLoop();
 	void AttachedDebugging(LPVOID pDebProc);

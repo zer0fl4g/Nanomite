@@ -60,7 +60,12 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"BreakOnNewPID",_coreDebugger->dbgSettings.bBreakOnNewPID ? L"true" : L"false");
 	outfile.write(cTemp,wcslen(cTemp));
-
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnExDLL",_coreDebugger->dbgSettings.bBreakOnExDLL ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnExTID",_coreDebugger->dbgSettings.bBreakOnExTID ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"BreakOnExPID",_coreDebugger->dbgSettings.bBreakOnExPID ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"BreakOnModuleEP",_coreDebugger->dbgSettings.bBreakOnModuleEP ? L"true" : L"false");
 	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"BreakOnSystemEP",_coreDebugger->dbgSettings.bBreakOnSystemEP ? L"true" : L"false");
@@ -73,41 +78,8 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 
 	for(size_t i = 0;i < _coreDebugger->ExceptionHandler.size();i++)
 	{
-		if(_coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_BREAKPOINT)
-		{
-			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_BREAKPOINT",_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
-		else if(_coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_SINGLE_STEP)
-		{
-			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_SINGLE_STEP",_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
-		else if(_coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_ACCESS_VIOLATION)
-		{
-			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_ACCESS_VIOLATION",_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
-		else if(_coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_PRIV_INSTRUCTION)
-		{
-			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_PRIV_INSTRUCTION",_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
-		else if(_coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_ILLEGAL_INSTRUCTION)
-		{
-			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_ILLEGAL_INSTRUCTION",_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
-		else if(_coreDebugger->ExceptionHandler[i].dwExceptionType == EXCEPTION_INT_DIVIDE_BY_ZERO)
-		{
-			wsprintf(cTemp,L"%s=%d\n",L"EXCEPTION_INT_DIVIDE_BY_ZERO",_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
-		else
-		{
-			wsprintf(cTemp,L"%s=%08X:%d\n",L"CUSTOM_EXCEPTION",_coreDebugger->ExceptionHandler[i].dwExceptionType,_coreDebugger->ExceptionHandler[i].dwAction);
-			outfile.write(cTemp,wcslen(cTemp));
-		}
+		wsprintf(cTemp,L"%s=%08X:%d\n",L"EXCEPTION",_coreDebugger->ExceptionHandler[i].dwExceptionType,_coreDebugger->ExceptionHandler[i].dwAction);
+		outfile.write(cTemp,wcslen(cTemp));
 	}
 
 	wsprintf(cTemp,L"%s=%d\n",L"DefaultExceptionMode",_coreDebugger->dbgSettings.dwDefaultExceptionMode);
@@ -190,6 +162,27 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 			else
 				_coreDebugger->dbgSettings.bBreakOnNewPID = false;
 		}
+		else if(sSettingLine[0] == L"BreakOnExDLL")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnExDLL = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnExDLL = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnExTID")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnExTID = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnExTID = false;
+		}
+		else if(sSettingLine[0] == L"BreakOnExPID")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bBreakOnExPID = true;
+			else
+				_coreDebugger->dbgSettings.bBreakOnExPID = false;
+		}
 		else if(sSettingLine[0] == L"BreakOnModuleEP")
 		{
 			if(sSettingLine[1] == L"true")
@@ -211,19 +204,11 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 			else
 				_coreDebugger->dbgSettings.bBreakOnTLS = false;
 		}
-		else if(sSettingLine[0] == L"EXCEPTION_ACCESS_VIOLATION")
-			_coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,_wtoi(sSettingLine[1].c_str()),NULL);
-		else if(sSettingLine[0] == L"EXCEPTION_PRIV_INSTRUCTION")
-			_coreDebugger->CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,_wtoi(sSettingLine[1].c_str()),NULL);
-		else if(sSettingLine[0] == L"EXCEPTION_ILLEGAL_INSTRUCTION")
-			_coreDebugger->CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,_wtoi(sSettingLine[1].c_str()),NULL);
-		else if(sSettingLine[0] == L"EXCEPTION_INT_DIVIDE_BY_ZERO")
-			_coreDebugger->CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,_wtoi(sSettingLine[1].c_str()),NULL);
 		else if(sSettingLine[0] == L"DefaultExceptionMode")
 			_coreDebugger->dbgSettings.dwDefaultExceptionMode = _wtoi(sSettingLine[1].c_str());
 		else if(sSettingLine[0] == L"SUSPENDTYPE")
 			_coreDebugger->dbgSettings.dwSuspendType = _wtoi(sSettingLine[1].c_str());
-		else if(sSettingLine[0] == L"CUSTOM_EXCEPTION")
+		else if(sSettingLine[0] == L"EXCEPTION")
 		{
 			QString sTemp = QString().fromStdWString(sSettingLine[1]);
 			_coreDebugger->CustomExceptionAdd(sTemp.split(":")[0].toULong(0,16),sTemp.split(":")[1].toULong(0,16),NULL);
