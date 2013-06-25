@@ -98,7 +98,7 @@
       </attribute>
       <column>
        <property name="text">
-        <string>Custom Exception</string>
+        <string>Exception</string>
        </property>
       </column>
       <column>
@@ -384,7 +384,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Load Symbols</string>
+       <string>load Symbols</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="cbDebugChild">
@@ -403,7 +403,7 @@
        </sizepolicy>
       </property>
       <property name="text">
-       <string>Debug Child Processes</string>
+       <string>debug Child Processes</string>
       </property>
      </widget>
      <widget class="QCheckBox" name="cbSuspendThread">
@@ -423,6 +423,25 @@
       </property>
       <property name="text">
        <string>use SuspendThread</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbExceptionAssist">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>63</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Exception Assistant</string>
       </property>
      </widget>
     </widget>

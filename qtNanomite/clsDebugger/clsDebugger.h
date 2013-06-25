@@ -48,6 +48,7 @@ struct clsDebuggerSettings
 	bool bBreakOnTLS;
 	bool bDebugChilds;
 	bool bAutoLoadSymbols;
+	bool bUseExceptionAssist;
 };
 
 struct DLLStruct

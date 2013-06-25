@@ -32,6 +32,9 @@ public:
 signals:
 	void ContinueException(int handleException);
 
+private:
+	int m_retValue;
+
 private slots:
 	void ExceptionIgnore();
 	void ExceptionSendToApp();

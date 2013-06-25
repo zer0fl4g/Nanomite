@@ -47,7 +47,7 @@ clsDebugger::clsDebugger()
 	_isDebugging = false;
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false};
+	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
@@ -61,7 +61,7 @@ clsDebugger::clsDebugger(wstring sTarget)
 	_isDebugging = false;
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false};
+	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false,false};
 	dbgSettings = tempSet;
 	pThis = this;
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");

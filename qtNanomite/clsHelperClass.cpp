@@ -72,6 +72,8 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	outfile.write(cTemp,wcslen(cTemp));
 	wsprintf(cTemp,L"%s=%s\n",L"BreakOnTLS",_coreDebugger->dbgSettings.bBreakOnTLS ? L"true" : L"false");
 	outfile.write(cTemp,wcslen(cTemp));
+	wsprintf(cTemp,L"%s=%s\n",L"ExceptionAssist",_coreDebugger->dbgSettings.bUseExceptionAssist ? L"true" : L"false");
+	outfile.write(cTemp,wcslen(cTemp));
 
 	wsprintf(cTemp,L"%s=%d\n",L"SUSPENDTYPE",_coreDebugger->dbgSettings.dwSuspendType);
 	outfile.write(cTemp,wcslen(cTemp));
@@ -203,6 +205,13 @@ bool clsHelperClass::ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteD
 				_coreDebugger->dbgSettings.bBreakOnTLS = true;
 			else
 				_coreDebugger->dbgSettings.bBreakOnTLS = false;
+		}
+		else if(sSettingLine[0] == L"ExceptionAssist")
+		{
+			if(sSettingLine[1] == L"true")
+				_coreDebugger->dbgSettings.bUseExceptionAssist = true;
+			else
+				_coreDebugger->dbgSettings.bUseExceptionAssist = false;
 		}
 		else if(sSettingLine[0] == L"DefaultExceptionMode")
 			_coreDebugger->dbgSettings.dwDefaultExceptionMode = _wtoi(sSettingLine[1].c_str());

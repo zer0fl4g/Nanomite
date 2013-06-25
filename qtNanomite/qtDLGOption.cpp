@@ -25,7 +25,6 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
-	//this->setAttribute(Qt::WA_DeleteOnClose,true);
 
 	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,new QTableWidgetItem(""));
@@ -81,10 +80,7 @@ void qtDLGOption::OnReload()
 	myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = false;
 
 	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
-	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ACCESS_VIOLATION,1,NULL);
-	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_PRIV_INSTRUCTION,1,NULL);
-	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_ILLEGAL_INSTRUCTION,1,NULL);
-	myMainWindow->coreDebugger->CustomExceptionAdd(EXCEPTION_INT_DIVIDE_BY_ZERO,1,NULL);
+
 	tblCustomExceptions->setRowCount(0);
 	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(""));
@@ -103,6 +99,7 @@ void qtDLGOption::OnReload()
 	cbBreakOnExDLL->setChecked(false);
 	cbBreakOnExTID->setChecked(false);
 	cbBreakOnExPID->setChecked(false);
+	cbExceptionAssist->setChecked(false);
 
 	myMainWindow->qtNanomiteDisAsColor->colorBP = "Red";
 	myMainWindow->qtNanomiteDisAsColor->colorCall = "Green";
@@ -133,6 +130,11 @@ void qtDLGOption::OnSave()
 		MessageBoxW(NULL,L"ERROR, could not write the default jit!\r\nDo you have Admin rights?",L"Nanomite",MB_OK);
 	
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
+
+	if(cbExceptionAssist->isChecked())
+		myMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist = true;
+	else
+		myMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist = false;
 
 	if(cbModuleEP->isChecked())
 		myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = true;
@@ -239,30 +241,73 @@ void qtDLGOption::OnLoad()
 	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
+	else
+		cbLoadSym->setChecked(false);
+
 	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds)
 		cbDebugChild->setChecked(true);
+	else
+		cbDebugChild->setChecked(false);
+
 	if(myMainWindow->coreDebugger->dbgSettings.dwSuspendType)
 		cbSuspendThread->setChecked(true);
+	else
+		cbSuspendThread->setChecked(false);
+		
 	if(myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode)
 		cbIgEx->setChecked(true);
+	else
+		cbIgEx->setChecked(false);
+	
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL)
 		cbBreakOnNewDLL->setChecked(true);
+	else
+		cbBreakOnNewDLL->setChecked(false);
+		
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID)
 		cbBreakOnNewTID->setChecked(true);
+	else
+		cbBreakOnNewTID->setChecked(false);
+
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID)
 		cbBreakOnNewPID->setChecked(true);
+	else
+		cbBreakOnNewPID->setChecked(false);
+	
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL)
 		cbBreakOnExDLL->setChecked(true);
+	else
+		cbBreakOnExDLL->setChecked(false);
+		
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID)
 		cbBreakOnExTID->setChecked(true);
+	else
+		cbBreakOnExTID->setChecked(false);
+	
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID)
 		cbBreakOnExPID->setChecked(true);
+	else
+		cbBreakOnExPID->setChecked(false);
+	
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP)
 		cbModuleEP->setChecked(true);
+	else
+		cbModuleEP->setChecked(false);
+	
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP)
 		cbSystemEP->setChecked(true);
+	else
+		cbSystemEP->setChecked(false);
+		
 	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS)
 		cbTLS->setChecked(true);
+	else
+		cbTLS->setChecked(false);
+
+	if(myMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist)
+		cbExceptionAssist->setChecked(true);
+	else
+		cbExceptionAssist->setChecked(false);
 
 	tblCustomExceptions->setRowCount(0);
 	for(size_t i = 0;i < myMainWindow->coreDebugger->ExceptionHandler.size();i++)

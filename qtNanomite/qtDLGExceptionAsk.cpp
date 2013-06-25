@@ -28,6 +28,8 @@ qtDLGExceptionAsk::qtDLGExceptionAsk(DWORD exceptionCode, QWidget *parent, Qt::W
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 
+	m_retValue = 0;
+
 	lableState->setText(QString("ExceptionCode: %1").arg(exceptionCode,8,16,QChar('0')));
 
 	connect(pbIgnore,SIGNAL(clicked()),this,SLOT(ExceptionIgnore()));
@@ -42,42 +44,35 @@ qtDLGExceptionAsk::~qtDLGExceptionAsk()
 
 void qtDLGExceptionAsk::ExceptionIgnore()
 {
-	int retVal = 2;
-
 	if(cbAlways->isChecked())
-		emit ContinueException(retVal + 10);
+		m_retValue = 12;
 	else
-		emit ContinueException(retVal);
+		m_retValue = 2;
 
 	close();
 }
 
 void qtDLGExceptionAsk::ExceptionSendToApp()
 {
-	int retVal = 1;
-
 	if(cbAlways->isChecked())
-		emit ContinueException(retVal + 10);
+		m_retValue = 11;
 	else
-		emit ContinueException(retVal);
+		m_retValue = 1;
 
 	close();
 }
 
 void qtDLGExceptionAsk::ExceptionBreak()
 {
-	int retVal = 0;
-
 	if(cbAlways->isChecked())
-		emit ContinueException(retVal + 10);
+		m_retValue = 10;
 	else
-		emit ContinueException(retVal);
+		m_retValue = 0;
 
 	close();
 }
 
 void qtDLGExceptionAsk::closeEvent(QCloseEvent *event)
 {
-	//emit ContinueException(0);
-	//close();
+	emit ContinueException(m_retValue);
 }
