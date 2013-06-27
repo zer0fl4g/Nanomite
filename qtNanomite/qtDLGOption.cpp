@@ -236,8 +236,12 @@ void qtDLGOption::OnSave()
 void qtDLGOption::OnLoad()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-	if(!m_NoRead)
-		clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
+	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
+	//if(!clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT))
+	//{
+	//	OnReload();
+	//	return;
+	//}
 	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
@@ -405,13 +409,6 @@ void qtDLGOption::OnSetNanomiteDefault()
 void qtDLGOption::OnRestoreOrg()
 {
 	lineCurrent->setText(lineOrg->text());
-}
-
-void qtDLGOption::showEvent(QShowEvent *event)
-{
-	m_NoRead = true;
-	OnLoad();
-	m_NoRead = false;
 }
 
 void qtDLGOption::OnExceptionRemove()

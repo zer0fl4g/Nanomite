@@ -38,6 +38,7 @@
 ## Changelog
 ###Version 0.1 beta 13
 + fixed some crashs related to the qt /MT build, see note for more details
++ fixed some bugs in the patch manager
 + added colors to the state bar
 + added missing edi/rdi register
 + added option break on tls callback

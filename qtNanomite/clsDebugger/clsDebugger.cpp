@@ -719,11 +719,12 @@ void clsDebugger::DebuggingLoop()
 						}
 					}
 				}
+
 				if(!bExceptionHandler && !bIsBP && !bIsEP && !bIsKernelBP)
 				{
 					if(dbgSettings.dwDefaultExceptionMode == 1)
 						dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwDefaultExceptionMode);
-					else
+					else if(dbgSettings.bUseExceptionAssist)
 					{
 						emit AskForException((DWORD)debug_event.u.Exception.ExceptionRecord.ExceptionCode);
 						WaitForSingleObject(m_waitForGUI,INFINITE);
@@ -736,6 +737,8 @@ void clsDebugger::DebuggingLoop()
 
 						dwContinueStatus = CallBreakDebugger(&debug_event,m_continueWithException);
 					}
+					else
+						dwContinueStatus = CallBreakDebugger(&debug_event,0);
 				}
 			}			
 			break;

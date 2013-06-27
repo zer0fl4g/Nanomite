@@ -43,15 +43,10 @@ public:
 
 private:
 	std::wstring m_originalJIT;
-
-	bool m_NoRead;
-
+	
 	void OnLoad();
 
 	int getIndex(QString itemColor);
-
-protected:
-	void showEvent(QShowEvent *event);
 };
 
 #endif
