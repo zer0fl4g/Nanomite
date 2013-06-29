@@ -551,8 +551,16 @@ void clsDebugger::DebuggingLoop()
 				case 0x4000001E: // Single Step in x86 Process which got executed in a x64 environment
 				case EXCEPTION_SINGLE_STEP:
 					{
-						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
+						if(PIDs[iPid].bTraceFlag && _bSingleStepFlag)
+						{
+							bIsBP = true;
+							_bSingleStepFlag = true;
+							SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
+							qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);
+							break;
+						}
 
+						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
 						if(bIsBP)
 						{
 							if(PIDs[iPid].dwBPRestoreFlag == 0x2) // Restore SoftwareBP
@@ -639,14 +647,7 @@ void clsDebugger::DebuggingLoop()
 								_bSingleStepFlag = false;
 								bIsBP = true;
 
-								if(PIDs[iPid].bTraceFlag)
-								{
-									_bSingleStepFlag = true;
-									SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
-									qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);
-								}
-								else
-									dwContinueStatus = CallBreakDebugger(&debug_event,0);
+								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							}
 						}
 						else
@@ -656,14 +657,7 @@ void clsDebugger::DebuggingLoop()
 								_bSingleStepFlag = false;
 								bIsBP = true;
 
-								if(PIDs[iPid].bTraceFlag)
-								{
-									_bSingleStepFlag = true;
-									SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
-									qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);		
-								}
-								else
-									dwContinueStatus = CallBreakDebugger(&debug_event,0);
+								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							}
 						}
 						break;

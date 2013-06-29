@@ -118,7 +118,7 @@ void qtDLGTrace::OnShow(int delta)
 		if(i.value().asmInstruction.length() <= 0)
 		{
 			std::wstring FuncName,ModName;
-			clsHelperClass::LoadSymbolForAddr(FuncName,ModName,i.value().dwOffset,OpenProcess(PROCESS_ALL_ACCESS,false,i.value().PID));
+			clsHelperClass::LoadSymbolForAddr(FuncName,ModName,i.value().dwOffset,qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(i.value().PID));
 
 			QString funcName = QString().fromStdWString(FuncName);
 			QString modName = QString().fromStdWString(ModName);

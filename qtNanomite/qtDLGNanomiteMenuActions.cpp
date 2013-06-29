@@ -69,7 +69,7 @@ void qtDLGNanomite::action_FileAttachTo()
 {
 	if(!coreDebugger->GetDebuggingState())
 	{
-		qtDLGAttach newAttaching;
+		qtDLGAttach newAttaching(this,Qt::Window);
 		connect(&newAttaching,SIGNAL(StartAttachedDebug(int,QString)),this,SLOT(action_DebugAttachStart(int,QString)));
 		newAttaching.exec();
 	}
@@ -395,13 +395,13 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 
 void qtDLGNanomite::action_OptionsAbout()
 {
-	qtDLGAbout DLGAbout;
+	qtDLGAbout DLGAbout(this,Qt::Window);
 	DLGAbout.exec();
 }
 
 void qtDLGNanomite::action_OptionsOptions()
 {
-	qtDLGOption newOption;
+	qtDLGOption newOption(this,Qt::Window);
 	newOption.exec();
 }
 
