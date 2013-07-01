@@ -36,7 +36,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	tblTraceLog->horizontalHeader()->resizeSection(0,80); //PID
 	tblTraceLog->horizontalHeader()->resizeSection(1,80); //TID
 	tblTraceLog->horizontalHeader()->resizeSection(2,135); //OFFSET
-	tblTraceLog->horizontalHeader()->resizeSection(3,300); //INST.
+	tblTraceLog->horizontalHeader()->resizeSection(3,300); //Symbol.
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
 
 	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
@@ -55,11 +55,11 @@ void qtDLGTrace::addTraceData(DWORD64 dwOffset,DWORD PID,DWORD TID)
 	TraceInfoRow newTraceRow;
 	newTraceRow.PID = PID;
 	newTraceRow.TID = TID;
-	newTraceRow.asmInstruction = QString("");
-	newTraceRow.cpuReg = QString("");
+	newTraceRow.debugSymbols = QString("");
+	//newTraceRow.cpuReg = QString("");
 	newTraceRow.dwOffset = dwOffset;
 
-	pThis->traceData.insert(dwOffset,newTraceRow);
+	pThis->traceData.append(newTraceRow);
 }
 
 void qtDLGTrace::clearTraceData()
@@ -82,7 +82,7 @@ void qtDLGTrace::OnShow(int delta)
 	int iLines = NULL,
 		count = NULL,
 		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 12) - 1;
-	QMap<DWORD64,TraceInfoRow>::iterator i = traceData.begin();
+	QList<TraceInfoRow>::iterator i = traceData.begin();
 
 	scrollTrace->setMaximum(traceData.count() + 2 - iPossibleRowCount);
 
@@ -101,37 +101,37 @@ void qtDLGTrace::OnShow(int delta)
 
 	while(iLines <= iPossibleRowCount)
 	{
-		if((QMapData::Node *)i == (QMapData::Node *)traceData.end())
+		if(i == traceData.end())
 			return;
 
 		tblTraceLog->insertRow(tblTraceLog->rowCount());
 		
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,0,
-			new QTableWidgetItem(QString("%1").arg(i.value().PID,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(i->PID,8,16,QChar('0'))));
 		
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,1,
-			new QTableWidgetItem(QString("%1").arg(i.value().TID,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(i->TID,8,16,QChar('0'))));
 	
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,2,
-			new QTableWidgetItem(QString("%1").arg(i.value().dwOffset,16,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(i->dwOffset,16,16,QChar('0'))));
 
-		if(i.value().asmInstruction.length() <= 0)
+		if(i->debugSymbols.length() <= 0)
 		{
 			std::wstring FuncName,ModName;
-			clsHelperClass::LoadSymbolForAddr(FuncName,ModName,i.value().dwOffset,qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(i.value().PID));
+			clsHelperClass::LoadSymbolForAddr(FuncName,ModName,i->dwOffset,qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(i->PID));
 
 			QString funcName = QString().fromStdWString(FuncName);
 			QString modName = QString().fromStdWString(ModName);
 
 			if(modName.length() > 0 && funcName.length() > 0)
-				i.value().asmInstruction.append(modName).append(".").append(funcName);
+				i->debugSymbols.append(modName).append(".").append(funcName);
 		}
 
 		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,3,
-			new QTableWidgetItem(i.value().asmInstruction));
+			new QTableWidgetItem(i->debugSymbols));
 
-		tblTraceLog->setItem(tblTraceLog->rowCount() - 1,4,
-			new QTableWidgetItem(i.value().cpuReg));
+		//tblTraceLog->setItem(tblTraceLog->rowCount() - 1,4,
+		//	new QTableWidgetItem(i.value().cpuReg));
 
 		++i;iLines++;
 	}

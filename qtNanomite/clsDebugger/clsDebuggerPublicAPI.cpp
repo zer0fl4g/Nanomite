@@ -187,18 +187,18 @@ bool clsDebugger::StepIn()
 {
 	_bSingleStepFlag = true;
 
-	#ifdef _AMD64_
-		BOOL bIsWOW64 = false;
-		if(clsAPIImport::pIsWow64Process)
-			clsAPIImport::pIsWow64Process(GetCurrentProcessHandle(),&bIsWOW64);
+#ifdef _AMD64_
+	BOOL bIsWOW64 = false;
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(GetCurrentProcessHandle(),&bIsWOW64);
 	
-		if(bIsWOW64)
-			wowProcessContext.EFlags |= 0x100;
-		else
-			ProcessContext.EFlags |= 0x100;
-	#else
+	if(bIsWOW64)
+		wowProcessContext.EFlags |= 0x100;
+	else
 		ProcessContext.EFlags |= 0x100;
-	#endif
+#else
+	ProcessContext.EFlags |= 0x100;
+#endif
 
 	return PulseEvent(_hDbgEvent);
 }
@@ -392,7 +392,10 @@ bool clsDebugger::SetTraceFlagForPID(DWORD dwPID,bool bIsEnabled)
 		if(PIDs[i].dwPID == dwPID)
 		{
 			PIDs[i].bTraceFlag = bIsEnabled;
-			return StepIn();
+			if(bIsEnabled)
+				return StepIn();
+			else
+				return true;
 		}
 	}
 	return false;

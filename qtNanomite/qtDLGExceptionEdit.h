@@ -14,42 +14,30 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef QTDLGOPTION_H
-#define QTDLGOPTION_H
+#ifndef QTDLGEXCEPTIONEDIT_H
+#define QTDLGEXCEPTIONEDIT_H
 
-#include "ui_qtDLGOption.h"
+#include "ui_qtDLGExceptionEdit.h"
 
-#include "qtDLGNanomite.h"
+#include <Windows.h>
 
-#include <string>
-
-class qtDLGOption : public QDialog, public Ui_qtDLGOptionClass
+class qtDLGExceptionEdit : public QDialog, public Ui_qtDLGExceptionEditClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGOption(QWidget *parent = 0, Qt::WFlags flags = 0);
-	~qtDLGOption();
+	qtDLGExceptionEdit(QWidget *parent = 0, Qt::WFlags flags = 0, DWORD exceptionCode = 0, int handleException = -1);
+	~qtDLGExceptionEdit();
 
-	private slots:
-		void OnRightClickCustomException(const QPoint qPoint);
-		void MenuCallback(QAction* pAction);
-		void OnClose();
-		void OnReload();
-		void OnSave();
-		void OnSetNanomiteDefault();
-		void OnRestoreOrg();
-		void OnExceptionRemove();
-		void OnInsertNewException(DWORD exceptionCode, int handleException);
+signals:
+	void OnInsertNewException(DWORD exceptionCode, int handleCode);
 
 private:
-	int m_selectedRow;
+	QStringList LoadExceptionList();
 
-	std::wstring m_originalJIT;
-	
-	void OnLoad();
-
-	int getIndex(QString itemColor);
+private slots:
+	void OnSave();
+	void OnCancel();
 };
 
 #endif

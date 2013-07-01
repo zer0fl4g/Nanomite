@@ -15,6 +15,7 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGOption.h"
+#include "qtDLGExceptionEdit.h"
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
@@ -26,14 +27,10 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	this->setFixedSize(this->width(),this->height());
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 
-	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,new QTableWidgetItem(""));
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,new QTableWidgetItem(""));
-
 	OnLoad();
 
 	// Events for the GUI
-	//connect(tblCustomExceptions,SIGNAL(customContextMenuRequested(const QPoint &)),this,SLOT(OnRightClickCustomException(const QPoint &)));
+	connect(tblCustomExceptions,SIGNAL(customContextMenuRequested(const QPoint &)),this,SLOT(OnRightClickCustomException(const QPoint &)));
 	connect(btnClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(btnReload,SIGNAL(clicked()),this,SLOT(OnReload()));
 	connect(btnSave,SIGNAL(clicked()),this,SLOT(OnSave()));
@@ -47,13 +44,29 @@ qtDLGOption::~qtDLGOption()
 
 }
 
-void qtDLGOption::OnRightClickCustomException(const QPoint &)
+void qtDLGOption::OnRightClickCustomException(const QPoint qPoint)
 {
-	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,new QTableWidgetItem(""));
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,new QTableWidgetItem(""));
+	QMenu menu;
 
-	return;
+	if(tblCustomExceptions->rowCount() <= 0)
+	{
+		menu.addAction(new QAction("Insert Exception",this));
+	}
+	else
+	{
+		m_selectedRow = tblCustomExceptions->indexAt(qPoint).row();
+		if(m_selectedRow >= 0)
+		{
+			menu.addAction(new QAction("Insert Exception",this));
+			menu.addAction(new QAction("Edit Exception",this));
+			menu.addAction(new QAction("Delete Exception",this));
+		}
+		else
+			menu.addAction(new QAction("Insert Exception",this));
+	}
+
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+	menu.exec(QCursor::pos());
 }
 
 void qtDLGOption::OnClose()
@@ -126,8 +139,8 @@ void qtDLGOption::OnSave()
 	newJIT.setValue("Debugger",lineCurrent->text());
 	newJIT.setValue("Auto","0");
 	newJIT.sync();
-	if(newJIT.status() != QSettings::NoError)
-		MessageBoxW(NULL,L"ERROR, could not write the default jit!\r\nDo you have Admin rights?",L"Nanomite",MB_OK);
+//	if(newJIT.status() != QSettings::NoError)
+//		MessageBoxW(NULL,L"ERROR, could not write the default jit!\r\nDo you have Admin rights?",L"Nanomite",MB_OK);
 	
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
 
@@ -324,9 +337,6 @@ void qtDLGOption::OnLoad()
 		tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,
 			new QTableWidgetItem(QString().sprintf("%d",myMainWindow->coreDebugger->ExceptionHandler[i].dwAction)));
 	}
-	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(""));
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,	new QTableWidgetItem(""));
 
 	int itemIndex = NULL;
 	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
@@ -421,4 +431,41 @@ void qtDLGOption::OnExceptionRemove()
 		if(tblCustomExceptions->item(i,0)->text().toULong(0,16) == selectedItems.value(0)->text().toULong(0,16))
 			tblCustomExceptions->removeRow(i);
 	}
+}
+
+void qtDLGOption::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Insert Exception") == 0)
+	{
+		qtDLGExceptionEdit newExceptionEdit(this,Qt::Window);
+		connect(&newExceptionEdit,SIGNAL(OnInsertNewException(DWORD,int)),this,SLOT(OnInsertNewException(DWORD,int)));
+		newExceptionEdit.exec();
+	}
+	else if(QString().compare(pAction->text(),"Edit Exception") == 0)
+	{
+		qtDLGExceptionEdit newExceptionEdit(this,Qt::Window,tblCustomExceptions->item(m_selectedRow,0)->text().toULong(0,16),
+			tblCustomExceptions->item(m_selectedRow,1)->text().toInt());
+		connect(&newExceptionEdit,SIGNAL(OnInsertNewException(DWORD,int)),this,SLOT(OnInsertNewException(DWORD,int)));
+		newExceptionEdit.exec();
+	}
+	else if(QString().compare(pAction->text(),"Delete Exception") == 0)
+	{
+		OnExceptionRemove();
+	}
+}
+
+void qtDLGOption::OnInsertNewException(DWORD exceptionCode, int handleException)
+{
+	for(int i = 0; i < tblCustomExceptions->rowCount(); i++)
+	{
+		if(tblCustomExceptions->item(i,0)->text().toULong(0,16) == exceptionCode)
+		{
+			tblCustomExceptions->item(i,1)->setText(QString("%1").arg(handleException));
+			return;
+		}
+	}
+
+	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
+	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(QString("%1").arg(exceptionCode,8,16,QChar('0'))));
+	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,	new QTableWidgetItem(QString("%1").arg(handleException)));
 }

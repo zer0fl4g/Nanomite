@@ -40,9 +40,10 @@
 + fixed some crashs related to the qt /MT build, see note for more details
 + fixed some bugs in the patch manager
 + fixed the symbol display in the trace view
++ fixed a bug which showed wrong trace data
 + added colors to the state bar
 + added missing edi/rdi register
-+ added option break on tls callback
++ added option to break on tls callback
 + added possibility to show registers of a thread in detailview
 + added possibility to show TEB/TBI of a thread in detailview
 + added possibility to show PEB/PBI of a process in detailview

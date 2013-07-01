@@ -554,7 +554,6 @@ void clsDebugger::DebuggingLoop()
 						if(PIDs[iPid].bTraceFlag && _bSingleStepFlag)
 						{
 							bIsBP = true;
-							_bSingleStepFlag = true;
 							SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
 							qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);
 							break;

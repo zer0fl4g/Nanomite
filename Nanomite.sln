@@ -7,6 +7,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "qtNanomite", "qtNanomite\qt
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "DebugMe.NET", "DotNetDebugMe\DebugMe.NET.csproj", "{63B08CA5-4563-4A73-8549-4DBC101A6D4A}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "NanomiteUpdater", "NanomiteUpdater\updater.vcxproj", "{10B0BEFC-62DC-3594-8EFC-08B69C48E525}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Win32 = Debug|Win32
@@ -30,7 +32,11 @@ Global
 		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Debug|Win32.ActiveCfg = Debug|x86
 		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Debug|x64.ActiveCfg = Debug|x64
 		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Release|Win32.ActiveCfg = Release|x86
-		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Release|x64.ActiveCfg = Release|x86
+		{63B08CA5-4563-4A73-8549-4DBC101A6D4A}.Release|x64.ActiveCfg = Release|x64
+		{10B0BEFC-62DC-3594-8EFC-08B69C48E525}.Debug|Win32.ActiveCfg = Debug|Win32
+		{10B0BEFC-62DC-3594-8EFC-08B69C48E525}.Debug|x64.ActiveCfg = Debug|x64
+		{10B0BEFC-62DC-3594-8EFC-08B69C48E525}.Release|Win32.ActiveCfg = Release|Win32
+		{10B0BEFC-62DC-3594-8EFC-08B69C48E525}.Release|x64.ActiveCfg = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

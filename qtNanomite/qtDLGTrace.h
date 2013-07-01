@@ -21,15 +21,16 @@
 
 #include <Windows.h>
 #include <string>
-#include <QMap>
+
+#include <QList>
 
 struct TraceInfoRow
 {
 	DWORD64 dwOffset;
 	DWORD	PID;
 	DWORD	TID;
-	QString asmInstruction;
-	QString cpuReg;
+	QString debugSymbols;
+	//QString cpuReg;
 };
 
 class qtDLGTrace : public QWidget, public Ui_qtDLGTraceClass
@@ -48,7 +49,7 @@ signals:
 
 private:
 	static qtDLGTrace *pThis;
-	QMap<DWORD64,TraceInfoRow> traceData;
+	QList<TraceInfoRow> traceData;
 	int _iSelectedRow;
 
 private slots:
