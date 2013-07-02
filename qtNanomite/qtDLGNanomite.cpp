@@ -123,6 +123,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionDebug_Step_Over, SIGNAL(triggered()), this, SLOT(action_DebugStepOver()));
 	connect(actionOptions_About, SIGNAL(triggered()), this, SLOT(action_OptionsAbout()));
 	connect(actionOptions_Options, SIGNAL(triggered()), this, SLOT(action_OptionsOptions()));
+	connect(actionOptions_Update, SIGNAL(triggered()), this, SLOT(action_OptionsUpdate()));
 	connect(actionWindow_Detail_Information, SIGNAL(triggered()), this, SLOT(action_WindowDetailInformation()));
 	connect(actionWindow_Breakpoint_Manager, SIGNAL(triggered()), this, SLOT(action_WindowBreakpointManager()));
 	connect(actionWindow_Show_Patches, SIGNAL(triggered()), this, SLOT(action_WindowPatches()));
@@ -210,7 +211,6 @@ void qtDLGNanomite::LoadWidgets()
 
 void qtDLGNanomite::OnDebuggerBreak()
 {
-	quint64 dwEIP = NULL;
 	if(!coreDebugger->GetDebuggingState())
 		UpdateStateBar(0x3);
 	else
@@ -222,6 +222,7 @@ void qtDLGNanomite::OnDebuggerBreak()
 		// display Reg
 		cpuRegView->LoadRegView(coreDebugger);
 
+		quint64 dwEIP = NULL;
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
 		if(clsAPIImport::pIsWow64Process)

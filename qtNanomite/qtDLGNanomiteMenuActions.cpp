@@ -33,6 +33,7 @@
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
 #include "clsMemManager.h"
+#include "clsUpdater.h"
 
 #include <TlHelp32.h>
 #include <Psapi.h>
@@ -405,6 +406,12 @@ void qtDLGNanomite::action_OptionsOptions()
 	newOption.exec();
 }
 
+void qtDLGNanomite::action_OptionsUpdate()
+{
+	clsUpdater launchUpdater("updater.exe");
+	launchUpdater.launchUpdater();
+}
+
 void qtDLGNanomite::action_WindowDetailInformation()
 {
 	dlgDetInfo->show();
@@ -584,6 +591,7 @@ void qtDLGNanomite::action_DebugTraceStart()
 			qtDLGTrace::clearTraceData();
 			coreDebugger->SetTraceFlagForPID(_iMenuPID,true);
 			actionDebug_Trace_Stop->setEnabled(true);
+			UpdateStateBar(1);
 		}
 		else
 			actionDebug_Trace_Start->setEnabled(true);

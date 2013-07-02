@@ -34,6 +34,8 @@
 	- cpu registers
 	- functions
 	- pe header
+	- TEB/TBI
+	- PEB/PBI
 
 ## Changelog
 ###Version 0.1 beta 13
@@ -48,6 +50,7 @@
 + added possibility to show TEB/TBI of a thread in detailview
 + added possibility to show PEB/PBI of a process in detailview
 + added possibility to set Nanomite as default JIT
++ added updater
 + updated PE-Editor layout
 + updated Options to include more options, easier config 
 
@@ -55,8 +58,5 @@
 	- Needed to compile Qt with /MD because of issues with the cruntime. If you want to use the
 	  debugger you have to install the visual c++ runtime 2010. 
 	- You can save an exception to the list in the Options window. The debugger then knows how to handle it. 
-		- 0 = break
-		- 1 = pass to application
-		- 2 = ignore
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

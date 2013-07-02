@@ -95,6 +95,7 @@ private slots:
 	void action_DebugRunToUserCode();
 	void action_OptionsAbout();
 	void action_OptionsOptions();
+	void action_OptionsUpdate();
 	void action_WindowDetailInformation();
 	void action_WindowBreakpointManager();
 	void action_WindowPatches();

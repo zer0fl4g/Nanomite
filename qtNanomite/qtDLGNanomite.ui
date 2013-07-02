@@ -124,6 +124,8 @@
     <addaction name="actionOptions_Options"/>
     <addaction name="separator"/>
     <addaction name="actionOptions_About"/>
+    <addaction name="separator"/>
+    <addaction name="actionOptions_Update"/>
    </widget>
    <widget class="QMenu" name="menuWindows">
     <property name="sizePolicy">
@@ -461,6 +463,11 @@
    </property>
    <property name="text">
     <string>Privileges</string>
+   </property>
+  </action>
+  <action name="actionOptions_Update">
+   <property name="text">
+    <string>Update</string>
    </property>
   </action>
  </widget>
