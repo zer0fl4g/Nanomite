@@ -33,7 +33,6 @@
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
 #include "clsMemManager.h"
-#include "clsUpdater.h"
 
 #include <TlHelp32.h>
 #include <Psapi.h>
@@ -408,8 +407,9 @@ void qtDLGNanomite::action_OptionsOptions()
 
 void qtDLGNanomite::action_OptionsUpdate()
 {
-	clsUpdater launchUpdater("updater.exe");
-	launchUpdater.launchUpdater();
+	launchUpdater = new clsUpdater(QString("%1%2").arg(QDir::currentPath()).arg("/updater.exe"));
+	connect(launchUpdater,SIGNAL(finished()),this,SLOT(OnUpdaterFinished()),Qt::QueuedConnection);
+	launchUpdater->launchUpdater();
 }
 
 void qtDLGNanomite::action_WindowDetailInformation()

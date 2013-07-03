@@ -40,6 +40,7 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblMemoryView->horizontalHeader()->resizeSection(2,135);
 	tblMemoryView->horizontalHeader()->resizeSection(3,150);
 	tblMemoryView->horizontalHeader()->resizeSection(4,135);
+	tblMemoryView->horizontalHeader()->setFixedHeight(21);
 
 	// Display
 	myMainWindow = qtDLGNanomite::GetInstance();

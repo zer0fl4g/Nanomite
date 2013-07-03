@@ -38,6 +38,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	tblTraceLog->horizontalHeader()->resizeSection(2,135); //OFFSET
 	tblTraceLog->horizontalHeader()->resizeSection(3,300); //Symbol.
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
+	tblTraceLog->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
@@ -81,7 +82,7 @@ void qtDLGTrace::OnShow(int delta)
 	tblTraceLog->setRowCount(0);
 	int iLines = NULL,
 		count = NULL,
-		iPossibleRowCount = ((tblTraceLog->verticalHeader()->height() + 4) / 12) - 1;
+		iPossibleRowCount = (tblTraceLog->verticalHeader()->height() / 12) - 1;
 	QList<TraceInfoRow>::iterator i = traceData.begin();
 
 	scrollTrace->setMaximum(traceData.count() + 2 - iPossibleRowCount);

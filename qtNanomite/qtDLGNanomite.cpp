@@ -164,6 +164,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 qtDLGNanomite::~qtDLGNanomite()
 {
+	// save settings
+	clsHelperClass::WriteToSettingsFile(coreDebugger,qtNanomiteDisAsColor,L"ignore");
+
 	delete coreDebugger;
 	delete coreDisAs;
 	delete PEManager;
@@ -444,4 +447,9 @@ void qtDLGNanomite::AskForException(DWORD exceptionCode)
 	connect(newException,SIGNAL(ContinueException(int)),coreDebugger,SLOT(HandleForException(int)),Qt::QueuedConnection);
 
 	newException->exec();
+}
+
+void qtDLGNanomite::OnUpdaterFinished()
+{
+	delete launchUpdater;
 }

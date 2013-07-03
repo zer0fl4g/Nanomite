@@ -32,6 +32,7 @@ qtDLGRegisters::qtDLGRegisters(QWidget *parent)
 	// List Register
 	tblRegView->horizontalHeader()->resizeSection(0,75);
 	tblRegView->horizontalHeader()->resizeSection(1,100);
+	tblRegView->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblRegView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnContextMenu(QPoint)));
 	connect(tblRegView,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnChangeRequest(QTableWidgetItem *)));

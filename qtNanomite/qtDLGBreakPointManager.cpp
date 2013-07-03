@@ -33,6 +33,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	tblBPs->horizontalHeader()->resizeSection(1,135);
 	tblBPs->horizontalHeader()->resizeSection(2,135);
 	tblBPs->horizontalHeader()->resizeSection(3,50);
+	tblBPs->horizontalHeader()->setFixedHeight(21);
 
 	connect(pbClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(pbAddUpdate,SIGNAL(clicked()),this,SLOT(OnAddUpdate()));

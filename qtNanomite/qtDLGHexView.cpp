@@ -33,6 +33,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	tblHexView->horizontalHeader()->resizeSection(1,135);
 	tblHexView->horizontalHeader()->resizeSection(2,375);
 	tblHexView->horizontalHeader()->resizeSection(3,230);
+	tblHexView->horizontalHeader()->setFixedHeight(21);
 
 	qtDLGNanomite *MyMainWindow = qtDLGNanomite::GetInstance();
 
@@ -58,7 +59,7 @@ qtDLGHexView::~qtDLGHexView()
 void qtDLGHexView::DisplayData()
 {
 	memoryScroll->setValue(0);
-	memoryScroll->setMaximum(m_pHexDataWorker->dataList.count() - ((tblHexView->verticalHeader()->height() + 4) / 11) + 1);
+	memoryScroll->setMaximum(m_pHexDataWorker->dataList.count() - (tblHexView->verticalHeader()->height() / 11) + 1);
 
 	InsertDataFrom(0);
 }
@@ -67,7 +68,7 @@ void qtDLGHexView::InsertDataFrom(int position)
 {
 	tblHexView->setRowCount(0);
 	int numberOfLines = 0,
-		possibleRowCount = ((tblHexView->verticalHeader()->height() + 4) / 11) - 2,
+		possibleRowCount = (tblHexView->verticalHeader()->height() / 11) - 1,
 		count = 0;
 	QMap<DWORD64,HexData>::const_iterator i = m_pHexDataWorker->dataList.constBegin();
 

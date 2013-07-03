@@ -37,6 +37,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	// Init List
 	tblStringView->horizontalHeader()->resizeSection(0,75);
 	tblStringView->horizontalHeader()->resizeSection(1,135);
+	tblStringView->horizontalHeader()->setFixedHeight(21);
 
 	// Display
 	myMainWindow = qtDLGNanomite::GetInstance();
@@ -80,7 +81,7 @@ void qtDLGStringView::DataProcessing()
 void qtDLGStringView::DisplayStrings()
 {
 	stringScroll->setValue(0);
-	stringScroll->setMaximum(m_pStringProcessor->stringList.count() - ((tblStringView->verticalHeader()->height() + 4) / 15) + 1);
+	stringScroll->setMaximum(m_pStringProcessor->stringList.count() - (tblStringView->verticalHeader()->height() / 15) + 1);
 
 	InsertDataFrom(0);
 }
@@ -89,7 +90,7 @@ void qtDLGStringView::InsertDataFrom(int position)
 {
 	tblStringView->setRowCount(0);
 	int numberOfLines = 0,
-		possibleRowCount = ((tblStringView->verticalHeader()->height() + 4) / 15) - 2,
+		possibleRowCount = (tblStringView->verticalHeader()->height() / 15) - 1,
 		count = 0;
 	QMap<DWORD64,StringData>::const_iterator i = m_pStringProcessor->stringList.constBegin();
 

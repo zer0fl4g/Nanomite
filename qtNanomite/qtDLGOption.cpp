@@ -26,6 +26,7 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
+	tblCustomExceptions->horizontalHeader()->setFixedHeight(21);
 
 	OnLoad();
 
@@ -41,7 +42,6 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 
 qtDLGOption::~qtDLGOption()
 {
-
 }
 
 void qtDLGOption::OnRightClickCustomException(const QPoint qPoint)
@@ -249,12 +249,7 @@ void qtDLGOption::OnSave()
 void qtDLGOption::OnLoad()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-	clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
-	//if(!clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT))
-	//{
-	//	OnReload();
-	//	return;
-	//}
+	//clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
 	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);

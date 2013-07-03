@@ -105,8 +105,11 @@ bool clsHelperClass::WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDi
 	wsprintf(cTemp,L"%s=%s\n",L"COLOR_MATH",qtNanomiteDisAsColor->colorMath.data());
 	outfile.write(cTemp,wcslen(cTemp));
 
-	wsprintf(cTemp,L"%s=%s\n",L"defaultJIT",originalJIT.c_str());
-	outfile.write(cTemp,wcslen(cTemp));
+	if(originalJIT != L"ignore")
+	{
+		wsprintf(cTemp,L"%s=%s\n",L"defaultJIT",originalJIT.c_str());
+		outfile.write(cTemp,wcslen(cTemp));
+	}
 
 	outfile.close();
 	clsMemManager::CFree(cTemp);

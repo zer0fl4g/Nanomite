@@ -37,6 +37,7 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblFunctions->horizontalHeader()->resizeSection(0,75);
 	tblFunctions->horizontalHeader()->resizeSection(1,200);
 	tblFunctions->horizontalHeader()->resizeSection(2,135);
+	tblFunctions->horizontalHeader()->setFixedHeight(21);
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
@@ -74,7 +75,7 @@ qtDLGFunctions::~qtDLGFunctions()
 void qtDLGFunctions::DisplayFunctionLists()
 {
 	functionScroll->setValue(0);
-	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - ((tblFunctions->verticalHeader()->height() + 4) / 15) + 1);
+	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - (tblFunctions->verticalHeader()->height() / 11) + 1);
 
 	InsertDataFrom(0);
 }
@@ -104,7 +105,7 @@ void qtDLGFunctions::InsertDataFrom(int position)
 {
 	tblFunctions->setRowCount(0);
 	int numberOfLines = 0,
-		possibleRowCount = ((tblFunctions->verticalHeader()->height() + 4) / 11) - 2,
+		possibleRowCount = (tblFunctions->verticalHeader()->height() / 11) - 1,
 		count = 0;
 	QList<FunctionData>::ConstIterator i = m_pFunctionWorker->functionList.constBegin();
 

@@ -53,6 +53,7 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	tblDisAs->horizontalHeader()->resizeSection(1,250);
 	tblDisAs->horizontalHeader()->resizeSection(2,310);
 	tblDisAs->horizontalHeader()->resizeSection(3,310);
+	tblDisAs->horizontalHeader()->setFixedHeight(21);
 }
 
 qtDLGDisassembler::~qtDLGDisassembler()
@@ -113,7 +114,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		tblDisAs->setRowCount(0);
 
 		quint64 itemStyle;
-		while(iLines <= ((tblDisAs->verticalHeader()->height() + 4) / 11) - 1)
+		while(iLines <= ((tblDisAs->verticalHeader()->height()) / 11) - 1)
 		{
 			itemStyle = i.value().itemStyle;
 			tblDisAs->insertRow(tblDisAs->rowCount());

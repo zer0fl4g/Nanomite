@@ -43,6 +43,8 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 	tblHeapView->horizontalHeader()->resizeSection(2,135);
 	tblHeapView->horizontalHeader()->resizeSection(3,135);
 	tblHeapView->horizontalHeader()->resizeSection(4,135);
+	tblHeapView->horizontalHeader()->setFixedHeight(21);
+	tblHeapBlocks->horizontalHeader()->setFixedHeight(21);
 
 	myMainWindow = qtDLGNanomite::GetInstance();
 

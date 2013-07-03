@@ -17,26 +17,22 @@
 #ifndef CLSUPDATER_H
 #define CLSUPDATER_H
 
-#include <QObject>
-#include <QProcess>
+#include <QThread>
+#include <QString>
 
-class clsUpdater : public QObject
+class clsUpdater : public QThread
 {
 	Q_OBJECT
 public:
-	clsUpdater(const QString &fileName, QObject *parent = 0);
+	clsUpdater(const QString &fileName);
 
 	void launchUpdater();
 
 private:
-	void init();
-
-	private Q_SLOTS:
-		void slot_checkExitCode(int exitCode);
-
-private:
-	QProcess m_process;
 	QString m_fileName;
+
+protected:
+	void run();
 };
 
 #endif

@@ -15,46 +15,52 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "clsUpdater.h"
+#include "clsMemManager.h"
 
-#ifdef _DEBUG
-#include <QDebug>
-#endif
+#include <Windows.h>
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-clsUpdater::clsUpdater(const QString &fileName, QObject *parent)
-	: QObject(parent), m_fileName(fileName)
+clsUpdater::clsUpdater(const QString &fileName)
+	: m_fileName(fileName)
 {
-	init();
+
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
 void clsUpdater::launchUpdater()
 {
-	m_process.start(m_fileName);
-	m_process.waitForFinished();
+	this->start();
 }
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void clsUpdater::init()
+void clsUpdater::run()
 {
-	connect(&m_process, SIGNAL(finished(int)),
-		this,       SLOT(slot_checkExitCode(int)));
-}
+	STARTUPINFO si;
+    PROCESS_INFORMATION pi;
+    ZeroMemory(&si,sizeof(si));
+    si.cb = sizeof(si);
+    ZeroMemory(&pi,sizeof(pi));
+	DWORD exitCode = 0;
 
-//////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////////
-void clsUpdater::slot_checkExitCode(int exitCode)
-{
-#ifdef _DEBUG
-	qDebug() << exitCode;
-#endif
+	if(!CreateProcess(m_fileName.toStdWString().c_str(),NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,NULL,&si,&pi)) 
+    {
+        MessageBoxW(NULL,L"Error, unable to launch updater!",L"Nanomite",MB_OK);
+		return;
+    }
 
-	// 0 - return if all is OK
-	// 1 - if there is some error
-	// 2 - if need to update updater.exe ( this case is handle inner of updater.exe )
-
-	// 3 - means that this is update of QtNanomite.exe and for install QtNanomite.exe need to close process of QtNanomite.exe.
-	if (exitCode == 3) {
-		m_process.start(m_fileName, QStringList() << "startUpdate");
-		exit(0);
+    WaitForSingleObject(pi.hProcess,INFINITE);
+	GetExitCodeProcess(pi.hProcess,&exitCode);
+	
+	switch(exitCode)
+	{
+	case 0: // 0 - return if all is OK
+		break;
+	case 1: // 1 - if there is some error
+		MessageBoxW(NULL,L"Error, some undefined error happend while updating",L"Nanomite",MB_OK);
+		break;
+	case 2: // 2 - if need to update updater.exe ( this case is handle inner of updater.exe )
+		break;
+	case 3: // 3 - means that this is update of QtNanomite.exe and for install QtNanomite.exe need to close process of QtNanomite.exe.
+		break;
 	}
+
+	CloseHandle(pi.hProcess);
+    CloseHandle(pi.hThread);
 }

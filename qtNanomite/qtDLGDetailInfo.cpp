@@ -41,22 +41,26 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 	tblPIDs->horizontalHeader()->resizeSection(0,135);
 	tblPIDs->horizontalHeader()->resizeSection(1,135);
 	tblPIDs->horizontalHeader()->resizeSection(2,135);
+	tblPIDs->horizontalHeader()->setFixedHeight(21);
 
 	// List DetInfo  Threads
 	tblTIDs->horizontalHeader()->resizeSection(0,135);
 	tblTIDs->horizontalHeader()->resizeSection(1,135);
 	tblTIDs->horizontalHeader()->resizeSection(2,135);
 	tblTIDs->horizontalHeader()->resizeSection(3,135);
+	tblTIDs->horizontalHeader()->setFixedHeight(21);
 
 	// List DetInfo  Exceptions
 	tblExceptions->horizontalHeader()->resizeSection(0,135);
 	tblExceptions->horizontalHeader()->resizeSection(1,135);
 	tblExceptions->horizontalHeader()->resizeSection(2,140);
+	tblExceptions->horizontalHeader()->setFixedHeight(21);
 
 	// List DetInfo  Modules
 	tblModules->horizontalHeader()->resizeSection(0,135);
 	tblModules->horizontalHeader()->resizeSection(1,135);
 	tblModules->horizontalHeader()->resizeSection(2,135);
+	tblModules->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblTIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomTIDContextMenu(QPoint)));
 	connect(tblPIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomPIDContextMenu(QPoint)));

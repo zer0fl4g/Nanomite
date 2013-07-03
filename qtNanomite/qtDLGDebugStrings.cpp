@@ -30,6 +30,7 @@ qtDLGDebugStrings::qtDLGDebugStrings(QWidget *parent, Qt::WFlags flags)
 	
 	// List Debug Strings
 	tblDebugStrings->horizontalHeader()->resizeSection(0,75);
+	tblDebugStrings->horizontalHeader()->setFixedHeight(21);
 
 	setLayout(verticalLayout);
 

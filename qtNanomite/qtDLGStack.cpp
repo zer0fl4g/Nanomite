@@ -39,6 +39,7 @@ qtDLGStack::qtDLGStack(QWidget *parent)
 	tblStack->horizontalHeader()->resizeSection(0,135);
 	tblStack->horizontalHeader()->resizeSection(1,135);
 	tblStack->horizontalHeader()->resizeSection(2,300);
+	tblStack->horizontalHeader()->setFixedHeight(21);
 
 	connect(scrollStackView,SIGNAL(valueChanged(int)),this,SLOT(OnStackScroll(int)));
 	connect(tblStack,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnContextMenu(QPoint)));
@@ -64,7 +65,7 @@ void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_READWRITE,
-		dwRowCount = ((tblStack->verticalHeader()->height() + 4) / 11),
+		dwRowCount = (tblStack->verticalHeader()->height() / 11),
 		dwSize = dwRowCount * dwStackSize;
 	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
 		dwEndOffset = dwESP + dwStackSize * (dwRowCount / 2);
@@ -169,10 +170,10 @@ void qtDLGStack::OnStackScroll(int iValue)
 		LoadStackView(dwOffset,dwStackSize);
 	else
 	{
-		if(((tblStack->verticalHeader()->height() + 4) / 14) % 2)
-			LoadStackView(dwOffset + (dwStackSize * ((tblStack->verticalHeader()->height() + 4) / 14)),dwStackSize);
+		if((tblStack->verticalHeader()->height() / 14) % 2)
+			LoadStackView(dwOffset + (dwStackSize * (tblStack->verticalHeader()->height() / 14)),dwStackSize);
 		else
-			LoadStackView(dwOffset + (dwStackSize * (((tblStack->verticalHeader()->height() + 4) / 14) + 1)),dwStackSize);
+			LoadStackView(dwOffset + (dwStackSize * ((tblStack->verticalHeader()->height() / 14) + 1)),dwStackSize);
 	}
 
 	scrollStackView->setValue(5);

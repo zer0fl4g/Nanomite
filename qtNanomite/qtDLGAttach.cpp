@@ -33,6 +33,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 
 	tblProcList->horizontalHeader()->resizeSection(0,135);
 	tblProcList->horizontalHeader()->resizeSection(1,50);
+	tblProcList->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblProcList,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(OnProcessDoubleClick(int,int)));
 

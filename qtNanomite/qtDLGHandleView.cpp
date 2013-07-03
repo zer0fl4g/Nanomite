@@ -39,6 +39,7 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblHandleView->horizontalHeader()->resizeSection(0,75);
 	tblHandleView->horizontalHeader()->resizeSection(1,135);
 	tblHandleView->horizontalHeader()->resizeSection(2,135);
+	tblHandleView->horizontalHeader()->setFixedHeight(21);
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 

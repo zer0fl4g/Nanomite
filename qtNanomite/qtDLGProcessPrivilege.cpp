@@ -36,6 +36,7 @@ qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags,q
 	tblProcPriv->horizontalHeader()->resizeSection(0,75);
 	tblProcPriv->horizontalHeader()->resizeSection(1,250);
 	tblProcPriv->horizontalHeader()->resizeSection(2,135);
+	tblProcPriv->horizontalHeader()->setFixedHeight(21);
 
 	// Display
 	myMainWindow = qtDLGNanomite::GetInstance();

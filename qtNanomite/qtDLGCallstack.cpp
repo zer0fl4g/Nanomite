@@ -37,6 +37,7 @@ qtDLGCallstack::qtDLGCallstack(QWidget *parent)
 	tblCallstack->horizontalHeader()->resizeSection(4,300);
 	tblCallstack->horizontalHeader()->resizeSection(5,75);
 	tblCallstack->horizontalHeader()->resizeSection(6,300);
+	tblCallstack->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblCallstack,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnContextMenu(QPoint)));
 	connect(tblCallstack,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnDisplaySource(QTableWidgetItem *)));

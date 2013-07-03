@@ -43,6 +43,7 @@ qtDLGPatchManager::qtDLGPatchManager(QWidget *parent, Qt::WFlags flags)
 	tblPatches->horizontalHeader()->resizeSection(3,135);
 	tblPatches->horizontalHeader()->resizeSection(4,50);
 	tblPatches->horizontalHeader()->resizeSection(5,50);
+	tblPatches->horizontalHeader()->setFixedHeight(21);
 }
 
 qtDLGPatchManager::~qtDLGPatchManager()

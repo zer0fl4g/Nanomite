@@ -36,6 +36,7 @@ qtDLGLogView::qtDLGLogView(QWidget *parent)
 	// List LogBox
 	tblLogBox->horizontalHeader()->resizeSection(0,85);
 	tblLogBox->horizontalHeader()->resizeSection(1,300);
+	tblLogBox->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblLogBox,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnContextMenu(QPoint)));
 }
