@@ -29,8 +29,6 @@ public:
 	clsHelperClass();
 	~clsHelperClass();
 
-	static bool WriteToSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor, std::wstring originalJIT);
-	static bool ReadFromSettingsFile(clsDebugger *_coreDebugger,qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor, std::wstring& originalJIT);
 	static bool MenuLoadNewFile(clsDebugger *_coreDebugger);
 	static bool IsWindowsXP();
 	static bool SetThreadPriorityByTid(DWORD ThreadID, int threadPrio);

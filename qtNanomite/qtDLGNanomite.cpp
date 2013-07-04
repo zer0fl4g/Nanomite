@@ -72,8 +72,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	qtDLGMyWindow = this;
 	lExceptionCount = 0;
 
-	wstring originalJIT;
-	clsHelperClass::ReadFromSettingsFile(coreDebugger,qtNanomiteDisAsColor,originalJIT);
+	settings->CheckIfFirstRun();
+	settings->LoadDebuggerSettings(coreDebugger);
+	settings->LoadDisassemblerColor(qtNanomiteDisAsColor);
 
 	DisAsGUI = new qtDLGDisassembler(this);
 	this->setCentralWidget(DisAsGUI);
@@ -164,8 +165,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 qtDLGNanomite::~qtDLGNanomite()
 {
-	// save settings
-	clsHelperClass::WriteToSettingsFile(coreDebugger,qtNanomiteDisAsColor,L"ignore");
+	settings->LoadDebuggerSettings(coreDebugger);
+	settings->LoadDisassemblerColor(qtNanomiteDisAsColor);
 
 	delete coreDebugger;
 	delete coreDisAs;

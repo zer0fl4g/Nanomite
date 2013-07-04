@@ -19,6 +19,7 @@
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
+#include "clsAppSettings.h"
 
 qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
@@ -76,59 +77,8 @@ void qtDLGOption::OnClose()
 
 void qtDLGOption::OnReload()
 {
-	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = true;
-	myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = true;
-	myMainWindow->coreDebugger->dbgSettings.bDebugChilds = true;
-	myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 0;
-	myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = false;
-	myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = false;
-
-	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
-
-	tblCustomExceptions->setRowCount(0);
-	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(""));
-	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,	new QTableWidgetItem(""));
-
-	cbModuleEP->setChecked(false);
-	cbSystemEP->setChecked(false);
-	cbTLS->setChecked(false);
-	cbLoadSym->setChecked(true);
-	cbDebugChild->setChecked(true);
-	cbSuspendThread->setChecked(false);
-	cbIgEx->setChecked(false);
-	cbBreakOnNewDLL->setChecked(false);
-	cbBreakOnNewTID->setChecked(false);
-	cbBreakOnNewPID->setChecked(false);
-	cbBreakOnExDLL->setChecked(false);
-	cbBreakOnExTID->setChecked(false);
-	cbBreakOnExPID->setChecked(false);
-	cbExceptionAssist->setChecked(false);
-
-	myMainWindow->qtNanomiteDisAsColor->colorBP = "Red";
-	myMainWindow->qtNanomiteDisAsColor->colorCall = "Green";
-	myMainWindow->qtNanomiteDisAsColor->colorStack = "Dark green";
-	myMainWindow->qtNanomiteDisAsColor->colorJump = "Blue";
-	myMainWindow->qtNanomiteDisAsColor->colorMove = "Gray";
-	myMainWindow->qtNanomiteDisAsColor->colorMath = "Magenta";
-
-	comboBP->setCurrentIndex(2);
-	comboCall->setCurrentIndex(3);
-	comboJump->setCurrentIndex(5);
-	comboMove->setCurrentIndex(13);
-	comboStack->setCurrentIndex(4);
-	comboMath->setCurrentIndex(9);
-
-	clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
+	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();	
+	clsAppSettings::SharedInstance()->WriteDefaultSettings();
 
 	OnLoad();
 }
@@ -242,14 +192,20 @@ void qtDLGOption::OnSave()
 	myMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
 	myMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
 
-	if(clsHelperClass::WriteToSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT))
-		MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
+	clsAppSettings *pSettings = clsAppSettings::SharedInstance();
+	pSettings->SaveDebuggerSettings(myMainWindow->coreDebugger);
+	pSettings->SaveDisassemblerColor(myMainWindow->qtNanomiteDisAsColor);
+	pSettings->SaveDefaultJITDebugger(m_originalJIT);
+	MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
 }
 
 void qtDLGOption::OnLoad()
 {
 	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-	//clsHelperClass::ReadFromSettingsFile(myMainWindow->coreDebugger,myMainWindow->qtNanomiteDisAsColor,m_originalJIT);
+	clsAppSettings *pSettings = clsAppSettings::SharedInstance();
+	pSettings->LoadDebuggerSettings(myMainWindow->coreDebugger);
+	pSettings->LoadDisassemblerColor(myMainWindow->qtNanomiteDisAsColor);
+	pSettings->LoadDefaultJITDebugger(m_originalJIT);
 	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
@@ -359,12 +315,12 @@ void qtDLGOption::OnLoad()
 	{
 		lineOrg->setText(JITString);
 		lineCurrent->setText(JITString);
-		m_originalJIT = JITString.toStdWString();
+		m_originalJIT = JITString;
 		// save org jit to settings
 	}
 	else
 	{
-		lineOrg->setText(QString::fromStdWString(m_originalJIT));
+		lineOrg->setText(m_originalJIT);
 		lineCurrent->setText(JITString);
 	}
 }

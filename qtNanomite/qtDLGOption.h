@@ -21,8 +21,6 @@
 
 #include "qtDLGNanomite.h"
 
-#include <string>
-
 class qtDLGOption : public QDialog, public Ui_qtDLGOptionClass
 {
 	Q_OBJECT
@@ -45,7 +43,7 @@ public:
 private:
 	int m_selectedRow;
 
-	std::wstring m_originalJIT;
+	QString m_originalJIT;
 	
 	void OnLoad();
 

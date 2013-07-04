@@ -22,6 +22,9 @@
 #include <qmutex.h>
 #include <qsettings.h>
 
+#include "../clsDebugger/clsDebugger.h"
+#include "clsSymbolAndSyntax.h"
+
 class clsAppSettings : public QObject
 {
 	Q_OBJECT
@@ -30,6 +33,15 @@ public:
 	void SaveWindowState(QMainWindow* window);
 	bool RestoreWindowState(QMainWindow* window);
 	void ResetWindowState();
+
+	void SaveDebuggerSettings(clsDebugger *pDebugger);
+	void SaveDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor);
+	void SaveDefaultJITDebugger(QString savedJIT);
+	void LoadDebuggerSettings(clsDebugger *pDebugger);
+	void LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor);
+	void LoadDefaultJITDebugger(QString& savedJIT);
+	void WriteDefaultSettings();
+	void CheckIfFirstRun();
 
 	static clsAppSettings* SharedInstance();
 
