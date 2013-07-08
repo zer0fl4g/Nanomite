@@ -28,9 +28,12 @@ class qtDLGPEEditor : public QWidget, Ui_qtDLGPEEditorClass
 public:
 	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int PID = 0, std::wstring FileName = L"");
 	~qtDLGPEEditor();
-	
+
 private:
-	int _PID;
+	int _PID,
+		m_selectedRow;
+
+	quint64 m_selectedOffset;
 
 	std::wstring _currentFile;
 
@@ -45,6 +48,11 @@ private:
 	void InsertSections();
 	void LoadPEView();
 	void InitList();
+
+private slots:
+	void MenuCallback(QAction* pAction);
+	void OnCustomContextMenu(QPoint qPoint);
+
 };
 
 #endif

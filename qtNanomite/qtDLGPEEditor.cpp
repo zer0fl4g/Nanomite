@@ -15,6 +15,7 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGPEEditor.h"
+#include "qtDLGNanomite.h"
 
 #include "clsMemManager.h"
 #include "clsPEManager.h"
@@ -27,6 +28,8 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	this->setLayout(verticalLayout);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
+
+	connect(treePE,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 
 	_PID = PID;
 	_PEManager = PEManager;
@@ -90,6 +93,7 @@ void qtDLGPEEditor::InsertImports()
 	QTreeWidgetItem *topElement,
 					*moduleElement;
 	QString lastTopElement;
+	//DWORD64 moduleBase = NULL;
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Imports");
@@ -104,11 +108,12 @@ void qtDLGPEEditor::InsertImports()
 			moduleElement = new QTreeWidgetItem(topElement);
 			moduleElement->setText(0,currentElement[0]);  
 			lastTopElement = currentElement[0];
+			//moduleBase = clsHelperClass::CalcOffsetForModule((PTCHAR)currentElement[0].toLower().toStdWString().c_str(),NULL,_PID);
 		}
 		
 		QTreeWidgetItem* childElement = new QTreeWidgetItem(moduleElement);
 		childElement->setText(0,currentElement[1]);
-		childElement->setText(1,QString("%1").arg(imports.value(importCount).APIOffset,16,16,QChar('0')));
+		childElement->setText(1,QString("%1").arg(imports.value(importCount).APIOffset /* + moduleBase */,16,16,QChar('0')));
 	}
 }
 
@@ -119,6 +124,7 @@ void qtDLGPEEditor::InsertExports()
 
 	QTreeWidgetItem *topElement,
 					*exportElement;
+	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule((PTCHAR)clsHelperClass::reverseStrip((PTCHAR)_currentFile.c_str(),'\\'),NULL,_PID);
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Exports");
@@ -128,7 +134,7 @@ void qtDLGPEEditor::InsertExports()
 	{		
 		exportElement = new QTreeWidgetItem(topElement);
 		exportElement->setText(0,exports.at(exportsCount).APIName);
-		exportElement->setText(1,QString("%1").arg(exports.value(exportsCount).APIOffset,16,16,QChar('0')));  
+		exportElement->setText(1,QString("%1").arg(exports.value(exportsCount).APIOffset + moduleBase,16,16,QChar('0')));  
 	}
 }
 
@@ -317,4 +323,33 @@ void qtDLGPEEditor::InsertHeaderData(QTreeWidgetItem *topElement,QString ValueNa
 	QTreeWidgetItem *dataElement = new QTreeWidgetItem(topElement);
 	dataElement->setText(0,ValueName);
 	dataElement->setText(1,QString("%1").arg(dwValue,16,16,QChar('0')));
+}
+
+void qtDLGPEEditor::OnCustomContextMenu(QPoint qPoint)
+{
+	QMenu menu;
+
+	m_selectedRow = treePE->indexAt(qPoint).row();
+	QList<QTreeWidgetItem *> selectedItems = treePE->selectedItems();
+
+	if(m_selectedRow < 0 || selectedItems.count() < 0) return;
+	
+	m_selectedOffset = selectedItems.value(0)->text(1).toULongLong(0,16);
+
+	menu.addAction(new QAction("Show Offset in disassembler",this));
+	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
+
+	menu.exec(QCursor::pos());
+}
+
+void qtDLGPEEditor::MenuCallback(QAction* pAction)
+{
+	if(QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
+	{
+		if(m_selectedOffset >= 0)
+		{
+			qtDLGNanomite::GetInstance()->DisAsGUI->OnDisplayDisassembly(m_selectedOffset);
+			m_selectedOffset = NULL;
+		}
+	}
 }

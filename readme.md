@@ -50,8 +50,10 @@
 + added possibility to show registers of a thread in detailview
 + added possibility to show TEB/TBI of a thread in detailview
 + added possibility to show PEB/PBI of a process in detailview
-+ added possibility to set Nanomite as default JIT
++ added possibility to set Nanomite as default just in time debugger
++ added possibility in PEEditor to show exports of a loaded module in disassembler
 + added updater
++ updated beaengine to rev. 174
 + updated PE-Editor layout
 + updated Options to include more options, easier config 
 
@@ -59,7 +61,7 @@
 	- Needed to compile Qt with /MD because of issues with the cruntime. If you want to use the
 	  debugger you have to install the visual c++ runtime 2010. 
 	- You can save an exception to the list in the Options window. The debugger then knows how to handle it.
-	  Alternatively you can enable the ExceptionAssistant. This will show a dialog once a exception occures and
+	  Alternatively you can enable the Exception Assistant. This will show a dialog once a exception occures and
 	  offers different ways to handle it.
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

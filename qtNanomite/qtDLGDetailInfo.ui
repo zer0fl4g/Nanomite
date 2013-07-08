@@ -1,21 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!--
-* 	This file is part of Nanomite.
-*
-*    Nanomite is free software: you can redistribute it and/or modify
-*    it under the terms of the GNU General Public License as published by
-*    the Free Software Foundation, either version 3 of the License, or
-*    (at your option) any later version.
-*
-*    Nanomite is distributed in the hope that it will be useful,
-*    but WITHOUT ANY WARRANTY; without even the implied warranty of
-*    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
-*    GNU General Public License for more details.
-*
-*    You should have received a copy of the GNU General Public License
-*    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
-*/
--->
+<?xml version="1.0" encoding="UTF-8"?>
 <ui version="4.0">
  <class>qtDLGDetailInfoClass</class>
  <widget class="QWidget" name="qtDLGDetailInfoClass">
@@ -23,8 +6,8 @@
    <rect>
     <x>0</x>
     <y>0</y>
-    <width>817</width>
-    <height>738</height>
+    <width>859</width>
+    <height>302</height>
    </rect>
   </property>
   <property name="sizePolicy">
@@ -34,247 +17,282 @@
    </sizepolicy>
   </property>
   <property name="windowTitle">
-   <string>[ Nanomite ] - Detail Information - Processes / Threads / Exceptions / Modules</string>
+   <string>[ Nanomite ] - Detail Information</string>
   </property>
   <property name="windowIcon">
    <iconset resource="qtDLGNanomite.qrc">
     <normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</normaloff>:/DLGNanomite/Icons/IDI_MAIN.ico</iconset>
   </property>
-  <widget class="QWidget" name="verticalLayoutWidget">
+  <widget class="QWidget" name="verticalLayoutWidget_2">
    <property name="geometry">
     <rect>
-     <x>-1</x>
-     <y>-2</y>
-     <width>821</width>
-     <height>741</height>
+     <x>0</x>
+     <y>0</y>
+     <width>861</width>
+     <height>301</height>
     </rect>
    </property>
    <layout class="QVBoxLayout" name="verticalLayout">
     <item>
-     <widget class="QSplitter" name="splitter">
-      <property name="orientation">
-       <enum>Qt::Vertical</enum>
+     <widget class="QTabWidget" name="tabDetailView">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
       </property>
-      <widget class="QTableWidget" name="tblPIDs">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>Lucida Console</family>
-        </font>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>15</number>
+      <property name="currentIndex">
+       <number>0</number>
+      </property>
+      <widget class="QWidget" name="tabProcessDetails">
+       <attribute name="title">
+        <string>Process Details</string>
        </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>15</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>PID</string>
+       <widget class="QWidget" name="verticalLayoutWidget">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>851</width>
+          <height>271</height>
+         </rect>
         </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>EntryPoint</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>ExitCode</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>FilePath</string>
-        </property>
-       </column>
+        <layout class="QVBoxLayout" name="layoutPID">
+         <item>
+          <widget class="QTableWidget" name="tblPIDs">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>15</number>
+           </attribute>
+           <attribute name="verticalHeaderMinimumSectionSize">
+            <number>15</number>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>PID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>EntryPoint</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>ExitCode</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>FilePath</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
-      <widget class="QTableWidget" name="tblTIDs">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>Lucida Console</family>
-        </font>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>15</number>
+      <widget class="QWidget" name="tabThreadDetails">
+       <attribute name="title">
+        <string>Thread Details</string>
        </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>15</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>PID</string>
+       <widget class="QWidget" name="verticalLayoutWidget_3">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>851</width>
+          <height>271</height>
+         </rect>
         </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>TID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>EntryPoint</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>ExitCode</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>State</string>
-        </property>
-       </column>
+        <layout class="QVBoxLayout" name="layoutTID">
+         <item>
+          <widget class="QTableWidget" name="tblTIDs">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>15</number>
+           </attribute>
+           <attribute name="verticalHeaderMinimumSectionSize">
+            <number>15</number>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>PID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>TID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>EntryPoint</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>ExitCode</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>State</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
-      <widget class="QTableWidget" name="tblExceptions">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>Lucida Console</family>
-        </font>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>15</number>
+      <widget class="QWidget" name="tabExceptionDetails">
+       <attribute name="title">
+        <string>Exception Details</string>
        </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>15</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>Offset</string>
+       <widget class="QWidget" name="verticalLayoutWidget_4">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>851</width>
+          <height>271</height>
+         </rect>
         </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Exc. Code</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>PID / TID</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Module.Function</string>
-        </property>
-       </column>
+        <layout class="QVBoxLayout" name="layoutException">
+         <item>
+          <widget class="QTableWidget" name="tblExceptions">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>15</number>
+           </attribute>
+           <attribute name="verticalHeaderMinimumSectionSize">
+            <number>15</number>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>Offset</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Exc. Code</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>PID / TID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Module.Function</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
-      <widget class="QTableWidget" name="tblModules">
-       <property name="sizePolicy">
-        <sizepolicy hsizetype="Expanding" vsizetype="Expanding">
-         <horstretch>0</horstretch>
-         <verstretch>0</verstretch>
-        </sizepolicy>
-       </property>
-       <property name="font">
-        <font>
-         <family>Lucida Console</family>
-        </font>
-       </property>
-       <property name="contextMenuPolicy">
-        <enum>Qt::CustomContextMenu</enum>
-       </property>
-       <property name="editTriggers">
-        <set>QAbstractItemView::NoEditTriggers</set>
-       </property>
-       <property name="selectionBehavior">
-        <enum>QAbstractItemView::SelectRows</enum>
-       </property>
-       <attribute name="horizontalHeaderMinimumSectionSize">
-        <number>15</number>
+      <widget class="QWidget" name="tabModuleDetails">
+       <attribute name="title">
+        <string>Module Details</string>
        </attribute>
-       <attribute name="horizontalHeaderStretchLastSection">
-        <bool>true</bool>
-       </attribute>
-       <attribute name="verticalHeaderVisible">
-        <bool>false</bool>
-       </attribute>
-       <attribute name="verticalHeaderDefaultSectionSize">
-        <number>15</number>
-       </attribute>
-       <column>
-        <property name="text">
-         <string>PID</string>
+       <widget class="QWidget" name="verticalLayoutWidget_5">
+        <property name="geometry">
+         <rect>
+          <x>0</x>
+          <y>0</y>
+          <width>851</width>
+          <height>271</height>
+         </rect>
         </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>EntryPoint</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>State</string>
-        </property>
-       </column>
-       <column>
-        <property name="text">
-         <string>Path</string>
-        </property>
-       </column>
+        <layout class="QVBoxLayout" name="layoutModule">
+         <item>
+          <widget class="QTableWidget" name="tblModules">
+           <property name="contextMenuPolicy">
+            <enum>Qt::CustomContextMenu</enum>
+           </property>
+           <property name="editTriggers">
+            <set>QAbstractItemView::NoEditTriggers</set>
+           </property>
+           <property name="selectionBehavior">
+            <enum>QAbstractItemView::SelectRows</enum>
+           </property>
+           <attribute name="horizontalHeaderStretchLastSection">
+            <bool>true</bool>
+           </attribute>
+           <attribute name="verticalHeaderVisible">
+            <bool>false</bool>
+           </attribute>
+           <attribute name="verticalHeaderDefaultSectionSize">
+            <number>15</number>
+           </attribute>
+           <attribute name="verticalHeaderMinimumSectionSize">
+            <number>15</number>
+           </attribute>
+           <column>
+            <property name="text">
+             <string>PID</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>EntryPoint</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>State</string>
+            </property>
+           </column>
+           <column>
+            <property name="text">
+             <string>Path</string>
+            </property>
+           </column>
+          </widget>
+         </item>
+        </layout>
+       </widget>
       </widget>
      </widget>
     </item>

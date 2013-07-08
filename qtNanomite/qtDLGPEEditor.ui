@@ -32,6 +32,9 @@
     </property>
     <item>
      <widget class="QTreeWidget" name="treePE">
+      <property name="contextMenuPolicy">
+       <enum>Qt::CustomContextMenu</enum>
+      </property>
       <attribute name="headerVisible">
        <bool>false</bool>
       </attribute>

@@ -25,7 +25,7 @@
 
 #define BEA_ENGINE_STATIC
 #define BEA_USE_STDCALL
-#include "BeaEngine.h"
+#include <BeaEngine.h>
 
 using namespace std;
 

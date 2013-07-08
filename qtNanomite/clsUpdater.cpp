@@ -44,23 +44,25 @@ void clsUpdater::run()
         MessageBoxW(NULL,L"Error, unable to launch updater!",L"Nanomite",MB_OK);
 		return;
     }
+	else
+		TerminateProcess((HANDLE)-1,0);
 
-    WaitForSingleObject(pi.hProcess,INFINITE);
-	GetExitCodeProcess(pi.hProcess,&exitCode);
-	
-	switch(exitCode)
-	{
-	case 0: // 0 - return if all is OK
-		break;
-	case 1: // 1 - if there is some error
-		MessageBoxW(NULL,L"Error, some undefined error happend while updating",L"Nanomite",MB_OK);
-		break;
-	case 2: // 2 - if need to update updater.exe ( this case is handle inner of updater.exe )
-		break;
-	case 3: // 3 - means that this is update of QtNanomite.exe and for install QtNanomite.exe need to close process of QtNanomite.exe.
-		break;
-	}
+	//WaitForSingleObject(pi.hProcess,INFINITE);
+	//GetExitCodeProcess(pi.hProcess,&exitCode);
+	//
+	//switch(exitCode)
+	//{
+	//case 0: // 0 - return if all is OK
+	//	break;
+	//case 1: // 1 - if there is some error
+	//	MessageBoxW(NULL,L"Error, some undefined error happend while updating",L"Nanomite",MB_OK);
+	//	break;
+	//case 2: // 2 - if need to update updater.exe ( this case is handle inner of updater.exe )
+	//	break;
+	//case 3: // 3 - means that this is update of QtNanomite.exe and for install QtNanomite.exe need to close process of QtNanomite.exe.
+	//	break;
+	//}
 
-	CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+	//CloseHandle(pi.hProcess);
+ //   CloseHandle(pi.hThread);
 }

@@ -409,7 +409,7 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 
 			wcscpy_s(pNewFileName,MAX_PATH,pCurrentFileName);
 			wcscat_s(pNewFileName,MAX_PATH,L"_patched.exe");
-			CopyFile(pCurrentFileName,pNewFileName,false);
+			CopyFile(pCurrentFileName,pNewFileName,true);
 
 			HANDLE hFile = CreateFileW(pNewFileName,GENERIC_READ | GENERIC_WRITE,NULL,NULL,OPEN_EXISTING,NULL,NULL);
 			if(hFile == INVALID_HANDLE_VALUE)

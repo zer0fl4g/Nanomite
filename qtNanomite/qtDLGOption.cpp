@@ -77,7 +77,6 @@ void qtDLGOption::OnClose()
 
 void qtDLGOption::OnReload()
 {
-	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();	
 	clsAppSettings::SharedInstance()->WriteDefaultSettings();
 
 	OnLoad();

@@ -36,12 +36,13 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
-
+	
 	// List DetInfo  Processes
 	tblPIDs->horizontalHeader()->resizeSection(0,135);
 	tblPIDs->horizontalHeader()->resizeSection(1,135);
 	tblPIDs->horizontalHeader()->resizeSection(2,135);
 	tblPIDs->horizontalHeader()->setFixedHeight(21);
+	tabProcessDetails->setLayout(layoutPID);
 
 	// List DetInfo  Threads
 	tblTIDs->horizontalHeader()->resizeSection(0,135);
@@ -49,18 +50,21 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 	tblTIDs->horizontalHeader()->resizeSection(2,135);
 	tblTIDs->horizontalHeader()->resizeSection(3,135);
 	tblTIDs->horizontalHeader()->setFixedHeight(21);
+	tabThreadDetails->setLayout(layoutTID);
 
 	// List DetInfo  Exceptions
 	tblExceptions->horizontalHeader()->resizeSection(0,135);
 	tblExceptions->horizontalHeader()->resizeSection(1,135);
 	tblExceptions->horizontalHeader()->resizeSection(2,140);
 	tblExceptions->horizontalHeader()->setFixedHeight(21);
+	tabExceptionDetails->setLayout(layoutException);
 
 	// List DetInfo  Modules
 	tblModules->horizontalHeader()->resizeSection(0,135);
 	tblModules->horizontalHeader()->resizeSection(1,135);
 	tblModules->horizontalHeader()->resizeSection(2,135);
 	tblModules->horizontalHeader()->setFixedHeight(21);
+	tabModuleDetails->setLayout(layoutModule);
 
 	connect(tblTIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomTIDContextMenu(QPoint)));
 	connect(tblPIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomPIDContextMenu(QPoint)));
@@ -84,7 +88,7 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 
 	_SelectedOffset = tblPIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
-	menu.addAction(new QAction("Show Offset in disassembler",this));
+	menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show PBI/PEB",this));
 
 	int ProcessPriority = GetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16));
@@ -159,7 +163,7 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 
 	_SelectedOffset = tblTIDs->item(_iSelectedRow,2)->text().toULongLong(0,16);
 
-	menu.addAction(new QAction("Show Offset in disassembler",this));
+	//menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show Registers",this));
 	menu.addAction(new QAction("Show TBI/TEB",this));
 	menu.addAction(new QAction("Suspend",this));
@@ -246,7 +250,7 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 
 	_SelectedOffset = tblModules->item(_iSelectedRow,1)->text().toULongLong(0,16);
 
-	menu.addAction(new QAction("Show Offset in disassembler",this));
+	//menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Open Module in PE View",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
@@ -255,7 +259,7 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 
 void qtDLGDetailInfo::PIDMenuCallback(QAction* pAction)
 {
-	if(QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
+	if(QString().compare(pAction->text(),"Show EntryPoint in disassembler") == 0)
 	{
 		if(_SelectedOffset >= 0)
 		{
@@ -293,6 +297,15 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		emit OpenFileInPEManager(temp,-1);
 		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
 		dlgPEEditor->show();
+	}
+	else if(QString().compare(pAction->text(),"Show EntryPoint in disassembler") == 0 || 
+		QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
+	{
+		if(_SelectedOffset >= 0)
+		{
+			emit ShowInDisassembler(_SelectedOffset);
+			_SelectedOffset = NULL;
+		}
 	}
 	else if(QString().compare(pAction->text(),"Suspend") == 0)
 	{

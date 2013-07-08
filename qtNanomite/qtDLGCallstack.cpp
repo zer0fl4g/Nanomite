@@ -186,13 +186,26 @@ int qtDLGCallstack::OnCallStack(quint64 dwStackAddr,
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
 			new QTableWidgetItem(""));
 
-	// Source Line
-	tblCallstack->setItem(tblCallstack->rowCount() - 1,5,
-		new QTableWidgetItem(QString().sprintf("%d",iSourceLineNum)));
-	
-	// Source File
-	tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
-		new QTableWidgetItem(QString::fromStdWString(sSourceFilePath)));
+	if(iSourceLineNum > 0 && sSourceFilePath.length() > 0)
+	{
+		// Source Line
+		tblCallstack->setItem(tblCallstack->rowCount() - 1,5,
+			new QTableWidgetItem(QString().sprintf("%d",iSourceLineNum)));
+
+		// Source File
+		tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
+			new QTableWidgetItem(QString::fromStdWString(sSourceFilePath)));
+	}
+	else
+	{
+		// Source Line
+		tblCallstack->setItem(tblCallstack->rowCount() - 1,5,
+		new QTableWidgetItem(""));
+
+		// Source File
+		tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
+			new QTableWidgetItem(""));
+	}
 
 	return 0;
 }
