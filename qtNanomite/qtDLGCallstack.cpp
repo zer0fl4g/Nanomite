@@ -52,8 +52,8 @@ void qtDLGCallstack::OnContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblCallstack->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblCallstack->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to Disassembler",this));
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
@@ -80,55 +80,55 @@ void qtDLGCallstack::MenuCallback(QAction* pAction)
 
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
-		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-				emit OnDisplayDisassembly(tblCallstack->item(_iSelectedRow,1)->text().toULongLong(0,16));	
+		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblCallstack->item(m_selectedRow,1)->text().toULongLong(0,16)))
+				emit OnDisplayDisassembly(tblCallstack->item(m_selectedRow,1)->text().toULongLong(0,16));	
 	}	
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4:%5:%6:%7")
-			.arg(tblCallstack->item(_iSelectedRow,0)->text())
-			.arg(tblCallstack->item(_iSelectedRow,1)->text())
-			.arg(tblCallstack->item(_iSelectedRow,2)->text())
-			.arg(tblCallstack->item(_iSelectedRow,3)->text())
-			.arg(tblCallstack->item(_iSelectedRow,4)->text())
-			.arg(tblCallstack->item(_iSelectedRow,5)->text())
-			.arg(tblCallstack->item(_iSelectedRow,6)->text()));
+			.arg(tblCallstack->item(m_selectedRow,0)->text())
+			.arg(tblCallstack->item(m_selectedRow,1)->text())
+			.arg(tblCallstack->item(m_selectedRow,2)->text())
+			.arg(tblCallstack->item(m_selectedRow,3)->text())
+			.arg(tblCallstack->item(m_selectedRow,4)->text())
+			.arg(tblCallstack->item(m_selectedRow,5)->text())
+			.arg(tblCallstack->item(m_selectedRow,6)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Stack Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,0)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,0)->text());
 	}
 	else if(QString().compare(pAction->text(),"current Function Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"current Module.Function") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"return Function Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,3)->text());
 	}
 	else if(QString().compare(pAction->text(),"return Module.Function") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,4)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,4)->text());
 	}
 	else if(QString().compare(pAction->text(),"Source Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,5)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,5)->text());
 	}
 	else if(QString().compare(pAction->text(),"Source File") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(_iSelectedRow,6)->text());
+		clipboard->setText(tblCallstack->item(m_selectedRow,6)->text());
 	}
 }
 
@@ -145,56 +145,56 @@ void qtDLGCallstack::OnDisplaySource(QTableWidgetItem *pItem)
 	return;
 }
 
-int qtDLGCallstack::OnCallStack(quint64 dwStackAddr,
-						 quint64 dwReturnTo,wstring sReturnToFunc,wstring sModuleName,
-						 quint64 dwEIP,wstring sFuncName,wstring sFuncModule,
-						 wstring sSourceFilePath,int iSourceLineNum)
+void qtDLGCallstack::OnCallStack(quint64 stackAddress,
+						 quint64 returnOffset, wstring returnFunctionName, wstring returnModuleName,
+						 quint64 currentOffset, wstring currentFunctionName, wstring currentModuleName,
+						 wstring sourceFilePath, int sourceLineNumber)
 {
 	tblCallstack->insertRow(tblCallstack->rowCount());
 
 	// Stack Address
 	tblCallstack->setItem(tblCallstack->rowCount() - 1,0,
-		new QTableWidgetItem(QString("%1").arg(dwStackAddr,16,16,QChar('0'))));
+		new QTableWidgetItem(QString("%1").arg(stackAddress,16,16,QChar('0'))));
 
 	// Func Addr
 	tblCallstack->setItem(tblCallstack->rowCount() - 1,1,
-		new QTableWidgetItem(QString("%1").arg(dwEIP,16,16,QChar('0'))));
+		new QTableWidgetItem(QString("%1").arg(currentOffset,16,16,QChar('0'))));
 
 	// <mod.func>
-	if(sFuncModule.length() > 0 && sFuncName.length() > 0)
+	if(currentModuleName.length() > 0 && currentFunctionName.length() > 0)
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString::fromStdWString(sFuncName))));
-	else if(sFuncModule.length() > 0 && sFuncName.length() <= 0)
+			new QTableWidgetItem(QString::fromStdWString(currentModuleName).append(".").append(QString::fromStdWString(currentFunctionName))));
+	else if(currentModuleName.length() > 0 && currentFunctionName.length() <= 0)
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(sFuncModule).append(".").append(QString("%1").arg(dwEIP,16,16,QChar('0')))));
+			new QTableWidgetItem(QString::fromStdWString(currentModuleName).append(".").append(QString("%1").arg(currentOffset,16,16,QChar('0')))));
 	else
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,24,
 			new QTableWidgetItem(""));
 
 	// Return To
 	tblCallstack->setItem(tblCallstack->rowCount() - 1,3,
-		new QTableWidgetItem(QString("%1").arg(dwReturnTo,16,16,QChar('0'))));
+		new QTableWidgetItem(QString("%1").arg(returnOffset,16,16,QChar('0'))));
 
 	// Return To <mod.func>
-	if(sFuncName.length() > 0 && sModuleName.length() > 0)
+	if(currentFunctionName.length() > 0 && returnModuleName.length() > 0)
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString::fromStdWString(sReturnToFunc))));
-	else if(sFuncName.length() <= 0 && sModuleName.length() > 0)
+			new QTableWidgetItem(QString::fromStdWString(returnModuleName).append(".").append(QString::fromStdWString(returnFunctionName))));
+	else if(currentFunctionName.length() <= 0 && returnModuleName.length() > 0)
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(sModuleName).append(".").append(QString("%1").arg(dwReturnTo,16,16,QChar('0')))));
+			new QTableWidgetItem(QString::fromStdWString(returnModuleName).append(".").append(QString("%1").arg(returnOffset,16,16,QChar('0')))));
 	else
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
 			new QTableWidgetItem(""));
 
-	if(iSourceLineNum > 0 && sSourceFilePath.length() > 0)
+	if(sourceLineNumber > 0 && sourceFilePath.length() > 0)
 	{
 		// Source Line
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,5,
-			new QTableWidgetItem(QString().sprintf("%d",iSourceLineNum)));
+			new QTableWidgetItem(QString().sprintf("%d",sourceLineNumber)));
 
 		// Source File
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
-			new QTableWidgetItem(QString::fromStdWString(sSourceFilePath)));
+			new QTableWidgetItem(QString::fromStdWString(sourceFilePath)));
 	}
 	else
 	{
@@ -206,6 +206,4 @@ int qtDLGCallstack::OnCallStack(quint64 dwStackAddr,
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
 			new QTableWidgetItem(""));
 	}
-
-	return 0;
 }

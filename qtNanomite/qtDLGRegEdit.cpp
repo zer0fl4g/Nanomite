@@ -22,13 +22,12 @@
 #include <QTCore>
 #include <QtGui>
 
-qtDLGRegEdit::qtDLGRegEdit(QWidget *parent, Qt::WFlags flags,LPVOID pProcessContext,bool bIs64)
-	: QDialog(parent, flags)
+qtDLGRegEdit::qtDLGRegEdit(QWidget *parent, Qt::WFlags flags,LPVOID pProcessContext,bool is64Bit)
+	: QDialog(parent, flags),
+	m_is64Bit(is64Bit),
+	m_pProcessContext(pProcessContext)
 {
-	_bIs64 = bIs64;
-	_pProcessContext = pProcessContext;
-
-	if(_bIs64)
+	if(m_is64Bit)
 	{
 		ui64.setupUi(this);
 		connect(ui64.pbExit,SIGNAL(clicked()),this,SLOT(OnExit()));
@@ -56,9 +55,9 @@ qtDLGRegEdit::~qtDLGRegEdit()
 void qtDLGRegEdit::FillGUI()
 {
 #ifdef _AMD64_
-	if(_bIs64)
+	if(m_is64Bit)
 	{
-		CONTEXT *pProcContext = (CONTEXT *)_pProcessContext;
+		CONTEXT *pProcContext = (CONTEXT *)m_pProcessContext;
 		ui64.lineRAX->setText(QString("%1").arg(pProcContext->Rax,16,16,QChar('0')));
 		ui64.lineRBX->setText(QString("%1").arg(pProcContext->Rbx,16,16,QChar('0')));
 		ui64.lineRCX->setText(QString("%1").arg(pProcContext->Rcx,16,16,QChar('0')));
@@ -80,7 +79,7 @@ void qtDLGRegEdit::FillGUI()
 	}
 	else
 	{
-		WOW64_CONTEXT *pProcContext = (WOW64_CONTEXT *)_pProcessContext;
+		WOW64_CONTEXT *pProcContext = (WOW64_CONTEXT *)m_pProcessContext;
 		ui86.lineEAX->setText(QString("%1").arg(pProcContext->Eax,8,16,QChar('0')));
 		ui86.lineEBX->setText(QString("%1").arg(pProcContext->Ebx,8,16,QChar('0')));
 		ui86.lineECX->setText(QString("%1").arg(pProcContext->Ecx,8,16,QChar('0')));
@@ -93,7 +92,7 @@ void qtDLGRegEdit::FillGUI()
 		ui86.lineEFlags->setText(QString("%1").arg(pProcContext->EFlags,8,16,QChar('0')));
 	}
 #else
-	CONTEXT *pProcContext = (CONTEXT *)_pProcessContext;
+	CONTEXT *pProcContext = (CONTEXT *)m_pProcessContext;
 	ui86.lineEAX->setText(QString("%1").arg(pProcContext->Eax,8,16,QChar('0')));
 	ui86.lineEBX->setText(QString("%1").arg(pProcContext->Ebx,8,16,QChar('0')));
 	ui86.lineECX->setText(QString("%1").arg(pProcContext->Ecx,8,16,QChar('0')));
@@ -116,9 +115,9 @@ void qtDLGRegEdit::OnSaveAndExit()
 {
 	DWORD dwEFlags = NULL;
 #ifdef _AMD64_
-	if(_bIs64)
+	if(m_is64Bit)
 	{
-		CONTEXT *pProcContext = (CONTEXT *)_pProcessContext;
+		CONTEXT *pProcContext = (CONTEXT *)m_pProcessContext;
 		pProcContext->Rax = ui64.lineRAX->text().toULongLong(0,16);
 		pProcContext->Rbx = ui64.lineRBX->text().toULongLong(0,16);
 		pProcContext->Rcx = ui64.lineRCX->text().toULongLong(0,16);
@@ -141,7 +140,7 @@ void qtDLGRegEdit::OnSaveAndExit()
 	}
 	else
 	{
-		WOW64_CONTEXT *pProcContext = (WOW64_CONTEXT *)_pProcessContext;
+		WOW64_CONTEXT *pProcContext = (WOW64_CONTEXT *)m_pProcessContext;
 		pProcContext->Eax = ui86.lineEAX->text().toULongLong(0,16);
 		pProcContext->Ebx = ui86.lineEBX->text().toULongLong(0,16);
 		pProcContext->Ecx = ui86.lineECX->text().toULongLong(0,16);
@@ -154,7 +153,7 @@ void qtDLGRegEdit::OnSaveAndExit()
 		pProcContext->EFlags = ui86.lineEFlags->text().toULongLong(0,16);
 	}
 #else
-	CONTEXT *pProcContext = (CONTEXT *)_pProcessContext;
+	CONTEXT *pProcContext = (CONTEXT *)m_pProcessContext;
 	pProcContext->Eax = ui86.lineEAX->text().toULongLong(0,16);
 	pProcContext->Ebx = ui86.lineEBX->text().toULongLong(0,16);
 	pProcContext->Ecx = ui86.lineECX->text().toULongLong(0,16);

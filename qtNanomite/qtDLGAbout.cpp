@@ -14,8 +14,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
-
 #include "qtDLGAbout.h"
+
 #include "clsHelperClass.h"
 
 qtDLGAbout::qtDLGAbout(QWidget *parent, Qt::WFlags flags)

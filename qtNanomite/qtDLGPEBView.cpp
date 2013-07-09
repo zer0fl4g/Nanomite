@@ -24,8 +24,7 @@
 #include <QMenu>
 
 qtDLGPEBView::qtDLGPEBView(HANDLE hProc, QWidget *parent, Qt::WFlags flags)
-	: QWidget(parent, flags),
-	m_SelectedRow(0)
+	: QWidget(parent, flags)
 {
 	this->setupUi(this);
 	this->setLayout(verticalLayout);
@@ -33,7 +32,6 @@ qtDLGPEBView::qtDLGPEBView(HANDLE hProc, QWidget *parent, Qt::WFlags flags)
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 
 	treePEB->header()->resizeSection(0,250);
-	//connect(treeTIB,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 
 	ShowPEBForProcess(hProc);
 }
@@ -164,36 +162,3 @@ void qtDLGPEBView::InsertDataIntoTable(QTreeWidgetItem *pTopElement, QString val
 	newItem->setText(0,valueName);
 	newItem->setText(1,QString("%1").arg(value,16,16,QChar('0')));	
 }
-
-//void qtDLGTIBView::OnCustomContextMenuRequested(QPoint qPoint)
-//{
-//	QMenu menu;
-//
-//	m_SelectedRow = treeTIB->indexAt(qPoint).row();
-//	if(m_SelectedRow < 0) return;
-//
-//	QMenu *submenu = menu.addMenu("Copy to Clipboard");
-//	submenu->addAction(new QAction("Line",this));
-//	submenu->addAction(new QAction("Value",this));
-//
-//	menu.addMenu(submenu);
-//	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-//
-//	menu.exec(QCursor::pos());
-//}
-//
-//void qtDLGTIBView::MenuCallback(QAction* pAction)
-//{
-//	//if(QString().compare(pAction->text(),"Line") == 0)
-//	//{
-//	//	QClipboard* clipboard = QApplication::clipboard();
-//	//	clipboard->setText(QString("%1:%2")
-//	//		.arg(treeTIB->item(_iSelectedRow,0)->text())
-//	//		.arg(treeTIB->item(_iSelectedRow,1)->text()));
-//	//}
-//	//else if(QString().compare(pAction->text(),"Debug String") == 0)
-//	//{
-//	//	QClipboard* clipboard = QApplication::clipboard();
-//	//	clipboard->setText(treeTIB->item(_iSelectedRow,1)->text());
-//	//}
-//}

@@ -21,23 +21,49 @@
 
 #include <Windows.h>
 
+/**
+* @file qtDLGPEBView.h
+* @brief Displaying the PEB,PBI widget
+*/
 class qtDLGPEBView : public QWidget, public Ui_qtDLGPEBViewClass
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the PEB,PBI widget
+	* @param processHandle A handle to the process which contains the thread
+	* @param threadHandle A handle to the thread which contains the whiched TEB,TBI
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
 	qtDLGPEBView(HANDLE hProc, QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGPEBView();
 
 private:
-	int m_SelectedRow;
-
+	/**
+	* @brief Will insert the given data to the given topelement
+	* @param pTopElement A pointer to the topelement which should get the childnode
+	* @param valueName The name of value which will be placed in the childnode
+	* @param value The value which will be placed in the childnode
+	*
+	* @return no
+	*/
 	void InsertDataIntoTable(QTreeWidgetItem *pTopElement, QString valueName, DWORD64 value);
+	/**
+	* @brief A override of the resizeevent to enable refilling in the table widget
+	* @param processHandle A handle to the process which contains the whiched TEB,TBI
+	*
+	* @return no
+	*/
 	void ShowPEBForProcess(HANDLE hProc);
-
-//private slots:
-//	void MenuCallback(QAction* pAction);
-//	void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
 #endif

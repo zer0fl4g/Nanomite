@@ -21,26 +21,55 @@
 
 #include "qtDLGNanomite.h"
 
+/**
+* @file qtDLGWindowView.h
+* @brief Displaying the window view widget
+*/
 class qtDLGWindowView : public QWidget, public Ui_qtDLGWindowViewClass
 {
 	Q_OBJECT
 
 public:
-	static qtDLGWindowView *pThis;
+	static qtDLGWindowView *pThis; /* static pointer to instance for enum function */
 
-	qtDLGWindowView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 iPID = 0);
+	/**
+	* @brief Responsible for initializing and showing the GUI of the window view widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	* @param processID The process id from which the windows will be displayed
+	*
+	* @return no
+	*/
+	qtDLGWindowView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 processID = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGWindowView();
 
 private:
-	size_t	_iPID,
-			_iForEntry,
-			_iForEnd;
+	size_t	m_processID, /* contains the needed process id */
+			m_processCountEntry, /* begin of the loop if we need more than one process */
+			m_processCountEnd; /* end of the loop if we need more than one process */
 
-	qtDLGNanomite *myMainWindow;
+	qtDLGNanomite *m_pMainWindow; /* pointer to the main application */
 
+	/**
+	* @brief Callback for the "EnumWindows" function
+	* @param hWnd The window handle which was enumed
+	* @param lParam Any additional data as a pointer which was send from the enum function
+	*
+	* @return no
+	*/
 	static bool CALLBACK EnumWindowCallBack(HWND hWnd,LPARAM lParam);
 
-	private slots:
-		void EnumWindow();
+private slots:
+	/**
+	* @brief Will call the "EnumWindows" API for each process based on user choice
+	*
+	* @return no
+	*/
+	void EnumWindow();
 };
 #endif

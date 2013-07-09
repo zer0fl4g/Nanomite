@@ -23,23 +23,65 @@
 
 #include <QTCore>
 
+/**
+* @file qtDLGHexView.h
+* @brief Displaying the exception editor
+*/
 class qtDLGHexView : public QWidget, public Ui_qtDLGHexViewClass
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the hexview widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	* @param dwPID The process id from which the memory will be
+	* @param StartOffset The offset from the begining of the display part
+	* @param Size The size of memory which will be displayed
+	*
+	* @return no
+	*/
 	qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID, unsigned long long StartOffset,unsigned long long Size);
+	/**
+	* @brief Cleans up the data
+	*
+	* @return no
+	*/
 	~qtDLGHexView();
 
 private:
-	clsHexViewWorker *m_pHexDataWorker;
+	clsHexViewWorker *m_pHexDataWorker; /* holds a pointer to the worker thread */
 
 private slots:
+	/**
+	* @brief A Qt slot which is called when the worked thread has finished
+	*
+	* @return no
+	*/
 	void DisplayData();
+	/**
+	* @brief A Qt slot which is called when the user scrolls, resizes
+	* @param position The position from where the data will be displayed
+	*
+	* @return no
+	*/
 	void InsertDataFrom(int position);
 
 protected:
+	/**
+	* @brief A override of the wheelevent to enable scrolling in the table widget
+	* @param event A pointer to the event data
+	*
+	* @return no
+	*/
 	void wheelEvent(QWheelEvent * event);
+	/**
+	* @brief A override of the resizeevent to enable refilling in the table widget
+	* @param event A pointer to the event data
+	*
+	* @return no
+	*/
 	void resizeEvent(QResizeEvent *event);
 };
 

@@ -23,21 +23,56 @@
 
 #include "ui_qtDLGLogView.h"
 
+/**
+* @file qtDLGLogView.h
+* @brief Displaying the logview widget
+*/
 class qtDLGLogView : public QDockWidget, public Ui_qtDLGLogView
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the regedit dialog
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	*
+	* @return no
+	*/
 	qtDLGLogView(QWidget *parent = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGLogView();
 
 public slots:
-	void OnContextMenu(QPoint);
+	/**
+	* @brief A Qt slot which is called when the user does a right click to open the
+	* context menu
+	* @param qPoint The point where the user right clicked
+	*
+	* @return no
+	*/
+	void OnContextMenu(QPoint qPoint);
+	/**
+	* @brief A Qt slot which is called when the user clicked the close button
+	* @param pAction The selected action from the context menu
+	*
+	* @return no
+	*/
 	void MenuCallback(QAction* pAction);
-	int OnLog(std::wstring sLog);
+	/**
+	* @brief A Qt slot which is called when the clsDebugger instance wants to place
+	* a log line in the gui
+	* @param logString The line which will be saved to gui
+	* 
+	* @return no
+	*/
+	void OnLog(std::wstring logString);
 
 private:
-	int _iSelectedRow;
+	int m_selectedRow; /* contains the selected row if the context menu was activated */
 };
 
 #endif // QTDLGLOGVIEW_H

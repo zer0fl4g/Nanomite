@@ -23,20 +23,17 @@
 #include <QClipboard>
 #include <QMenu>
 
-qtDLGTIBView::qtDLGTIBView(HANDLE hProc, HANDLE hThread, QWidget *parent, Qt::WFlags flags)
-	: QWidget(parent, flags),
-	m_SelectedRow(0)
+qtDLGTIBView::qtDLGTIBView(HANDLE processHandle, HANDLE threadHandle, QWidget *parent, Qt::WFlags flags)
+	: QWidget(parent, flags)
 {
 	this->setupUi(this);
 	this->setLayout(verticalLayout);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 
-	//connect(treeTIB,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
-
 	treeTIB->header()->resizeSection(0,250);
 
-	ShowTIBForThread(hProc,hThread);
+	ShowTIBForThread(processHandle,threadHandle);
 }
 
 qtDLGTIBView::~qtDLGTIBView()
@@ -44,12 +41,12 @@ qtDLGTIBView::~qtDLGTIBView()
 
 }
 
-void qtDLGTIBView::ShowTIBForThread(HANDLE hProc, HANDLE hThread)
+void qtDLGTIBView::ShowTIBForThread(HANDLE processHandle, HANDLE threadHandle)
 {
 	DWORD retLen = NULL;
 	THREAD_BASIC_INFORMATION pTIB;
 
-	if(clsAPIImport::pNtQueryInformationThread(hThread,ThreadBasicInformation,&pTIB,sizeof(pTIB),&retLen) != NULL)
+	if(clsAPIImport::pNtQueryInformationThread(threadHandle,ThreadBasicInformation,&pTIB,sizeof(pTIB),&retLen) != NULL)
 	{
 		MessageBoxW(NULL,L"ERROR, NtQueryInformationThread failed!",L"Nanomite",MB_OK);
 		this->close();
@@ -58,7 +55,7 @@ void qtDLGTIBView::ShowTIBForThread(HANDLE hProc, HANDLE hThread)
 
 	PTEB pTEB = (PTEB)clsMemManager::CAlloc(sizeof(TEB));
 	SIZE_T bytesRead = NULL;
-	if(!ReadProcessMemory(hProc,pTIB.TebBaseAddress,pTEB,sizeof(TEB),&bytesRead))
+	if(!ReadProcessMemory(processHandle,pTIB.TebBaseAddress,pTEB,sizeof(TEB),&bytesRead))
 	{
 		MessageBoxW(NULL,L"ERROR, Could not read the TEB address!",L"Nanomite",MB_OK);
 		clsMemManager::CFree(pTEB);
@@ -153,36 +150,3 @@ void qtDLGTIBView::InsertDataIntoTable(QTreeWidgetItem *pTopElement, QString val
 	newItem->setText(0,valueName);
 	newItem->setText(1,QString("%1").arg(value,16,16,QChar('0')));
 }
-
-//void qtDLGTIBView::OnCustomContextMenuRequested(QPoint qPoint)
-//{
-//	QMenu menu;
-//
-//	m_SelectedRow = treeTIB->indexAt(qPoint).row();
-//	if(m_SelectedRow < 0) return;
-//
-//	QMenu *submenu = menu.addMenu("Copy to Clipboard");
-//	submenu->addAction(new QAction("Line",this));
-//	submenu->addAction(new QAction("Value",this));
-//
-//	menu.addMenu(submenu);
-//	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
-//
-//	menu.exec(QCursor::pos());
-//}
-//
-//void qtDLGTIBView::MenuCallback(QAction* pAction)
-//{
-//	//if(QString().compare(pAction->text(),"Line") == 0)
-//	//{
-//	//	QClipboard* clipboard = QApplication::clipboard();
-//	//	clipboard->setText(QString("%1:%2")
-//	//		.arg(treeTIB->item(_iSelectedRow,0)->text())
-//	//		.arg(treeTIB->item(_iSelectedRow,1)->text()));
-//	//}
-//	//else if(QString().compare(pAction->text(),"Debug String") == 0)
-//	//{
-//	//	QClipboard* clipboard = QApplication::clipboard();
-//	//	clipboard->setText(treeTIB->item(_iSelectedRow,1)->text());
-//	//}
-//}

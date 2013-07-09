@@ -21,26 +21,70 @@
 
 #include <Windows.h>
 
+/**
+* @file qtDLGExceptionAsk.h
+* @brief Displaying the Exception Assistant
+*/
 class qtDLGExceptionAsk : public QDialog, Ui_qtDLGExceptionAskClass
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the Exception Assistant
+	* @param exceptionCode The exception code
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
 	qtDLGExceptionAsk(DWORD exceptionCode, QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGExceptionAsk();
 
 signals:
+	/**
+	* @brief A Qt signal which contains the instruction how to handle the occured exception
+	* @param handleException The value for the debugger to know how to handle this exception
+	*
+	* @return no
+	*/
 	void ContinueException(int handleException);
 
 private:
-	int m_retValue;
+	int m_retValue; /* stores a value depending on what the user decided */
 
 private slots:
+	/**
+	* @brief A Qt slot which is called when the user selected the exception to be ignored
+	*
+	* @return no
+	*/
 	void ExceptionIgnore();
+	/**
+	* @brief A Qt slot which is called when the user selected the exception to be send to the application
+	*
+	* @return no
+	*/
 	void ExceptionSendToApp();
+	/**
+	* @brief A Qt slot which is called when the user selected to break on the exception
+	*
+	* @return no
+	*/
 	void ExceptionBreak();
 
 protected:
+	/**
+	* @brief A override of the closeEvent which is called when the user has done his input and 
+	* the window closes itself
+	*
+	* @return no
+	*/
 	void closeEvent(QCloseEvent *event);
 };
 

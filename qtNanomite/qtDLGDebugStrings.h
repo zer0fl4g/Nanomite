@@ -22,23 +22,58 @@
 #include <string>
 #include <Windows.h>
 
+/**
+* @file qtDLGDebugStrings.h
+* @brief Displaying the debugstring widget
+*/
 class qtDLGDebugStrings : public QWidget, public Ui_qtDLGDebugStringsClass
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the debugstring widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
 	qtDLGDebugStrings(QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGDebugStrings();
 
-	public slots:
-		int OnDbgString(std::wstring sMessage,DWORD dwPID);
+public slots:
+	/**
+	* @brief A Qt slot which is called when the clsDebugger instance catched a new debug string
+	* @param debugString The new debugstring
+	* @param processID The process id from the the debugstring comes
+	*
+	* @return no
+	*/
+	void OnDbgString(std::wstring debugString, DWORD processID);
 
 private:
-	int _iSelectedRow;
+	int m_selectedRow; /* contains the selected row if the user opens a context menu */
 
-	private slots:
-		void MenuCallback(QAction*);
-		void OnCustomContextMenuRequested(QPoint qPoint);
+private slots:
+	/**
+	* @brief A Qt slot which is called when the user selected a option in the context menu
+	* @param pAction The selected action
+	*
+	* @return no
+	*/
+	void MenuCallback(QAction *pAction);
+	/**
+	* @brief A Qt slot which is called when the user wants to open the context menu
+	* @param qPoint The point where the user clicked
+	*
+	* @return no
+	*/
+	void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
 #endif

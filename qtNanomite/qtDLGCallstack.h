@@ -24,27 +24,86 @@
 
 #include "ui_qtDLGCallstack.h"
 
+/**
+* @file qtDLGCallstack.h
+* @brief Displaying the callstack widget
+*/
 class qtDLGCallstack : public QDockWidget, public Ui_qtDLGCallstack
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the callstack widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	*
+	* @return no
+	*/
 	qtDLGCallstack(QWidget *parent = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGCallstack();
 
-private:
-	int _iSelectedRow;
-
 public slots:
+	/**
+	* @brief A Qt slot which is called when the user wants to display the source code
+	* @param pItem A pointer to the selected QTableWidgetItem to extract the data
+	*
+	* @return no
+	*/
 	void OnDisplaySource(QTableWidgetItem *pItem);
+	/**
+	* @brief A Qt slot which is called when the user wants to display the context menu
+	* @param QPoint A QPoint indicating the position where the user clicked
+	*
+	* @return no
+	*/
 	void OnContextMenu(QPoint);
+	/**
+	* @brief A Qt slot which is called when the user selected an item from the context menu
+	* @param pAction A pointer to the QAction which was selected by the user
+	*
+	* @return no
+	*/
 	void MenuCallback(QAction* pAction);
-	int OnCallStack(quint64 dwStackAddr,quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,std::wstring sSourceFilePath,int iSourceLineNum);
+	/**
+	* @brief A Qt slot which is called when the Debugger breaks
+	* @param stackAddress The stack address
+	* @param returnOffset The address the function will return after executing
+	* @param returnFunctionName A string containing the function name which will be returned to
+	* @param returnModuleName A string containing the module name which contains the return to function
+	* @param currentOffset Contains the offset where the process is currently located
+	* @param currentFunctionName A string containing the current function name
+	* @param currentModuleName A string containing the module name where the current function is located
+	* @param sourceFilePath A string containing the sourcefile path
+	* @param sourceLineNumber Contains the line number
+	*
+	* @return no 
+	*/
+	void OnCallStack(quint64 stackAddress, quint64 returnOffset, std::wstring returnFunctionName, std::wstring returnModuleName, quint64 currentOffset, std::wstring currentFunctionName, std::wstring currentModuleName, std::wstring sourceFilePath, int sourceLineNumber);
 
 signals:
-	void OnDisplayDisassembly(quint64 dwEIP);
-	void DisplaySource(QString,int);
+	/**
+	* @brief A Qt signal which is send when the user selected an offset to show in disassembler
+	* @param selectedOffset The selected offset
+	*
+	* @return no
+	*/
+	void OnDisplayDisassembly(quint64 selectedOffset);
+	/**
+	* @brief A Qt signal which is send when the user wants to show the sourcecode
+	* @param sourceFilePath The path to the sourcefile
+	* @param sourceLineNumber The current line number in the sourcefile
+	*
+	* @return no
+	*/
+	void DisplaySource(QString sourceFilePath, int sourceLineNumber);
 
+private:
+	int m_selectedRow; /* contains the selected row when the users opens a context menu*/
 };
 
 #endif // QTDLGCALLSTACK_H

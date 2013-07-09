@@ -40,7 +40,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
 
-	APICompleter = new QCompleter(completerList, this);
+	m_pAPICompleter = new QCompleter(m_completerList, this);
 }
 
 qtDLGBreakPointManager::~qtDLGBreakPointManager()
@@ -53,7 +53,7 @@ void qtDLGBreakPointManager::OnClose()
 	close();
 }
 
-void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int iType)
+void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 {
 	if(newBP.dwHandle == 0x1)
 	{
@@ -62,7 +62,7 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int iType)
 		tblBPs->setItem(tblBPs->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(newBP.dwOffset,16,16,QChar('0'))));
 
 		QString TempString;
-		switch(iType)
+		switch(breakpointType)
 		{
 		case 0:
 			TempString = "Software BP - int3";
@@ -103,7 +103,7 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int iType)
 		}
 		newBP.dwHandle = 0x1;
 
-		OnUpdate(newBP,iType);
+		OnUpdate(newBP,breakpointType);
 	}
 }
 
@@ -219,34 +219,34 @@ void qtDLGBreakPointManager::OnBPRemove()
 	}
 }
 
-void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int iPID)
+void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int processID)
 {
 	QList<APIData> newImports = clsPEManager::getImportsFromFile(FilePath);
 
 	for(int i = 0; i < newImports.size(); i++)
 	{
-		completerList.append(newImports.value(i).APIName);
+		m_completerList.append(newImports.value(i).APIName);
 	}
 	
-	delete APICompleter;
-	APICompleter = new QCompleter(completerList, this);
+	delete m_pAPICompleter;
+	m_pAPICompleter = new QCompleter(m_completerList, this);
 
-	APICompleter->setCaseSensitivity(Qt::CaseInsensitive);
-	leOffset->setCompleter(APICompleter);
+	m_pAPICompleter->setCaseSensitivity(Qt::CaseInsensitive);
+	leOffset->setCompleter(m_pAPICompleter);
 }
 
 void qtDLGBreakPointManager::DeleteCompleterContent()
 {
-	completerList.clear();
-	delete APICompleter;
-	APICompleter = new QCompleter(completerList, this);
+	m_completerList.clear();
+	delete m_pAPICompleter;
+	m_pAPICompleter = new QCompleter(m_completerList, this);
 }
 
-void qtDLGBreakPointManager::OnDelete(quint64 bpOffset)
+void qtDLGBreakPointManager::OnDelete(quint64 breakpointOffset)
 {
 	for(int i = 0; i < tblBPs->rowCount(); i++)
 	{
-		if(tblBPs->item(i,1)->text().toULongLong(0,16) == bpOffset)
+		if(tblBPs->item(i,1)->text().toULongLong(0,16) == breakpointOffset)
 		{
 			tblBPs->removeRow(i);
 			i = 0;

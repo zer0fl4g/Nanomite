@@ -21,23 +21,50 @@
 
 #include <Windows.h>
 
+/**
+* @file qtDLGTIBView.h
+* @brief Displaying the TEB,TBI widget
+*/
 class qtDLGTIBView : public QWidget, public Ui_qtDLGTIBViewClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGTIBView(HANDLE hProc, HANDLE hThread, QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Responsible for initializing and showing the GUI of the TEB,TBI widget
+	* @param processHandle A handle to the process which contains the thread
+	* @param threadHandle A handle to the thread which contains the whiched TEB,TBI
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
+	qtDLGTIBView(HANDLE processHandle, HANDLE threadHandle, QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGTIBView();
 
 private:
-	int m_SelectedRow;
-
+	/**
+	* @brief Will insert the given data to the given topelement
+	* @param pTopElement A pointer to the topelement which should get the childnode
+	* @param valueName The name of value which will be placed in the childnode
+	* @param value The value which will be placed in the childnode
+	*
+	* @return no
+	*/
 	void InsertDataIntoTable(QTreeWidgetItem *pTopElement, QString valueName, DWORD64 value);
-	void ShowTIBForThread(HANDLE hProc, HANDLE hThread);
-
-//private slots:
-//	void MenuCallback(QAction* pAction);
-//	void OnCustomContextMenuRequested(QPoint qPoint);
+	/**
+	* @brief A override of the resizeevent to enable refilling in the table widget
+	* @param processHandle A handle to the process which contains the thread
+	* @param threadHandle A handle to the thread which contains the whiched TEB,TBI
+	*
+	* @return no
+	*/
+	void ShowTIBForThread(HANDLE processHandle, HANDLE threadHandle);
 };
 
 #endif

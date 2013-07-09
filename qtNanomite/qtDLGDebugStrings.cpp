@@ -46,8 +46,8 @@ void qtDLGDebugStrings::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblDebugStrings->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblDebugStrings->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
@@ -65,27 +65,25 @@ void qtDLGDebugStrings::MenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2")
-			.arg(tblDebugStrings->item(_iSelectedRow,0)->text())
-			.arg(tblDebugStrings->item(_iSelectedRow,1)->text()));
+			.arg(tblDebugStrings->item(m_selectedRow,0)->text())
+			.arg(tblDebugStrings->item(m_selectedRow,1)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Debug String") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDebugStrings->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblDebugStrings->item(m_selectedRow,1)->text());
 	}
 }
 
-int qtDLGDebugStrings::OnDbgString(wstring sMessage,DWORD dwPID)
+void qtDLGDebugStrings::OnDbgString(wstring debugString, DWORD processID)
 {
 	tblDebugStrings->insertRow(tblDebugStrings->rowCount());
 
 	tblDebugStrings->setItem(tblDebugStrings->rowCount() - 1,0,
-		new QTableWidgetItem(QString().sprintf("%08X",dwPID)));
+		new QTableWidgetItem(QString().sprintf("%08X",processID)));
 
 	tblDebugStrings->setItem(tblDebugStrings->rowCount() - 1,1,
-		new QTableWidgetItem(QString::fromStdWString(sMessage)));
+		new QTableWidgetItem(QString::fromStdWString(debugString)));
 
 	tblDebugStrings->scrollToBottom();
-
-	return 0;
 }

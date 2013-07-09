@@ -23,14 +23,14 @@
 
 #include <QClipboard>
 
-qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
-	: QWidget(parent, flags)
+qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 processID)
+	: QWidget(parent, flags),
+	m_processID(processID),
+	m_processCountEntry(0)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
-
-	_iPID = iPID;
 
 	connect(tblHandleView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(OnDisplayHandles()));
@@ -43,13 +43,11 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
-	_iForEntry = 0;
-	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
-
+	m_processCountEnd = myMainWindow->coreDebugger->PIDs.size();
 	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			_iForEntry = i; _iForEnd = i + 1;
+		if(myMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
+			m_processCountEntry = i; m_processCountEnd = i + 1;
 	}
 
 	OnDisplayHandles();
@@ -82,7 +80,7 @@ void qtDLGHandleView::OnDisplayHandles()
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
 	tblHandleView->setRowCount(0);
-	for(size_t i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
 		NTSTATUS status;
 		ULONG handleInfoSize = 0x10000;
@@ -164,8 +162,8 @@ void qtDLGHandleView::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblHandleView->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblHandleView->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
@@ -185,23 +183,23 @@ void qtDLGHandleView::MenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3")
-			.arg(tblHandleView->item(_iSelectedRow,1)->text())
-			.arg(tblHandleView->item(_iSelectedRow,2)->text())
-			.arg(tblHandleView->item(_iSelectedRow,3)->text()));
+			.arg(tblHandleView->item(m_selectedRow,1)->text())
+			.arg(tblHandleView->item(m_selectedRow,2)->text())
+			.arg(tblHandleView->item(m_selectedRow,3)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Handle") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHandleView->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblHandleView->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"Type") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHandleView->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblHandleView->item(m_selectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"Name") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHandleView->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblHandleView->item(m_selectedRow,3)->text());
 	}
 }

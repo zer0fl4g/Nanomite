@@ -19,16 +19,32 @@
 
 #include "ui_qtDLGAbout.h"
 
+/**
+* @file qtDLGAbout.h
+* @brief Displaying the about dialog
+*/
 class qtDLGAbout : public QDialog
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the about dialog
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
 	qtDLGAbout(QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGAbout();
 	
 private:
-	Ui::qtDLGAboutUI ui;
+	Ui::qtDLGAboutUI ui; /* a private variable holding the gui instance  */
 };
 
 #endif

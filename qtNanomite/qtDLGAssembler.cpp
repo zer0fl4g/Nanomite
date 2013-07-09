@@ -22,19 +22,18 @@
 #include <QFile>
 
 qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
-	HANDLE hProc,quint64 InstructionOffset,clsDisassembler *pDisAs,bool Is64Bit)
-	: QWidget(parent, flags)
+	HANDLE processHandle,quint64 instructionOffset,clsDisassembler *pCurrentDisassembler,bool is64Bit)
+	: QWidget(parent, flags),
+	m_processHandle(processHandle),
+	m_instructionOffset(instructionOffset),
+	m_pCurrentDisassembler(pCurrentDisassembler),
+	m_is64Bit(is64Bit)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setFixedSize(this->width(),this->height());
 
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(InsertNewInstructions()));
-
-	_Is64Bit = Is64Bit;
-	_pDisAs = pDisAs;
-	_InstructionOffset = InstructionOffset;
-	_hProc = hProc;
 }
 
 qtDLGAssembler::~qtDLGAssembler()
@@ -50,8 +49,8 @@ void qtDLGAssembler::InsertNewInstructions()
 		return;
 	}
 
-	QMap<QString,DisAsDataRow>::const_iterator i = _pDisAs->SectionDisAs.constFind(QString("%1").arg(_InstructionOffset,16,16,QChar('0')).toUpper());
-	if((QMapData::Node *)i == (QMapData::Node *)_pDisAs->SectionDisAs.constEnd()) 
+	QMap<QString,DisAsDataRow>::const_iterator i = m_pCurrentDisassembler->SectionDisAs.constFind(QString("%1").arg(m_instructionOffset,16,16,QChar('0')).toUpper());
+	if((QMapData::Node *)i == (QMapData::Node *)m_pCurrentDisassembler->SectionDisAs.constEnd()) 
 	{
 		close();
 		return;
@@ -65,7 +64,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	tempOutput.open(QIODevice::WriteOnly | QIODevice::Text);
 	QTextStream out(&tempOutput);
 
-	if(_Is64Bit)
+	if(m_is64Bit)
 		out << "BITS 64\r\n";
 	else
 		out << "BITS 32\r\n";
@@ -131,7 +130,7 @@ void qtDLGAssembler::InsertNewInstructions()
 		while(newOpcodeLen < BytesRead)
 		{
 			++i;
-			if((QMapData::Node *)i == (QMapData::Node *)_pDisAs->SectionDisAs.constEnd()) return;
+			if((QMapData::Node *)i == (QMapData::Node *)m_pCurrentDisassembler->SectionDisAs.constEnd()) return;
 			oldOpcodes = i.value().OpCodes;
 			newOpcodeLen += oldOpcodes.replace(" ", "").length() / 2;
 		}
@@ -141,11 +140,11 @@ void qtDLGAssembler::InsertNewInstructions()
 	memset(pBuffer,0x90,newOpcodeLen);
 	memcpy(pBuffer,pFileBuffer,BytesRead);
 
-	qtDLGPatchManager::AddNewPatch(0,_hProc,_InstructionOffset,newOpcodeLen,pBuffer);
+	qtDLGPatchManager::AddNewPatch(0,m_processHandle,m_instructionOffset,newOpcodeLen,pBuffer);
 
 	clsMemManager::CFree(pBuffer);
 	clsMemManager::CFree(pFileBuffer);
-	_pDisAs->SectionDisAs.clear();
+	m_pCurrentDisassembler->SectionDisAs.clear();
 	emit OnReloadDebugger();
 	lineEdit->clear();
 	close();

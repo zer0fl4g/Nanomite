@@ -22,15 +22,15 @@
 
 qtDLGWindowView* qtDLGWindowView::pThis = NULL;
 
-qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
-	: QWidget(parent, flags)
+qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 processID)
+	: QWidget(parent, flags),
+	m_processID(processID),
+	m_processCountEntry(0)
 {
 	setupUi(this);
 	pThis = this;
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
-
-	_iPID = iPID;
 
 	// Init List
 	tblWindowView->horizontalHeader()->resizeSection(0,75);
@@ -40,15 +40,13 @@ qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblWindowView->horizontalHeader()->setFixedHeight(21);
 
 	// Display
-	myMainWindow = qtDLGNanomite::GetInstance();
+	m_pMainWindow = qtDLGNanomite::GetInstance();
+	m_processCountEnd = m_pMainWindow->coreDebugger->PIDs.size();
 
-	_iForEntry = 0;
-	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
-
-	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			_iForEntry = i; _iForEnd = i + 1;
+		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
+			m_processCountEntry = i; m_processCountEnd = i + 1;
 	}
 
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(EnumWindow()));
@@ -65,9 +63,9 @@ void qtDLGWindowView::EnumWindow()
 {
 	tblWindowView->setRowCount(0);
 
-	for(size_t i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
-		EnumWindows((WNDENUMPROC)EnumWindowCallBack,(LPARAM)myMainWindow->coreDebugger->PIDs[i].dwPID);
+		EnumWindows((WNDENUMPROC)EnumWindowCallBack,(LPARAM)m_pMainWindow->coreDebugger->PIDs[i].dwPID);
 	}
 }
 
@@ -75,9 +73,9 @@ bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 {
 	DWORD dwHwPID = NULL;
 	GetWindowThreadProcessId(hWnd,&dwHwPID);
-	int iPid = (int)lParam;
+	int processID = (int)lParam;
 	
-	if(dwHwPID == iPid)
+	if(dwHwPID == processID)
 	{
 		HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,dwHwPID);
 		
@@ -99,11 +97,6 @@ bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		// hWnd
 		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,3,
 			new QTableWidgetItem(QString("%1").arg((int)hWnd,8,16,QChar('0'))));
-
-		// WndProc
-		//LONG_PTR wndproc = GetWindowLongPtr(hWnd,GWLP_ID);
-		//qtDLGWindowView::pThis->tblWindowView->setItem(qtDLGWindowView::pThis->tblWindowView->rowCount() - 1,4,
-		//	new QTableWidgetItem(QString("%1").arg(wndproc,8,16,QChar('0'))));
 
 		// GetModuleName
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));

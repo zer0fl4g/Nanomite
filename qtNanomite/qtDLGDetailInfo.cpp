@@ -83,15 +83,15 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 
 	QMenu menu;
 
-	_iSelectedRow = tblPIDs->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblPIDs->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
-	_SelectedOffset = tblPIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
+	m_selectedOffset = tblPIDs->item(m_selectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show PBI/PEB",this));
 
-	int ProcessPriority = GetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16));
+	int ProcessPriority = GetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16));
 	if(ProcessPriority != 0)
 	{
 		QMenu *submenu = menu.addMenu("Set Process Priority");
@@ -158,10 +158,10 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 
 	QMenu menu;
 
-	_iSelectedRow = tblTIDs->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblTIDs->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
-	_SelectedOffset = tblTIDs->item(_iSelectedRow,2)->text().toULongLong(0,16);
+	m_selectedOffset = tblTIDs->item(m_selectedRow,2)->text().toULongLong(0,16);
 
 	//menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show Registers",this));
@@ -169,7 +169,7 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 	menu.addAction(new QAction("Suspend",this));
 	menu.addAction(new QAction("Resume",this));
 
-	int ThreadPriority = GetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16));
+	int ThreadPriority = GetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16));
 	if(ThreadPriority != THREAD_PRIORITY_ERROR_RETURN)
 	{
 		QMenu *submenu = menu.addMenu("Set Thread Priority");
@@ -228,10 +228,10 @@ void qtDLGDetailInfo::OnCustomExceptionContextMenu(QPoint qPoint)
 
 	QMenu menu;
 
-	_iSelectedRow = tblExceptions->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblExceptions->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
-	_SelectedOffset = tblExceptions->item(_iSelectedRow,0)->text().toULongLong(0,16);
+	m_selectedOffset = tblExceptions->item(m_selectedRow,0)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Show Offset in disassembler",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
@@ -245,10 +245,10 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 
 	QMenu menu;
 
-	_iSelectedRow = tblModules->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblModules->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
-	_SelectedOffset = tblModules->item(_iSelectedRow,1)->text().toULongLong(0,16);
+	m_selectedOffset = tblModules->item(m_selectedRow,1)->text().toULongLong(0,16);
 
 	//menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Open Module in PE View",this));
@@ -261,39 +261,39 @@ void qtDLGDetailInfo::PIDMenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Show EntryPoint in disassembler") == 0)
 	{
-		if(_SelectedOffset >= 0)
+		if(m_selectedOffset >= 0)
 		{
-			emit ShowInDisassembler(_SelectedOffset);
-			_SelectedOffset = NULL;
+			emit ShowInDisassembler(m_selectedOffset);
+			m_selectedOffset = NULL;
 		}
 	}
 	else if(QString().compare(pAction->text(),"Show PBI/PEB") == 0)
 	{
-		DWORD selectedPID = tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+		DWORD selectedPID = tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16);
 		HANDLE selectedProcessHandle = qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(selectedPID);
 
 		qtDLGPEBView *newPEB = new qtDLGPEBView(selectedProcessHandle, this, Qt::Window);
 		newPEB->show();
 	}
 	else if(QString().compare(pAction->text(),"Realtime") == 0)
-		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),REALTIME_PRIORITY_CLASS);
+		SetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16),REALTIME_PRIORITY_CLASS);
 	else if(QString().compare(pAction->text(),"High") == 0)
-		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),HIGH_PRIORITY_CLASS);
+		SetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16),HIGH_PRIORITY_CLASS);
 	else if(QString().compare(pAction->text(),"Above Normal") == 0)
-		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),ABOVE_NORMAL_PRIORITY_CLASS);
+		SetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16),ABOVE_NORMAL_PRIORITY_CLASS);
 	else if(QString().compare(pAction->text(),"Normal") == 0)
-		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),NORMAL_PRIORITY_CLASS);
+		SetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16),NORMAL_PRIORITY_CLASS);
 	else if(QString().compare(pAction->text(),"Below Normal") == 0)
-		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),BELOW_NORMAL_PRIORITY_CLASS);
+		SetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16),BELOW_NORMAL_PRIORITY_CLASS);
 	else if(QString().compare(pAction->text(),"Idle") == 0)
-		SetProcessPriorityByPid(tblPIDs->item(_iSelectedRow,0)->text().toULongLong(0,16),IDLE_PRIORITY_CLASS);
+		SetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16),IDLE_PRIORITY_CLASS);
 }
 
 void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
 	{
-		std::wstring temp = tblModules->item(_iSelectedRow,3)->text().toStdWString();
+		std::wstring temp = tblModules->item(m_selectedRow,3)->text().toStdWString();
 		emit OpenFileInPEManager(temp,-1);
 		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
 		dlgPEEditor->show();
@@ -301,16 +301,16 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Show EntryPoint in disassembler") == 0 || 
 		QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
 	{
-		if(_SelectedOffset >= 0)
+		if(m_selectedOffset >= 0)
 		{
-			emit ShowInDisassembler(_SelectedOffset);
-			_SelectedOffset = NULL;
+			emit ShowInDisassembler(m_selectedOffset);
+			m_selectedOffset = NULL;
 		}
 	}
 	else if(QString().compare(pAction->text(),"Suspend") == 0)
 	{
-		DWORD ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
-		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,ThreadID);
+		DWORD threadID = tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16);
+		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,threadID);
 		if(hThread == INVALID_HANDLE_VALUE) 
 		{
 			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
@@ -318,7 +318,7 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		}
 
 		if(SuspendThread(hThread) != -1)
-			tblTIDs->item(_iSelectedRow,4)->setText("Suspended");
+			tblTIDs->item(m_selectedRow,4)->setText("Suspended");
 		else
 			MessageBoxW(NULL,L"ERROR, have not been able to suspend this Thread!",L"Nanomite",MB_OK);
 
@@ -326,8 +326,8 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Resume") == 0)
 	{
-		DWORD ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
-		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,ThreadID);
+		DWORD threadID = tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16);
+		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,threadID);
 		if(hThread == INVALID_HANDLE_VALUE) 
 		{
 			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
@@ -335,7 +335,7 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		}
 
 		if(ResumeThread(hThread) != -1)
-			tblTIDs->item(_iSelectedRow,4)->setText("Running");
+			tblTIDs->item(m_selectedRow,4)->setText("Running");
 		else
 			MessageBoxW(NULL,L"ERROR, have not been able to resume this Thread!",L"Nanomite",MB_OK);
 
@@ -343,10 +343,10 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Show TBI/TEB") == 0)
 	{
-		DWORD	ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),
-				procID = tblTIDs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+		DWORD	threadID = tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),
+				procID = tblTIDs->item(m_selectedRow,0)->text().toULongLong(0,16);
 
-		HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,ThreadID);
+		HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,threadID);
 		if(hThread == INVALID_HANDLE_VALUE) 
 		{
 			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
@@ -360,9 +360,9 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Show Registers") == 0)
 	{
-		DWORD ThreadID = tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16);
-		HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,ThreadID);
-		HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION,false,tblTIDs->item(_iSelectedRow,0)->text().toULongLong(0,16));
+		DWORD threadID = tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16);
+		HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,threadID);
+		HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION,false,tblTIDs->item(m_selectedRow,0)->text().toULongLong(0,16));
 
 		if(hThread == INVALID_HANDLE_VALUE && hProc == NULL) 
 		{
@@ -411,31 +411,31 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		CloseHandle(hProc);
 	}
 	else if(QString().compare(pAction->text(),"Highest") == 0)
-		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_HIGHEST);
+		SetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_HIGHEST);
 	else if(QString().compare(pAction->text(),"Above Normal") == 0)
-		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_ABOVE_NORMAL);
+		SetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_ABOVE_NORMAL);
 	else if(QString().compare(pAction->text(),"Normal") == 0)
-		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_NORMAL);
+		SetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_NORMAL);
 	else if(QString().compare(pAction->text(),"Below Normal") == 0)
-		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_BELOW_NORMAL);
+		SetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_BELOW_NORMAL);
 	else if(QString().compare(pAction->text(),"Lowest") == 0)
-		SetThreadPriorityByTid(tblTIDs->item(_iSelectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
+		SetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
 }
 
-int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound)
+void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypointOffset, bool bSuspended,DWORD exitCode, bool bFound)
 {
 	if(!bFound)
 	{
 		tblTIDs->insertRow(tblTIDs->rowCount());
 		
 		tblTIDs->setItem(tblTIDs->rowCount() - 1,0,
-			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(processID,8,16,QChar('0'))));
 		
 		tblTIDs->setItem(tblTIDs->rowCount() - 1,1,
-			new QTableWidgetItem(QString("%1").arg(dwTID,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(threadID,8,16,QChar('0'))));
 	
 		tblTIDs->setItem(tblTIDs->rowCount() - 1,2,
-			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(entrypointOffset,16,16,QChar('0'))));
 
 		tblTIDs->setItem(tblTIDs->rowCount() - 1,4,
 			new QTableWidgetItem("Running"));
@@ -445,11 +445,11 @@ int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspend
 	else
 	{
 		for(int i = 0; i < tblTIDs->rowCount();i++)
-			if(QString().compare(tblTIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0 &&
-				QString().compare(tblTIDs->item(i,1)->text(),QString("%1").arg(dwTID,8,16,QChar('0'))) == 0)
+			if(QString().compare(tblTIDs->item(i,0)->text(),QString("%1").arg(processID,8,16,QChar('0'))) == 0 &&
+				QString().compare(tblTIDs->item(i,1)->text(),QString("%1").arg(threadID,8,16,QChar('0'))) == 0)
 			{
 				tblTIDs->setItem(i,4,new QTableWidgetItem(QString("Terminated")));
-				tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
+				tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(exitCode,8,16,QChar('0'))));
 			}
 	}
 	
@@ -457,20 +457,18 @@ int qtDLGDetailInfo::OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspend
 	QString logMessage;
 
 	if(bFound)
-		logMessage = QString("[-] Exit Thread(%1) in Process(%2) with Exitcode: %3").arg(dwTID,8,16,QChar('0'))
-		.arg(dwPID,8,16,QChar('0'))
-		.arg(dwExitCode,8,16,QChar('0'));
+		logMessage = QString("[-] Exit Thread(%1) in Process(%2) with Exitcode: %3").arg(threadID,8,16,QChar('0'))
+		.arg(processID,8,16,QChar('0'))
+		.arg(exitCode,8,16,QChar('0'));
 	else
-		logMessage = QString("[+] New Thread(%1) in Process(%2) with Entrypoint: %3").arg(dwTID,8,16,QChar('0'))
-		.arg(dwPID,8,16,QChar('0'))
-		.arg(dwEP,16,16,QChar('0'));
+		logMessage = QString("[+] New Thread(%1) in Process(%2) with Entrypoint: %3").arg(threadID,8,16,QChar('0'))
+		.arg(processID,8,16,QChar('0'))
+		.arg(entrypointOffset,16,16,QChar('0'));
 
 	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
-
-	return 0;
 }
 
-int qtDLGDetailInfo::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound)
+void qtDLGDetailInfo::OnPID(DWORD processID,wstring sFile,DWORD exitCode,quint64 entrypointOffset,bool bFound)
 {
 
 	if(!bFound)
@@ -478,10 +476,10 @@ int qtDLGDetailInfo::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dw
 		tblPIDs->insertRow(tblPIDs->rowCount());
 		
 		tblPIDs->setItem(tblPIDs->rowCount() - 1,0,
-			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(processID,8,16,QChar('0'))));
 		
 		tblPIDs->setItem(tblPIDs->rowCount() - 1,1,
-			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(entrypointOffset,16,16,QChar('0'))));
 
 		tblPIDs->setItem(tblPIDs->rowCount() - 1,3,
 			new QTableWidgetItem(QString::fromStdWString(sFile)));
@@ -491,25 +489,23 @@ int qtDLGDetailInfo::OnPID(DWORD dwPID,wstring sFile,DWORD dwExitCode,quint64 dw
 	else
 	{
 		for(int i = 0; i < tblPIDs->rowCount();i++)
-			if(QString().compare(tblPIDs->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0)
-				tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(dwExitCode,8,16,QChar('0'))));
+			if(QString().compare(tblPIDs->item(i,0)->text(),QString("%1").arg(processID,8,16,QChar('0'))) == 0)
+				tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(exitCode,8,16,QChar('0'))));
 	}
 
 	QString logMessage;
 
 	if(bFound)
-		logMessage = QString("[-] Exit Process(%1) with Exitcode: %2").arg(dwPID,8,16,QChar('0'))
-		.arg(dwExitCode,8,16,QChar('0'));
+		logMessage = QString("[-] Exit Process(%1) with Exitcode: %2").arg(processID,8,16,QChar('0'))
+		.arg(exitCode,8,16,QChar('0'));
 	else
-		logMessage = QString("[+] New Process(%1) Entrypoint: %2").arg(dwPID,16,16,QChar('0'))
-		.arg(dwEP,16,16,QChar('0'));
+		logMessage = QString("[+] New Process(%1) Entrypoint: %2").arg(processID,16,16,QChar('0'))
+		.arg(entrypointOffset,16,16,QChar('0'));
 
 	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
-
-	return 0;
 }
 
-int qtDLGDetailInfo::OnException(wstring sFuncName,wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
+void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quint64 exceptionOffset, quint64 exceptionCode, DWORD processID, DWORD threadID)
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 	myMainWindow->lExceptionCount++;
@@ -517,54 +513,52 @@ int qtDLGDetailInfo::OnException(wstring sFuncName,wstring sModName,quint64 dwOf
 	tblExceptions->insertRow(tblExceptions->rowCount());
 		
 	tblExceptions->setItem(tblExceptions->rowCount() - 1,0,
-		new QTableWidgetItem(QString("%1").arg(dwOffset,16,16,QChar('0'))));
+		new QTableWidgetItem(QString("%1").arg(exceptionOffset,16,16,QChar('0'))));
 		
 	tblExceptions->setItem(tblExceptions->rowCount() - 1,1,
-		new QTableWidgetItem(QString("%1").arg(dwExceptionCode,16,16,QChar('0'))));
+		new QTableWidgetItem(QString("%1").arg(exceptionCode,16,16,QChar('0'))));
 
 	tblExceptions->setItem(tblExceptions->rowCount() - 1,2,
-		new QTableWidgetItem(QString().sprintf("%08X / %08X",dwPID,dwTID)));
+		new QTableWidgetItem(QString().sprintf("%08X / %08X",processID,threadID)));
 
-	if(sFuncName.length() > 0 )
+	if(functionName.length() > 0 )
 		tblExceptions->setItem(tblExceptions->rowCount() - 1,3,
-			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
+			new QTableWidgetItem(QString::fromStdWString(moduleName).append(".").append(QString::fromStdWString(functionName))));
 
 	tblExceptions->scrollToBottom();
 
 
 	QString logMessage;
 
-	if(sFuncName.length() > 0 && sModName.length() > 0)
-		logMessage = QString("[!] %1@%2 ExceptionCode: %3 ExceptionOffset: %4 PID: %5 TID: %6")
-		.arg(QString::fromStdWString(sFuncName))
-		.arg(QString::fromStdWString(sModName))
-		.arg(dwExceptionCode,16,16,QChar('0'))
-		.arg(dwOffset,16,16,QChar('0'))
-		.arg(dwPID,8,16,QChar('0'))
-		.arg(dwTID,8,16,QChar('0'));
+	if(functionName.length() > 0 && moduleName.length() > 0)
+		logMessage = QString("[!] %1@%2 ExceptionCode: %3 ExceptionOffset: %4processID: %5 TID: %6")
+		.arg(QString::fromStdWString(functionName))
+		.arg(QString::fromStdWString(moduleName))
+		.arg(exceptionCode,16,16,QChar('0'))
+		.arg(exceptionOffset,16,16,QChar('0'))
+		.arg(processID,8,16,QChar('0'))
+		.arg(threadID,8,16,QChar('0'));
 	else
-		logMessage = QString("[!] ExceptionCode: %1 ExceptionOffset: %2 PID: %3 TID: %4")
-		.arg(dwExceptionCode,16,16,QChar('0'))
-		.arg(dwOffset,16,16,QChar('0'))
-		.arg(dwPID,8,16,QChar('0'))
-		.arg(dwTID,8,16,QChar('0'));
+		logMessage = QString("[!] ExceptionCode: %1 ExceptionOffset: %2processID: %3 TID: %4")
+		.arg(exceptionCode,16,16,QChar('0'))
+		.arg(exceptionOffset,16,16,QChar('0'))
+		.arg(processID,8,16,QChar('0'))
+		.arg(threadID,8,16,QChar('0'));
 
 	myMainWindow->logView->OnLog(logMessage.toStdWString());
-
-	return 0;
 }
 
-int qtDLGDetailInfo::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded)
+void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypointOffset, bool bLoaded)
 {
 	if(bLoaded)
 	{
 		tblModules->insertRow(tblModules->rowCount());
 		
 		tblModules->setItem(tblModules->rowCount() - 1,0,
-			new QTableWidgetItem(QString("%1").arg(dwPID,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(processID,8,16,QChar('0'))));
 		
 		tblModules->setItem(tblModules->rowCount() - 1,1,
-			new QTableWidgetItem(QString("%1").arg(dwEP,16,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(entrypointOffset,16,16,QChar('0'))));
 
 		tblModules->setItem(tblModules->rowCount() - 1,2,
 			new QTableWidgetItem("Loaded"));
@@ -577,31 +571,29 @@ int qtDLGDetailInfo::OnDll(wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 	else
 	{
 		for(int i = 0; i < tblModules->rowCount();i++)
-			if(QString().compare(tblModules->item(i,0)->text(),QString("%1").arg(dwPID,8,16,QChar('0'))) == 0 &&
-				QString().compare(tblModules->item(i,1)->text(),QString("%1").arg(dwEP,16,16,QChar('0'))) == 0)
+			if(QString().compare(tblModules->item(i,0)->text(),QString("%1").arg(processID,8,16,QChar('0'))) == 0 &&
+				QString().compare(tblModules->item(i,1)->text(),QString("%1").arg(entrypointOffset,16,16,QChar('0'))) == 0)
 				tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
 	}
 
 	QString logMessage;
 
 	if(bLoaded)
-		logMessage = QString("[+] PID(%1) - Loaded DLL: %2 Entrypoint: %3")
-		.arg(dwPID,8,16,QChar('0'))
+		logMessage = QString("[+]processID(%1) - Loaded DLL: %2 Entrypoint: %3")
+		.arg(processID,8,16,QChar('0'))
 		.arg(QString::fromStdWString(sDLLPath))
-		.arg(dwEP,16,16,QChar('0'));
+		.arg(entrypointOffset,16,16,QChar('0'));
 	else
-		logMessage = QString("[+] PID(%1) - Unloaded DLL: %2")
-		.arg(dwPID,8,16,QChar('0'))
+		logMessage = QString("[+]processID(%1) - Unloaded DLL: %2")
+		.arg(processID,8,16,QChar('0'))
 		.arg(QString::fromStdWString(sDLLPath));
 
 	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
-
-	return 0;
 }
 
-bool qtDLGDetailInfo::SetThreadPriorityByTid(DWORD ThreadID, int threadPrio)
+bool qtDLGDetailInfo::SetThreadPriorityByTid(DWORD threadID, int threadPrio)
 {
-	HANDLE hThread = OpenThread(THREAD_SET_INFORMATION,false,ThreadID);
+	HANDLE hThread = OpenThread(THREAD_SET_INFORMATION,false,threadID);
 	if(hThread == INVALID_HANDLE_VALUE) return false;
 
 	bool bSuccess = false;
@@ -611,30 +603,30 @@ bool qtDLGDetailInfo::SetThreadPriorityByTid(DWORD ThreadID, int threadPrio)
 	return bSuccess;
 }
 
-bool qtDLGDetailInfo::SetProcessPriorityByPid(DWORD PID, int processPrio)
+bool qtDLGDetailInfo::SetProcessPriorityByPid(DWORD processID, int processPrio)
 {
-	HANDLE hProc = OpenProcess(PROCESS_SET_INFORMATION,false,PID);
+	HANDLE hProc = OpenProcess(PROCESS_SET_INFORMATION, false, processID);
 	if(hProc == INVALID_HANDLE_VALUE) return false;
 
 	bool bSuccess = false;
-	if(!(bSuccess = SetPriorityClass(hProc,processPrio)))
-		MessageBoxW(NULL,L"ERROR, could not set the process priority",L"Nanomite",MB_OK);
+	if(!(bSuccess = SetPriorityClass(hProc, processPrio)))
+		MessageBoxW(NULL, L"ERROR, could not set the process priority", L"Nanomite", MB_OK);
 	CloseHandle(hProc);
 	return bSuccess;
 }
 
-int qtDLGDetailInfo::GetThreadPriorityByTid(DWORD ThreadID)
+int qtDLGDetailInfo::GetThreadPriorityByTid(DWORD threadID)
 {
-	HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,ThreadID);
+	HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,threadID);
 	if(hThread == INVALID_HANDLE_VALUE) return THREAD_PRIORITY_ERROR_RETURN;
 	int iPriority = GetThreadPriority(hThread);
 	CloseHandle(hThread);
 	return iPriority;
 }
 
-int qtDLGDetailInfo::GetProcessPriorityByPid(DWORD PID)
+int qtDLGDetailInfo::GetProcessPriorityByPid(DWORD processID)
 {
-	HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION,false,PID);
+	HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION, false, processID);
 	if(hProc == INVALID_HANDLE_VALUE) return 0;
 	int iPriority = GetPriorityClass(hProc);
 	CloseHandle(hProc);

@@ -21,25 +21,68 @@
 
 #include <Windows.h>
 
+/**
+* @file qtDLGHandleView.h
+* @brief Displaying the handleview widget
+*/
 class qtDLGHandleView : public QWidget, public Ui_qtDLGHandleViewClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGHandleView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 iPID = 0);
+	/**
+	* @brief Responsible for initializing and showing the GUI of the hexview widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	* @param processID The process id from which the handles will be shown
+	*
+	* @return no
+	*/
+	qtDLGHandleView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 processID = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGHandleView();
 
 private:
-	size_t	_iPID,
-			_iForEntry,
-			_iForEnd;
-	int		_iSelectedRow;
-
+	size_t	m_processID,
+			m_processCountEntry,
+			m_processCountEnd;
+	int		m_selectedRow;
+	
+	/**
+	* @brief A Qt slot which is called when the user scrolls, resizes
+	* @param dwPID The process id of the handle
+	* @param dwHandle The handle id
+	* @param ptType The type of handle
+	* @param ptName The name of the handle
+	*
+	* @return no
+	*/
 	void InsertDataIntoTable(DWORD dwPID,DWORD dwHandle,PTCHAR ptType,PTCHAR ptName);
 
 private slots:
+	/**
+	* @brief A Qt slot which is called when the data needs to be displayed
+	*
+	* @return no
+	*/
 	void OnDisplayHandles();
+	/**
+	* @brief A Qt slot which is called when the user right clicks to open the context menu
+	* @param qPoint The point where the user opened the context menu
+	*
+	* @return no
+	*/
 	void OnCustomContextMenuRequested(QPoint qPoint);
+	/**
+	* @brief A Qt slot which is called when the user clicks on a element in the context menu
+	* @param pAction The action which was selected from the context menu
+	*
+	* @return no
+	*/
 	void MenuCallback(QAction* pAction);
 };
 

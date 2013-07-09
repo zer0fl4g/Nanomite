@@ -50,8 +50,8 @@ void qtDLGLogView::OnContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblLogBox->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblLogBox->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 
 	menu.addAction(new QAction("Clear Log",this));
@@ -89,21 +89,21 @@ void qtDLGLogView::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2").arg(tblLogBox->item(_iSelectedRow,0)->text()).arg(tblLogBox->item(_iSelectedRow,1)->text()));
+		clipboard->setText(QString("%1:%2").arg(tblLogBox->item(m_selectedRow,0)->text()).arg(tblLogBox->item(m_selectedRow,1)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Time") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblLogBox->item(_iSelectedRow,0)->text());
+		clipboard->setText(tblLogBox->item(m_selectedRow,0)->text());
 	}
 	else if(QString().compare(pAction->text(),"Text") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblLogBox->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblLogBox->item(m_selectedRow,1)->text());
 	}
 }
 
-int qtDLGLogView::OnLog(wstring sLog)
+void qtDLGLogView::OnLog(wstring logString)
 {
 	time_t tTime;
 	tm timeInfo;
@@ -116,8 +116,7 @@ int qtDLGLogView::OnLog(wstring sLog)
 		new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec)));
 	
 	tblLogBox->setItem(tblLogBox->rowCount() - 1,1,
-		new QTableWidgetItem(QString::fromStdWString(sLog)));
+		new QTableWidgetItem(QString::fromStdWString(logString)));
 	
 	tblLogBox->scrollToBottom();
-	return 0;
 }

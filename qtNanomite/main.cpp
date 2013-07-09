@@ -21,8 +21,6 @@
 
 #include <WinBase.h>
 
-#include <QtGui/QApplication>
-
 BOOL IsUserAdmin()
 {
     BOOL _isUserAdmin = false;
