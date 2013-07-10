@@ -449,8 +449,3 @@ void qtDLGNanomite::AskForException(DWORD exceptionCode)
 
 	newException->exec();
 }
-
-void qtDLGNanomite::OnUpdaterFinished()
-{
-	delete launchUpdater;
-}

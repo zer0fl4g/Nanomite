@@ -20,11 +20,11 @@
 #include <Windows.h>
 
 qtDLGSourceViewer::qtDLGSourceViewer(QWidget *parent, Qt::WFlags flags)
-	: QWidget(parent, flags)
+	: QWidget(parent, flags),
+	IsSourceAvailable(false)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
-	IsSourceAvailable = false;
 }
 
 qtDLGSourceViewer::~qtDLGSourceViewer()

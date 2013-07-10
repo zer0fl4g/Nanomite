@@ -24,15 +24,16 @@
 
 #include <QClipboard>
 
-qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
-	: QWidget(parent, flags)
+qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int processID)
+	: QWidget(parent, flags),
+	m_processID(processID),
+	m_processCountEntry(0),
+	m_selectedRow(-1)
+
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
-
-	_iPID = iPID;
-	_iSelectedRow = -1;
 
 	connect(tblHeapBlocks,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(tblHeapView,SIGNAL(itemSelectionChanged()),this,SLOT(OnSelectionChanged()));
@@ -46,15 +47,13 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int iPID)
 	tblHeapView->horizontalHeader()->setFixedHeight(21);
 	tblHeapBlocks->horizontalHeader()->setFixedHeight(21);
 
-	myMainWindow = qtDLGNanomite::GetInstance();
+	m_pMainWindow = qtDLGNanomite::GetInstance();
 
-	_iForEntry = 0;
-	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
-
-	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	m_processCountEnd = m_pMainWindow->coreDebugger->PIDs.size();
+	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			_iForEntry = i; _iForEnd = i +1;
+		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
+			m_processCountEntry = i; m_processCountEnd = i + 1;
 	}
 
 	DisplayHeap();
@@ -69,8 +68,8 @@ void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblHeapBlocks->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblHeapBlocks->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	menu.addAction(new QAction("Send Offset To HexView",this));
 	menu.addAction(new QAction("Dump Memory To File",this));
@@ -92,55 +91,55 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Send Offset To HexView") == 0)
 	{
-		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblHeapBlocks->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblHeapBlocks->item(_iSelectedRow,2)->text().toULongLong(0,16),
-			tblHeapBlocks->item(_iSelectedRow,3)->text().toULongLong(0,16));
+		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblHeapBlocks->item(m_selectedRow,0)->text().toULongLong(0,16),
+			tblHeapBlocks->item(m_selectedRow,2)->text().toULongLong(0,16),
+			tblHeapBlocks->item(m_selectedRow,3)->text().toULongLong(0,16));
 		newView->show();
 	}
 	else if(QString().compare(pAction->text(),"Dump Memory To File") == 0)
 	{
-		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblHeapBlocks->item(_iSelectedRow,0)->text().toULongLong(0,16));
+		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblHeapBlocks->item(m_selectedRow,0)->text().toULongLong(0,16));
 
 		clsMemDump memDump(hProc,
 			L"Heap",
-			tblHeapBlocks->item(_iSelectedRow,2)->text().toULongLong(0,16),
-			tblHeapBlocks->item(_iSelectedRow,3)->text().toULongLong(0,16));
+			tblHeapBlocks->item(m_selectedRow,2)->text().toULongLong(0,16),
+			tblHeapBlocks->item(m_selectedRow,3)->text().toULongLong(0,16));
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4:%5:%6")
-			.arg(tblHeapBlocks->item(_iSelectedRow,0)->text())
-			.arg(tblHeapBlocks->item(_iSelectedRow,1)->text())
-			.arg(tblHeapBlocks->item(_iSelectedRow,2)->text())
-			.arg(tblHeapBlocks->item(_iSelectedRow,3)->text())
-			.arg(tblHeapBlocks->item(_iSelectedRow,4)->text())
-			.arg(tblHeapBlocks->item(_iSelectedRow,5)->text()));
+			.arg(tblHeapBlocks->item(m_selectedRow,0)->text())
+			.arg(tblHeapBlocks->item(m_selectedRow,1)->text())
+			.arg(tblHeapBlocks->item(m_selectedRow,2)->text())
+			.arg(tblHeapBlocks->item(m_selectedRow,3)->text())
+			.arg(tblHeapBlocks->item(m_selectedRow,4)->text())
+			.arg(tblHeapBlocks->item(m_selectedRow,5)->text()));
 	}
 	else if(QString().compare(pAction->text(),"HeapID") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblHeapBlocks->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"Address") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblHeapBlocks->item(m_selectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"Block Size") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblHeapBlocks->item(m_selectedRow,3)->text());
 	}
 	else if(QString().compare(pAction->text(),"Block Count") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,4)->text());
+		clipboard->setText(tblHeapBlocks->item(m_selectedRow,4)->text());
 	}
 	else if(QString().compare(pAction->text(),"Flags") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(_iSelectedRow,5)->text());
+		clipboard->setText(tblHeapBlocks->item(m_selectedRow,5)->text());
 	}
 }
 
@@ -217,11 +216,11 @@ void qtDLGHeapView::DisplayHeap()
 	tblHeapView->setRowCount(0);
 	tblHeapBlocks->setRowCount(0);
 
-	for(size_t i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
 		HEAPLIST32 heapList;
 		heapList.dwSize = sizeof(HEAPLIST32);
-		HANDLE hHeapSnap = CreateToolhelp32Snapshot(TH32CS_SNAPHEAPLIST,myMainWindow->coreDebugger->PIDs[i].dwPID);
+		HANDLE hHeapSnap = CreateToolhelp32Snapshot(TH32CS_SNAPHEAPLIST,m_pMainWindow->coreDebugger->PIDs[i].dwPID);
 
 		if(hHeapSnap != INVALID_HANDLE_VALUE)
 		{
@@ -236,7 +235,7 @@ void qtDLGHeapView::DisplayHeap()
 					ZeroMemory(&he, sizeof(HEAPENTRY32));
 					he.dwSize = sizeof(HEAPENTRY32);
 
-					if(Heap32First(&he,myMainWindow->coreDebugger->PIDs[i].dwPID,heapList.th32HeapID))
+					if(Heap32First(&he,m_pMainWindow->coreDebugger->PIDs[i].dwPID,heapList.th32HeapID))
 					{
 						do
 						{

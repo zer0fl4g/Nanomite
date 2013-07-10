@@ -24,31 +24,91 @@
 #include <Windows.h>
 #include <QtCore>
 
+/**
+* @file qtDLGFunctions.h
+* @brief Displaying the function view widget
+*/
 class qtDLGFunctions : public QWidget, public Ui_qtDLGFunctionsClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGFunctions(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 iPID = 0);
+	/**
+	* @brief Responsible for initializing and showing the GUI of the function view widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	* @param processID The process id from which the functions will be shown
+	*
+	* @return no
+	*/
+	qtDLGFunctions(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 processID = 0);
+	/**
+	* @brief Deleting the worker data
+	*
+	* @return no
+	*/
 	~qtDLGFunctions();
 
 signals:
+	/**
+	* @brief A Qt signal which is send when the user wants to display a function in 
+	* the gui
+	* @param Offset The offset of the function which will be shown
+	*
+	* @return no
+	*/
 	void ShowInDisAs(quint64 Offset);
 
 private:
-	int _iPID,
-		_iSelectedRow;
+	int m_processID,	/* contains the process id from which the functions will be extracted */
+		m_selectedRow;	/* contains the selected row if the user opens the context menu */
 
-	clsFunctionsViewWorker *m_pFunctionWorker;
+	clsFunctionsViewWorker *m_pFunctionWorker; /* a pointer to the data background worker */
 
-	private slots:
-		void InsertDataFrom(int position);
-		void DisplayFunctionLists();
-		void OnCustomContextMenu(QPoint qPoint);
-		void MenuCallback(QAction* pAction);
+private slots:
+	/**
+	* @brief A Qt slot which is called when the user clicks opens,scrolls,resizes and will
+	* insert the data into the table
+	* @param position The position from where the data will be inserted
+	*
+	* @return no
+	*/
+	void InsertDataFrom(int position);
+	/**
+	* @brief A Qt slot which is called when the data needs to be inserted into the table
+	*
+	* @return no
+	*/
+	void DisplayFunctionLists();
+	/**
+	* @brief A Qt slot which is called when the user opens the context menu
+	* @param qPoint The point where the user opened the context menu
+	*
+	* @return no
+	*/
+	void OnCustomContextMenu(QPoint qPoint);
+	/**
+	* @brief A Qt slot which is called when the user clicks on a element in the context menu
+	* @param pAction The action which was selected from the context menu
+	*
+	* @return no
+	*/
+	void MenuCallback(QAction *pAction);
 
 protected:
-	void wheelEvent(QWheelEvent * event);
+	/**
+	* @brief A override of the wheel event to enable scrolling in the table widget
+	* @param event A pointer to the event data
+	*
+	* @return no
+	*/
+	void wheelEvent(QWheelEvent *event);
+	/**
+	* @brief A override of the resize event to enable refilling in the table widget
+	* @param event A pointer to the event data
+	*
+	* @return no
+	*/
 	void resizeEvent(QResizeEvent *event);
 };
 

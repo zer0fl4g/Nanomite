@@ -75,7 +75,7 @@ protected:
 	*
 	* @return no
 	*/
-	void wheelEvent(QWheelEvent * event);
+	void wheelEvent(QWheelEvent *event);
 	/**
 	* @brief A override of the resizeevent to enable refilling in the table widget
 	* @param event A pointer to the event data

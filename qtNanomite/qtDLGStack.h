@@ -23,27 +23,76 @@
 
 #include "ui_qtDLGStack.h"
 
+/**
+* @file qtDLGStack.h
+* @brief Displaying the stackview widget
+*/
 class qtDLGStack : public QDockWidget, public Ui_qtDLGStack
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Responsible for initializing and showing the GUI of the stackview widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	*
+	* @return no
+	*/
 	qtDLGStack(QWidget *parent = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGStack();
 
-	void LoadStackView(quint64 dwESP, DWORD dwStackSize);
+	/**
+	* @brief Loads the needed data into the stack table
+	* @param stackBaseOffset The base offset from where it begins to grab the data
+	* @param stackAlign The align number wich changes for x64 or x86
+	*
+	* @return no
+	*/
+	void LoadStackView(quint64 stackBaseOffset, DWORD stackAlign);
 	
 public slots:
+	/**
+	* @brief A Qt slot which is called when the user scrolls in the table with
+	* the mouse wheel or the scrollbar
+	* @param iValue The number of line which have been scrolled up/down
+	*
+	* @return no
+	*/
 	void OnStackScroll(int iValue);
 
 private:
-	int _iSelectedRow;
+	int m_selectedRow; /* contains the row which the user clicked to open the context menu */
 
 private slots:
+	/**
+	* @brief A Qt slot which is called when the user clicks on an action in the
+	* context menu
+	* @param pAction The action the user selected in the context menu
+	*
+	* @return no
+	*/
 	void MenuCallback(QAction *pAction);
+	/**
+	* @brief A Qt slot which is called when the user opens the context menu
+	* @param qPoint The position where the user opened the context menu
+	*
+	* @return no
+	*/
 	void OnContextMenu(QPoint qPoint);
 
 protected:
+	/**
+	* @brief An override to handle the wheel scroll event
+	* @param pOpject The object on which the event happend
+	* @param event The event type
+	*
+	* @return no
+	*/
 	bool eventFilter(QObject *pOpject,QEvent *event);
 };
 

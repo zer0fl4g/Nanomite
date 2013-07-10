@@ -38,7 +38,7 @@ public:
 	*
 	* @return no
 	*/
-	qtDLGHandleView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 processID = 0);
+	qtDLGHandleView(QWidget *parent = 0, Qt::WFlags flags = 0, qint32 processID = 0);
 	/**
 	* @brief Does not need to do something at the current stage
 	*
@@ -47,10 +47,10 @@ public:
 	~qtDLGHandleView();
 
 private:
-	size_t	m_processID,
-			m_processCountEntry,
-			m_processCountEnd;
-	int		m_selectedRow;
+	size_t	m_processID,			/* contains the process id from which the handle will be shown */
+			m_processCountEntry,	/* loop for process ids to show if we have more than one */
+			m_processCountEnd;		/* loop for process ids to show if we have more than one */
+	int		m_selectedRow;			/* contains the row on which the user opend the context menu */
 	
 	/**
 	* @brief A Qt slot which is called when the user scrolls, resizes
@@ -61,7 +61,7 @@ private:
 	*
 	* @return no
 	*/
-	void InsertDataIntoTable(DWORD dwPID,DWORD dwHandle,PTCHAR ptType,PTCHAR ptName);
+	void InsertDataIntoTable(DWORD dwPID, DWORD dwHandle, PTCHAR ptType, PTCHAR ptName);
 
 private slots:
 	/**

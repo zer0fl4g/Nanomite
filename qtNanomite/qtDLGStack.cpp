@@ -26,7 +26,6 @@
 using namespace std;
 
 qtDLGStack::qtDLGStack(QWidget *parent)
-
 	: QDockWidget(parent)
 {
 	setupUi(this);
@@ -50,7 +49,7 @@ qtDLGStack::~qtDLGStack()
 
 }
 
-void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
+void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 {
 	clsDebugger *coreDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
 
@@ -66,9 +65,9 @@ void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_READWRITE,
 		dwRowCount = (tblStack->verticalHeader()->height() / 11),
-		dwSize = dwRowCount * dwStackSize;
-	quint64	dwStartOffset = dwESP - dwStackSize * (dwRowCount / 2),
-		dwEndOffset = dwESP + dwStackSize * (dwRowCount / 2);
+		dwSize = dwRowCount * stackAlign;
+	quint64	dwStartOffset = stackBaseOffset - stackAlign * (dwRowCount / 2),
+		dwEndOffset = stackBaseOffset + stackAlign * (dwRowCount / 2);
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 		return;
@@ -95,7 +94,7 @@ void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 		int itemIndex = tblStack->rowCount();
 
 		// Current Offset
-		wsprintf(sTemp,L"%016I64X",(dwStartOffset + i * dwStackSize));
+		wsprintf(sTemp,L"%016I64X",(dwStartOffset + i * stackAlign));
 		tblStack->setItem(itemIndex - 1,0,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
 
 		// Value
@@ -106,14 +105,14 @@ void qtDLGStack::LoadStackView(quint64 dwESP, DWORD dwStackSize)
 
 		if(bIsWOW64)
 			for(int id = 3;id != -1;id--)
-				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
+				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
 		else
 			for(int id = 7;id != -1;id--)
-				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
+				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
 
 #else
 		for(int id = 3;id != -1;id--)
-			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * dwStackSize + id)));
+			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
 #endif
 		tblStack->setItem(itemIndex - 1,1,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
 
@@ -140,7 +139,7 @@ void qtDLGStack::OnStackScroll(int iValue)
 
 	clsDebugger *coreDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
 
-	DWORD dwStackSize = NULL;
+	DWORD stackAlign = NULL;
 	quint64 dwOffset = NULL;
 	QString strTemp;
 
@@ -149,10 +148,10 @@ void qtDLGStack::OnStackScroll(int iValue)
 	if(clsAPIImport::pIsWow64Process)
 		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
-	if(bIsWOW64) dwStackSize = 4;	
-	else dwStackSize = 8;
+	if(bIsWOW64) stackAlign = 4;	
+	else stackAlign = 8;
 #else
-	dwStackSize = 4;
+	stackAlign = 4;
 #endif
 
 	if(tblStack->rowCount() > 0)
@@ -167,13 +166,13 @@ void qtDLGStack::OnStackScroll(int iValue)
 		dwOffset = strTemp.toULongLong(0,16);
 
 	if(iValue < 5)
-		LoadStackView(dwOffset,dwStackSize);
+		LoadStackView(dwOffset,stackAlign);
 	else
 	{
 		if((tblStack->verticalHeader()->height() / 14) % 2)
-			LoadStackView(dwOffset + (dwStackSize * (tblStack->verticalHeader()->height() / 14)),dwStackSize);
+			LoadStackView(dwOffset + (stackAlign * (tblStack->verticalHeader()->height() / 14)),stackAlign);
 		else
-			LoadStackView(dwOffset + (dwStackSize * ((tblStack->verticalHeader()->height() / 14) + 1)),dwStackSize);
+			LoadStackView(dwOffset + (stackAlign * ((tblStack->verticalHeader()->height() / 14) + 1)),stackAlign);
 	}
 
 	scrollStackView->setValue(5);
@@ -195,8 +194,8 @@ void qtDLGStack::OnContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblStack->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblStack->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to Disassembler",this));
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
@@ -218,29 +217,29 @@ void qtDLGStack::MenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4")
-			.arg(tblStack->item(_iSelectedRow,0)->text())
-			.arg(tblStack->item(_iSelectedRow,1)->text())
-			.arg(tblStack->item(_iSelectedRow,2)->text())
-			.arg(tblStack->item(_iSelectedRow,3)->text()));
+			.arg(tblStack->item(m_selectedRow,0)->text())
+			.arg(tblStack->item(m_selectedRow,1)->text())
+			.arg(tblStack->item(m_selectedRow,2)->text())
+			.arg(tblStack->item(m_selectedRow,3)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(_iSelectedRow,0)->text());
+		clipboard->setText(tblStack->item(m_selectedRow,0)->text());
 	}
 	else if(QString().compare(pAction->text(),"OpCodes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblStack->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"Mnemonics") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblStack->item(m_selectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"Comment") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblStack->item(m_selectedRow,3)->text());
 	}
 }

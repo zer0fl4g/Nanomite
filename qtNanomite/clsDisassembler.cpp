@@ -24,6 +24,7 @@
 #include <TlHelp32.h>
 
 #define BEA_ENGINE_STATIC
+#define BEA_USE_STDCALL
 #include <BeaEngine.h>
 
 using namespace std;

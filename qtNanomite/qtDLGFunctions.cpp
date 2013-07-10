@@ -21,15 +21,14 @@
 
 using namespace std;
 
-qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 iPID)
-	: QWidget(parent, flags)
+qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 processID)
+	: QWidget(parent, flags),
+	m_processID(processID)
 {
 	this->setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(horizontalLayout);
 	tblFunctions->setRowCount(0);
-
-	_iPID = iPID;
 
 	connect(tblFunctions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 
@@ -46,7 +45,7 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 
 	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
+		if(myMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
 			iForEntry = i; iForEnd = i + 1;
 	}
 
@@ -84,8 +83,8 @@ void qtDLGFunctions::OnCustomContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblFunctions->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblFunctions->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to Disassembler",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
@@ -97,7 +96,7 @@ void qtDLGFunctions::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
-		emit ShowInDisAs(tblFunctions->item(_iSelectedRow,2)->text().toULongLong(0,16));
+		emit ShowInDisAs(tblFunctions->item(m_selectedRow,2)->text().toULongLong(0,16));
 	}
 }
 

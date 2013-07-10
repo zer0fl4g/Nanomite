@@ -45,28 +45,22 @@
     <Filter Include="Source Dateien\SQLite">
       <UniqueIdentifier>{6f74e63e-5989-40f4-8b3d-047c24413a90}</UniqueIdentifier>
     </Filter>
+    <Filter Include="Header Dateien\Updater">
+      <UniqueIdentifier>{7843b617-f56c-4b09-96fd-095c24b42940}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Source Dateien\Updater">
+      <UniqueIdentifier>{131afb2e-85b4-4aa2-8d52-b23865c0bc73}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="Form Dateien\Updater">
+      <UniqueIdentifier>{eabb0343-74ad-4f84-9a39-72e76ef7f251}</UniqueIdentifier>
+    </Filter>
   </ItemGroup>
   <ItemGroup>
     <ClCompile Include="main.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGNanomite.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGNanomite.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\qrc_qtDLGNanomite.cpp">
-      <Filter>Generierte Dateien</Filter>
-    </ClCompile>
     <ClCompile Include="clsHelperClass.cpp">
       <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGAbout.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGAbout.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGNanomite.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
@@ -77,89 +71,29 @@
     <ClCompile Include="clsDebugger\clsdebugger.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsDebugger.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsDebugger.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGAttach.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGAttach.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGAttach.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGDetailInfo.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGDetailInfo.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGDetailInfo.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGDebugStrings.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGDebugStrings.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGDebugStrings.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGOption.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGOption.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGOption.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGBreakPointManager.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGBreakPointManager.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGBreakPointManager.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGMemoryView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGMemoryView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGMemoryView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGHeapView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGHeapView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGHeapView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGStringView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGStringView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGStringView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGHandleView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGHandleView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGHandleView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
@@ -167,41 +101,17 @@
     <ClCompile Include="qtDLGWindowView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGWindowView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGWindowView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="clsAPIImport.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGHexView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGHexView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGHexView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsDisassembler.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsDisassembler.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="clsDisassembler.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGRegEdit.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGRegEdit.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGRegEdit.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="clsSymbolAndSyntax.cpp">
       <Filter>Source Dateien</Filter>
@@ -218,32 +128,14 @@
     <ClCompile Include="clsPEManager.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsPEManager.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsPEManager.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGPEEditor.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGPEEditor.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGPEEditor.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="clsCrashHandler.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGNanomiteMenuActions.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGSourceViewer.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGSourceViewer.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGSourceViewer.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
@@ -272,65 +164,17 @@
     <ClCompile Include="qtDLGTrace.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGTrace.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGTrace.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGFunctions.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGFunctions.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGFunctions.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGAssembler.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGAssembler.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGAssembler.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGRegisters.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGRegisters.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGRegisters.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGCallstack.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGCallstack.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGStack.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGStack.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGLogView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGLogView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="clsAppSettings.cpp">
       <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsAppSettings.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsAppSettings.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGCallstack.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
@@ -344,35 +188,11 @@
     <ClCompile Include="qtDLGPatchManager.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGPatchManager.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGPatchManager.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="clsStringViewWorker.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsStringViewWorker.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsStringViewWorker.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="clsHexViewWorker.cpp">
       <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsHexViewWorker.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsHexViewWorker.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsFunctionsViewWorker.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsFunctionsViewWorker.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="clsFunctionsViewWorker.cpp">
       <Filter>Source Dateien</Filter>
@@ -380,65 +200,296 @@
     <ClCompile Include="qtDLGProcessPrivilege.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGProcessPrivilege.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGProcessPrivilege.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGDisassembler.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGDisassembler.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGDisassembler.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGTIBView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGTIBView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGTIBView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGPEBView.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGPEBView.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGPEBView.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
     <ClCompile Include="qtDLGExceptionAsk.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGExceptionAsk.cpp">
-      <Filter>Generierte Dateien\Debug</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGExceptionAsk.cpp">
-      <Filter>Generierte Dateien\Release</Filter>
-    </ClCompile>
     <ClCompile Include="qtDLGExceptionEdit.cpp">
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_qtDLGExceptionEdit.cpp">
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGWindowView.cpp">
       <Filter>Generierte Dateien\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_qtDLGExceptionEdit.cpp">
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGWindowView.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
-    <ClCompile Include="clsUpdater.cpp">
-      <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="GeneratedFiles\Debug\moc_clsUpdater.cpp">
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGTrace.cpp">
       <Filter>Generierte Dateien\Debug</Filter>
     </ClCompile>
-    <ClCompile Include="GeneratedFiles\Release\moc_clsUpdater.cpp">
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGTrace.cpp">
       <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGTIBView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGTIBView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGStringView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGStringView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGStack.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGStack.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGSourceViewer.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGSourceViewer.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGRegisters.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGRegisters.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGRegEdit.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGRegEdit.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGProcessPrivilege.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGProcessPrivilege.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGPEEditor.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGPEEditor.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGPEBView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGPEBView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGPatchManager.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGPatchManager.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGOption.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGOption.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGNanomite.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGNanomite.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGMemoryView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGMemoryView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGLogView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGLogView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGHexView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGHexView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGHeapView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGHeapView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGHandleView.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGHandleView.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGFunctions.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGFunctions.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGExceptionEdit.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGExceptionEdit.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGExceptionAsk.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGExceptionAsk.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGDisassembler.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGDisassembler.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGDetailInfo.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGDetailInfo.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGDebugStrings.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGDebugStrings.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGCallstack.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGCallstack.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGBreakPointManager.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGBreakPointManager.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGAttach.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGAttach.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGAssembler.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGAssembler.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGAbout.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGAbout.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsStringViewWorker.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsStringViewWorker.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsPEManager.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsPEManager.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsHexViewWorker.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsHexViewWorker.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsFunctionsViewWorker.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsFunctionsViewWorker.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsDisassembler.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsDisassembler.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsDebugger.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsDebugger.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsAppSettings.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsAppSettings.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\qrc_qtDLGNanomite.cpp">
+      <Filter>Generierte Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_ucheckupdateswidget.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_ucheckupdateswidget.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_ufiledownloader.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_ufiledownloader.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_uupdatesmodel.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_uupdatesmodel.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_uupdatestableview.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_uupdatestableview.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_uupdatewidget.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_uupdatewidget.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\ucheckupdateswidget.cpp">
+      <Filter>Source Dateien\Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\ufiledownloader.cpp">
+      <Filter>Source Dateien\Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\updateitem.cpp">
+      <Filter>Source Dateien\Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\usettingsreader.cpp">
+      <Filter>Source Dateien\Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\uupdatesmodel.cpp">
+      <Filter>Source Dateien\Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\uupdatestableview.cpp">
+      <Filter>Source Dateien\Updater</Filter>
+    </ClCompile>
+    <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\uupdatewidget.cpp">
+      <Filter>Source Dateien\Updater</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
@@ -655,61 +706,37 @@
     <CustomBuild Include="qtDLGExceptionEdit.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
-    <CustomBuild Include="clsUpdater.h">
-      <Filter>Header Dateien</Filter>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\ucheckupdateswidget.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\ufiledownloader.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\uupdatesmodel.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\uupdatestableview.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\uupdatewidget.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\mainwindow.ui">
+      <Filter>Form Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\ucheckupdateswidget.ui">
+      <Filter>Form Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\uupdatewidget.ui">
+      <Filter>Form Dateien\Updater</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGNanomite.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGAbout.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGAttach.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGDetailInfo.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGDebugStrings.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGOption.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGBreakPointManager.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGMemoryView.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGHeapView.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGStringView.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGHandleView.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
     <ClInclude Include="NativeHeaders.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGWindowView.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
     <ClInclude Include="clsAPIImport.h">
       <Filter>Header Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGHexView.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGRegEdit86.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGRegEdit64.h">
-      <Filter>Generierte Dateien</Filter>
     </ClInclude>
     <ClInclude Include="clsSymbolAndSyntax.h">
       <Filter>Header Dateien</Filter>
@@ -720,14 +747,8 @@
     <ClInclude Include="db_sqlite\sqlite3.h">
       <Filter>Header Dateien\SQLite</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGPEEditor.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
     <ClInclude Include="clsCrashHandler.h">
       <Filter>Header Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGSourceViewer.h">
-      <Filter>Generierte Dateien</Filter>
     </ClInclude>
     <ClInclude Include="db_sqlite\sqlite3ext.h">
       <Filter>Header Dateien\SQLite</Filter>
@@ -744,49 +765,118 @@
     <ClInclude Include="clsMemDump.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGTrace.h">
-      <Filter>Generierte Dateien</Filter>
-    </ClInclude>
     <ClInclude Include="resource.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGFunctions.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGNanomite.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGAssembler.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGAbout.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGRegisters.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGAttach.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGCallstack.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGDetailInfo.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGStack.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGDebugStrings.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGLogView.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGOption.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGPatchManager.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGBreakPointManager.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGProcessPrivilege.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGMemoryView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGDisassembler.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGHeapView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGTIBView.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGStringView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGPEBView.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGHandleView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGExceptionAsk.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGWindowView.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="GeneratedFiles\ui_qtDLGExceptionEdit.h">
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGHexView.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGRegEdit86.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGRegEdit64.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGPEEditor.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGSourceViewer.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGTrace.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGFunctions.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGAssembler.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGRegisters.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGCallstack.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGStack.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGLogView.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGPatchManager.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGProcessPrivilege.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGDisassembler.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGTIBView.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGPEBView.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGExceptionAsk.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGExceptionEdit.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NanomiteUpdater\UpdaterWidget\settings.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NanomiteUpdater\UpdaterWidget\updateitem.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </ClInclude>
+    <ClInclude Include="..\NanomiteUpdater\UpdaterWidget\usettingsreader.h">
+      <Filter>Header Dateien\Updater</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_mainwindow.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_ucheckupdateswidget.h">
+      <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_uupdatewidget.h">
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
   </ItemGroup>
@@ -794,6 +884,87 @@
     <None Include="..\readme.md" />
     <None Include="..\changelog.md" />
     <None Include="..\Documentation\codeconvention.md" />
+    <None Include="..\Icons\ID_Privileges.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_PatchManager.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_Functions.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STEPOUT.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_SHOWTRACE.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STOPTRACE.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STARTTRACE.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STEPB2U.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_PEEditor.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\450x150.bmp">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_BPManager.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_DebugString.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_Handles.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_Heap.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_Memory.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_showInfo.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_Strings.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\ID_Windows.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_MAIN.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_RESTART.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_START.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STEPIN.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STEPOVER.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_STOP.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Icons\IDI_SUSPEND.ico">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Fonts\consola.ttf">
+      <Filter>Resource Dateien</Filter>
+    </None>
+    <None Include="..\Fonts\SourceCodePro-Regular.ttf">
+      <Filter>Resource Dateien</Filter>
+    </None>
   </ItemGroup>
   <ItemGroup>
     <ResourceCompile Include="qtNanomite.rc" />

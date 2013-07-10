@@ -21,13 +21,14 @@
 
 #include <QClipboard>
 
-qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags,qint32 iPID)
-	: QWidget(parent, flags)
+qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags, qint32 processID)
+	: QWidget(parent, flags),
+	m_processID(processID),
+	m_processLoopEntry(0)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
-	_PID = iPID;
 
 	connect(tblProcPriv,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayPrivileges()));
@@ -39,15 +40,13 @@ qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags,q
 	tblProcPriv->horizontalHeader()->setFixedHeight(21);
 
 	// Display
-	myMainWindow = qtDLGNanomite::GetInstance();
+	m_pMainWindow = qtDLGNanomite::GetInstance();
 
-	_ForEntry = 0;
-	_ForEnd = myMainWindow->coreDebugger->PIDs.size();
-
-	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	m_processLoopEnd = m_pMainWindow->coreDebugger->PIDs.size();
+	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _PID)
-			_ForEntry = i; _ForEnd = i + 1;
+		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
+			m_processLoopEntry = i; m_processLoopEnd = i + 1;
 	}
 
 	DisplayPrivileges();
@@ -62,9 +61,9 @@ void qtDLGProcessPrivilege::DisplayPrivileges()
 {
 	tblProcPriv->setRowCount(0);
 
-	for(size_t i = _ForEntry; i < _ForEnd;i++)
+	for(size_t i = m_processLoopEntry; i < m_processLoopEnd;i++)
 	{
-		HANDLE	hProcess	= myMainWindow->coreDebugger->PIDs[i].hProc,
+		HANDLE	hProcess	= m_pMainWindow->coreDebugger->PIDs[i].hProc,
 				hToken		= NULL;
 		
 		if(!OpenProcessToken(hProcess, TOKEN_READ, &hToken))
@@ -94,7 +93,7 @@ void qtDLGProcessPrivilege::DisplayPrivileges()
 
 		PTCHAR pPrivilegeName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 		DWORD nameSize = NULL;
-		int	PID	= myMainWindow->coreDebugger->PIDs[i].dwPID;
+		int	PID	= m_pMainWindow->coreDebugger->PIDs[i].dwPID;
 		
 		for(DWORD i = 0; i < pTokenBuffer->PrivilegeCount; i++)
 		{
@@ -146,8 +145,8 @@ void qtDLGProcessPrivilege::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_SelectedRow = tblProcPriv->indexAt(qPoint).row();
-	if(_SelectedRow < 0) return;
+	m_selectedRow = tblProcPriv->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
@@ -166,18 +165,18 @@ void qtDLGProcessPrivilege::MenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3")
-			.arg(tblProcPriv->item(_SelectedRow,0)->text())
-			.arg(tblProcPriv->item(_SelectedRow,1)->text())
-			.arg(tblProcPriv->item(_SelectedRow,2)->text()));
+			.arg(tblProcPriv->item(m_selectedRow,0)->text())
+			.arg(tblProcPriv->item(m_selectedRow,1)->text())
+			.arg(tblProcPriv->item(m_selectedRow,2)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Privilege Name") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblProcPriv->item(_SelectedRow,1)->text());
+		clipboard->setText(tblProcPriv->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"State") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblProcPriv->item(_SelectedRow,2)->text());
+		clipboard->setText(tblProcPriv->item(m_selectedRow,2)->text());
 	}
 }

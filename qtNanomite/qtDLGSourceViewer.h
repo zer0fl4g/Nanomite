@@ -19,18 +19,42 @@
 
 #include "ui_qtDLGSourceViewer.h"
 
+/**
+* @file qtDLGSourceViewer.h
+* @brief Displaying the sourceview widget
+*/
 class qtDLGSourceViewer : public QWidget, public Ui_qtDLGSourceViewerClass
 {
 	Q_OBJECT
 
 public:
-	bool IsSourceAvailable;
+	bool IsSourceAvailable; /* indicates if a source is avalible and allows the user to open the widget */
 
+	/**
+	* @brief Responsible for initializing and showing the GUI of the about dialog
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
 	qtDLGSourceViewer(QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGSourceViewer();
 
 public slots:
-	void OnDisplaySource(QString,int);
+	/**
+	* @brief This Qt slot is called then the debugger needs to display a sourcefile
+	* @param sourceFile This is the file which will be displayed
+	* @param sourceLine This is the line where the debugger is and which needs to be
+	* highlighted
+	*
+	* @return no
+	*/
+	void OnDisplaySource(QString sourceFile, int sourceLine);
 };
 
 #endif

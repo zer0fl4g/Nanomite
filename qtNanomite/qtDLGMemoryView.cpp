@@ -23,14 +23,15 @@
 #include <Psapi.h>
 #include <TlHelp32.h>
 
-qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
-	: QWidget(parent, flags)
+qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 processID)
+	: QWidget(parent, flags),
+	m_processID(processID),	
+	m_processCountEntry(0)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(verticalLayout);
-	_iPID = iPID;
-
+	
 	connect(tblMemoryView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayMemory()));
 
@@ -43,15 +44,13 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
 	tblMemoryView->horizontalHeader()->setFixedHeight(21);
 
 	// Display
-	myMainWindow = qtDLGNanomite::GetInstance();
+	m_pMainWindow = qtDLGNanomite::GetInstance();
 
-	_iForEntry = 0;
-	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
-
-	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	m_processCountEnd = m_pMainWindow->coreDebugger->PIDs.size();
+	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			_iForEntry = i; _iForEnd = i +1;
+		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
+			m_processCountEntry = i; m_processCountEnd = i +1;
 	}
 	
 	DisplayMemory();
@@ -66,8 +65,8 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblMemoryView->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblMemoryView->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to HexView",this));
 	menu.addAction(new QAction("Dump to File",this));
@@ -162,54 +161,54 @@ void qtDLGMemoryView::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Send to HexView") == 0)
 	{
-		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
-			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
+		qtDLGHexView *newView = new qtDLGHexView(this,Qt::Window,tblMemoryView->item(m_selectedRow,0)->text().toULongLong(0,16),
+			tblMemoryView->item(m_selectedRow,1)->text().toULongLong(0,16),
+			tblMemoryView->item(m_selectedRow,2)->text().toULongLong(0,16));
 		newView->show();
 	}
 	else if(QString().compare(pAction->text(),"Dump to File") == 0)
 	{
-		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
+		HANDLE hProc = clsDebugger::GetProcessHandleByPID(tblMemoryView->item(m_selectedRow,0)->text().toULongLong(0,16));
 
 		clsMemDump memDump(hProc,
-			(PTCHAR)tblMemoryView->item(_iSelectedRow,3)->text().utf16(),
-			tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
-			tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16));
+			(PTCHAR)tblMemoryView->item(m_selectedRow,3)->text().utf16(),
+			tblMemoryView->item(m_selectedRow,1)->text().toULongLong(0,16),
+			tblMemoryView->item(m_selectedRow,2)->text().toULongLong(0,16));
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4:%5")
-			.arg(tblMemoryView->item(_iSelectedRow,0)->text())
-			.arg(tblMemoryView->item(_iSelectedRow,1)->text())
-			.arg(tblMemoryView->item(_iSelectedRow,2)->text())
-			.arg(tblMemoryView->item(_iSelectedRow,3)->text())
-			.arg(tblMemoryView->item(_iSelectedRow,4)->text()));
+			.arg(tblMemoryView->item(m_selectedRow,0)->text())
+			.arg(tblMemoryView->item(m_selectedRow,1)->text())
+			.arg(tblMemoryView->item(m_selectedRow,2)->text())
+			.arg(tblMemoryView->item(m_selectedRow,3)->text())
+			.arg(tblMemoryView->item(m_selectedRow,4)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Base Address") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblMemoryView->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"Size") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblMemoryView->item(m_selectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"Module") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblMemoryView->item(m_selectedRow,3)->text());
 	}
 	else if(QString().compare(pAction->text(),"Type") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(_iSelectedRow,4)->text());
+		clipboard->setText(tblMemoryView->item(m_selectedRow,4)->text());
 	}
 	else if(QString().compare(pAction->text(),"Access") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(_iSelectedRow,5)->text());
+		clipboard->setText(tblMemoryView->item(m_selectedRow,5)->text());
 	}
 	else if(QString().compare(pAction->text(),"PAGE_EXECUTE") == 0)
 		SetPageProctection(PAGE_EXECUTE);
@@ -239,16 +238,16 @@ void qtDLGMemoryView::DisplayMemory()
 	MEMORY_BASIC_INFORMATION mbi;
 
 	tblMemoryView->setRowCount(0);
-	for(size_t i = _iForEntry; i < _iForEnd;i++)
+	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
 		quint64 dwAddress = NULL;
-		while(VirtualQueryEx(myMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
+		while(VirtualQueryEx(m_pMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
 		{
 			tblMemoryView->insertRow(tblMemoryView->rowCount());
 
 			// PID
 			tblMemoryView->setItem(tblMemoryView->rowCount() -1,0,
-				new QTableWidgetItem(QString().sprintf("%08X",myMainWindow->coreDebugger->PIDs[i].dwPID)));
+				new QTableWidgetItem(QString().sprintf("%08X",m_pMainWindow->coreDebugger->PIDs[i].dwPID)));
 			
 
 			// Base Address
@@ -271,7 +270,7 @@ void qtDLGMemoryView::DisplayMemory()
 
 			memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 			memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
-			GetMappedFileName(myMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH * sizeof(TCHAR));
+			GetMappedFileName(m_pMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH * sizeof(TCHAR));
 
 			iModLen = wcslen(sTemp2);
 			if(iModLen > 0)
@@ -340,12 +339,12 @@ void qtDLGMemoryView::DisplayMemory()
 
 DWORD qtDLGMemoryView::GetPageProtectionFlags()
 {
-	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, tblMemoryView->item(_iSelectedRow, 0)->text().toULongLong(0,16));
+	HANDLE hProcess = OpenProcess(PROCESS_QUERY_INFORMATION, false, tblMemoryView->item(m_selectedRow, 0)->text().toULongLong(0,16));
 	if(hProcess == INVALID_HANDLE_VALUE || hProcess == NULL) return -1;
 
 	MEMORY_BASIC_INFORMATION MBI;
 
-	if(!VirtualQueryEx(hProcess, (LPVOID)tblMemoryView->item(_iSelectedRow, 1)->text().toULongLong(0,16),&MBI,sizeof(MBI)))
+	if(!VirtualQueryEx(hProcess, (LPVOID)tblMemoryView->item(m_selectedRow, 1)->text().toULongLong(0,16),&MBI,sizeof(MBI)))
 	{
 		CloseHandle(hProcess);
 		return -1;
@@ -357,12 +356,12 @@ DWORD qtDLGMemoryView::GetPageProtectionFlags()
 
 void qtDLGMemoryView::SetPageProctection(DWORD protectionFlag)
 {
-	HANDLE hProcess = OpenProcess(PROCESS_VM_OPERATION, false, tblMemoryView->item(_iSelectedRow,0)->text().toULongLong(0,16));
+	HANDLE hProcess = OpenProcess(PROCESS_VM_OPERATION, false, tblMemoryView->item(m_selectedRow,0)->text().toULongLong(0,16));
 	if(hProcess == INVALID_HANDLE_VALUE || hProcess == NULL) return;
 
 	DWORD oldProtection = NULL;
-	if(!VirtualProtectEx(hProcess, (LPVOID)tblMemoryView->item(_iSelectedRow,1)->text().toULongLong(0,16),
-		tblMemoryView->item(_iSelectedRow,2)->text().toULongLong(0,16), protectionFlag, &oldProtection))
+	if(!VirtualProtectEx(hProcess, (LPVOID)tblMemoryView->item(m_selectedRow,1)->text().toULongLong(0,16),
+		tblMemoryView->item(m_selectedRow,2)->text().toULongLong(0,16), protectionFlag, &oldProtection))
 	{
 		MessageBoxW(NULL, L"ERROR, Failed to change the Page protection!", L"Nanomite", MB_OK);
 	}

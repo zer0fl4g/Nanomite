@@ -35,7 +35,6 @@
 #include "clsPEManager.h"
 #include "clsDBManager.h"
 #include "clsAppSettings.h"
-#include "clsUpdater.h"
 
 #include "ui_qtDLGNanomite.h"
 
@@ -61,7 +60,6 @@ public:
 	clsPEManager *PEManager;
 	clsDBManager *DBManager;
 	clsAppSettings *settings;
-	clsUpdater *launchUpdater;
 
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;
@@ -118,7 +116,6 @@ private slots:
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
 	void GenerateMenuCallback(QAction *qAction);
-	void OnUpdaterFinished();
 
 private:
 	int _iMenuPID;

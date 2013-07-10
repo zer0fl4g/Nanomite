@@ -21,26 +21,61 @@
 
 #include "qtDLGNanomite.h"
 
+/**
+* @file qtDLGProcessPrivilege.h
+* @brief Displaying the process privilege view widget
+*/
 class qtDLGProcessPrivilege : public QWidget, public Ui_qtDLGProcessPrivilegeClass
 {
 	Q_OBJECT
 
 public:
-	qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags,qint32 iPID);
+	/**
+	* @brief Responsible for initializing and showing the GUI of the process privilege view widget
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	* @param processID The process id of which the privileges will be displayed
+	*
+	* @return no
+	*/
+	qtDLGProcessPrivilege(QWidget *parent = 0, Qt::WFlags flags = 0, qint32 processID = -1);
+	/**
+	* @brief Does not need to do something at the current stage
+	*
+	* @return no
+	*/
 	~qtDLGProcessPrivilege();
 
 private:
-	int _PID,
-		_SelectedRow;
-	size_t	_ForEntry,
-			_ForEnd;
+	int			m_processID,
+				m_selectedRow;
+	size_t		m_processLoopEntry,
+				m_processLoopEnd;
 
-	qtDLGNanomite *myMainWindow;
+	qtDLGNanomite *m_pMainWindow;
 
 private slots:
+	/**
+	* @brief A Qt slot which is called when the privileges data should be displayed
+	*
+	* @return no
+	*/
 	void DisplayPrivileges();
-	void MenuCallback(QAction*);
+	/**
+	* @brief A Qt slot which is called when the user clicks on an action in the
+	* context menu
+	* @param pAction The action the user selected in the context menu
+	*
+	* @return no
+	*/
+	void MenuCallback(QAction *pAction);
+	/**
+	* @brief A Qt slot which is called when the user opens the context menu
+	* @param qPoint The position where the user opened the context menu
+	*
+	* @return no
+	*/
 	void OnCustomContextMenuRequested(QPoint qPoint);
 };
 
-#endif // QTDLGREGISTERS_H
+#endif

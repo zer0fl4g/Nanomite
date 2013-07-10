@@ -34,6 +34,8 @@
 #include "clsAPIImport.h"
 #include "clsMemManager.h"
 
+#include "..\NanomiteUpdater\UpdaterWidget\uupdatewidget.h"
+
 #include <TlHelp32.h>
 #include <Psapi.h>
 
@@ -407,9 +409,8 @@ void qtDLGNanomite::action_OptionsOptions()
 
 void qtDLGNanomite::action_OptionsUpdate()
 {
-	launchUpdater = new clsUpdater(QString("%1%2").arg(QDir::currentPath()).arg("/updater.exe"));
-	connect(launchUpdater,SIGNAL(finished()),this,SLOT(OnUpdaterFinished()),Qt::QueuedConnection);
-	launchUpdater->launchUpdater();
+	UUpdateWidget *pUpdater = new UUpdateWidget();
+	pUpdater->show();
 }
 
 void qtDLGNanomite::action_WindowDetailInformation()

@@ -516,7 +516,7 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 		new QTableWidgetItem(QString("%1").arg(exceptionOffset,16,16,QChar('0'))));
 		
 	tblExceptions->setItem(tblExceptions->rowCount() - 1,1,
-		new QTableWidgetItem(QString("%1").arg(exceptionCode,16,16,QChar('0'))));
+		new QTableWidgetItem(QString("%1").arg(exceptionCode,8,16,QChar('0'))));
 
 	tblExceptions->setItem(tblExceptions->rowCount() - 1,2,
 		new QTableWidgetItem(QString().sprintf("%08X / %08X",processID,threadID)));
@@ -531,16 +531,16 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 	QString logMessage;
 
 	if(functionName.length() > 0 && moduleName.length() > 0)
-		logMessage = QString("[!] %1@%2 ExceptionCode: %3 ExceptionOffset: %4processID: %5 TID: %6")
+		logMessage = QString("[!] %1@%2 ExceptionCode: %3 ExceptionOffset: %4 PID: %5 TID: %6")
 		.arg(QString::fromStdWString(functionName))
 		.arg(QString::fromStdWString(moduleName))
-		.arg(exceptionCode,16,16,QChar('0'))
+		.arg(exceptionCode,8,16,QChar('0'))
 		.arg(exceptionOffset,16,16,QChar('0'))
 		.arg(processID,8,16,QChar('0'))
 		.arg(threadID,8,16,QChar('0'));
 	else
-		logMessage = QString("[!] ExceptionCode: %1 ExceptionOffset: %2processID: %3 TID: %4")
-		.arg(exceptionCode,16,16,QChar('0'))
+		logMessage = QString("[!] ExceptionCode: %1 ExceptionOffset: %2 PID: %3 TID: %4")
+		.arg(exceptionCode,8,16,QChar('0'))
 		.arg(exceptionOffset,16,16,QChar('0'))
 		.arg(processID,8,16,QChar('0'))
 		.arg(threadID,8,16,QChar('0'));
@@ -579,12 +579,12 @@ void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypoin
 	QString logMessage;
 
 	if(bLoaded)
-		logMessage = QString("[+]processID(%1) - Loaded DLL: %2 Entrypoint: %3")
+		logMessage = QString("[+] PID(%1) - Loaded DLL: %2 Entrypoint: %3")
 		.arg(processID,8,16,QChar('0'))
 		.arg(QString::fromStdWString(sDLLPath))
 		.arg(entrypointOffset,16,16,QChar('0'));
 	else
-		logMessage = QString("[+]processID(%1) - Unloaded DLL: %2")
+		logMessage = QString("[+] PID(%1) - Unloaded DLL: %2")
 		.arg(processID,8,16,QChar('0'))
 		.arg(QString::fromStdWString(sDLLPath));
 
