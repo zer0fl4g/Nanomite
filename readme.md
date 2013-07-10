@@ -52,7 +52,7 @@
 + added possibility to show PEB/PBI of a process in detailview
 + added possibility to set Nanomite as default just in time debugger
 + added possibility in PEEditor to show exports of a loaded module in disassembler
-+ added updater (thanks to ... for this contribution)
++ added updater (thanks to inisider for this contribution)
 + updated beaengine to rev. 174
 + updated PE-Editor layout
 + updated DetailView layout
