@@ -134,6 +134,8 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 
 			SetThreadContext(hThread,&cTT);
 		}
+
+		CloseHandle(hThread);
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
 	memset(tcLogString,0x00,LOGBUFFER);
@@ -185,7 +187,10 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 
 			SetThreadContext(hThread,&cTT);
 		}
+
+		CloseHandle(hThread);
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
+
 	CloseHandle(hProcessSnap);
 	return true;
 }

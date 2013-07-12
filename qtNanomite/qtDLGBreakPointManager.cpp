@@ -58,7 +58,11 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 	if(newBP.dwHandle == 0x1)
 	{
 		tblBPs->insertRow(tblBPs->rowCount());
-		tblBPs->setItem(tblBPs->rowCount() - 1,0,new QTableWidgetItem(QString("%1").arg(newBP.dwPID,8,16,QChar('0'))));
+
+		if(newBP.dwPID == -1)
+			tblBPs->setItem(tblBPs->rowCount() - 1,0,new QTableWidgetItem(QString("%1").arg(newBP.dwPID)));
+		else
+			tblBPs->setItem(tblBPs->rowCount() - 1,0,new QTableWidgetItem(QString("%1").arg(newBP.dwPID,0,16)));
 		tblBPs->setItem(tblBPs->rowCount() - 1,1,new QTableWidgetItem(QString("%1").arg(newBP.dwOffset,16,16,QChar('0'))));
 
 		QString TempString;
@@ -133,8 +137,7 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	}
 
 	for(int i = 0; i < tblBPs->rowCount(); i++)
-		if(QString().compare(tblBPs->item(i,0)->text(),lePID->text()) == 0 &&
-			QString().compare(tblBPs->item(i,1)->text(),leOffset->text()) == 0)
+		if(QString().compare(tblBPs->item(i,1)->text(),leOffset->text()) == 0)
 			iUpdateLine = i;		
 
 	if(iUpdateLine != -1)
@@ -168,8 +171,10 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	else if(cbBreakOn->currentText().compare("Write") == 0)
 		dwBreakOn = DR_WRITE;
 
-	myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toLong(0,16),
-		leOffset->text().toULongLong(0,16),0,true);
+	if(lePID->text().toInt() == -1)
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),leOffset->text().toULongLong(0,16),0,true);
+	else
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),leOffset->text().toULongLong(0,16),0,true);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
@@ -196,14 +201,11 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 void qtDLGBreakPointManager::OnBPRemove()
 {
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
-	QList <QTableWidgetItem *> selectedItems = tblBPs->selectedItems();
-	if(selectedItems.count() <= 0)
-		return;
-
 	DWORD dwType = 0;
+
 	for(int i = 0; i < tblBPs->rowCount(); i++)
 	{
-		if(selectedItems.value(i)->isSelected())
+		if(tblBPs->item(i,0)->isSelected())
 		{
 			if(QString().compare(tblBPs->item(i,2)->text(),"Software BP - int3") == 0)
 				dwType = 0;

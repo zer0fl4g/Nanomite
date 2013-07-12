@@ -36,6 +36,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 	tblProcList->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblProcList,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(OnProcessDoubleClick(int,int)));
+	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(FillProcessList()));
 
 	FillProcessList();
 }
@@ -47,6 +48,8 @@ qtDLGAttach::~qtDLGAttach()
 
 void qtDLGAttach::FillProcessList()
 {
+	tblProcList->setRowCount(0);
+
 	HANDLE hToolSnapShot = CreateToolhelp32Snapshot(TH32CS_SNAPPROCESS,0);
 	if( hToolSnapShot != INVALID_HANDLE_VALUE)
 	{

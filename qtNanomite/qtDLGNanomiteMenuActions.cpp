@@ -243,6 +243,12 @@ void qtDLGNanomite::action_DebugStepOver()
 	if(i == coreDisAs->SectionDisAs.constEnd())
 		return;
 
+	if(i.value().ASM.contains("ret") || i.value().ASM.contains("retn") || i.value().ASM.contains("retf"))
+	{
+		action_DebugStepIn();
+		return;
+	}
+
 	bool bOF = (eFlags & 0x800) ? true : false;
 	bool bDF = (eFlags & 0x400) ? true : false;
 	bool bTF = (eFlags & 0x100) ? true : false;
