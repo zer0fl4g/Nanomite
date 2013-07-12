@@ -23,32 +23,31 @@
 
 using namespace std;
 
-qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags,qint32 iPID)
-	: QWidget(parent, flags)
+qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 processID)
+	: QWidget(parent, flags),
+	m_processID(processID),
+	m_pStringProcessor(NULL)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(horizontalLayout);
 	tblStringView->setRowCount(0);
 	
-	m_pStringProcessor = NULL;
-	_iPID = iPID;
-
 	// Init List
 	tblStringView->horizontalHeader()->resizeSection(0,75);
 	tblStringView->horizontalHeader()->resizeSection(1,135);
 	tblStringView->horizontalHeader()->setFixedHeight(21);
 
 	// Display
-	myMainWindow = qtDLGNanomite::GetInstance();
+	m_pMainWindow = qtDLGNanomite::GetInstance();
 
-	_iForEntry = 0;
-	_iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	m_forEntry = 0;
+	m_forEnd = m_pMainWindow->coreDebugger->PIDs.size();
 
-	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
-		if(myMainWindow->coreDebugger->PIDs[i].dwPID == _iPID)
-			_iForEntry = i; _iForEnd = i + 1;
+		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
+			m_forEntry = i; m_forEnd = i + 1;
 	}
 	
 	connect(stringScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
@@ -66,10 +65,10 @@ qtDLGStringView::~qtDLGStringView()
 void qtDLGStringView::DataProcessing()
 {
 	QMap<int,PTCHAR> dataForProcessing;
-	for(size_t i = _iForEntry; i < _iForEnd; i++)
+	for(size_t i = m_forEntry; i < m_forEnd; i++)
 	{
-		dataForProcessing.insert(myMainWindow->coreDebugger->PIDs[_iForEntry].dwPID,
-			myMainWindow->coreDebugger->PIDs[_iForEntry].sFileName);
+		dataForProcessing.insert(m_pMainWindow->coreDebugger->PIDs[m_forEntry].dwPID,
+			m_pMainWindow->coreDebugger->PIDs[m_forEntry].sFileName);
 	}
 
 	if(m_pStringProcessor != NULL)
@@ -142,19 +141,19 @@ void qtDLGStringView::MenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3")
-			.arg(tblStringView->item(_iSelectedRow,0)->text())
-			.arg(tblStringView->item(_iSelectedRow,1)->text())
-			.arg(tblStringView->item(_iSelectedRow,2)->text()));
+			.arg(tblStringView->item(m_selectedRow,0)->text())
+			.arg(tblStringView->item(m_selectedRow,1)->text())
+			.arg(tblStringView->item(m_selectedRow,2)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStringView->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblStringView->item(m_selectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"String") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStringView->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblStringView->item(m_selectedRow,2)->text());
 	}
 }
 
@@ -162,8 +161,8 @@ void qtDLGStringView::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblStringView->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_selectedRow = tblStringView->indexAt(qPoint).row();
+	if(m_selectedRow < 0) return;
 
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
