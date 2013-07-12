@@ -28,27 +28,27 @@ class qtDLGStringView : public QWidget, public Ui_qtDLGStringViewClass
 	Q_OBJECT
 
 public:
-	qtDLGStringView(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 iPID = 0);
+	qtDLGStringView(QWidget *parent = 0, Qt::WFlags flags = 0, qint32 processID = 0);
 	~qtDLGStringView();
 
 private:
-	size_t	_iPID,
-			_iForEntry,
-			_iForEnd;
-	int		_iSelectedRow;
+	size_t				m_processID,
+						m_forEntry,
+						m_forEnd;
+	int					m_selectedRow;
 
-	qtDLGNanomite *myMainWindow;
+	qtDLGNanomite		*m_pMainWindow;
 
-	clsStringViewWorker *m_pStringProcessor;
+	clsStringViewWorker	*m_pStringProcessor;
 
-	void PrintStringToList(int PID,QString StringToPrint, int StringOffset);
+	void PrintStringToList(int processID,QString stringToPrint, int stringOffset);
 
-	private slots:
-		void InsertDataFrom(int position);
-		void DataProcessing();
-		void OnCustomContextMenuRequested(QPoint qPoint);
-		void MenuCallback(QAction* pAction);
-		void DisplayStrings();
+private slots:
+	void InsertDataFrom(int position);
+	void DataProcessing();
+	void OnCustomContextMenuRequested(QPoint qPoint);
+	void MenuCallback(QAction* pAction);
+	void DisplayStrings();
 
 protected:
 	void wheelEvent(QWheelEvent * event);
