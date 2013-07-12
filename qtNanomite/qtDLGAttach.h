@@ -51,14 +51,6 @@ signals:
 	*/
 	void StartAttachedDebug(int iPID,QString sFile);
 
-private:
-	/**
-	* @brief A method which fills the QTableWidget with the current and accessible functions
-	*
-	* @return no
-	*/
-	void FillProcessList();
-
 private slots:
 	/**
 	* @brief A qt slot which is triggered when the user double clicks a process from the QTableWidget
@@ -68,6 +60,13 @@ private slots:
 	* @return no
 	*/
 	void OnProcessDoubleClick(int iRow,int iColumn);
+	/**
+	* @brief A qt slot which is triggered when the user reloads the list, or it fills the list on 
+	* dialog opening
+	*
+	* @return no
+	*/
+	void FillProcessList();
 };
 
 #endif

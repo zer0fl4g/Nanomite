@@ -88,7 +88,6 @@ struct BPStruct
 {
 	DWORD dwSize;
 	DWORD dwSlot;
-	DWORD dwPID;
 	DWORD dwTypeFlag;
 	/*
 	|	DR_EXECUTE
@@ -105,6 +104,7 @@ struct BPStruct
 	quint64 dwOffset;
 	quint64 dwBaseOffset;
 	quint64 dwOldOffset;
+	int dwPID;
 	BYTE bOrgByte;
 	bool bRestoreBP;
 	PTCHAR moduleName;

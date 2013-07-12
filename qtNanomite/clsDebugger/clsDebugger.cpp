@@ -43,6 +43,10 @@ clsDebugger* clsDebugger::pThis = NULL;
 
 clsDebugger::clsDebugger()
 {
+	ZeroMemory(&_si, sizeof(_si));
+	_si.cb = sizeof(_si);
+	ZeroMemory(&_pi, sizeof(_pi));
+
 	_NormalDebugging = true;
 	_isDebugging = false;
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
@@ -56,6 +60,10 @@ clsDebugger::clsDebugger()
 
 clsDebugger::clsDebugger(wstring sTarget)
 {
+	ZeroMemory(&_si, sizeof(_si));
+	_si.cb = sizeof(_si);
+	ZeroMemory(&_pi, sizeof(_pi));
+
 	_sTarget = sTarget;
 	_NormalDebugging = true;
 	_isDebugging = false;
@@ -119,6 +127,15 @@ void clsDebugger::CleanWorkSpace()
 	PIDs.clear();
 	DLLs.clear();
 	TIDs.clear();
+
+	if(_pi.hProcess != NULL && _pi.hThread != NULL)
+	{
+		CloseHandle(_pi.hProcess);
+		CloseHandle(_pi.hThread);
+		ZeroMemory(&_si, sizeof(_si));
+		_si.cb = sizeof(_si);
+		ZeroMemory(&_pi, sizeof(_pi));
+	}
 }
 
 PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile) 
@@ -243,6 +260,7 @@ void clsDebugger::AttachedDebugging(LPVOID pDebProc)
 		_NormalDebugging = true;
 		return;
 	}
+
 	_isDebugging = false;
 	emit OnDebuggerTerminated();
 }
@@ -250,10 +268,6 @@ void clsDebugger::AttachedDebugging(LPVOID pDebProc)
 void clsDebugger::NormalDebugging(LPVOID pDebProc)
 {
 	clsDebugger *pThis = (clsDebugger*)pDebProc;
-
-	ZeroMemory(&_si, sizeof(_si));
-	_si.cb = sizeof(_si);
-	ZeroMemory(&_pi, sizeof(_pi));
 
 	DWORD dwCreationFlag = 0x2;
 
@@ -336,6 +350,7 @@ void clsDebugger::DebuggingLoop()
 				if(dbgSettings.bBreakOnNewPID)
 					dwContinueStatus = CallBreakDebugger(&debug_event,0);
 
+				CloseHandle(debug_event.u.CreateProcessInfo.hFile);
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
@@ -352,7 +367,7 @@ void clsDebugger::DebuggingLoop()
 
 			if(dbgSettings.bBreakOnExTID)
 				dwContinueStatus = CallBreakDebugger(&debug_event,0);
-
+			
 			break;
 
 		case EXIT_PROCESS_DEBUG_EVENT:
@@ -406,6 +421,8 @@ void clsDebugger::DebuggingLoop()
 
 				if(dbgSettings.bBreakOnNewDLL)
 					dwContinueStatus = CallBreakDebugger(&debug_event,0);
+
+				CloseHandle(debug_event.u.LoadDll.hFile);
 			}
 			break;
 
@@ -864,7 +881,7 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 				return true;
 		for(size_t i = 0;i < HardwareBPs.size();i++)
 			if(dwExceptionOffset == HardwareBPs[i].dwOffset && (HardwareBPs[i].dwPID == dwPID || HardwareBPs[i].dwPID == -1))
-			return true;
+				return true;
 	}
 	return false;
 }
@@ -885,11 +902,12 @@ bool clsDebugger::SuspendProcess(DWORD dwPID,bool bSuspend)
 		CloseHandle(hProcessSnap);
 		return false;
 	}
+
 	do{
 		HANDLE hThread = INVALID_HANDLE_VALUE;
 
 		if(dwPID == threadEntry32.th32OwnerProcessID)
-			hThread = OpenThread(THREAD_ALL_ACCESS,false,threadEntry32.th32ThreadID);
+			hThread = OpenThread(THREAD_SUSPEND_RESUME ,false,threadEntry32.th32ThreadID);
 
 		if(hThread != INVALID_HANDLE_VALUE)
 		{
@@ -898,9 +916,11 @@ bool clsDebugger::SuspendProcess(DWORD dwPID,bool bSuspend)
 			else
 				ResumeThread(hThread);
 		}
-
+		
+		CloseHandle(hThread);
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
+	CloseHandle(hProcessSnap);
 	return true;
 }
 
