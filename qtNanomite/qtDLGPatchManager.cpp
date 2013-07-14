@@ -56,8 +56,8 @@ void qtDLGPatchManager::OnCustomContextMenuRequested(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblPatches->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_iSelectedRow = tblPatches->indexAt(qPoint).row();
+	if(m_iSelectedRow < 0) return;
 
 	menu.addAction(new QAction("(Un)Do Patch",this));
 	menu.addAction(new QAction("Remove Patch",this));
@@ -84,11 +84,11 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"(Un)Do Patch") == 0)
 	{
-		if(tblPatches->item(_iSelectedRow,6)->text().contains("false"))
-			AddNewPatch(NULL,NULL,tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16),NULL,NULL,true);
+		if(tblPatches->item(m_iSelectedRow,6)->text().contains("false"))
+			AddNewPatch(NULL,NULL,tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16),NULL,NULL,true);
 		else
-			RemovePatch(tblPatches->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
+			RemovePatch(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 
 		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
 		emit pThis->OnReloadDebugger();
@@ -96,10 +96,10 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Remove Patch") == 0)
 	{
-		RemovePatch(tblPatches->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
-		DeletePatch(tblPatches->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		RemovePatch(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
+		DeletePatch(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 
 		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
 		emit pThis->OnReloadDebugger();
@@ -114,8 +114,8 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Save Patch to File") == 0)
 	{
-		SavePatchToFile(tblPatches->item(_iSelectedRow,0)->text().toULongLong(0,16),
-			tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		SavePatchToFile(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 
 		UpdatePatchTable();
 	}
@@ -130,49 +130,49 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
-		emit OnShowInDisassembler(tblPatches->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		emit OnShowInDisassembler(tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4:%5:%6:%7")
-			.arg(tblPatches->item(_iSelectedRow,0)->text())
-			.arg(tblPatches->item(_iSelectedRow,1)->text())
-			.arg(tblPatches->item(_iSelectedRow,2)->text())
-			.arg(tblPatches->item(_iSelectedRow,3)->text())
-			.arg(tblPatches->item(_iSelectedRow,4)->text())
-			.arg(tblPatches->item(_iSelectedRow,5)->text())
-			.arg(tblPatches->item(_iSelectedRow,6)->text()));
+			.arg(tblPatches->item(m_iSelectedRow,0)->text())
+			.arg(tblPatches->item(m_iSelectedRow,1)->text())
+			.arg(tblPatches->item(m_iSelectedRow,2)->text())
+			.arg(tblPatches->item(m_iSelectedRow,3)->text())
+			.arg(tblPatches->item(m_iSelectedRow,4)->text())
+			.arg(tblPatches->item(m_iSelectedRow,5)->text())
+			.arg(tblPatches->item(m_iSelectedRow,6)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblPatches->item(m_iSelectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"Org. Bytes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblPatches->item(m_iSelectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"New Bytes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblPatches->item(m_iSelectedRow,3)->text());
 	}
 	else if(QString().compare(pAction->text(),"Size") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(_iSelectedRow,4)->text());
+		clipboard->setText(tblPatches->item(m_iSelectedRow,4)->text());
 	}
 	else if(QString().compare(pAction->text(),"Saved") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(_iSelectedRow,5)->text());
+		clipboard->setText(tblPatches->item(m_iSelectedRow,5)->text());
 	}
 	else if(QString().compare(pAction->text(),"Written") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(_iSelectedRow,5)->text());
+		clipboard->setText(tblPatches->item(m_iSelectedRow,5)->text());
 	}
 }
 
@@ -180,7 +180,7 @@ bool qtDLGPatchManager::AddNewPatch(int PID, HANDLE hProc, quint64 Offset, int P
 {
 	if(pThis == NULL) return false;
 
-	for(QList<PatchData>::iterator i = pThis->patches.begin(); i != pThis->patches.end(); ++i)
+	for(QList<PatchData>::iterator i = pThis->m_patches.begin(); i != pThis->m_patches.end(); ++i)
 	{
 		if(i->Offset == Offset)
 		{
@@ -214,7 +214,7 @@ bool qtDLGPatchManager::AddNewPatch(int PID, HANDLE hProc, quint64 Offset, int P
 	else
 		newPatch.bWritten = false;
 	
-	pThis->patches.push_back(newPatch);
+	pThis->m_patches.push_back(newPatch);
 	pThis->UpdateOffsetPatch(hProc,PID);
 
 	return true;
@@ -225,7 +225,7 @@ bool qtDLGPatchManager::RemovePatch(int PID, quint64 Offset)
 	// Delete Patch from Memory
 	if(pThis == NULL) return false;
 
-	for(QList<PatchData>::iterator i = pThis->patches.begin(); i != pThis->patches.end(); ++i)
+	for(QList<PatchData>::iterator i = pThis->m_patches.begin(); i != pThis->m_patches.end(); ++i)
 	{
 		if(i->Offset == Offset)
 		{
@@ -244,7 +244,7 @@ bool qtDLGPatchManager::DeletePatch(int PID, quint64 Offset)
 	// Delete Patch from List
 	if(pThis == NULL) return false;
 
-	for(QList<PatchData>::iterator i = pThis->patches.begin(); i != pThis->patches.end(); ++i)
+	for(QList<PatchData>::iterator i = pThis->m_patches.begin(); i != pThis->m_patches.end(); ++i)
 	{
 		if(i->Offset == Offset)
 		{
@@ -252,7 +252,7 @@ bool qtDLGPatchManager::DeletePatch(int PID, quint64 Offset)
 			clsMemManager::CFree(i->newData);
 			clsMemManager::CFree(i->ModuleName);
 
-			pThis->patches.erase(i);
+			pThis->m_patches.erase(i);
 			return true;
 		}
 	}
@@ -263,7 +263,7 @@ void qtDLGPatchManager::ClearAllPatches()
 {
 	if(pThis == NULL) return;
 
-	for(QList<PatchData>::iterator i = pThis->patches.begin(); i != pThis->patches.end(); ++i)
+	for(QList<PatchData>::iterator i = pThis->m_patches.begin(); i != pThis->m_patches.end(); ++i)
 	{
 		RemovePatch(i->PID,i->Offset);
 		clsMemManager::CFree(i->orgData);
@@ -271,7 +271,7 @@ void qtDLGPatchManager::ClearAllPatches()
 		clsMemManager::CFree(i->ModuleName);
 	}
 
-	pThis->patches.clear();
+	pThis->m_patches.clear();
 }
 
 bool qtDLGPatchManager::WritePatchToProc(HANDLE hProc, quint64 Offset, int PatchSize, LPVOID DataToWrite, LPVOID OrgData, bool bRemove)
@@ -305,7 +305,7 @@ void qtDLGPatchManager::UpdatePatchTable()
 	QString strTemp;
 
 	tblPatches->setRowCount(0);
-	for(QList<PatchData>::iterator i = patches.begin(); i != patches.end(); ++i)
+	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
 		tblPatches->insertRow(tblPatches->rowCount());		
 
@@ -354,7 +354,7 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 {
 	bool bThingsChanged = false;
 
-	for(QList<PatchData>::iterator i = patches.begin(); i != patches.end(); ++i)
+	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
 		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(i->ModuleName,i->Offset,newPID);
 		if(newBaseOffset != i->Offset && newBaseOffset != i->BaseOffset)
@@ -393,7 +393,7 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 
 void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 {
-	for(QList<PatchData>::iterator i = patches.begin(); i != patches.end(); ++i)
+	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
 		if(i->Offset == Offset)
 		{

@@ -118,8 +118,8 @@ private slots:
 	void GenerateMenuCallback(QAction *qAction);
 
 private:
-	int _iMenuPID;
-	int _iSelectedRow;
+	int m_iMenuProcessID;
+	int m_iSelectedRow;
 
 	bool m_IsRestart;
 

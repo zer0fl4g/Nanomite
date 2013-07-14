@@ -31,22 +31,22 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 
 	connect(treePE,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 
-	_PID = PID;
-	_PEManager = PEManager;
+	m_processID = PID;
+	m_pEManager = PEManager;
 	
-	if(_PEManager != NULL)
+	if(m_pEManager != NULL)
 	{	
 		if(FileName.length() > 0)
-			_currentFile = FileName;
+			m_currentFile = FileName;
 		else
-			_currentFile = _PEManager->getFilenameFromPID(_PID);
-		if(_currentFile.length() <= 0) 
+			m_currentFile = m_pEManager->getFilenameFromPID(m_processID);
+		if(m_currentFile.length() <= 0) 
 		{
 			MessageBoxW(NULL,L"Could not load File!",L"Nanomite",MB_OK);
 			close();
 		}
 
-		this->setWindowTitle(QString("[Nanomite] - PEEditor - FileName: %1").arg(QString::fromStdWString(_currentFile)));
+		this->setWindowTitle(QString("[Nanomite] - PEEditor - FileName: %1").arg(QString::fromStdWString(m_currentFile)));
 
 		InitList();
 		LoadPEView();
@@ -60,9 +60,9 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 
 qtDLGPEEditor::~qtDLGPEEditor()
 {
-	if(_PID == -1)
-		_PEManager->CloseFile(_currentFile,-1);
-	_PEManager = NULL;
+	if(m_processID == -1)
+		m_pEManager->CloseFile(m_currentFile,-1);
+	m_pEManager = NULL;
 }
 
 void qtDLGPEEditor::InitList()
@@ -87,7 +87,7 @@ void qtDLGPEEditor::LoadPEView()
 
 void qtDLGPEEditor::InsertImports()
 {
-	QList<APIData> imports = _PEManager->getImports(_currentFile);
+	QList<APIData> imports = m_pEManager->getImports(m_currentFile);
 	if(imports.size() <= 0) return;
 
 	QTreeWidgetItem *topElement,
@@ -119,12 +119,12 @@ void qtDLGPEEditor::InsertImports()
 
 void qtDLGPEEditor::InsertExports()
 {
-	QList<APIData> exports = _PEManager->getExports(_currentFile);
+	QList<APIData> exports = m_pEManager->getExports(m_currentFile);
 	if(exports.size() <= 0) return;
 
 	QTreeWidgetItem *topElement,
 					*exportElement;
-	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule((PTCHAR)clsHelperClass::reverseStrip((PTCHAR)_currentFile.c_str(),'\\'),NULL,_PID);
+	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule((PTCHAR)clsHelperClass::reverseStrip((PTCHAR)m_currentFile.c_str(),'\\'),NULL,m_processID);
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Exports");
@@ -140,7 +140,7 @@ void qtDLGPEEditor::InsertExports()
 
 void qtDLGPEEditor::InsertDosHeader()
 {
-	PIMAGE_DOS_HEADER currentDOS = _PEManager->getDosHeader(_currentFile);
+	PIMAGE_DOS_HEADER currentDOS = m_pEManager->getDosHeader(m_currentFile);
 	if(currentDOS == NULL) return;
 
 	QTreeWidgetItem *topElement;
@@ -176,9 +176,9 @@ void qtDLGPEEditor::InsertFileHeader()
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"IMAGE_FILE_HEADER");
 		
-	if(_PEManager->is64BitFile(_currentFile))
+	if(m_pEManager->is64BitFile(m_currentFile))
 	{
-		PIMAGE_NT_HEADERS64 currentFileHeader = _PEManager->getNTHeader64(_currentFile);
+		PIMAGE_NT_HEADERS64 currentFileHeader = m_pEManager->getNTHeader64(m_currentFile);
 		if(currentFileHeader == NULL) return;
 	
 		treePE->addTopLevelItem(topElement);
@@ -192,7 +192,7 @@ void qtDLGPEEditor::InsertFileHeader()
 	}
 	else
 	{
-		PIMAGE_NT_HEADERS32 currentFileHeader = _PEManager->getNTHeader32(_currentFile);
+		PIMAGE_NT_HEADERS32 currentFileHeader = m_pEManager->getNTHeader32(m_currentFile);
 		if(currentFileHeader == NULL) return;
 
 		treePE->addTopLevelItem(topElement);
@@ -212,9 +212,9 @@ void qtDLGPEEditor::InsertOptionalHeader()
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"IMAGE_OPTIONAL_HEADER");
 
-	if(_PEManager->is64BitFile(_currentFile))
+	if(m_pEManager->is64BitFile(m_currentFile))
 	{
-		PIMAGE_NT_HEADERS64 currentFileHeader = _PEManager->getNTHeader64(_currentFile);
+		PIMAGE_NT_HEADERS64 currentFileHeader = m_pEManager->getNTHeader64(m_currentFile);
 		if(currentFileHeader == NULL) return;
 
 		treePE->addTopLevelItem(topElement);
@@ -251,7 +251,7 @@ void qtDLGPEEditor::InsertOptionalHeader()
 	}
 	else
 	{
-		PIMAGE_NT_HEADERS32 currentFileHeader = _PEManager->getNTHeader32(_currentFile);
+		PIMAGE_NT_HEADERS32 currentFileHeader = m_pEManager->getNTHeader32(m_currentFile);
 		if(currentFileHeader == NULL) return;
 
 		treePE->addTopLevelItem(topElement);
@@ -290,7 +290,7 @@ void qtDLGPEEditor::InsertOptionalHeader()
 
 void qtDLGPEEditor::InsertSections()
 {
-	QList<PESectionData> sections = _PEManager->getSections(_currentFile);
+	QList<PESectionData> sections = m_pEManager->getSections(m_currentFile);
 	if(sections.size() <= 0) return;
 
 	QTreeWidgetItem *topElement;

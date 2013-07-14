@@ -50,8 +50,8 @@ void qtDLGRegisters::OnContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblRegView->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_iSelectedRow = tblRegView->indexAt(qPoint).row();
+	if(m_iSelectedRow < 0) return;
 
 
 	menu.addAction(new QAction("Send to StackView",this));
@@ -74,8 +74,8 @@ void qtDLGRegisters::MenuCallback(QAction* pAction)
 
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
-		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16)))
-			emit OnDisplayDisassembly(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16));
+		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16)))
+			emit OnDisplayDisassembly(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 	}
 	else if(QString().compare(pAction->text(),"Send to StackView") == 0)
 	{
@@ -85,22 +85,22 @@ void qtDLGRegisters::MenuCallback(QAction* pAction)
 			clsAPIImport::pIsWow64Process(pMainWindow->coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
 		if(bIsWOW64)
-			pMainWindow->stackView->LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),4);
+			pMainWindow->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),4);
 		else
-			pMainWindow->stackView->LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),8);
+			pMainWindow->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),8);
 #else
-		pMainWindow->stackView->LoadStackView(tblRegView->item(_iSelectedRow,1)->text().toULongLong(0,16),4);
+		pMainWindow->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),4);
 #endif
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2").arg(tblRegView->item(_iSelectedRow,0)->text()).arg(tblRegView->item(_iSelectedRow,1)->text()));
+		clipboard->setText(QString("%1:%2").arg(tblRegView->item(m_iSelectedRow,0)->text()).arg(tblRegView->item(m_iSelectedRow,1)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Value") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblRegView->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblRegView->item(m_iSelectedRow,1)->text());
 	}
 }
 

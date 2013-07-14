@@ -68,7 +68,7 @@ private:
 
 private slots:
 	/**
-	* @brief A qt slot which is triggered if the user press return in the line edit
+	* @brief A qt slot which is triggered when the user press return in the line edit
 	*
 	* @return no
 	*/

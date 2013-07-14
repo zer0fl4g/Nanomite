@@ -332,7 +332,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 
 void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
 {
-	_iMenuPID = qAction->text().toULong(0,16);
+	m_iMenuProcessID = qAction->text().toULong(0,16);
 }
 
 void qtDLGNanomite::GenerateMenu(bool isAllEnabled)

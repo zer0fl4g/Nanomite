@@ -47,7 +47,7 @@ private:
 		DWORD64 high;
 	} uint128_t;
 
-	int _iSelectedRow;
+	int m_iSelectedRow;
 
 	void PrintValueInTable(QString regName, QString regValue);
 	double readFloat80(const uint8_t buffer[10]);
