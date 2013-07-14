@@ -2361,7 +2361,7 @@
   </ImportGroup>
   <ProjectExtensions>
     <VisualStudio>
-      <UserProperties UicDir=".\TempOutput\GeneratedFiles" MocDir=".\TempOutput\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\TempOutput\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" QtVersion_x0020_Win32="4.8.5_x64" QtVersion_x0020_x64="4.8.5_x64" />
+      <UserProperties UicDir=".\TempOutput\GeneratedFiles" MocDir=".\TempOutput\GeneratedFiles\$(ConfigurationName)" MocOptions="" RccDir=".\TempOutput\GeneratedFiles" lupdateOnBuild="0" lupdateOptions="" lreleaseOptions="" QtVersion_x0020_Win32="4.8.5_x86" QtVersion_x0020_x64="4.8.5_x64" />
     </VisualStudio>
   </ProjectExtensions>
 </Project>

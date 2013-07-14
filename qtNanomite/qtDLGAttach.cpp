@@ -33,6 +33,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 
 	tblProcList->horizontalHeader()->resizeSection(0,135);
 	tblProcList->horizontalHeader()->resizeSection(1,50);
+	tblProcList->horizontalHeader()->resizeSection(2,50);
 	tblProcList->horizontalHeader()->setFixedHeight(21);
 
 	connect(tblProcList,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(OnProcessDoubleClick(int,int)));
@@ -74,14 +75,35 @@ void qtDLGAttach::FillProcessList()
 					tblProcList->setItem(tblProcList->rowCount() - 1,1,
 						new QTableWidgetItem(QString().sprintf("%d",pProcessEntry.th32ProcessID)));
 
+					// Type
+					if(clsAPIImport::pIsWow64Process == NULL)
+						tblProcList->setItem(tblProcList->rowCount() - 1,2,
+							new QTableWidgetItem(QString("x86")));
+					else
+					{
+						BOOL isWoW64 = FALSE;
+						clsAPIImport::pIsWow64Process(hProc,&isWoW64);
+						if(isWoW64)
+						{
+							tblProcList->setItem(tblProcList->rowCount() - 1,2,
+								new QTableWidgetItem(QString("x86")));
+						}
+						else
+						{
+							tblProcList->setItem(tblProcList->rowCount() - 1,2,
+								new QTableWidgetItem(QString("x64")));
+						}
+					}
+
 					// Process Path
 					memset(ProcessFile,0,MAX_PATH * sizeof(TCHAR));
 					if(GetModuleFileNameEx(hProc,NULL,ProcessFile,MAX_PATH) > 0)
-						tblProcList->setItem(tblProcList->rowCount() - 1,2,
+						tblProcList->setItem(tblProcList->rowCount() - 1,3,
 							new QTableWidgetItem(QString().fromWCharArray(ProcessFile)));
 					else
-						tblProcList->setItem(tblProcList->rowCount() - 1,2,
-							new QTableWidgetItem(""));
+						tblProcList->removeRow(tblProcList->rowCount() - 1);
+					//	tblProcList->setItem(tblProcList->rowCount() - 1,3,
+					//		new QTableWidgetItem(""));
 
 					CloseHandle(hProc);
 				}
@@ -93,7 +115,7 @@ void qtDLGAttach::FillProcessList()
 
 void qtDLGAttach::OnProcessDoubleClick(int iRow,int iColumn)
 {
-	QString targetFile = tblProcList->item(iRow,2)->text();
+	QString targetFile = tblProcList->item(iRow,3)->text();
 	if(!targetFile.isEmpty() && targetFile.length() > 0)
 	{
 		emit StartAttachedDebug(tblProcList->item(iRow,1)->text().toInt(),targetFile);

@@ -200,10 +200,8 @@ void qtDLGOption::OnSave()
 
 void qtDLGOption::OnLoad()
 {
-	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
+	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 	clsAppSettings *pSettings = clsAppSettings::SharedInstance();
-	pSettings->LoadDebuggerSettings(myMainWindow->coreDebugger);
-	pSettings->LoadDisassemblerColor(myMainWindow->qtNanomiteDisAsColor);
 	pSettings->LoadDefaultJITDebugger(m_originalJIT);
 	
 	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
