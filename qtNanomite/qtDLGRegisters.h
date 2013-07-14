@@ -40,7 +40,7 @@ signals:
 	void OnDisplayDisassembly(quint64 dwEIP);
 
 private:
-	int _iSelectedRow;
+	int m_iSelectedRow;
 
 	void PrintValueInTable(QString regName, QString regValue);
 

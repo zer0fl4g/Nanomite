@@ -26,21 +26,46 @@
 
 #include "qtDLGSourceViewer.h"
 
+/**
+* @file qtDLGDisassembler.h
+* @brief Displaying stringdata from debugged file
+*/
 class qtDLGDisassembler : public QWidget, public Ui_qtDLGDisassemblerClass
 {
 	Q_OBJECT
 
 public:
+	/**
+	* @brief Calls the disassembler.
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	*
+	* @return no
+	*/
 	qtDLGDisassembler(QWidget *parent);
+	/**
+	* @brief cleanup used data.
+	*
+	* @return no
+	*/
 	~qtDLGDisassembler();
 
 	qtDLGSourceViewer *dlgSourceViewer;
 	clsPEManager *PEManager;
 
 signals:
+	/**
+	* @brief Emited when debugger breaks.
+	*
+	* @return no
+	*/
 	void OnDebuggerBreak();
 
 public slots:
+	/**
+	* @brief 
+	*
+	* @return no
+	*/
 	void OnDisplayDisassembly(quint64 dwEIP);
 
 private slots:
@@ -57,9 +82,9 @@ private:
 	
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
-	QList<quint64> _OffsetWalkHistory;
+	QList<quint64> m_offsetWalkHistory;
 
-	int _iSelectedRow;
+	int m_iSelectedRow;
 
 protected:
 	bool eventFilter(QObject *pOpject,QEvent *event);

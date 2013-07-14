@@ -59,7 +59,7 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 qtDLGDisassembler::~qtDLGDisassembler()
 {
 	tblDisAs->setRowCount(0);
-	_OffsetWalkHistory.clear();
+	m_offsetWalkHistory.clear();
 
 	delete dlgSourceViewer;
 }
@@ -180,7 +180,7 @@ void qtDLGDisassembler::OnDisAsReturnPressed()
 
 	if(dwSelectedVA != 0)
 	{
-		_OffsetWalkHistory.append(currentSelectedItems.value(0)->text().toULongLong(0,16));
+		m_offsetWalkHistory.append(currentSelectedItems.value(0)->text().toULongLong(0,16));
 		coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwSelectedVA);
 	}
 	return;
@@ -188,8 +188,8 @@ void qtDLGDisassembler::OnDisAsReturnPressed()
 
 void qtDLGDisassembler::OnDisAsReturn()
 {
-	if(_OffsetWalkHistory.isEmpty()) return;
-	coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),_OffsetWalkHistory.takeLast());
+	if(m_offsetWalkHistory.isEmpty()) return;
+	coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),m_offsetWalkHistory.takeLast());
 }
 
 bool qtDLGDisassembler::eventFilter(QObject *pObject, QEvent *event)
@@ -208,8 +208,8 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblDisAs->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_iSelectedRow = tblDisAs->indexAt(qPoint).row();
+	if(m_iSelectedRow < 0) return;
 
 
 	menu.addAction(new QAction("Goto Offset",this));
@@ -241,17 +241,17 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 			clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
 		if(bIsWOW64)
-			coreDebugger->wowProcessContext.Eip = tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+			coreDebugger->wowProcessContext.Eip = tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16);
 		else
-			coreDebugger->ProcessContext.Rip = tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+			coreDebugger->ProcessContext.Rip = tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16);
 #else
-		coreDebugger->ProcessContext.Eip = tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16);
+		coreDebugger->ProcessContext.Eip = tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16);
 #endif
 		emit OnDebuggerBreak();
 	}
 	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
 	{
-		qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
+		qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
 		connect(dlgAssembler,SIGNAL(OnReloadDebugger()),qtDLGNanomite::GetInstance(),SLOT(OnDebuggerBreak()));
 		dlgAssembler->show();
 	}
@@ -275,30 +275,30 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4")
-			.arg(tblDisAs->item(_iSelectedRow,0)->text())
-			.arg(tblDisAs->item(_iSelectedRow,1)->text())
-			.arg(tblDisAs->item(_iSelectedRow,2)->text())
-			.arg(tblDisAs->item(_iSelectedRow,3)->text()));
+			.arg(tblDisAs->item(m_iSelectedRow,0)->text())
+			.arg(tblDisAs->item(m_iSelectedRow,1)->text())
+			.arg(tblDisAs->item(m_iSelectedRow,2)->text())
+			.arg(tblDisAs->item(m_iSelectedRow,3)->text()));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(_iSelectedRow,0)->text());
+		clipboard->setText(tblDisAs->item(m_iSelectedRow,0)->text());
 	}
 	else if(QString().compare(pAction->text(),"OpCodes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(_iSelectedRow,1)->text());
+		clipboard->setText(tblDisAs->item(m_iSelectedRow,1)->text());
 	}
 	else if(QString().compare(pAction->text(),"Mnemonic") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(_iSelectedRow,2)->text());
+		clipboard->setText(tblDisAs->item(m_iSelectedRow,2)->text());
 	}
 	else if(QString().compare(pAction->text(),"Comment") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(_iSelectedRow,3)->text());
+		clipboard->setText(tblDisAs->item(m_iSelectedRow,3)->text());
 	}
 }
 

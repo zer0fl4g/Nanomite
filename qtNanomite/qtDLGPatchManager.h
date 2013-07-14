@@ -56,9 +56,9 @@ signals:
 	void OnShowInDisassembler(quint64 Offset);
 
 private:
-	int _iSelectedRow;
+	int m_iSelectedRow;
 
-	QList<PatchData> patches;
+	QList<PatchData> m_patches;
 	
 	static qtDLGPatchManager *pThis;
 

@@ -49,8 +49,8 @@ signals:
 
 private:
 	static qtDLGTrace *pThis;
-	QList<TraceInfoRow> traceData;
-	int _iSelectedRow;
+	QList<TraceInfoRow> m_traceData;
+	int m_iSelectedRow;
 
 private slots:
 	void OnShow(int Offset);

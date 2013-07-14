@@ -60,14 +60,14 @@ void qtDLGTrace::addTraceData(DWORD64 dwOffset,DWORD PID,DWORD TID)
 	//newTraceRow.cpuReg = QString("");
 	newTraceRow.dwOffset = dwOffset;
 
-	pThis->traceData.append(newTraceRow);
+	pThis->m_traceData.append(newTraceRow);
 }
 
 void qtDLGTrace::clearTraceData()
 {
 	if(pThis == NULL) return;
 
-	pThis->traceData.clear();
+	pThis->m_traceData.clear();
 	pThis->scrollTrace->setValue(0);
 	pThis->scrollTrace->setMaximum(0);
 }
@@ -83,9 +83,9 @@ void qtDLGTrace::OnShow(int delta)
 	int iLines = NULL,
 		count = NULL,
 		iPossibleRowCount = (tblTraceLog->verticalHeader()->height() / 12) - 1;
-	QList<TraceInfoRow>::iterator i = traceData.begin();
+	QList<TraceInfoRow>::iterator i = m_traceData.begin();
 
-	scrollTrace->setMaximum(traceData.count() + 2 - iPossibleRowCount);
+	scrollTrace->setMaximum(m_traceData.count() + 2 - iPossibleRowCount);
 
 	if(delta != 0 && scrollTrace->value() >= 0)
 	{
@@ -96,13 +96,13 @@ void qtDLGTrace::OnShow(int delta)
 	}
 	else
 	{
-		i = traceData.begin();
+		i = m_traceData.begin();
 		scrollTrace->setValue(0);
 	}
 
 	while(iLines <= iPossibleRowCount)
 	{
-		if(i == traceData.end())
+		if(i == m_traceData.end())
 			return;
 
 		tblTraceLog->insertRow(tblTraceLog->rowCount());
@@ -163,8 +163,8 @@ void qtDLGTrace::OnCustomContextMenu(QPoint qPoint)
 {
 	QMenu menu;
 
-	_iSelectedRow = tblTraceLog->indexAt(qPoint).row();
-	if(_iSelectedRow < 0) return;
+	m_iSelectedRow = tblTraceLog->indexAt(qPoint).row();
+	if(m_iSelectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to Disassembler",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
@@ -175,5 +175,5 @@ void qtDLGTrace::OnCustomContextMenu(QPoint qPoint)
 void qtDLGTrace::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
-		emit OnDisplayDisassembly(tblTraceLog->item(_iSelectedRow,2)->text().toULongLong(0,16));
+		emit OnDisplayDisassembly(tblTraceLog->item(m_iSelectedRow,2)->text().toULongLong(0,16));
 }

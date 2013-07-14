@@ -182,24 +182,24 @@ void qtDLGNanomite::action_DebugSuspend()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionDebug_Suspend->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID == 0)
+		if(m_iMenuProcessID == 0)
 		{
 			coreDebugger->SuspendDebuggingAll();
 			UpdateStateBar(0x2);
 		}
 		else
 		{
-			coreDebugger->SuspendDebugging(_iMenuPID);
+			coreDebugger->SuspendDebugging(m_iMenuProcessID);
 			UpdateStateBar(0x2);
 		}
 
 		actionDebug_Suspend->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -438,19 +438,19 @@ void qtDLGNanomite::action_WindowShowMemory()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Memory->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGMemoryView *dlgMemory = new qtDLGMemoryView(this,Qt::Window,_iMenuPID);
+			qtDLGMemoryView *dlgMemory = new qtDLGMemoryView(this,Qt::Window,m_iMenuProcessID);
 			dlgMemory->show();
 		}
 
 		actionWindow_Show_Memory->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -458,19 +458,19 @@ void qtDLGNanomite::action_WindowShowHeap()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Heap->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGHeapView *dlgHeap = new qtDLGHeapView(this,Qt::Window,_iMenuPID);
+			qtDLGHeapView *dlgHeap = new qtDLGHeapView(this,Qt::Window,m_iMenuProcessID);
 			dlgHeap->show();
 		}
 
 		actionWindow_Show_Heap->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -478,19 +478,19 @@ void qtDLGNanomite::action_WindowShowStrings()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Strings->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGStringView *dlgString = new qtDLGStringView(this,Qt::Window,_iMenuPID);
+			qtDLGStringView *dlgString = new qtDLGStringView(this,Qt::Window,m_iMenuProcessID);
 			dlgString->show();
 		}
 
 		actionWindow_Show_Strings->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -503,19 +503,19 @@ void qtDLGNanomite::action_WindowShowHandles()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Handles->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGHandleView *dlgHandle = new qtDLGHandleView(this,Qt::Window,_iMenuPID);
+			qtDLGHandleView *dlgHandle = new qtDLGHandleView(this,Qt::Window,m_iMenuProcessID);
 			dlgHandle->show();
 		}
 
 		actionWindow_Show_Handles->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -523,19 +523,19 @@ void qtDLGNanomite::action_WindowShowWindows()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Windows->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGWindowView *dlgWindows = new qtDLGWindowView(this,Qt::Window,_iMenuPID);
+			qtDLGWindowView *dlgWindows = new qtDLGWindowView(this,Qt::Window,m_iMenuProcessID);
 			dlgWindows->show();
 		}
 
 		actionWindow_Show_Windows->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -543,19 +543,19 @@ void qtDLGNanomite::action_WindowShowPEEditor()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_PEEditor->setDisabled(true);
 
 		GenerateMenu(false);
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(PEManager,this,Qt::Window,_iMenuPID);
+			qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(PEManager,this,Qt::Window,m_iMenuProcessID);
 			dlgPEEditor->show();
 		}
 
 		actionWindow_Show_PEEditor->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -563,19 +563,19 @@ void qtDLGNanomite::action_WindowShowPrivileges()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Privileges->setDisabled(true);
 
 		GenerateMenu(false);
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGProcessPrivilege *dlgProcPrivs = new qtDLGProcessPrivilege(this,Qt::Window,_iMenuPID);
+			qtDLGProcessPrivilege *dlgProcPrivs = new qtDLGProcessPrivilege(this,Qt::Window,m_iMenuProcessID);
 			dlgProcPrivs->show();
 		}
 
 		actionWindow_Show_Privileges->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -588,22 +588,22 @@ void qtDLGNanomite::action_DebugTraceStart()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionDebug_Trace_Start->setDisabled(true);
 
 		GenerateMenu(false);
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
 			qtDLGTrace::clearTraceData();
-			coreDebugger->SetTraceFlagForPID(_iMenuPID,true);
+			coreDebugger->SetTraceFlagForPID(m_iMenuProcessID,true);
 			actionDebug_Trace_Stop->setEnabled(true);
 			UpdateStateBar(1);
 		}
 		else
 			actionDebug_Trace_Start->setEnabled(true);
 
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -611,20 +611,20 @@ void qtDLGNanomite::action_DebugTraceStop()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionDebug_Trace_Stop->setDisabled(true);
 
 		GenerateMenu(false);
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			coreDebugger->SetTraceFlagForPID(_iMenuPID,false);
+			coreDebugger->SetTraceFlagForPID(m_iMenuProcessID,false);
 			actionDebug_Trace_Start->setEnabled(true);
 		}
 		else
 			actionDebug_Trace_Stop->setEnabled(true);
 
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
 
@@ -632,19 +632,19 @@ void qtDLGNanomite::action_WindowShowFunctions()
 {
 	if(coreDebugger->GetDebuggingState())
 	{
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 		actionWindow_Show_Functions->setDisabled(true);
 
 		GenerateMenu();
 
-		if(_iMenuPID >= 0)
+		if(m_iMenuProcessID >= 0)
 		{
-			qtDLGFunctions *dlgFunctions = new qtDLGFunctions(this,Qt::Window,_iMenuPID);
+			qtDLGFunctions *dlgFunctions = new qtDLGFunctions(this,Qt::Window,m_iMenuProcessID);
 			connect(dlgFunctions,SIGNAL(ShowInDisAs(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 			dlgFunctions->show();
 		}
 
 		actionWindow_Show_Functions->setEnabled(true);
-		_iMenuPID = -1;
+		m_iMenuProcessID = -1;
 	}
 }
