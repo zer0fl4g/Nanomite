@@ -26,7 +26,6 @@
 #include <TlHelp32.h>
 #include <algorithm>
 #include <QtCore>
-#include <QFileDialog>
 #include <string>
 
 using namespace std;
@@ -37,20 +36,6 @@ clsHelperClass::clsHelperClass()
 
 clsHelperClass::~clsHelperClass()
 {
-}
-
-bool clsHelperClass::MenuLoadNewFile(clsDebugger *_coreDebugger)
-{
-	QString fileName = QFileDialog::getOpenFileName(NULL,"Please select a Target",QDir::currentPath(),"Executables (*.exe)");
-
-	if(!fileName.isEmpty())
-		_coreDebugger->SetTarget(fileName.toStdWString());
-	else
-	{
-		//MessageBox(NULL,L"Error while selecting your file!",L"Nanomite",MB_OK);
-		return false;
-	}
-	return true;
 }
 
 vector<wstring> clsHelperClass::split(const wstring& s,const wstring& f ){

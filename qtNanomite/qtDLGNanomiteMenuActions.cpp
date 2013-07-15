@@ -28,6 +28,7 @@
 #include "qtDLGPEEditor.h"
 #include "qtDLGFunctions.h"
 #include "qtDLGProcessPrivilege.h"
+#include "qtDLGOpenNewFile.h"
 
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
@@ -96,11 +97,26 @@ void qtDLGNanomite::action_DebugStart()
 
 		if(!coreDebugger->IsTargetSet())
 		{
-			if(!clsHelperClass::MenuLoadNewFile(coreDebugger))
+			qtDLGOpenNewFile newFile(this);
+			QString fileName, commandLine;
+
+			newFile.exec();
+			newFile.GetFilePathAndCommandLine(fileName, commandLine);
+
+			if(fileName.length() > 0 && commandLine.length() > 0)
+			{
+				coreDebugger->SetTarget(fileName.toStdWString());
+				coreDebugger->SetCommandLine(commandLine.toStdWString());
+			}
+			else if(fileName.length() > 0 && commandLine.length() <= 0)
+			{
+				coreDebugger->SetTarget(fileName.toStdWString());
+				coreDebugger->ClearCommandLine();		
+			}
+			else
 				return;
 
 			qtDLGPatchManager::ClearAllPatches();
-			coreDebugger->ClearCommandLine();
 		}
 
 		if(!PEManager->OpenFile(coreDebugger->GetTarget()) || 
@@ -111,18 +127,7 @@ void qtDLGNanomite::action_DebugStart()
 			coreDebugger->ClearTarget();
 			return;
 		}
-
-		if(coreDebugger->GetCMDLine().size() <= 0)
-		{
-			bool bOk = false;
-			QString strNewCommandLine = QInputDialog::getText(this,"CommandLine:","",QLineEdit::Normal,NULL,&bOk);
-
-			if(bOk && !strNewCommandLine.isEmpty())
-			{
-				coreDebugger->SetCommandLine(strNewCommandLine.toStdWString());
-			}
-		}
-
+		
 		coreDebugger->start();
 
 		UpdateStateBar(0x1);

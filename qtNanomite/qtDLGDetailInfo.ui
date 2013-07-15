@@ -276,7 +276,7 @@
            </column>
            <column>
             <property name="text">
-             <string>EntryPoint</string>
+             <string>Modulebase</string>
             </property>
            </column>
            <column>

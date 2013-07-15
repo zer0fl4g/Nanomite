@@ -491,6 +491,15 @@
     <ClCompile Include="..\NanomiteUpdater\UpdaterWidget\uupdatewidget.cpp">
       <Filter>Source Dateien\Updater</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGOpenNewFile.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGOpenNewFile.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGOpenNewFile.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -729,6 +738,9 @@
     </CustomBuild>
     <CustomBuild Include="..\NanomiteUpdater\UpdaterWidget\uupdatewidget.ui">
       <Filter>Form Dateien\Updater</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGOpenNewFile.h">
+      <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

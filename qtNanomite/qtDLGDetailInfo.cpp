@@ -457,12 +457,14 @@ void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypoi
 	QString logMessage;
 
 	if(bFound)
-		logMessage = QString("[-] Exit Thread(%1) in Process(%2) with Exitcode: %3").arg(threadID,8,16,QChar('0'))
-		.arg(processID,8,16,QChar('0'))
+		logMessage = QString("[-] Exit Thread - PID: %1 TID: %2 - Exitcode: %3")
+		.arg(processID,6,16,QChar('0'))
+		.arg(threadID,6,16,QChar('0'))
 		.arg(exitCode,8,16,QChar('0'));
 	else
-		logMessage = QString("[+] New Thread(%1) in Process(%2) with Entrypoint: %3").arg(threadID,8,16,QChar('0'))
-		.arg(processID,8,16,QChar('0'))
+		logMessage = QString("[+] New Thread - PID: %1 TID: %2 Entrypoint: %3")
+		.arg(processID,6,16,QChar('0'))
+		.arg(threadID,6,16,QChar('0'))
 		.arg(entrypointOffset,16,16,QChar('0'));
 
 	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
@@ -496,10 +498,12 @@ void qtDLGDetailInfo::OnPID(DWORD processID,wstring sFile,DWORD exitCode,quint64
 	QString logMessage;
 
 	if(bFound)
-		logMessage = QString("[-] Exit Process(%1) with Exitcode: %2").arg(processID,8,16,QChar('0'))
+		logMessage = QString("[-] Exit Process - PID: %1 Exitcode: %2")
+		.arg(processID,6,16,QChar('0'))
 		.arg(exitCode,8,16,QChar('0'));
 	else
-		logMessage = QString("[+] New Process(%1) Entrypoint: %2").arg(processID,16,16,QChar('0'))
+		logMessage = QString("[+] New Process - PID: %1 Entrypoint: %2")
+		.arg(processID,6,16,QChar('0'))
 		.arg(entrypointOffset,16,16,QChar('0'));
 
 	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());
@@ -531,19 +535,19 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 	QString logMessage;
 
 	if(functionName.length() > 0 && moduleName.length() > 0)
-		logMessage = QString("[!] %1@%2 ExceptionCode: %3 ExceptionOffset: %4 PID: %5 TID: %6")
+		logMessage = QString("[!] Exception - PID: %1 TID: %2 - ExceptionCode: %3 - ExceptionOffset: %4 - %5@%6")
+		.arg(processID,6,16,QChar('0'))
+		.arg(threadID,6,16,QChar('0'))
+		.arg(exceptionCode,8,16,QChar('0'))
+		.arg(exceptionOffset,16,16,QChar('0'))
 		.arg(QString::fromStdWString(functionName))
-		.arg(QString::fromStdWString(moduleName))
-		.arg(exceptionCode,8,16,QChar('0'))
-		.arg(exceptionOffset,16,16,QChar('0'))
-		.arg(processID,8,16,QChar('0'))
-		.arg(threadID,8,16,QChar('0'));
+		.arg(QString::fromStdWString(moduleName));
 	else
-		logMessage = QString("[!] ExceptionCode: %1 ExceptionOffset: %2 PID: %3 TID: %4")
+		logMessage = QString("[!] Exception - PID: %1 TID: %2 - ExceptionCode: %3 - ExceptionOffset: %4")
+		.arg(processID,6,16,QChar('0'))
+		.arg(threadID,6,16,QChar('0'))
 		.arg(exceptionCode,8,16,QChar('0'))
-		.arg(exceptionOffset,16,16,QChar('0'))
-		.arg(processID,8,16,QChar('0'))
-		.arg(threadID,8,16,QChar('0'));
+		.arg(exceptionOffset,16,16,QChar('0'));
 
 	myMainWindow->logView->OnLog(logMessage.toStdWString());
 }
@@ -579,13 +583,13 @@ void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypoin
 	QString logMessage;
 
 	if(bLoaded)
-		logMessage = QString("[+] PID(%1) - Loaded DLL: %2 Entrypoint: %3")
-		.arg(processID,8,16,QChar('0'))
-		.arg(QString::fromStdWString(sDLLPath))
-		.arg(entrypointOffset,16,16,QChar('0'));
+		logMessage = QString("[+] Loaded DLL - PID: %1 - Modulebase: %2 - %3")
+		.arg(processID,6,16,QChar('0'))
+		.arg(entrypointOffset,16,16,QChar('0'))
+		.arg(QString::fromStdWString(sDLLPath));
 	else
-		logMessage = QString("[+] PID(%1) - Unloaded DLL: %2")
-		.arg(processID,8,16,QChar('0'))
+		logMessage = QString("[+] Unloaded DLL - PID: %1 - %2")
+		.arg(processID,6,16,QChar('0'))
 		.arg(QString::fromStdWString(sDLLPath));
 
 	qtDLGNanomite::GetInstance()->logView->OnLog(logMessage.toStdWString());

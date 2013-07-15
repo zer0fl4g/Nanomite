@@ -549,13 +549,13 @@ void clsDebugger::DebuggingLoop()
 										memset(tcLogString,0x00,LOGBUFFER);
 										if(bIsEP)
 #ifdef _AMD64_
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on EP at %016I64X",(quint64)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
 										else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Software BP at %016I64X",(quint64)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
 #else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on EP at %08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
 										else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Software BP at %08X",(DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
 #endif
 										PBLogInfo();
 									}
@@ -590,13 +590,13 @@ void clsDebugger::DebuggingLoop()
 										wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwHandle,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
 										SoftwareBPs[i].bRestoreBP = false;
 
-										memset(tcLogString,0x00,LOGBUFFER);
-#ifdef _AMD64_
-										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Restored BP at %016I64X",SoftwareBPs[i].dwOffset);
-#else
-										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Restored BP at %08X",(DWORD)SoftwareBPs[i].dwOffset);
-#endif
-										PBLogInfo();
+//										memset(tcLogString,0x00,LOGBUFFER);
+//#ifdef _AMD64_
+//										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Restored BP - PID: %06X - %016I64X", debug_event.dwProcessId, SoftwareBPs[i].dwOffset);
+//#else
+//										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Restored BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)SoftwareBPs[i].dwOffset);
+//#endif
+//										PBLogInfo();
 									}
 								}
 								PIDs[iPid].bTrapFlag = false;
@@ -640,9 +640,9 @@ void clsDebugger::DebuggingLoop()
 									{
 										memset(tcLogString,0x00,LOGBUFFER);
 #ifdef _AMD64_
-										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Hardware BP at %016I64X",HardwareBPs[i].dwOffset);
+										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Hardware BP - PID: %06X - %016I64X", debug_event.dwProcessId, HardwareBPs[i].dwOffset);
 #else
-										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Hardware BP at %08X",(DWORD)HardwareBPs[i].dwOffset);
+										swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Hardware BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)HardwareBPs[i].dwOffset);
 #endif
 										PBLogInfo();
 
@@ -695,9 +695,9 @@ void clsDebugger::DebuggingLoop()
 
 									memset(tcLogString,0x00,LOGBUFFER);
 #ifdef _AMD64_
-									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Memory BP at %016I64X",MemoryBPs[i].dwOffset);
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Memory BP - PID: %06X - %016I64X", debug_event.dwProcessId, MemoryBPs[i].dwOffset);
 #else
-									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on Memory BP at %08X",(DWORD)MemoryBPs[i].dwOffset);
+									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Memory BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)MemoryBPs[i].dwOffset);
 #endif
 									PBLogInfo();
 								}
@@ -733,9 +733,10 @@ void clsDebugger::DebuggingLoop()
 				if(!bExceptionHandler && !bIsBP && !bIsEP && !bIsKernelBP)
 				{
 					if(dbgSettings.dwDefaultExceptionMode == 1)
-						dwContinueStatus = CallBreakDebugger(&debug_event,dbgSettings.dwDefaultExceptionMode);
+						dwContinueStatus = DBG_CONTINUE;
 					else if(dbgSettings.bUseExceptionAssist)
 					{
+						m_continueWithException = 0;
 						emit AskForException((DWORD)debug_event.u.Exception.ExceptionRecord.ExceptionCode);
 						WaitForSingleObject(m_waitForGUI,INFINITE);
 
