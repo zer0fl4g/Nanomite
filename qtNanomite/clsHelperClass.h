@@ -29,7 +29,6 @@ public:
 	clsHelperClass();
 	~clsHelperClass();
 
-	static bool MenuLoadNewFile(clsDebugger *_coreDebugger);
 	static bool IsWindowsXP();
 	static bool SetThreadPriorityByTid(DWORD ThreadID, int threadPrio);
 	static bool LoadSymbolForAddr(std::wstring& sFuncName,std::wstring& sModName,quint64 dwOffset,HANDLE hProc);

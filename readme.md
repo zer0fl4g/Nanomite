@@ -46,5 +46,7 @@
 + fixed some handle leaks
 + added f5 hotkey to attach dialog to reload the processlist
 + added type column in attach dialog
++ updated to qt 4.8.5
++ updated file open dialog to remove annoying messagebox for commandline
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)
