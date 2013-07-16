@@ -52,6 +52,14 @@ class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
 	Q_OBJECT
 
 public:
+	enum UPDATE_STATE
+	{
+		STATE_RUN		= 1,
+		STATE_SUSPEND	= 2,
+		STATE_TERMINATE = 3,
+		STATE_TRACE		= 4
+	};
+
 	static qtDLGNanomite* GetInstance();
 
 	long lExceptionCount;
@@ -111,7 +119,8 @@ private slots:
 	void action_DebugTraceStart();
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();
-
+		
+	void UpdateStateBar(int actionType, quint64 stepCount = 0);
 	void AskForException(DWORD exceptionCode);
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
@@ -128,7 +137,6 @@ private:
 	void resizeEvent(QResizeEvent *event);
 	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
-	void UpdateStateBar(DWORD dwAction);
 	void LoadWidgets();
 	void ParseCommandLineArgs();
 

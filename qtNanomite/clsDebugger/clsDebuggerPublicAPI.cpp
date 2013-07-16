@@ -393,9 +393,15 @@ bool clsDebugger::SetTraceFlagForPID(DWORD dwPID,bool bIsEnabled)
 		{
 			PIDs[i].bTraceFlag = bIsEnabled;
 			if(bIsEnabled)
+			{
+				qtDLGTrace::enableStatusBarTimer();
 				return StepIn();
+			}
 			else
+			{	
+				qtDLGTrace::disableStatusBarTimer();
 				return true;
+			}
 		}
 	}
 	return false;

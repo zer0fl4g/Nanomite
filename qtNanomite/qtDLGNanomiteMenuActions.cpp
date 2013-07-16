@@ -85,7 +85,7 @@ void qtDLGNanomite::action_FileDetach()
 		if(!coreDebugger->DetachFromProcess())
 			MessageBox(NULL,L"Failed to detach from Process!",L"Nanomite",MB_OK);
 		else
-			UpdateStateBar(0x3);
+			UpdateStateBar(STATE_TERMINATE);
 	}
 }
 
@@ -130,13 +130,13 @@ void qtDLGNanomite::action_DebugStart()
 		
 		coreDebugger->start();
 
-		UpdateStateBar(0x1);
+		UpdateStateBar(STATE_RUN);
 	}
 	else
 	{
 		qtDLGTrace::clearTraceData();
 		coreDebugger->ResumeDebugging();
-		UpdateStateBar(0x1);
+		UpdateStateBar(STATE_RUN);
 	}
 }
 
@@ -162,7 +162,7 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 		coreDebugger->AttachToProcess(iPID);
 		coreDebugger->start();
 
-		UpdateStateBar(0x1);
+		UpdateStateBar(STATE_RUN);
 	}
 }
 
@@ -195,12 +195,12 @@ void qtDLGNanomite::action_DebugSuspend()
 		if(m_iMenuProcessID == 0)
 		{
 			coreDebugger->SuspendDebuggingAll();
-			UpdateStateBar(0x2);
+			UpdateStateBar(STATE_SUSPEND);
 		}
 		else
 		{
 			coreDebugger->SuspendDebugging(m_iMenuProcessID);
-			UpdateStateBar(0x2);
+			UpdateStateBar(STATE_SUSPEND);
 		}
 
 		actionDebug_Suspend->setEnabled(true);
@@ -603,7 +603,7 @@ void qtDLGNanomite::action_DebugTraceStart()
 			qtDLGTrace::clearTraceData();
 			coreDebugger->SetTraceFlagForPID(m_iMenuProcessID,true);
 			actionDebug_Trace_Stop->setEnabled(true);
-			UpdateStateBar(1);
+			UpdateStateBar(STATE_TRACE);
 		}
 		else
 			actionDebug_Trace_Start->setEnabled(true);
