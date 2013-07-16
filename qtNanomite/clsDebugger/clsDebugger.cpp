@@ -733,7 +733,7 @@ void clsDebugger::DebuggingLoop()
 				if(!bExceptionHandler && !bIsBP && !bIsEP && !bIsKernelBP)
 				{
 					if(dbgSettings.dwDefaultExceptionMode == 1)
-						dwContinueStatus = DBG_CONTINUE;
+						dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
 					else if(dbgSettings.bUseExceptionAssist)
 					{
 						m_continueWithException = 0;

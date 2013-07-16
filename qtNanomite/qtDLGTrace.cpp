@@ -26,12 +26,18 @@ using namespace std;
 qtDLGTrace *qtDLGTrace::pThis = NULL;
 
 qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
-	: QWidget(parent, flags)
+	: QWidget(parent, flags),
+	m_stepsDoneInSecond(0),
+	m_prevStepsDone(0)
 {
 	setupUi(this);
 	this->setLayout(horizontalLayout);
 	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	pThis = this;
+	
+	m_statusBarTimer = new QTimer(this);
+	m_statusBarTimer->setInterval(2000);
+	m_statusBarTimer->stop();
 
 	tblTraceLog->horizontalHeader()->resizeSection(0,80); //PID
 	tblTraceLog->horizontalHeader()->resizeSection(1,80); //TID
@@ -40,6 +46,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	//tblTraceLog->horizontalHeader()->resizeSection(4,300); //REG
 	tblTraceLog->horizontalHeader()->setFixedHeight(21);
 
+	connect(m_statusBarTimer,SIGNAL(timeout()),this,SLOT(OnUpdateStatusBar()));
 	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
 }
@@ -47,6 +54,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 qtDLGTrace::~qtDLGTrace()
 {
 	pThis = NULL;
+	delete m_statusBarTimer;
 }
 
 void qtDLGTrace::addTraceData(DWORD64 dwOffset,DWORD PID,DWORD TID)
@@ -176,4 +184,24 @@ void qtDLGTrace::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 		emit OnDisplayDisassembly(tblTraceLog->item(m_iSelectedRow,2)->text().toULongLong(0,16));
+}
+
+void qtDLGTrace::OnUpdateStatusBar()
+{
+	quint64 temp = m_traceData.size();
+	m_stepsDoneInSecond =  (temp - m_prevStepsDone) / 2;
+	m_prevStepsDone = temp;
+
+	emit OnUpdateStatusBar(4,m_stepsDoneInSecond);
+}
+
+void qtDLGTrace::enableStatusBarTimer()
+{
+	pThis->m_statusBarTimer->start();
+}
+
+void qtDLGTrace::disableStatusBarTimer()
+{
+	pThis->m_statusBarTimer->stop();
+	pThis->m_prevStepsDone = 0;
 }

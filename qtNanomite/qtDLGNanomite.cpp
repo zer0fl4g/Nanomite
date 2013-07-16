@@ -158,6 +158,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// Callbacks from Disassembler GUI to GUI
 	connect(DisAsGUI,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()));
 
+	// Callbacks to StateBar
+	connect(dlgTraceWindow,SIGNAL(OnUpdateStatusBar(int,quint64)),this,SLOT(UpdateStateBar(int,quint64)));
+
 	actionDebug_Trace_Stop->setDisabled(true);
 
 	ParseCommandLineArgs();
@@ -216,7 +219,7 @@ void qtDLGNanomite::LoadWidgets()
 void qtDLGNanomite::OnDebuggerBreak()
 {
 	if(!coreDebugger->GetDebuggingState())
-		UpdateStateBar(0x3);
+		UpdateStateBar(STATE_TERMINATE);
 	else
 	{
 		// display callstack
@@ -259,11 +262,11 @@ void qtDLGNanomite::OnDebuggerBreak()
 			DisAsGUI->OnDisplayDisassembly(dwEIP);
 
 		// Update Toolbar
-		UpdateStateBar(0x2);
+		UpdateStateBar(STATE_SUSPEND);
 	}
 }
 
-void qtDLGNanomite::UpdateStateBar(DWORD dwAction)
+void qtDLGNanomite::UpdateStateBar(int actionType, quint64 stepCount)
 {
 	QString qsStateMessage = QString().sprintf("\t\tPIDs: %d  TIDs: %d  DLLs: %d  Exceptions: %d State: ",
 		coreDebugger->PIDs.size(),
@@ -271,19 +274,23 @@ void qtDLGNanomite::UpdateStateBar(DWORD dwAction)
 		coreDebugger->DLLs.size(),
 		lExceptionCount);
 
-	switch(dwAction)
+	switch(actionType)
 	{
-	case 0x1: // Running
+	case 1: // Running
 		stateBar->setStyleSheet("background-color: green");
 		qsStateMessage.append("Running");
 		break;
-	case 0x2: // Suspended
+	case 2: // Suspended
 		stateBar->setStyleSheet("background-color: yellow");
 		qsStateMessage.append("Suspended");
 		break;
-	case 0x3: // Terminated
+	case 3: // Terminated
 		stateBar->setStyleSheet("background-color: red");
 		qsStateMessage.append("Terminated");
+		break;
+	case 4: // Tracing
+		stateBar->setStyleSheet("background-color: green");
+		qsStateMessage.append(QString("Tracing - %1/s").arg(stepCount));
 		break;
 	}
 
@@ -321,7 +328,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	actionDebug_Trace_Start->setEnabled(true);
 	CleanGUI(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1]"));
-	UpdateStateBar(0x3);
+	UpdateStateBar(STATE_TERMINATE);
 	
 	if(m_IsRestart)
 	{
@@ -403,7 +410,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 			HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,PID);
 			if(hProc == NULL) return;
 
-			PTCHAR processFile = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+			PTCHAR processFile = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 			if(GetModuleFileNameEx(hProc,NULL,processFile,MAX_PATH) <= 0)
 			{
 				CloseHandle(hProc);
@@ -413,7 +420,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 			QString procFile = QString::fromWCharArray(processFile,MAX_PATH);
 
 			CloseHandle(hProc);
-			free(processFile);
+			clsMemManager::CFree(processFile);
 			action_DebugAttachStart(PID,procFile);
 			return;
 		}

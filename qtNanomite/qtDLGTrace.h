@@ -23,6 +23,7 @@
 #include <string>
 
 #include <QList>
+#include <QTimer>
 
 struct TraceInfoRow
 {
@@ -44,18 +45,27 @@ public:
 	static void addTraceData(DWORD64 dwOffset,DWORD PID,DWORD TID);
 	static void clearTraceData();
 
+	static void enableStatusBarTimer();
+	static void disableStatusBarTimer();
+
 signals:
 	void OnDisplayDisassembly(quint64 Offset);
+	void OnUpdateStatusBar(int actionType, quint64 count);
 
 private:
 	static qtDLGTrace *pThis;
 	QList<TraceInfoRow> m_traceData;
 	int m_iSelectedRow;
 
+	QTimer *m_statusBarTimer;
+	quint64 m_stepsDoneInSecond,
+			m_prevStepsDone;
+
 private slots:
 	void OnShow(int Offset);
 	void OnCustomContextMenu(QPoint qPoint);
 	void MenuCallback(QAction* pAction);
+	void OnUpdateStatusBar();
 
 protected:
 	void showEvent(QShowEvent * event);
