@@ -222,6 +222,12 @@ void qtDLGNanomite::OnDebuggerBreak()
 		UpdateStateBar(STATE_TERMINATE);
 	else
 	{
+		// clear tracing stuff
+		coreDebugger->SetTraceFlagForPID(coreDebugger->GetCurrentPID(),false);
+		actionDebug_Trace_Stop->setEnabled(false);
+		actionDebug_Trace_Start->setEnabled(true);
+		qtDLGTrace::disableStatusBarTimer();
+
 		// display callstack
 		callstackView->tblCallstack->setRowCount(0);
 		coreDebugger->ShowCallStack();
@@ -328,6 +334,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	actionDebug_Trace_Start->setEnabled(true);
 	CleanGUI(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1]"));
+	qtDLGTrace::disableStatusBarTimer();
 	UpdateStateBar(STATE_TERMINATE);
 	
 	if(m_IsRestart)
