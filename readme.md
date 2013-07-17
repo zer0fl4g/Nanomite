@@ -47,6 +47,7 @@
 + added f5 hotkey to attach dialog to reload the processlist
 + added type column in attach dialog
 + added state update when doing a trace
++ added trace to selected disassembly line
 + updated to qt 4.8.5
 + updated file open dialog to remove annoying messagebox for commandline
 

@@ -216,6 +216,7 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	menu.addAction(new QAction("Edit Instruction",this));
 	menu.addAction(new QAction("Show Source",this));
 	menu.addAction(new QAction("Set R/EIP to this",this));
+	menu.addAction(new QAction("Trace to this",this));
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Offset",this));
@@ -232,7 +233,7 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 {
 	if(!coreDebugger->GetDebuggingState()) return;
-
+	
 	if(QString().compare(pAction->text(),"Set R/EIP to this") == 0)
 	{
 #ifdef _AMD64_
@@ -248,6 +249,17 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		coreDebugger->ProcessContext.Eip = tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16);
 #endif
 		emit OnDebuggerBreak();
+	}
+	else if(QString().compare(pAction->text(),"Trace to this") == 0)
+	{
+		int processID = coreDebugger->GetCurrentPID();
+		qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
+
+		coreDebugger->AddBreakpointToList(NULL,2,processID,tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),NULL,0x2);
+		qtDLGTrace::clearTraceData();
+		pMainWindow->actionDebug_Trace_Stop->setEnabled(true);
+		pMainWindow->actionDebug_Trace_Start->setEnabled(false);
+		coreDebugger->SetTraceFlagForPID(processID,true);
 	}
 	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
 	{
