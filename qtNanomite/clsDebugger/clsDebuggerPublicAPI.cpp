@@ -27,7 +27,7 @@ using namespace std;
 bool clsDebugger::DetachFromProcess()
 {
 	_NormalDebugging = true;
-	_isDebugging = false;
+	//_isDebugging = false;
 	_bStopDebugging = true;
 
 	RemoveBPs();
@@ -37,11 +37,11 @@ bool clsDebugger::DetachFromProcess()
 		if(!CheckProcessState(PIDs[d].dwPID))
 			break;
 		DebugBreakProcess(PIDs[d].hProc);
-		DebugActiveProcessStop(PIDs[d].dwPID);
+		//DebugActiveProcessStop(PIDs[d].dwPID);
 		PulseEvent(_hDbgEvent);
 	}
 
-	emit OnDebuggerTerminated();
+	//emit OnDebuggerTerminated();
 	return true;
 }
 

@@ -218,6 +218,7 @@ void clsDebugger::run()
 
 bool clsDebugger::StartDebugging()
 {
+	_bStopDebugging = false;
 	if(_dwPidToAttach != 0 && !_NormalDebugging)
 	{
 		CleanWorkSpace();
@@ -296,7 +297,7 @@ void clsDebugger::DebuggingLoop()
 		if (!WaitForDebugEvent(&debug_event, INFINITE))
 			bContinueDebugging = false;
 
-		if(_bStopDebugging && !_isDebugging)
+		if(_bStopDebugging)
 		{
 			_bStopDebugging = false;
 			DebugActiveProcessStop(debug_event.dwProcessId);
