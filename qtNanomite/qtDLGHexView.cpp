@@ -29,10 +29,9 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	this->setLayout(horizontalLayout);
 	this->setWindowTitle(QString("[ Nanomite ] - Show Memory - PID - %1 - From: %2 - To: %3").arg(dwPID,8,16,QChar('0')).arg(StartOffset,8,16,QChar('0')).arg(StartOffset + Size,8,16,QChar('0')));
 
-	tblHexView->horizontalHeader()->resizeSection(0,75);
-	tblHexView->horizontalHeader()->resizeSection(1,135);
-	tblHexView->horizontalHeader()->resizeSection(2,375);
-	tblHexView->horizontalHeader()->resizeSection(3,230);
+	tblHexView->horizontalHeader()->resizeSection(0,135);
+	tblHexView->horizontalHeader()->resizeSection(1,375);
+	tblHexView->horizontalHeader()->resizeSection(2,230);
 	tblHexView->horizontalHeader()->setFixedHeight(21);
 
 	qtDLGNanomite *MyMainWindow = qtDLGNanomite::GetInstance();
@@ -92,17 +91,14 @@ void qtDLGHexView::InsertDataFrom(int position)
 		else
 		{
 			tblHexView->insertRow(tblHexView->rowCount());
-
+			
 			tblHexView->setItem(tblHexView->rowCount() - 1,0,
-				new QTableWidgetItem(QString("%1").arg(i->PID,8,16,QChar('0'))));
-
-			tblHexView->setItem(tblHexView->rowCount() - 1,1,
 				new QTableWidgetItem(QString("%1").arg(i->hexOffset,16,16,QChar('0'))));
 
-			tblHexView->setItem(tblHexView->rowCount() - 1,2,
+			tblHexView->setItem(tblHexView->rowCount() - 1,1,
 				new QTableWidgetItem(i->hexString));
 
-			tblHexView->setItem(tblHexView->rowCount() - 1,3,
+			tblHexView->setItem(tblHexView->rowCount() - 1,2,
 				new QTableWidgetItem(i->asciiData));
 
 			++i;numberOfLines++;

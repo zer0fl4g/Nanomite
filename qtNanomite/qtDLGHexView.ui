@@ -75,11 +75,6 @@
       </attribute>
       <column>
        <property name="text">
-        <string>PID</string>
-       </property>
-      </column>
-      <column>
-       <property name="text">
         <string>Offset</string>
        </property>
       </column>
