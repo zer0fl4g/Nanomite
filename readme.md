@@ -43,6 +43,8 @@
 + fixed a bug when stepping over a return
 + fixed a bug in breakpoint manager which deleted the wrong bp when the user wants to remove the selected bp
 + fixed a bug in breakpoint manager which created unusable breakpoints
++ fixed a bug in assembler which double loaded the gui
++ fixed a bug where by detaching from a process while the process was suspended didn't resume the process
 + fixed some handle leaks
 + added f5 hotkey to attach dialog to reload the processlist
 + added type column in attach dialog

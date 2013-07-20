@@ -264,7 +264,6 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
 	{
 		qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
-		connect(dlgAssembler,SIGNAL(OnReloadDebugger()),qtDLGNanomite::GetInstance(),SLOT(OnDebuggerBreak()));
 		dlgAssembler->show();
 	}
 	else if(QString().compare(pAction->text(),"Goto Offset") == 0)

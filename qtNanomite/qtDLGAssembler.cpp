@@ -144,9 +144,8 @@ void qtDLGAssembler::InsertNewInstructions()
 
 	clsMemManager::CFree(pBuffer);
 	clsMemManager::CFree(pFileBuffer);
+
 	m_pCurrentDisassembler->SectionDisAs.clear();
-	emit OnReloadDebugger();
 	lineEdit->clear();
 	close();
-	return;
 }
