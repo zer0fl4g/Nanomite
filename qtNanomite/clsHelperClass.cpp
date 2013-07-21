@@ -288,3 +288,110 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 	clsMemManager::CFree(sTemp);
 	return Offset;
 }
+
+DWORD64 clsHelperClass::RemoteGetProcAddr(QString moduleName, QString apiName, quint64 moduleBase, quint64 processID)
+{
+	HANDLE processHandle = clsDebugger::GetProcessHandleByPID(processID); // do not close
+	IMAGE_DOS_HEADER IDH = {0};
+	IMAGE_FILE_HEADER IFH = {0};
+	IMAGE_OPTIONAL_HEADER64 IOH64 = {0};
+	IMAGE_OPTIONAL_HEADER32 IOH32 = {0};
+	IMAGE_EXPORT_DIRECTORY exportTable = {0};
+	DWORD exportTableVA = NULL,
+		ntSig = NULL;
+	bool is64Bit = false;
+	
+	if(!ReadProcessMemory(processHandle, (LPVOID)moduleBase, &IDH, sizeof(IMAGE_DOS_HEADER), NULL) || IDH.e_magic != IMAGE_DOS_SIGNATURE)
+		return 0;
+
+	if(!ReadProcessMemory(processHandle, (LPVOID)(moduleBase + IDH.e_lfanew), &ntSig, sizeof(DWORD), NULL) || ntSig != IMAGE_NT_SIGNATURE)
+		return 0;
+	
+	if(!ReadProcessMemory(processHandle, (LPVOID)(moduleBase + IDH.e_lfanew + sizeof(DWORD)), &IFH, sizeof(IFH), NULL))
+		return 0;
+ 
+	if(IFH.SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER64))
+		is64Bit = true;
+	else if(IFH.SizeOfOptionalHeader == sizeof(IMAGE_OPTIONAL_HEADER32))
+		is64Bit = false;
+	else
+		return 0;
+ 
+	if(is64Bit)
+	{
+		if(!ReadProcessMemory(processHandle, (LPVOID)(moduleBase + IDH.e_lfanew + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER)), &IOH64, IFH.SizeOfOptionalHeader, NULL) || IOH64.Magic != IMAGE_NT_OPTIONAL_HDR64_MAGIC)
+			return 0;
+
+		exportTableVA = IOH64.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	}
+	else
+	{
+		if(!ReadProcessMemory(processHandle, (LPVOID)(moduleBase + IDH.e_lfanew + sizeof(DWORD) + sizeof(IMAGE_FILE_HEADER)), &IOH32, IFH.SizeOfOptionalHeader, NULL) || IOH32.Magic != IMAGE_NT_OPTIONAL_HDR32_MAGIC)
+			return 0;
+
+		exportTableVA = IOH32.DataDirectory[IMAGE_DIRECTORY_ENTRY_EXPORT].VirtualAddress;
+	}
+
+
+	if(!ReadProcessMemory(processHandle, (LPVOID)(moduleBase + exportTableVA), &exportTable, sizeof(IMAGE_EXPORT_DIRECTORY), NULL))
+		return 0;
+
+	DWORD ExportFunctionTableVA	= moduleBase + exportTable.AddressOfFunctions;
+	DWORD ExportNameTableVA = moduleBase + exportTable.AddressOfNames;
+	DWORD ExportOrdinalTableVA	= moduleBase + exportTable.AddressOfNameOrdinals;
+
+	DWORD *ExportFunctionTable = new DWORD[exportTable.NumberOfFunctions];
+	DWORD *ExportNameTable = new DWORD[exportTable.NumberOfNames];
+	WORD *ExportOrdinalTable = new WORD[exportTable.NumberOfNames];
+	
+	if(!ReadProcessMemory(processHandle, (LPCVOID)ExportNameTableVA, ExportNameTable, exportTable.NumberOfNames * sizeof(DWORD), NULL) ||
+		!ReadProcessMemory(processHandle, (LPCVOID)ExportOrdinalTableVA, ExportOrdinalTable, exportTable.NumberOfNames * sizeof(WORD), NULL) ||
+		!ReadProcessMemory(processHandle, (LPCVOID)ExportFunctionTableVA, ExportFunctionTable, exportTable.NumberOfFunctions * sizeof(DWORD), NULL))
+	{
+		delete [] ExportFunctionTable;
+		delete [] ExportNameTable;
+		delete [] ExportOrdinalTable;
+
+		return 0;
+	}
+
+	string functioName;
+	bool isFullString = false;
+	CHAR oneCharOfFunction = '\0';
+
+	for(int i = 0; i < exportTable.NumberOfNames; i++)
+	{ 
+		isFullString = false;
+		functioName.clear(); 
+
+		for(int stringLen = 0; !isFullString; stringLen++)
+		{
+			if(!ReadProcessMemory(processHandle, (LPCVOID)(moduleBase + ExportNameTable[i] + stringLen), &oneCharOfFunction, sizeof(CHAR), NULL))
+			{
+				delete [] ExportFunctionTable;
+				delete [] ExportNameTable;
+				delete [] ExportOrdinalTable;
+
+				return 0;
+			}
+ 
+			functioName.push_back(oneCharOfFunction);
+
+			if(oneCharOfFunction == (CHAR)'\0')
+				isFullString = true;
+		}
+ 
+		if(functioName.find(apiName.toStdString()) != string::npos)
+		{		
+			DWORD64 returnValue = moduleBase + ExportFunctionTable[ExportOrdinalTable[i]];
+
+			delete[] ExportFunctionTable;
+			delete[] ExportNameTable;
+			delete[] ExportOrdinalTable;
+
+			return returnValue;
+		}
+	}
+
+	return 0;
+}

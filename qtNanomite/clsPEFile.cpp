@@ -165,7 +165,7 @@ QList<APIData> clsPEFile::getImports32()
 				if(pImportName != NULL && pImportName->Name != NULL)
 				{
 					APIData newAPI;
-					newAPI.APIOffset = pIAT->u1.Function;
+					newAPI.APIOffset = 0;
 					newAPI.APIName = QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name));			
 					importsOfFile.push_back(newAPI);
 				}
@@ -205,7 +205,7 @@ QList<APIData> clsPEFile::getImports64()
 				if(pImportName != NULL && pImportName->Name != NULL)
 				{
 					APIData newAPI;
-					newAPI.APIOffset = pIAT->u1.Function;
+					newAPI.APIOffset = 0;
 					newAPI.APIName = QString().fromAscii((const char*)((pImportHeader->Name - dwVAOfImportSection) + dwImportSectionOffset)).append("::").append(QString().fromAscii((const char*)pImportName->Name));			
 					importsOfFile.push_back(newAPI);
 				}

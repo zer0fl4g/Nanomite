@@ -16,8 +16,8 @@
  */
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGNanomite.h"
-#include "clsPEManager.h"
 
+#include "clsHelperClass.h"
 #include "clsMemManager.h"
 
 using namespace std;
@@ -122,9 +122,8 @@ void qtDLGBreakPointManager::OnAddUpdate()
 
 		if(SplitAPIList.count() >= 2)
 		{
-	
-			quint64 dwOffset = (quint64)GetProcAddress(GetModuleHandleA(SplitAPIList[0].toUtf8().data()),
-				SplitAPIList[1].toUtf8().data());
+			quint64 dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,lePID->text().toULong(0,16));
+			dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[0],SplitAPIList[1],dwOffset,lePID->text().toULong(0,16));
 
 			if(dwOffset <= 0)
 			{
@@ -229,7 +228,7 @@ void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int processID)
 	{
 		m_completerList.append(newImports.value(i).APIName);
 	}
-	
+
 	delete m_pAPICompleter;
 	m_pAPICompleter = new QCompleter(m_completerList, this);
 

@@ -93,7 +93,6 @@ void qtDLGPEEditor::InsertImports()
 	QTreeWidgetItem *topElement,
 					*moduleElement;
 	QString lastTopElement;
-	//DWORD64 moduleBase = NULL;
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Imports");
@@ -108,12 +107,11 @@ void qtDLGPEEditor::InsertImports()
 			moduleElement = new QTreeWidgetItem(topElement);
 			moduleElement->setText(0,currentElement[0]);  
 			lastTopElement = currentElement[0];
-			//moduleBase = clsHelperClass::CalcOffsetForModule((PTCHAR)currentElement[0].toLower().toStdWString().c_str(),NULL,_PID);
 		}
 		
 		QTreeWidgetItem* childElement = new QTreeWidgetItem(moduleElement);
 		childElement->setText(0,currentElement[1]);
-		childElement->setText(1,QString("%1").arg(imports.value(importCount).APIOffset /* + moduleBase */,16,16,QChar('0')));
+		childElement->setText(1,QString("%1").arg(imports.value(importCount).APIOffset,16,16,QChar('0')));
 	}
 }
 

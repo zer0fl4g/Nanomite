@@ -17,9 +17,10 @@
 #ifndef qHelperClass
 #define qHelperClass
 
-#include <QStringlist.h>
+#include <QStringList>
 #include <QString>
 
+#include "clsPEManager.h"
 #include "clsDebugger/clsDebugger.h"
 #include "qtDLGNanomite.h"
 
@@ -33,6 +34,7 @@ public:
 	static bool SetThreadPriorityByTid(DWORD ThreadID, int threadPrio);
 	static bool LoadSymbolForAddr(std::wstring& sFuncName,std::wstring& sModName,quint64 dwOffset,HANDLE hProc);
 	static DWORD GetMainThread(DWORD ThreadID);
+	static DWORD64 RemoteGetProcAddr(QString moduleName, QString apiName, quint64 moduleBase, quint64 processID);
 	static void LoadSourceForAddr(std::wstring &FileName,int &LineNumber,quint64 dwOffset,HANDLE hProc);
 	static std::vector<std::wstring> split(const std::wstring& s,const std::wstring& f);
 	static std::string convertWSTRtoSTR(std::wstring FileName);
