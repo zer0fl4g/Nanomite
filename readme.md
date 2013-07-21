@@ -51,8 +51,9 @@
 + added type column in attach dialog
 + added state update when doing a trace
 + added trace to selected disassembly line
-+ added toggle breakpoing on selected disassembly line
++ added toggle breakpoint on selected disassembly line
 + updated to qt 4.8.5
 + updated file open dialog to remove annoying messagebox for commandline
++ updated the internal pe handling
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

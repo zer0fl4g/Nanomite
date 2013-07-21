@@ -42,11 +42,12 @@ public:
 
 	QList<APIData> getImports(std::wstring FileName,int PID = -1);
 	QList<APIData> getExports(std::wstring FileName,int PID = -1);
-	QList<PESectionData> getSections(std::wstring FileName,int PID = -1);
+	
+	QList<IMAGE_SECTION_HEADER> getSections(std::wstring FileName,int PID = -1);
 
-	PIMAGE_DOS_HEADER getDosHeader(std::wstring FileName,int PID = -1);
-	PIMAGE_NT_HEADERS32 getNTHeader32(std::wstring FileName,int PID = -1);
-	PIMAGE_NT_HEADERS64 getNTHeader64(std::wstring FileName,int PID = -1);
+	IMAGE_DOS_HEADER getDosHeader(std::wstring FileName,int PID = -1);
+	IMAGE_NT_HEADERS32 getNTHeader32(std::wstring FileName,int PID = -1);
+	IMAGE_NT_HEADERS64 getNTHeader64(std::wstring FileName,int PID = -1);
 
 	std::wstring getFilenameFromPID(int PID);
 

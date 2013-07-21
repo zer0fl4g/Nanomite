@@ -138,34 +138,32 @@ void qtDLGPEEditor::InsertExports()
 
 void qtDLGPEEditor::InsertDosHeader()
 {
-	PIMAGE_DOS_HEADER currentDOS = m_pEManager->getDosHeader(m_currentFile);
-	if(currentDOS == NULL) return;
-
+	IMAGE_DOS_HEADER currentDOS = m_pEManager->getDosHeader(m_currentFile);
 	QTreeWidgetItem *topElement;
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"IMAGE_DOS_HEADER");
 	treePE->addTopLevelItem(topElement);	
 
-	InsertHeaderData(topElement,"e_cblp",currentDOS->e_cblp);
-	InsertHeaderData(topElement,"e_cp",currentDOS->e_cp);
-	InsertHeaderData(topElement,"e_cparhdr",currentDOS->e_cparhdr);
-	InsertHeaderData(topElement,"e_crlc",currentDOS->e_crlc);
-	InsertHeaderData(topElement,"e_cs",currentDOS->e_cs);
-	InsertHeaderData(topElement,"e_csum",currentDOS->e_csum);
-	InsertHeaderData(topElement,"e_ip",currentDOS->e_ip);
-	InsertHeaderData(topElement,"e_lfanew",currentDOS->e_lfanew);
-	InsertHeaderData(topElement,"e_lfarlc",currentDOS->e_lfarlc);
-	InsertHeaderData(topElement,"e_magic",currentDOS->e_magic);
-	InsertHeaderData(topElement,"e_maxalloc",currentDOS->e_maxalloc);
-	InsertHeaderData(topElement,"e_minalloc",currentDOS->e_minalloc);
-	InsertHeaderData(topElement,"e_oemid",currentDOS->e_oemid);
-	InsertHeaderData(topElement,"e_oeminfo",currentDOS->e_oeminfo);
-	InsertHeaderData(topElement,"e_ovno",currentDOS->e_ovno);
-	InsertHeaderData(topElement,"e_res",(quint64)currentDOS->e_res);
-	InsertHeaderData(topElement,"e_res2",(quint64)currentDOS->e_res2);
-	InsertHeaderData(topElement,"e_sp",currentDOS->e_sp);
-	InsertHeaderData(topElement,"e_ss",currentDOS->e_ss);
+	InsertHeaderData(topElement,"e_cblp",currentDOS.e_cblp);
+	InsertHeaderData(topElement,"e_cp",currentDOS.e_cp);
+	InsertHeaderData(topElement,"e_cparhdr",currentDOS.e_cparhdr);
+	InsertHeaderData(topElement,"e_crlc",currentDOS.e_crlc);
+	InsertHeaderData(topElement,"e_cs",currentDOS.e_cs);
+	InsertHeaderData(topElement,"e_csum",currentDOS.e_csum);
+	InsertHeaderData(topElement,"e_ip",currentDOS.e_ip);
+	InsertHeaderData(topElement,"e_lfanew",currentDOS.e_lfanew);
+	InsertHeaderData(topElement,"e_lfarlc",currentDOS.e_lfarlc);
+	InsertHeaderData(topElement,"e_magic",currentDOS.e_magic);
+	InsertHeaderData(topElement,"e_maxalloc",currentDOS.e_maxalloc);
+	InsertHeaderData(topElement,"e_minalloc",currentDOS.e_minalloc);
+	InsertHeaderData(topElement,"e_oemid",currentDOS.e_oemid);
+	InsertHeaderData(topElement,"e_oeminfo",currentDOS.e_oeminfo);
+	InsertHeaderData(topElement,"e_ovno",currentDOS.e_ovno);
+	InsertHeaderData(topElement,"e_res",(quint64)currentDOS.e_res);
+	InsertHeaderData(topElement,"e_res2",(quint64)currentDOS.e_res2);
+	InsertHeaderData(topElement,"e_sp",currentDOS.e_sp);
+	InsertHeaderData(topElement,"e_ss",currentDOS.e_ss);
 }
 
 void qtDLGPEEditor::InsertFileHeader()
@@ -176,31 +174,29 @@ void qtDLGPEEditor::InsertFileHeader()
 		
 	if(m_pEManager->is64BitFile(m_currentFile))
 	{
-		PIMAGE_NT_HEADERS64 currentFileHeader = m_pEManager->getNTHeader64(m_currentFile);
-		if(currentFileHeader == NULL) return;
+		IMAGE_NT_HEADERS64 currentFileHeader = m_pEManager->getNTHeader64(m_currentFile);
 	
 		treePE->addTopLevelItem(topElement);
-		InsertHeaderData(topElement,"Characteristics",currentFileHeader->FileHeader.Characteristics);
-		InsertHeaderData(topElement,"Machine",currentFileHeader->FileHeader.Machine);
-		InsertHeaderData(topElement,"NumberOfSections",currentFileHeader->FileHeader.NumberOfSections);
-		InsertHeaderData(topElement,"NumberOfSymbols",currentFileHeader->FileHeader.NumberOfSymbols);
-		InsertHeaderData(topElement,"PointerToSymbolTable",currentFileHeader->FileHeader.PointerToSymbolTable);
-		InsertHeaderData(topElement,"SizeOfOptionalHeader",currentFileHeader->FileHeader.SizeOfOptionalHeader);
-		InsertHeaderData(topElement,"TimeDateStamp",currentFileHeader->FileHeader.TimeDateStamp);
+		InsertHeaderData(topElement,"Characteristics",currentFileHeader.FileHeader.Characteristics);
+		InsertHeaderData(topElement,"Machine",currentFileHeader.FileHeader.Machine);
+		InsertHeaderData(topElement,"NumberOfSections",currentFileHeader.FileHeader.NumberOfSections);
+		InsertHeaderData(topElement,"NumberOfSymbols",currentFileHeader.FileHeader.NumberOfSymbols);
+		InsertHeaderData(topElement,"PointerToSymbolTable",currentFileHeader.FileHeader.PointerToSymbolTable);
+		InsertHeaderData(topElement,"SizeOfOptionalHeader",currentFileHeader.FileHeader.SizeOfOptionalHeader);
+		InsertHeaderData(topElement,"TimeDateStamp",currentFileHeader.FileHeader.TimeDateStamp);
 	}
 	else
 	{
-		PIMAGE_NT_HEADERS32 currentFileHeader = m_pEManager->getNTHeader32(m_currentFile);
-		if(currentFileHeader == NULL) return;
+		IMAGE_NT_HEADERS32 currentFileHeader = m_pEManager->getNTHeader32(m_currentFile);
 
 		treePE->addTopLevelItem(topElement);
-		InsertHeaderData(topElement,"Characteristics",currentFileHeader->FileHeader.Characteristics);
-		InsertHeaderData(topElement,"Machine",currentFileHeader->FileHeader.Machine);
-		InsertHeaderData(topElement,"NumberOfSections",currentFileHeader->FileHeader.NumberOfSections);
-		InsertHeaderData(topElement,"NumberOfSymbols",currentFileHeader->FileHeader.NumberOfSymbols);
-		InsertHeaderData(topElement,"PointerToSymbolTable",currentFileHeader->FileHeader.PointerToSymbolTable);
-		InsertHeaderData(topElement,"SizeOfOptionalHeader",currentFileHeader->FileHeader.SizeOfOptionalHeader);
-		InsertHeaderData(topElement,"TimeDateStamp",currentFileHeader->FileHeader.TimeDateStamp);
+		InsertHeaderData(topElement,"Characteristics",currentFileHeader.FileHeader.Characteristics);
+		InsertHeaderData(topElement,"Machine",currentFileHeader.FileHeader.Machine);
+		InsertHeaderData(topElement,"NumberOfSections",currentFileHeader.FileHeader.NumberOfSections);
+		InsertHeaderData(topElement,"NumberOfSymbols",currentFileHeader.FileHeader.NumberOfSymbols);
+		InsertHeaderData(topElement,"PointerToSymbolTable",currentFileHeader.FileHeader.PointerToSymbolTable);
+		InsertHeaderData(topElement,"SizeOfOptionalHeader",currentFileHeader.FileHeader.SizeOfOptionalHeader);
+		InsertHeaderData(topElement,"TimeDateStamp",currentFileHeader.FileHeader.TimeDateStamp);
 	}
 }
 
@@ -212,83 +208,81 @@ void qtDLGPEEditor::InsertOptionalHeader()
 
 	if(m_pEManager->is64BitFile(m_currentFile))
 	{
-		PIMAGE_NT_HEADERS64 currentFileHeader = m_pEManager->getNTHeader64(m_currentFile);
-		if(currentFileHeader == NULL) return;
+		IMAGE_NT_HEADERS64 currentFileHeader = m_pEManager->getNTHeader64(m_currentFile);
 
 		treePE->addTopLevelItem(topElement);
-		InsertHeaderData(topElement,"AddressOfEntryPoint",currentFileHeader->OptionalHeader.AddressOfEntryPoint);
-		InsertHeaderData(topElement,"BaseOfCode",currentFileHeader->OptionalHeader.BaseOfCode);
-		InsertHeaderData(topElement,"CheckSum",currentFileHeader->OptionalHeader.CheckSum);
-		//InsertHeaderData(topElement,"DataDirectory",currentFileHeader->OptionalHeader.DataDirectory);
-		InsertHeaderData(topElement,"DllCharacteristics",currentFileHeader->OptionalHeader.DllCharacteristics);
-		InsertHeaderData(topElement,"FileAlignment",currentFileHeader->OptionalHeader.FileAlignment);
-		InsertHeaderData(topElement,"ImageBase",currentFileHeader->OptionalHeader.ImageBase);
-		InsertHeaderData(topElement,"LoaderFlags",currentFileHeader->OptionalHeader.LoaderFlags);
-		InsertHeaderData(topElement,"Magic",currentFileHeader->OptionalHeader.Magic);
-		InsertHeaderData(topElement,"MajorImageVersion",currentFileHeader->OptionalHeader.MajorImageVersion);
-		InsertHeaderData(topElement,"MajorLinkerVersion",currentFileHeader->OptionalHeader.MajorLinkerVersion);
-		InsertHeaderData(topElement,"MajorOperatingSystemVersion",currentFileHeader->OptionalHeader.MajorOperatingSystemVersion);
-		InsertHeaderData(topElement,"MajorSubsystemVersion",currentFileHeader->OptionalHeader.MajorSubsystemVersion);
-		InsertHeaderData(topElement,"MinorImageVersion",currentFileHeader->OptionalHeader.MinorImageVersion);
-		InsertHeaderData(topElement,"MinorLinkerVersion",currentFileHeader->OptionalHeader.MinorLinkerVersion);
-		InsertHeaderData(topElement,"MinorOperatingSystemVersion",currentFileHeader->OptionalHeader.MinorOperatingSystemVersion);
-		InsertHeaderData(topElement,"MinorSubsystemVersion",currentFileHeader->OptionalHeader.MinorSubsystemVersion);
-		InsertHeaderData(topElement,"NumberOfRvaAndSizes",currentFileHeader->OptionalHeader.NumberOfRvaAndSizes);
-		InsertHeaderData(topElement,"SectionAlignment",currentFileHeader->OptionalHeader.SectionAlignment);
-		InsertHeaderData(topElement,"SizeOfCode",currentFileHeader->OptionalHeader.SizeOfCode);
-		InsertHeaderData(topElement,"SizeOfHeaders",currentFileHeader->OptionalHeader.SizeOfHeaders);
-		InsertHeaderData(topElement,"SizeOfHeapCommit",currentFileHeader->OptionalHeader.SizeOfHeapCommit);
-		InsertHeaderData(topElement,"SizeOfHeapReserve",currentFileHeader->OptionalHeader.SizeOfHeapReserve);
-		InsertHeaderData(topElement,"SizeOfImage",currentFileHeader->OptionalHeader.SizeOfImage);
-		InsertHeaderData(topElement,"SizeOfInitializedData",currentFileHeader->OptionalHeader.SizeOfInitializedData);
-		InsertHeaderData(topElement,"SizeOfStackCommit",currentFileHeader->OptionalHeader.SizeOfStackCommit);
-		InsertHeaderData(topElement,"SizeOfStackReserve",currentFileHeader->OptionalHeader.SizeOfStackReserve);
-		InsertHeaderData(topElement,"SizeOfUninitializedData",currentFileHeader->OptionalHeader.SizeOfUninitializedData);
-		InsertHeaderData(topElement,"Subsystem",currentFileHeader->OptionalHeader.Subsystem);
-		InsertHeaderData(topElement,"Win32VersionValue",currentFileHeader->OptionalHeader.Win32VersionValue);
+		InsertHeaderData(topElement,"AddressOfEntryPoint",currentFileHeader.OptionalHeader.AddressOfEntryPoint);
+		InsertHeaderData(topElement,"BaseOfCode",currentFileHeader.OptionalHeader.BaseOfCode);
+		InsertHeaderData(topElement,"CheckSum",currentFileHeader.OptionalHeader.CheckSum);
+		//InsertHeaderData(topElement,"DataDirectory",currentFileHeader.OptionalHeader.DataDirectory);
+		InsertHeaderData(topElement,"DllCharacteristics",currentFileHeader.OptionalHeader.DllCharacteristics);
+		InsertHeaderData(topElement,"FileAlignment",currentFileHeader.OptionalHeader.FileAlignment);
+		InsertHeaderData(topElement,"ImageBase",currentFileHeader.OptionalHeader.ImageBase);
+		InsertHeaderData(topElement,"LoaderFlags",currentFileHeader.OptionalHeader.LoaderFlags);
+		InsertHeaderData(topElement,"Magic",currentFileHeader.OptionalHeader.Magic);
+		InsertHeaderData(topElement,"MajorImageVersion",currentFileHeader.OptionalHeader.MajorImageVersion);
+		InsertHeaderData(topElement,"MajorLinkerVersion",currentFileHeader.OptionalHeader.MajorLinkerVersion);
+		InsertHeaderData(topElement,"MajorOperatingSystemVersion",currentFileHeader.OptionalHeader.MajorOperatingSystemVersion);
+		InsertHeaderData(topElement,"MajorSubsystemVersion",currentFileHeader.OptionalHeader.MajorSubsystemVersion);
+		InsertHeaderData(topElement,"MinorImageVersion",currentFileHeader.OptionalHeader.MinorImageVersion);
+		InsertHeaderData(topElement,"MinorLinkerVersion",currentFileHeader.OptionalHeader.MinorLinkerVersion);
+		InsertHeaderData(topElement,"MinorOperatingSystemVersion",currentFileHeader.OptionalHeader.MinorOperatingSystemVersion);
+		InsertHeaderData(topElement,"MinorSubsystemVersion",currentFileHeader.OptionalHeader.MinorSubsystemVersion);
+		InsertHeaderData(topElement,"NumberOfRvaAndSizes",currentFileHeader.OptionalHeader.NumberOfRvaAndSizes);
+		InsertHeaderData(topElement,"SectionAlignment",currentFileHeader.OptionalHeader.SectionAlignment);
+		InsertHeaderData(topElement,"SizeOfCode",currentFileHeader.OptionalHeader.SizeOfCode);
+		InsertHeaderData(topElement,"SizeOfHeaders",currentFileHeader.OptionalHeader.SizeOfHeaders);
+		InsertHeaderData(topElement,"SizeOfHeapCommit",currentFileHeader.OptionalHeader.SizeOfHeapCommit);
+		InsertHeaderData(topElement,"SizeOfHeapReserve",currentFileHeader.OptionalHeader.SizeOfHeapReserve);
+		InsertHeaderData(topElement,"SizeOfImage",currentFileHeader.OptionalHeader.SizeOfImage);
+		InsertHeaderData(topElement,"SizeOfInitializedData",currentFileHeader.OptionalHeader.SizeOfInitializedData);
+		InsertHeaderData(topElement,"SizeOfStackCommit",currentFileHeader.OptionalHeader.SizeOfStackCommit);
+		InsertHeaderData(topElement,"SizeOfStackReserve",currentFileHeader.OptionalHeader.SizeOfStackReserve);
+		InsertHeaderData(topElement,"SizeOfUninitializedData",currentFileHeader.OptionalHeader.SizeOfUninitializedData);
+		InsertHeaderData(topElement,"Subsystem",currentFileHeader.OptionalHeader.Subsystem);
+		InsertHeaderData(topElement,"Win32VersionValue",currentFileHeader.OptionalHeader.Win32VersionValue);
 	}
 	else
 	{
-		PIMAGE_NT_HEADERS32 currentFileHeader = m_pEManager->getNTHeader32(m_currentFile);
-		if(currentFileHeader == NULL) return;
+		IMAGE_NT_HEADERS32 currentFileHeader = m_pEManager->getNTHeader32(m_currentFile);
 
 		treePE->addTopLevelItem(topElement);
-		InsertHeaderData(topElement,"AddressOfEntryPoint",currentFileHeader->OptionalHeader.AddressOfEntryPoint);
-		InsertHeaderData(topElement,"BaseOfCode",currentFileHeader->OptionalHeader.BaseOfCode);
-		InsertHeaderData(topElement,"CheckSum",currentFileHeader->OptionalHeader.CheckSum);
-		//InsertHeaderData(topElement,"DataDirectory",currentFileHeader->OptionalHeader.DataDirectory);
-		InsertHeaderData(topElement,"DllCharacteristics",currentFileHeader->OptionalHeader.DllCharacteristics);
-		InsertHeaderData(topElement,"FileAlignment",currentFileHeader->OptionalHeader.FileAlignment);
-		InsertHeaderData(topElement,"ImageBase",currentFileHeader->OptionalHeader.ImageBase);
-		InsertHeaderData(topElement,"LoaderFlags",currentFileHeader->OptionalHeader.LoaderFlags);
-		InsertHeaderData(topElement,"Magic",currentFileHeader->OptionalHeader.Magic);
-		InsertHeaderData(topElement,"MajorImageVersion",currentFileHeader->OptionalHeader.MajorImageVersion);
-		InsertHeaderData(topElement,"MajorLinkerVersion",currentFileHeader->OptionalHeader.MajorLinkerVersion);
-		InsertHeaderData(topElement,"MajorOperatingSystemVersion",currentFileHeader->OptionalHeader.MajorOperatingSystemVersion);
-		InsertHeaderData(topElement,"MajorSubsystemVersion",currentFileHeader->OptionalHeader.MajorSubsystemVersion);
-		InsertHeaderData(topElement,"MinorImageVersion",currentFileHeader->OptionalHeader.MinorImageVersion);
-		InsertHeaderData(topElement,"MinorLinkerVersion",currentFileHeader->OptionalHeader.MinorLinkerVersion);
-		InsertHeaderData(topElement,"MinorOperatingSystemVersion",currentFileHeader->OptionalHeader.MinorOperatingSystemVersion);
-		InsertHeaderData(topElement,"MinorSubsystemVersion",currentFileHeader->OptionalHeader.MinorSubsystemVersion);
-		InsertHeaderData(topElement,"NumberOfRvaAndSizes",currentFileHeader->OptionalHeader.NumberOfRvaAndSizes);
-		InsertHeaderData(topElement,"SectionAlignment",currentFileHeader->OptionalHeader.SectionAlignment);
-		InsertHeaderData(topElement,"SizeOfCode",currentFileHeader->OptionalHeader.SizeOfCode);
-		InsertHeaderData(topElement,"SizeOfHeaders",currentFileHeader->OptionalHeader.SizeOfHeaders);
-		InsertHeaderData(topElement,"SizeOfHeapCommit",currentFileHeader->OptionalHeader.SizeOfHeapCommit);
-		InsertHeaderData(topElement,"SizeOfHeapReserve",currentFileHeader->OptionalHeader.SizeOfHeapReserve);
-		InsertHeaderData(topElement,"SizeOfImage",currentFileHeader->OptionalHeader.SizeOfImage);
-		InsertHeaderData(topElement,"SizeOfInitializedData",currentFileHeader->OptionalHeader.SizeOfInitializedData);
-		InsertHeaderData(topElement,"SizeOfStackCommit",currentFileHeader->OptionalHeader.SizeOfStackCommit);
-		InsertHeaderData(topElement,"SizeOfStackReserve",currentFileHeader->OptionalHeader.SizeOfStackReserve);
-		InsertHeaderData(topElement,"SizeOfUninitializedData",currentFileHeader->OptionalHeader.SizeOfUninitializedData);
-		InsertHeaderData(topElement,"Subsystem",currentFileHeader->OptionalHeader.Subsystem);
-		InsertHeaderData(topElement,"Win32VersionValue",currentFileHeader->OptionalHeader.Win32VersionValue);
+		InsertHeaderData(topElement,"AddressOfEntryPoint",currentFileHeader.OptionalHeader.AddressOfEntryPoint);
+		InsertHeaderData(topElement,"BaseOfCode",currentFileHeader.OptionalHeader.BaseOfCode);
+		InsertHeaderData(topElement,"CheckSum",currentFileHeader.OptionalHeader.CheckSum);
+		//InsertHeaderData(topElement,"DataDirectory",currentFileHeader.OptionalHeader.DataDirectory);
+		InsertHeaderData(topElement,"DllCharacteristics",currentFileHeader.OptionalHeader.DllCharacteristics);
+		InsertHeaderData(topElement,"FileAlignment",currentFileHeader.OptionalHeader.FileAlignment);
+		InsertHeaderData(topElement,"ImageBase",currentFileHeader.OptionalHeader.ImageBase);
+		InsertHeaderData(topElement,"LoaderFlags",currentFileHeader.OptionalHeader.LoaderFlags);
+		InsertHeaderData(topElement,"Magic",currentFileHeader.OptionalHeader.Magic);
+		InsertHeaderData(topElement,"MajorImageVersion",currentFileHeader.OptionalHeader.MajorImageVersion);
+		InsertHeaderData(topElement,"MajorLinkerVersion",currentFileHeader.OptionalHeader.MajorLinkerVersion);
+		InsertHeaderData(topElement,"MajorOperatingSystemVersion",currentFileHeader.OptionalHeader.MajorOperatingSystemVersion);
+		InsertHeaderData(topElement,"MajorSubsystemVersion",currentFileHeader.OptionalHeader.MajorSubsystemVersion);
+		InsertHeaderData(topElement,"MinorImageVersion",currentFileHeader.OptionalHeader.MinorImageVersion);
+		InsertHeaderData(topElement,"MinorLinkerVersion",currentFileHeader.OptionalHeader.MinorLinkerVersion);
+		InsertHeaderData(topElement,"MinorOperatingSystemVersion",currentFileHeader.OptionalHeader.MinorOperatingSystemVersion);
+		InsertHeaderData(topElement,"MinorSubsystemVersion",currentFileHeader.OptionalHeader.MinorSubsystemVersion);
+		InsertHeaderData(topElement,"NumberOfRvaAndSizes",currentFileHeader.OptionalHeader.NumberOfRvaAndSizes);
+		InsertHeaderData(topElement,"SectionAlignment",currentFileHeader.OptionalHeader.SectionAlignment);
+		InsertHeaderData(topElement,"SizeOfCode",currentFileHeader.OptionalHeader.SizeOfCode);
+		InsertHeaderData(topElement,"SizeOfHeaders",currentFileHeader.OptionalHeader.SizeOfHeaders);
+		InsertHeaderData(topElement,"SizeOfHeapCommit",currentFileHeader.OptionalHeader.SizeOfHeapCommit);
+		InsertHeaderData(topElement,"SizeOfHeapReserve",currentFileHeader.OptionalHeader.SizeOfHeapReserve);
+		InsertHeaderData(topElement,"SizeOfImage",currentFileHeader.OptionalHeader.SizeOfImage);
+		InsertHeaderData(topElement,"SizeOfInitializedData",currentFileHeader.OptionalHeader.SizeOfInitializedData);
+		InsertHeaderData(topElement,"SizeOfStackCommit",currentFileHeader.OptionalHeader.SizeOfStackCommit);
+		InsertHeaderData(topElement,"SizeOfStackReserve",currentFileHeader.OptionalHeader.SizeOfStackReserve);
+		InsertHeaderData(topElement,"SizeOfUninitializedData",currentFileHeader.OptionalHeader.SizeOfUninitializedData);
+		InsertHeaderData(topElement,"Subsystem",currentFileHeader.OptionalHeader.Subsystem);
+		InsertHeaderData(topElement,"Win32VersionValue",currentFileHeader.OptionalHeader.Win32VersionValue);
 	}
 }
 
 void qtDLGPEEditor::InsertSections()
 {
-	QList<PESectionData> sections = m_pEManager->getSections(m_currentFile);
+	QList<IMAGE_SECTION_HEADER> sections = m_pEManager->getSections(m_currentFile);
 	if(sections.size() <= 0) return;
 
 	QTreeWidgetItem *topElement;
@@ -307,9 +301,9 @@ void qtDLGPEEditor::InsertSections()
 		QTreeWidgetItem *sectionElement;
 
 		sectionElement = new QTreeWidgetItem(topElement);
-		sectionElement->setText(0,sections.at(i).SectionName);
+		sectionElement->setText(0,QString::fromAscii((char*)sections.at(i).Name, sizeof(sections.at(i).Name)));
 		sectionElement->setText(1,QString("%1").arg(sections.at(i).VirtualAddress,8,16,QChar('0')));
-		sectionElement->setText(2,QString("%1").arg(sections.at(i).VirtualSize,8,16,QChar('0')));
+		sectionElement->setText(2,QString("%1").arg(sections.at(i).Misc.VirtualSize,8,16,QChar('0')));
 		sectionElement->setText(3,QString("%1").arg(sections.at(i).PointerToRawData,8,16,QChar('0')));
 		sectionElement->setText(4,QString("%1").arg(sections.at(i).SizeOfRawData,8,16,QChar('0')));
 		sectionElement->setText(5,QString("%1").arg(sections.at(i).Characteristics,8,16,QChar('0')));
