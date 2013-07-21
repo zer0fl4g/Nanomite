@@ -211,12 +211,6 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	m_iSelectedRow = tblDisAs->indexAt(qPoint).row();
 	if(m_iSelectedRow < 0) return;
 
-
-	menu.addAction(new QAction("Goto Offset",this));
-	menu.addAction(new QAction("Edit Instruction",this));
-	menu.addAction(new QAction("Show Source",this));
-	menu.addAction(new QAction("Set R/EIP to this",this));
-	menu.addAction(new QAction("Trace to this",this));
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Offset",this));
@@ -225,6 +219,13 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	submenu->addAction(new QAction("Comment",this));
 
 	menu.addMenu(submenu);
+	menu.addAction(new QAction("Edit Instruction",this));	
+	menu.addAction(new QAction("Goto Offset",this));
+	menu.addAction(new QAction("Set R/EIP to this",this));
+	menu.addAction(new QAction("Show Source",this));	
+	menu.addAction(new QAction("Toggle SW Breakpoint", this));
+	menu.addAction(new QAction("Trace to this",this));
+	
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -310,6 +311,10 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblDisAs->item(m_iSelectedRow,3)->text());
+	}
+	else if(QString().compare(pAction->text(), "Toggle SW Breakpoint") == 0)
+	{
+		OnF2BreakPointPlace();
 	}
 }
 
