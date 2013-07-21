@@ -145,7 +145,7 @@ QList<APIData> clsPEManager::getExports(std::wstring FileName,int PID)
 	return QList<APIData>();
 }
 
-QList<PESectionData> clsPEManager::getSections(std::wstring FileName,int PID)
+QList<IMAGE_SECTION_HEADER> clsPEManager::getSections(std::wstring FileName,int PID)
 {
 	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
@@ -155,7 +155,7 @@ QList<PESectionData> clsPEManager::getSections(std::wstring FileName,int PID)
 			return PEFiles[i].PEFile->getSections();
 	}
 
-	return QList<PESectionData>();
+	return QList<IMAGE_SECTION_HEADER>();
 }
 
 clsPEManager::~clsPEManager()
@@ -170,7 +170,7 @@ void clsPEManager::CleanPEManager()
 	PEFiles.clear();
 }
 
-PIMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
+IMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
 {
 	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
@@ -179,10 +179,12 @@ PIMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getDosHeader();
 	}
-	return NULL;
+
+	IMAGE_DOS_HEADER failed;
+	return failed;
 }
 
-PIMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
+IMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
 {
 	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
@@ -191,10 +193,12 @@ PIMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getNTHeader32();
 	}
-	return NULL;
+
+	IMAGE_NT_HEADERS32 failed;
+	return failed;
 }
 
-PIMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
+IMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
 {
 	wstring newFileName = clsHelperClass::replaceAll(FileName,'\\','/');
 
@@ -203,7 +207,9 @@ PIMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getNTHeader64();
 	}
-	return NULL;
+
+	IMAGE_NT_HEADERS64 failed;
+	return failed;
 }
 
 bool clsPEManager::is64BitFile(std::wstring FileName,int PID)

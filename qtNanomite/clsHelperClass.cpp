@@ -336,17 +336,13 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString moduleName, QString apiName, q
 	if(!ReadProcessMemory(processHandle, (LPVOID)(moduleBase + exportTableVA), &exportTable, sizeof(IMAGE_EXPORT_DIRECTORY), NULL))
 		return 0;
 
-	DWORD ExportFunctionTableVA	= moduleBase + exportTable.AddressOfFunctions;
-	DWORD ExportNameTableVA = moduleBase + exportTable.AddressOfNames;
-	DWORD ExportOrdinalTableVA	= moduleBase + exportTable.AddressOfNameOrdinals;
-
 	DWORD *ExportFunctionTable = new DWORD[exportTable.NumberOfFunctions];
 	DWORD *ExportNameTable = new DWORD[exportTable.NumberOfNames];
 	WORD *ExportOrdinalTable = new WORD[exportTable.NumberOfNames];
 	
-	if(!ReadProcessMemory(processHandle, (LPCVOID)ExportNameTableVA, ExportNameTable, exportTable.NumberOfNames * sizeof(DWORD), NULL) ||
-		!ReadProcessMemory(processHandle, (LPCVOID)ExportOrdinalTableVA, ExportOrdinalTable, exportTable.NumberOfNames * sizeof(WORD), NULL) ||
-		!ReadProcessMemory(processHandle, (LPCVOID)ExportFunctionTableVA, ExportFunctionTable, exportTable.NumberOfFunctions * sizeof(DWORD), NULL))
+	if(!ReadProcessMemory(processHandle, (LPCVOID)(moduleBase + exportTable.AddressOfNames), ExportNameTable, exportTable.NumberOfNames * sizeof(DWORD), NULL) ||
+		!ReadProcessMemory(processHandle, (LPCVOID)(moduleBase + exportTable.AddressOfNameOrdinals), ExportOrdinalTable, exportTable.NumberOfNames * sizeof(WORD), NULL) ||
+		!ReadProcessMemory(processHandle, (LPCVOID)(moduleBase + exportTable.AddressOfFunctions), ExportFunctionTable, exportTable.NumberOfFunctions * sizeof(DWORD), NULL))
 	{
 		delete [] ExportFunctionTable;
 		delete [] ExportNameTable;
