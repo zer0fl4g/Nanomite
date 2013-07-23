@@ -624,7 +624,7 @@ void clsDebugger::DebuggingLoop()
 										HardwareBPs[i].dwHandle == 0x1 &&
 										(HardwareBPs[i].dwPID == debug_event.dwProcessId || HardwareBPs[i].dwPID == -1))
 									{
-										wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot,HardwareBPs[i].dwTypeFlag);
+										wHardwareBP(debug_event.dwProcessId,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot,HardwareBPs[i].dwTypeFlag);
 										HardwareBPs[i].bRestoreBP = false;
 									}
 								}
@@ -637,7 +637,7 @@ void clsDebugger::DebuggingLoop()
 								{
 									if(HardwareBPs[i].dwOffset == (quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress &&
 										(HardwareBPs[i].dwPID == debug_event.dwProcessId || HardwareBPs[i].dwPID == -1) &&
-										dHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSlot))
+										dHardwareBP(debug_event.dwProcessId,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSlot))
 									{
 										memset(tcLogString,0x00,LOGBUFFER);
 #ifdef _AMD64_
@@ -965,7 +965,7 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 	BOOL bIsWOW64 = false;
 
 	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
+		clsAPIImport::pIsWow64Process(GetProcessHandleByPID(dwPID),&bIsWOW64);
 
 	if(bIsWOW64)
 	{

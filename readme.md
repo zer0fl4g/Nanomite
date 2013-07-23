@@ -46,6 +46,7 @@
 + fixed a bug in breakpoint manager which may resolved ModuleName::APIName to wrong offset
 + fixed a bug in assembler which double loaded the gui
 + fixed a bug where by detaching from a suspended process didn't resume the process
++ fixed a bug which did not handle hardware breakpoints for wow64 targets
 + fixed some handle leaks
 + added f5 hotkey to attach dialog to reload the processlist
 + added type column in attach dialog
