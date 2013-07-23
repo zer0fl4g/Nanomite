@@ -168,8 +168,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 qtDLGNanomite::~qtDLGNanomite()
 {
-	settings->LoadDebuggerSettings(coreDebugger);
-	settings->LoadDisassemblerColor(qtNanomiteDisAsColor);
+	settings->SaveDebuggerSettings(coreDebugger);
+	settings->SaveDisassemblerColor(qtNanomiteDisAsColor);
 
 	delete coreDebugger;
 	delete coreDisAs;

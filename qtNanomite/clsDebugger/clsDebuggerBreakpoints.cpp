@@ -17,6 +17,7 @@
 #include "clsDebugger.h"
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
+#include "clsAPIImport.h"
 
 #include <TlHelp32.h>
 
@@ -76,8 +77,17 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 	DWORD dwThreadCounter = 0;
 	THREADENTRY32 threadEntry32;
 	threadEntry32.dwSize = sizeof(THREADENTRY32);
+
 	CONTEXT cTT;
 	cTT.ContextFlags = CONTEXT_ALL;
+	WOW64_CONTEXT cTTwow;
+	cTTwow.ContextFlags = CONTEXT_ALL;
+
+	BOOL isWOW64 = false;
+#ifdef _AMD64_
+	clsAPIImport::pIsWow64Process(clsDebugger::GetProcessHandleByPID(dwPID), &isWOW64);
+#endif
+
 	HANDLE hThread = INVALID_HANDLE_VALUE;
 
 	if(dwPID == -1 || dwPID == 0)
@@ -105,42 +115,73 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 
 	do{
 		if(dwPID == threadEntry32.th32OwnerProcessID)
-			hThread = OpenThread(THREAD_ALL_ACCESS,false,threadEntry32.th32ThreadID);
+			hThread = OpenThread(THREAD_GETSET_CONTEXT,false,threadEntry32.th32ThreadID);
 
 		if(hThread != INVALID_HANDLE_VALUE)
 		{
 			dwThreadCounter++;
-			GetThreadContext(hThread,&cTT);
 
-			switch(HardwareBPs[iBP].dwSlot)
+			if(isWOW64)
 			{
-			case 0:
-				cTT.Dr0 = HardwareBPs[iBP].dwOffset;
-				break;
-			case 1:
-				cTT.Dr1 = HardwareBPs[iBP].dwOffset;
-				break;
-			case 2:
-				cTT.Dr2 = HardwareBPs[iBP].dwOffset;
-				break;
-			case 3:
-				cTT.Dr3 = HardwareBPs[iBP].dwOffset;
-				break;
+				clsAPIImport::pWow64GetThreadContext(hThread,&cTTwow);
+
+				switch(HardwareBPs[iBP].dwSlot)
+				{
+				case 0:
+					cTTwow.Dr0 = HardwareBPs[iBP].dwOffset;
+					break;
+				case 1:
+					cTTwow.Dr1 = HardwareBPs[iBP].dwOffset;
+					break;
+				case 2:
+					cTTwow.Dr2 = HardwareBPs[iBP].dwOffset;
+					break;
+				case 3:
+					cTTwow.Dr3 = HardwareBPs[iBP].dwOffset;
+					break;
+				}
+
+				cTTwow.Dr7 |= 1 << (HardwareBPs[iBP].dwSlot * 2);
+				cTTwow.Dr7 |= dwTypeFlag << ((HardwareBPs[iBP].dwSlot * 4) + 16);
+				cTTwow.Dr7 |= (dwSize - 1) << ((HardwareBPs[iBP].dwSlot * 4) + 18);
+				
+				clsAPIImport::pWow64SetThreadContext(hThread,&cTTwow);
+			}
+			else
+			{
+				GetThreadContext(hThread,&cTT);
+
+				switch(HardwareBPs[iBP].dwSlot)
+				{
+				case 0:
+					cTT.Dr0 = HardwareBPs[iBP].dwOffset;
+					break;
+				case 1:
+					cTT.Dr1 = HardwareBPs[iBP].dwOffset;
+					break;
+				case 2:
+					cTT.Dr2 = HardwareBPs[iBP].dwOffset;
+					break;
+				case 3:
+					cTT.Dr3 = HardwareBPs[iBP].dwOffset;
+					break;
+				}
+
+				cTT.Dr7 |= 1 << (HardwareBPs[iBP].dwSlot * 2);
+				cTT.Dr7 |= dwTypeFlag << ((HardwareBPs[iBP].dwSlot * 4) + 16);
+				cTT.Dr7 |= (dwSize - 1) << ((HardwareBPs[iBP].dwSlot * 4) + 18);
+
+				SetThreadContext(hThread,&cTT);
 			}
 
-			cTT.Dr7 |= 1 << (HardwareBPs[iBP].dwSlot * 2);
-			cTT.Dr7 |= dwTypeFlag << ((HardwareBPs[iBP].dwSlot * 4) + 16);
-			cTT.Dr7 |= (dwSize - 1) << ((HardwareBPs[iBP].dwSlot * 4) + 18);
-
-			SetThreadContext(hThread,&cTT);
+			CloseHandle(hThread);
+			hThread = NULL;
 		}
-
-		CloseHandle(hThread);
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
-	memset(tcLogString,0x00,LOGBUFFER);
-	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,HardwareBPs[iBP].dwOffset,HardwareBPs[iBP].dwSlot);
-	PBLogInfo();
+	//memset(tcLogString,0x00,LOGBUFFER);
+	//swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,HardwareBPs[iBP].dwOffset,HardwareBPs[iBP].dwSlot);
+	//PBLogInfo();
 
 	CloseHandle(hProcessSnap);
 	return true;
@@ -149,10 +190,21 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 {
 	HANDLE hProcessSnap;
+	HANDLE hThread = INVALID_HANDLE_VALUE;
 	THREADENTRY32 threadEntry32;
 
-	hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,dwPID);
+	CONTEXT cTT;
+	cTT.ContextFlags = CONTEXT_ALL;
+	WOW64_CONTEXT cTTwow;
+	cTTwow.ContextFlags = CONTEXT_ALL;
 
+	BOOL isWOW64 = false;
+
+#ifdef _AMD64_
+	clsAPIImport::pIsWow64Process(clsDebugger::GetProcessHandleByPID(dwPID), &isWOW64);
+#endif
+
+	hProcessSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,dwPID);
 	if(hProcessSnap == INVALID_HANDLE_VALUE)
 		return false;
 
@@ -165,30 +217,48 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 	}
 
 	do{
-		CONTEXT cTT;
-		cTT.ContextFlags = CONTEXT_ALL;
-		HANDLE hThread = INVALID_HANDLE_VALUE;
-
 		if(dwPID == threadEntry32.th32OwnerProcessID)
 			hThread = OpenThread(THREAD_GETSET_CONTEXT,false,threadEntry32.th32ThreadID);
 
 		if(hThread != INVALID_HANDLE_VALUE)
 		{
-			GetThreadContext(hThread,&cTT);
+			if(isWOW64)
+			{
+				clsAPIImport::pWow64GetThreadContext(hThread,&cTTwow);
+				
+				if(cTTwow.Dr0 == dwOffset) cTTwow.Dr0 = 0;
+				if(cTTwow.Dr1 == dwOffset) cTTwow.Dr1 = 0;
+				if(cTTwow.Dr2 == dwOffset) cTTwow.Dr2 = 0;
+				if(cTTwow.Dr3 == dwOffset) cTTwow.Dr3 = 0;
 
-			if(cTT.Dr0 == dwOffset) cTT.Dr0 = 0;
-			if(cTT.Dr1 == dwOffset) cTT.Dr1 = 0;
-			if(cTT.Dr2 == dwOffset) cTT.Dr2 = 0;
-			if(cTT.Dr3 == dwOffset) cTT.Dr3 = 0;
+				cTTwow.Dr7 &= ~(1 << (dwSlot * 2));
+				cTTwow.Dr7 &= ~(3 << ((dwSlot * 4) + 16));
+				cTTwow.Dr7 &= ~(3 << ((dwSlot * 4) + 18));
 
-			cTT.Dr7 &= ~(1 << (dwSlot * 2));
-			cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 16));
-			cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 18));
+				clsAPIImport::pWow64SetThreadContext(hThread,&cTTwow);
+				
+				CloseHandle(hThread);
+				hThread = NULL;
+			}
+			else
+			{
+				GetThreadContext(hThread,&cTT);
 
-			SetThreadContext(hThread,&cTT);
+				if(cTT.Dr0 == dwOffset) cTT.Dr0 = 0;
+				if(cTT.Dr1 == dwOffset) cTT.Dr1 = 0;
+				if(cTT.Dr2 == dwOffset) cTT.Dr2 = 0;
+				if(cTT.Dr3 == dwOffset) cTT.Dr3 = 0;
+
+				cTT.Dr7 &= ~(1 << (dwSlot * 2));
+				cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 16));
+				cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 18));
+
+				SetThreadContext(hThread,&cTT);
+				
+				CloseHandle(hThread);
+				hThread = NULL;
+			}
 		}
-
-		CloseHandle(hThread);
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
 	CloseHandle(hProcessSnap);

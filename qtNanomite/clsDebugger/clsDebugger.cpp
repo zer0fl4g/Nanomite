@@ -637,7 +637,7 @@ void clsDebugger::DebuggingLoop()
 								{
 									if(HardwareBPs[i].dwOffset == (quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress &&
 										(HardwareBPs[i].dwPID == debug_event.dwProcessId || HardwareBPs[i].dwPID == -1) &&
-										dHardwareBP(debug_event.dwProcessId,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSlot))
+										dHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSlot))
 									{
 										memset(tcLogString,0x00,LOGBUFFER);
 #ifdef _AMD64_
@@ -647,8 +647,8 @@ void clsDebugger::DebuggingLoop()
 #endif
 										PBLogInfo();
 
-										dwContinueStatus = CallBreakDebugger(&debug_event,0);
 										HardwareBPs[i].bRestoreBP = true;
+										dwContinueStatus = CallBreakDebugger(&debug_event,0);
 										PIDs[iPid].dwBPRestoreFlag = 0x8;
 										PIDs[iPid].bTrapFlag = true;
 
@@ -872,8 +872,9 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 		return true;
 
 	if(dwExceptionType == EXCEPTION_BREAKPOINT ||
-		dwExceptionType == 0x4000001f ||
-		dwExceptionType == EXCEPTION_GUARD_PAGE)
+		dwExceptionType == 0x4000001f	||
+		dwExceptionType == EXCEPTION_GUARD_PAGE ||
+		dwExceptionType == EXCEPTION_SINGLE_STEP)
 	{
 		for(size_t i = 0;i < SoftwareBPs.size();i++)
 			if(dwExceptionOffset == SoftwareBPs[i].dwOffset && (SoftwareBPs[i].dwPID == dwPID || SoftwareBPs[i].dwPID == -1))
