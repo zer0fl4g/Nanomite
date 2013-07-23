@@ -81,7 +81,7 @@ bool clsPEFile::LoadFile(wstring FileName)
 	}
 	else
 	{
-		memcpy_s(&m_INH32, sizeof(PIMAGE_NT_HEADERS32), (LPVOID)((DWORD64)m_fileBuffer + m_IDH.e_lfanew), sizeof(PIMAGE_NT_HEADERS32));
+		memcpy_s(&m_INH32, sizeof(IMAGE_NT_HEADERS32), (LPVOID)((DWORD64)m_fileBuffer + m_IDH.e_lfanew), sizeof(IMAGE_NT_HEADERS32));
 		if(m_INH32.Signature != IMAGE_NT_SIGNATURE)
 		{
 			UnmapViewOfFile(m_fileBuffer);
