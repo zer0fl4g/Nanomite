@@ -23,6 +23,8 @@
 
 #include "ui_qtDLGRegisters.h"
 
+#include <stdint.h>
+
 class qtDLGRegisters : public QDockWidget, public Ui_qtDLGRegisters
 {
 	Q_OBJECT
@@ -43,6 +45,7 @@ private:
 	int _iSelectedRow;
 
 	void PrintValueInTable(QString regName, QString regValue);
+	double readFloat80(const uint8_t buffer[10]);
 
 private slots:
 	void OnContextMenu(QPoint);
