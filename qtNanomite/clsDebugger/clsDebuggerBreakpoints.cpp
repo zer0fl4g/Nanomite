@@ -175,7 +175,7 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 			}
 
 			CloseHandle(hThread);
-			hThread = NULL;
+			hThread = INVALID_HANDLE_VALUE;
 		}
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
@@ -236,9 +236,6 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 				cTTwow.Dr7 &= ~(3 << ((dwSlot * 4) + 18));
 
 				clsAPIImport::pWow64SetThreadContext(hThread,&cTTwow);
-				
-				CloseHandle(hThread);
-				hThread = NULL;
 			}
 			else
 			{
@@ -254,10 +251,10 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 				cTT.Dr7 &= ~(3 << ((dwSlot * 4) + 18));
 
 				SetThreadContext(hThread,&cTT);
-				
-				CloseHandle(hThread);
-				hThread = NULL;
 			}
+
+			CloseHandle(hThread);
+			hThread = INVALID_HANDLE_VALUE;
 		}
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 
