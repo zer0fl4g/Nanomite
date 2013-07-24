@@ -165,6 +165,11 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->wowProcessContext.SegGs,16,16,QChar('0')));
 		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->wowProcessContext.SegSs,16,16,QChar('0')));
 
+		double value;		
+		for (int i = 0; i < 8; i++) {
+			value = readFloat80(&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10]);
+			PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
+		}
 		//for(int i = 0; i < 8; i++)
 		//{
 		//	// MMX
@@ -214,6 +219,12 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 
 		// EFlags
 		PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0')));
+
+		double value;		
+		for (int i = 0; i < 8; i++) {
+			value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
+			PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
+		}
 	}
 #else
 	dwEFlags = coreDebugger->ProcessContext.EFlags;
@@ -237,9 +248,8 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	double value;
 	for (int i = 0; i < 8; i++) {
 		value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
-		PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value, 8, 'g', -1, QChar('0')));
+		PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
 	}
-
 
 	//for(int i = 0; i < 8; i++)
 	//{
@@ -288,6 +298,7 @@ void qtDLGRegisters::PrintValueInTable(QString regName, QString regValue)
 	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(regValue));
 }
 
+// FIXME: maybe rewrite this function, because it was taken from some link in internet
 double qtDLGRegisters::readFloat80(const uint8_t buffer[10]) 
 {
 	 //80 bit floating point value according to IEEE-754:
