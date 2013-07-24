@@ -37,8 +37,7 @@ public:
 	bool isValidPEFile();
 	
 	DWORD64 getTLSCallbackOffset();
-	DWORD64 VAtoRaw64(quint64 Offset);
-	DWORD	VAtoRaw32(quint64 Offset);
+	DWORD64 VAtoRaw(quint64 Offset);
 
 	QList<APIData> getImports();
 	QList<APIData> getExports();
