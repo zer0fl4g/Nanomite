@@ -185,7 +185,7 @@ DWORD64 clsPEFile::loadTLSCallbackOffset64()
 
 	if(pTLS->AddressOfCallBacks == NULL) return 0;
 
-	DWORD64 rvaTLS = VAtoRaw64(pTLS->AddressOfCallBacks - m_INH64.OptionalHeader.ImageBase);
+	DWORD64 rvaTLS = VAtoRaw(pTLS->AddressOfCallBacks - m_INH64.OptionalHeader.ImageBase);
 	DWORD64 callbackOffset = (DWORD64)*(PDWORD64)((DWORD64)m_fileBuffer + rvaTLS);
 	return callbackOffset - m_INH64.OptionalHeader.ImageBase;
 }
@@ -199,7 +199,7 @@ DWORD clsPEFile::loadTLSCallbackOffset32()
 
 	if(pTLS->AddressOfCallBacks == NULL) return 0;
 
-	DWORD rvaTLS = VAtoRaw32(pTLS->AddressOfCallBacks - m_INH32.OptionalHeader.ImageBase);
+	DWORD rvaTLS = VAtoRaw(pTLS->AddressOfCallBacks - m_INH32.OptionalHeader.ImageBase);
 	DWORD callbackOffset = (DWORD)*(PDWORD)((DWORD)m_fileBuffer + rvaTLS);
 	return callbackOffset - m_INH32.OptionalHeader.ImageBase;
 }
@@ -331,37 +331,17 @@ bool clsPEFile::is64Bit()
 	return m_is64Bit;
 }
 
-DWORD64 clsPEFile::VAtoRaw64(quint64 Offset)
+DWORD64 clsPEFile::VAtoRaw(quint64 Offset)
 {
-	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD64)m_fileBuffer + m_IDH.e_lfanew + sizeof(IMAGE_NT_HEADERS64));
-
-	for (WORD i = 0; i < m_INH64.FileHeader.NumberOfSections; i++)
+	for(QList<IMAGE_SECTION_HEADER>::const_iterator sectionIT = fileSections.constBegin(); sectionIT != fileSections.constEnd(); ++sectionIT)
 	{
-		DWORD64 sectionVA = pSectionHeader->VirtualAddress;
-		DWORD64 sectionSize = pSectionHeader->Misc.VirtualSize;
+		DWORD64 sectionVA = sectionIT->VirtualAddress;
+		DWORD64 sectionSize = sectionIT->Misc.VirtualSize;
 
 		if ((sectionVA <= Offset) && (Offset < (sectionVA + sectionSize)))
-			return (DWORD64)(pSectionHeader->PointerToRawData + (Offset - sectionVA));
-
-		pSectionHeader++;
+			return (DWORD64)(sectionIT->PointerToRawData + (Offset - sectionVA));
 	}
-	return 0;
-}
 
-DWORD clsPEFile::VAtoRaw32(quint64 Offset)
-{
-	PIMAGE_SECTION_HEADER pSectionHeader = (PIMAGE_SECTION_HEADER)((DWORD)m_fileBuffer + m_IDH.e_lfanew + sizeof(IMAGE_NT_HEADERS32));
-
-	for (WORD i = 0; i < m_INH32.FileHeader.NumberOfSections; i++)
-	{
-		DWORD sectionVA = pSectionHeader->VirtualAddress;
-		DWORD sectionSize = pSectionHeader->Misc.VirtualSize;
-
-		if ((sectionVA <= Offset) && (Offset < (sectionVA + sectionSize)))
-			return (DWORD)(pSectionHeader->PointerToRawData + (Offset - sectionVA));
-
-		pSectionHeader++;
-	}
 	return 0;
 }
 

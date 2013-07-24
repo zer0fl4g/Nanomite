@@ -232,14 +232,7 @@ DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
 	{
 		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
 		{
-			if(PEFiles[i].is64Bit)
-			{
-				return PEFiles[i].PEFile->VAtoRaw64(RVAOffset);
-			}
-			else
-			{
-				return PEFiles[i].PEFile->VAtoRaw32(RVAOffset);
-			}
+			return PEFiles[i].PEFile->VAtoRaw(RVAOffset);
 		}
 	}
 	return NULL;
