@@ -45,6 +45,8 @@
 + fixed a bug in breakpoint manager which created unusable breakpoints
 + fixed a bug in breakpoint manager which may resolved ModuleName::APIName to wrong offset
 + fixed a bug in assembler which double loaded the gui
++ fixed a bug in hardware breakpoints which did not activate them in running processes
++ fixed a bug in hardware breakpoints which did not activate them on the current thread
 + fixed a bug where by detaching from a suspended process didn't resume the process
 + fixed a bug which did not handle hardware breakpoints for wow64 targets
 + fixed some handle leaks
@@ -53,7 +55,9 @@
 + added state update when doing a trace
 + added trace to selected disassembly line
 + added toggle breakpoint on selected disassembly line
++ added double click event in function widget to view function in disassembler
 + updated to qt 4.8.5
++ updated nasm to 2.10.09
 + updated file open dialog to remove annoying messagebox for commandline
 + updated the internal pe handling
 

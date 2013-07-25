@@ -1077,3 +1077,11 @@ void clsDebugger::HandleForException(int handleException)
 	m_continueWithException = handleException;
 	PulseEvent(m_waitForGUI);
 }
+
+void clsDebugger::SetNewThreadContext(bool isWow64, CONTEXT newProcessContext, WOW64_CONTEXT newWowProcessContext)
+{
+	if(isWow64)
+		pThis->wowProcessContext = newWowProcessContext;
+	else
+		pThis->ProcessContext = newProcessContext;
+}

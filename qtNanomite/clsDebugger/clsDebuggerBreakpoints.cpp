@@ -74,7 +74,6 @@ bool clsDebugger::wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwKe
 bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag)
 {
 	size_t iBP = NULL;
-	DWORD dwThreadCounter = 0;
 	THREADENTRY32 threadEntry32;
 	threadEntry32.dwSize = sizeof(THREADENTRY32);
 
@@ -119,8 +118,8 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 
 		if(hThread != INVALID_HANDLE_VALUE)
 		{
-			dwThreadCounter++;
-
+			SuspendThread(hThread);
+		
 			if(isWOW64)
 			{
 				clsAPIImport::pWow64GetThreadContext(hThread,&cTTwow);
@@ -174,14 +173,14 @@ bool clsDebugger::wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dw
 				SetThreadContext(hThread,&cTT);
 			}
 
+			ResumeThread(hThread);
 			CloseHandle(hThread);
 			hThread = INVALID_HANDLE_VALUE;
+
+			if(clsDebugger::GetCurrentTID() == threadEntry32.th32ThreadID)
+				clsDebugger::SetNewThreadContext(isWOW64, cTT, cTTwow);
 		}
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
-
-	//memset(tcLogString,0x00,LOGBUFFER);
-	//swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] New HardwareBP in %i Threads placed at %X in Slot No. %i",dwThreadCounter,HardwareBPs[iBP].dwOffset,HardwareBPs[iBP].dwSlot);
-	//PBLogInfo();
 
 	CloseHandle(hProcessSnap);
 	return true;
@@ -222,6 +221,8 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 
 		if(hThread != INVALID_HANDLE_VALUE)
 		{
+			SuspendThread(hThread);
+
 			if(isWOW64)
 			{
 				clsAPIImport::pWow64GetThreadContext(hThread,&cTTwow);
@@ -253,8 +254,12 @@ bool clsDebugger::dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot)
 				SetThreadContext(hThread,&cTT);
 			}
 
+			ResumeThread(hThread);
 			CloseHandle(hThread);
 			hThread = INVALID_HANDLE_VALUE;
+
+			if(clsDebugger::GetCurrentTID() == threadEntry32.th32ThreadID)
+				clsDebugger::SetNewThreadContext(isWOW64, cTT, cTTwow);
 		}
 	}while(Thread32Next(hProcessSnap,&threadEntry32));
 

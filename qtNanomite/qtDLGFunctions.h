@@ -94,6 +94,14 @@ private slots:
 	* @return no
 	*/
 	void MenuCallback(QAction *pAction);
+	/**
+	* @brief A Qt slot which is called when the user double clicks a function and sends it
+	* to the disassembler
+	* @param pSelectedRow The row on which the user double clicked
+	*
+	* @return no
+	*/
+	void OnSendToDisassembler(QTableWidgetItem *pSelectedRow);
 
 protected:
 	/**
