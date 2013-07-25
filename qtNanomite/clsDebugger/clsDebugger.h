@@ -142,6 +142,10 @@ public:
 	static bool IsOffsetAnBP(quint64 Offset);
 	static bool IsOffsetEIP(quint64 Offset);
 
+	static void SetNewThreadContext(bool isWow64, CONTEXT newProcessContext, WOW64_CONTEXT newWowProcessContext);
+
+	static HANDLE GetProcessHandleByPID(DWORD PID);
+
 	bool StopDebuggingAll();
 	bool StopDebugging(DWORD dwPID);
 	bool SuspendDebuggingAll();
@@ -173,7 +177,6 @@ public:
 	void CustomExceptionRemoveAll();
 
 	HANDLE GetCurrentProcessHandle();
-	static HANDLE GetProcessHandleByPID(DWORD PID);
 
 	std::wstring GetTarget();
 	std::wstring GetCMDLine();

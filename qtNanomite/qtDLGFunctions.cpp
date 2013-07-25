@@ -31,6 +31,7 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 processI
 	tblFunctions->setRowCount(0);
 
 	connect(tblFunctions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
+	connect(tblFunctions,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
 
 	// Init List
 	tblFunctions->horizontalHeader()->resizeSection(0,75);
@@ -167,4 +168,9 @@ void qtDLGFunctions::wheelEvent(QWheelEvent *event)
 		functionScroll->setValue(functionScroll->value() + 1);
 		InsertDataFrom(1);
 	}
+}
+
+void qtDLGFunctions::OnSendToDisassembler(QTableWidgetItem *pSelectedRow)
+{
+	emit ShowInDisAs(tblFunctions->item(pSelectedRow->row(),2)->text().toULongLong(0,16));
 }
