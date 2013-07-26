@@ -26,7 +26,8 @@
 using namespace std;
 
 qtDLGStack::qtDLGStack(QWidget *parent)
-	: QDockWidget(parent)
+	: QDockWidget(parent),
+	m_pCoreDebugger(qtDLGNanomite::GetInstance()->coreDebugger)
 {
 	setupUi(this);
 
@@ -51,9 +52,7 @@ qtDLGStack::~qtDLGStack()
 
 void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 {
-	clsDebugger *coreDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
-
-	if(!coreDebugger->GetDebuggingState())
+	if(!m_pCoreDebugger->GetDebuggingState())
 		return;
 
 	bool bCheckVar = false;
@@ -61,13 +60,13 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 	wstring sFuncName,sModName;
 	LPBYTE bBuffer;
 	PTCHAR sTemp;
-	HANDLE hProcess = coreDebugger->GetCurrentProcessHandle();
+	HANDLE hProcess = m_pCoreDebugger->GetCurrentProcessHandle();
 	DWORD dwOldProtect = NULL,
 		dwNewProtect = PAGE_READWRITE,
 		dwRowCount = (tblStack->verticalHeader()->height() / 11),
 		dwSize = dwRowCount * stackAlign;
-	quint64	dwStartOffset = stackBaseOffset - stackAlign * (dwRowCount / 2),
-		dwEndOffset = stackBaseOffset + stackAlign * (dwRowCount / 2);
+	quint64	dwStartOffset = stackBaseOffset - stackAlign,
+		dwEndOffset = stackBaseOffset + stackAlign * (dwRowCount - 1);
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 		return;
@@ -101,7 +100,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
-		IsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+		IsWow64Process(m_pCoreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
 		if(bIsWOW64)
 			for(int id = 3;id != -1;id--)
@@ -118,7 +117,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 
 		// Comment
 		clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,QString::fromWCharArray(sTemp).toULongLong(0,16),
-			coreDebugger->GetCurrentProcessHandle());
+			m_pCoreDebugger->GetCurrentProcessHandle());
 		if(sFuncName.length() > 0 && sModName.length() > 0)
 			tblStack->setItem(itemIndex - 1,2,
 			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
@@ -136,9 +135,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 void qtDLGStack::OnStackScroll(int iValue)
 {
 	if(iValue == 5) return;
-
-	clsDebugger *coreDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
-
+	
 	DWORD stackAlign = NULL;
 	quint64 dwOffset = NULL;
 	QString strTemp;
@@ -146,34 +143,34 @@ void qtDLGStack::OnStackScroll(int iValue)
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
 	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+		clsAPIImport::pIsWow64Process(m_pCoreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
-	if(bIsWOW64) stackAlign = 4;	
-	else stackAlign = 8;
+	if(bIsWOW64)
+		stackAlign = 4;	
+	else
+		stackAlign = 8;
 #else
 	stackAlign = 4;
 #endif
 
-	if(tblStack->rowCount() > 0)
-		strTemp = tblStack->item(0,0)->text();
-	if(tblStack->rowCount() <= 0 || QString().compare(strTemp,"0") == 0)
+	if(tblStack->rowCount() <= 0)
 #ifdef _AMD64_
-		dwOffset = coreDebugger->ProcessContext.Rsp;
+	{
+		if(bIsWOW64)
+			dwOffset = m_pCoreDebugger->wowProcessContext.Esp;
+		else
+			dwOffset = m_pCoreDebugger->ProcessContext.Rsp;
+	}
 #else
-		dwOffset = coreDebugger->ProcessContext.Esp;
+		dwOffset = m_pCoreDebugger->ProcessContext.Esp;
 #endif
 	else
-		dwOffset = strTemp.toULongLong(0,16);
+		dwOffset = tblStack->item(0,0)->text().toULongLong(0,16);
 
 	if(iValue < 5)
 		LoadStackView(dwOffset,stackAlign);
 	else
-	{
-		if((tblStack->verticalHeader()->height() / 14) % 2)
-			LoadStackView(dwOffset + (stackAlign * (tblStack->verticalHeader()->height() / 14)),stackAlign);
-		else
-			LoadStackView(dwOffset + (stackAlign * ((tblStack->verticalHeader()->height() / 14) + 1)),stackAlign);
-	}
+		LoadStackView(dwOffset + (stackAlign * 2),stackAlign);
 
 	scrollStackView->setValue(5);
 }
@@ -242,4 +239,28 @@ void qtDLGStack::MenuCallback(QAction* pAction)
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblStack->item(m_selectedRow,3)->text());
 	}
+}
+
+void qtDLGStack::resizeEvent(QResizeEvent *event)
+{
+	quint64 dwEIP = NULL;
+#ifdef _AMD64_
+	BOOL bIsWOW64 = false;
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(m_pCoreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+
+	if(bIsWOW64)
+	{
+		dwEIP = m_pCoreDebugger->wowProcessContext.Eip;
+		LoadStackView(m_pCoreDebugger->wowProcessContext.Esp,4);
+	}
+	else
+	{
+		dwEIP = m_pCoreDebugger->ProcessContext.Rip;
+		LoadStackView(m_pCoreDebugger->ProcessContext.Rsp,8);
+	}
+#else
+	dwEIP = m_pCoreDebugger->ProcessContext.Eip;
+	LoadStackView(m_pCoreDebugger->ProcessContext.Esp,4);
+#endif
 }

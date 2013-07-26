@@ -86,6 +86,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 {
 	if(coreDisAs->SectionDisAs.count() > 0 && dwEIP != 0)
 	{
+		m_lastEIP = dwEIP;
 		bool IsAlreadyEIPSet = false;
 		int iLines = 0;
 
@@ -173,8 +174,22 @@ void qtDLGDisassembler::OnDisAsReturnPressed()
 	quint64 dwSelectedVA = NULL;
 	QString tempSelectedString = currentSelectedItems.value(2)->text();
 
-	if(tempSelectedString.contains("ptr") || tempSelectedString.contains("ptr"))
-		dwSelectedVA = tempSelectedString.split(" ")[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16);
+	if(tempSelectedString.contains("ptr"))
+	{
+		QStringList splittedSelectedString = tempSelectedString.split(" ");
+		if(splittedSelectedString[1].compare("qword") == 0)
+		{
+			ReadProcessMemory(coreDebugger->GetCurrentProcessHandle(),
+				(LPVOID)splittedSelectedString[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16),
+				(LPVOID)&dwSelectedVA, sizeof(DWORD64),NULL);
+		}
+		else if(splittedSelectedString[1].compare("dword") == 0)
+		{
+			ReadProcessMemory(coreDebugger->GetCurrentProcessHandle(),
+				(LPVOID)splittedSelectedString[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16),
+				(LPVOID)&dwSelectedVA, sizeof(DWORD),NULL);
+		}
+	}
 	else
 		dwSelectedVA = tempSelectedString.split(" ")[1].replace("h","").toULongLong(0,16);
 
@@ -332,4 +347,9 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 		currentSelectedItems.value(0)->setForeground(QColor("Black"));
 	}	
 	return;
+}
+
+void qtDLGDisassembler::resizeEvent(QResizeEvent *event)
+{
+	OnDisplayDisassembly(m_lastEIP);
 }
