@@ -17,6 +17,8 @@
 #ifndef QTDLGSTACK_H
 #define QTDLGSTACK_H
 
+#include "..\clsDebugger\clsDebugger.h"
+
 #include <Windows.h>
 
 #include <QDockWidget>
@@ -67,6 +69,16 @@ public slots:
 
 private:
 	int m_selectedRow; /* contains the row which the user clicked to open the context menu */
+	clsDebugger *m_pCoreDebugger; /* pointer to the main debugger instance */
+
+	/**
+	* @brief This is triggered when the Widget gets resized to refill the gui with the correct 
+	* data
+	* @param event A pointer to more informations about the event type
+	*
+	* @return no
+	*/
+	void resizeEvent(QResizeEvent *event);
 
 private slots:
 	/**

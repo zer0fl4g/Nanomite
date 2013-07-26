@@ -701,10 +701,54 @@ void clsDebugger::DebuggingLoop()
 									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Memory BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)MemoryBPs[i].dwOffset);
 #endif
 									PBLogInfo();
+
+									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 								}
 							}
-							dwContinueStatus = CallBreakDebugger(&debug_event,0);
+
 						}
+						else
+						{
+							MODULEENTRY32 pModEntry;
+							pModEntry.dwSize = sizeof(MODULEENTRY32);
+							MEMORY_BASIC_INFORMATION mbi;
+
+							quint64 dwAddress = NULL,
+								pageBase = NULL,
+								pageSize = NULL;
+
+							HANDLE processHandle = GetProcessHandleByPID(debug_event.dwProcessId);
+
+							while(VirtualQueryEx(processHandle,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
+							{
+								if((DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress >= (DWORD64)mbi.BaseAddress && (DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
+								{
+									pageSize = mbi.RegionSize; 
+									pageBase = (DWORD64)mbi.BaseAddress;
+									break;
+								}
+
+								dwAddress += mbi.RegionSize;
+							}
+
+							for(size_t i = 0;i < MemoryBPs.size(); i++)
+							{
+								if(MemoryBPs[i].dwOffset <= (pageBase + pageSize) && MemoryBPs[i].dwOffset >= pageBase)
+									bIsBP = true;
+							}
+
+							if(bIsBP)
+							{
+								SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
+								PIDs[iPid].dwBPRestoreFlag = 0x4;
+								PIDs[iPid].bTrapFlag = true;
+
+								dwContinueStatus = CallBreakDebugger(&debug_event,2);
+							}
+							else
+								dwContinueStatus = CallBreakDebugger(&debug_event,0);
+						}
+
 						break;
 					}
 				}

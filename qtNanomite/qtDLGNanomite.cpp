@@ -54,8 +54,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	qRegisterMetaType<BPStruct>("BPStruct");
 	qRegisterMetaType<HANDLE>("HANDLE");
 
-	LoadWidgets();
-	
 	clsAPIImport::LoadFunctions();
 
 	coreDebugger = new clsDebugger;
@@ -71,6 +69,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	qtDLGMyWindow = this;
 	lExceptionCount = 0;
+
+	LoadWidgets();
 
 	settings->CheckIfFirstRun();
 	settings->LoadDebuggerSettings(coreDebugger);
@@ -370,11 +370,6 @@ void qtDLGNanomite::GenerateMenu(bool isAllEnabled)
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(GenerateMenuCallback(QAction*)));
 	menu.addAction(qAction);
 	menu.exec(QCursor::pos());
-}
-
-void qtDLGNanomite::resizeEvent(QResizeEvent *event)
-{
-	OnDebuggerBreak();
 }
 
 void qtDLGNanomite::dragEnterEvent(QDragEnterEvent* pEvent)

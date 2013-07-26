@@ -134,7 +134,6 @@ private:
 
 	static qtDLGNanomite *qtDLGMyWindow;
 
-	void resizeEvent(QResizeEvent *event);
 	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void LoadWidgets();

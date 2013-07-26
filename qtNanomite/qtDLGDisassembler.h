@@ -86,6 +86,10 @@ private:
 
 	int m_iSelectedRow;
 
+	quint64 m_lastEIP;
+
+	void resizeEvent(QResizeEvent *event);
+
 protected:
 	bool eventFilter(QObject *pOpject,QEvent *event);
 };
