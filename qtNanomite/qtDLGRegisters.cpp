@@ -251,12 +251,12 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
 	}
 
-	//for(int i = 0; i < 8; i++)
-	//{
-		// MMX
-		//DWORD64* pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i];
-		//PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX,16,16,QChar('0')));
-	//}
+	if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+		for (int i = 0; i < 8; i++) {
+			DWORD64* pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10];
+			PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX,16,16,QChar('0')));
+		}
+	}
 
 	// EFlags
 	PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,8,16,QChar('0')));
