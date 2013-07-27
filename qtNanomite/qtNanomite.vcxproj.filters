@@ -895,7 +895,6 @@
   <ItemGroup>
     <None Include="..\readme.md" />
     <None Include="..\changelog.md" />
-    <None Include="..\Documentation\codeconvention.md" />
     <None Include="..\Icons\ID_Privileges.ico">
       <Filter>Resource Dateien</Filter>
     </None>

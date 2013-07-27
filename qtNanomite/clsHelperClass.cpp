@@ -131,7 +131,7 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 {
 	size_t	iModPos = NULL,
 			iModLen = NULL;
-	PTCHAR	lpTempString = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+	PTCHAR	lpTempString = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
 	iModLen = wcslen(lpString);
 	if(iModLen > 0)
@@ -149,7 +149,7 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 	}					
 	else
 	{
-		free(lpTempString);
+		clsMemManager::CFree(lpTempString);
 		return NULL;
 	}
 }

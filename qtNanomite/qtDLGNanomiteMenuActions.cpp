@@ -301,7 +301,25 @@ void qtDLGNanomite::action_DebugStepOver()
 	{
 		// jump conditions are set so lets step over jump
 		if(i.value().ASM.contains("ptr"))
-			coreDebugger->StepOver(i.value().ASM.split(" ")[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16));	
+		{
+			quint64 dwSelectedVA = NULL;
+			QStringList splittedSelectedString = i.value().ASM.split(" ");
+			
+			if(splittedSelectedString[1].compare("qword") == 0)
+			{
+				ReadProcessMemory(coreDebugger->GetCurrentProcessHandle(),
+					(LPVOID)splittedSelectedString[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16),
+					(LPVOID)&dwSelectedVA, sizeof(DWORD64),NULL);
+			}
+			else if(splittedSelectedString[1].compare("dword") == 0)
+			{
+				ReadProcessMemory(coreDebugger->GetCurrentProcessHandle(),
+					(LPVOID)splittedSelectedString[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16),
+					(LPVOID)&dwSelectedVA, sizeof(DWORD),NULL);
+			}
+
+			coreDebugger->StepOver(dwSelectedVA);	
+		}
 		else
 			coreDebugger->StepOver(i.value().ASM.split(" ")[1].replace("h","").toULongLong(0,16));
 	}
@@ -334,6 +352,7 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 			CurAddress = NULL;
 	HANDLE	hProcess = coreDebugger->GetCurrentProcessHandle();
 	PTCHAR	lpFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),
+			lpCurrentNameTemp = NULL,
 			lpCurrentName = NULL,
 			lpCurrentFileName = NULL;
 	bool	bWeGotIt = false;
@@ -342,18 +361,18 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 	{
 		if(coreDebugger->PIDs[i].hProc == hProcess)
 		{
-			lpCurrentName = coreDebugger->PIDs[i].sFileName;
+			lpCurrentNameTemp = coreDebugger->PIDs[i].sFileName;
 			break;
 		}
 	}
 
-	if(lpCurrentName == NULL) 
+	if(lpCurrentNameTemp == NULL) 
 	{
 		clsMemManager::CFree(lpFileName);
 		return;
 	}
 
-	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentName,'\\');
+	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentNameTemp,'\\');
 
 	MODULEENTRY32 pModEntry;
 	pModEntry.dwSize = sizeof(MODULEENTRY32);
@@ -380,12 +399,12 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 				{
 					if(bWeGotIt)
 					{
-						free(lpCurrentFileName);
+						clsMemManager::CFree(lpCurrentFileName);
 						break;
 					}
 				}
 
-				free(lpCurrentFileName);
+				clsMemManager::CFree(lpCurrentFileName);
 			}
 		}
 		CurAddress += mbi.RegionSize;
