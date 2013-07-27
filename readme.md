@@ -49,6 +49,7 @@
 + fixed a bug in hardware breakpoints which did not activate them on the current thread
 + fixed a bug where by detaching from a suspended process didn't resume the process
 + fixed a bug which did not handle hardware breakpoints for wow64 targets
++ fixed handling of "call * ptr []" and "jmp * ptr []"
 + fixed some handle leaks
 + added f5 hotkey to attach dialog to reload the processlist
 + added type column in attach dialog
@@ -60,5 +61,7 @@
 + updated nasm to 2.10.09
 + updated file open dialog to remove annoying messagebox for commandline
 + updated the internal pe handling
++ updated resizeevent of Disassembler and Stack
++ updated Stack scroll
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

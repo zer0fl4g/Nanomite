@@ -1815,7 +1815,6 @@
   </ItemGroup>
   <ItemGroup>
     <None Include="..\changelog.md" />
-    <None Include="..\Documentation\codeconvention.md" />
     <None Include="..\Fonts\consola.ttf">
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">true</ExcludedFromBuild>
       <ExcludedFromBuild Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">true</ExcludedFromBuild>

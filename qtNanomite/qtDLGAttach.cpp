@@ -110,6 +110,8 @@ void qtDLGAttach::FillProcessList()
 			} while (Process32Next(hToolSnapShot,&pProcessEntry));
 			free(ProcessFile);
 		}
+
+		CloseHandle(hToolSnapShot);
 	}
 }
 

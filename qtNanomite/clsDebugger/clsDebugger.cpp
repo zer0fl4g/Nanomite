@@ -891,7 +891,10 @@ bool clsDebugger::CheckProcessState(DWORD dwPID)
 
 	do{
 		if(procEntry32.th32ProcessID == dwPID)
+		{
+			CloseHandle(hProcessSnap);
 			return true;
+		}
 	}while(Process32Next(hProcessSnap,&procEntry32));
 
 	CloseHandle(hProcessSnap);
