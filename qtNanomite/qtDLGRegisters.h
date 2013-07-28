@@ -42,6 +42,11 @@ signals:
 	void OnDisplayDisassembly(quint64 dwEIP);
 
 private:
+	typedef struct {
+		DWORD64 low;
+		DWORD64 high;
+	} uint128_t;
+
 	int _iSelectedRow;
 
 	void PrintValueInTable(QString regName, QString regValue);
