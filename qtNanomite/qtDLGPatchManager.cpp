@@ -353,6 +353,7 @@ void qtDLGPatchManager::UpdatePatchTable()
 void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 {
 	bool bThingsChanged = false;
+	quint64 latestPatchOffset = NULL;
 
 	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
@@ -377,7 +378,10 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 			i->hProc = newProc;
 			bThingsChanged = WritePatchToProc(i->hProc,i->Offset,i->PatchSize,i->newData,NULL,true);
 			if(bThingsChanged)
+			{
+				latestPatchOffset = i->Offset;
 				i->bWritten = true;
+			}
 			else
 				i->bWritten = false;
 		}
@@ -386,7 +390,11 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 	if(bThingsChanged)
 	{
 		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		emit pThis->OnReloadDebugger();
+		if(!qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),latestPatchOffset))
+			qtDLGNanomite::GetInstance()->DisAsGUI->OnDisplayDisassembly(latestPatchOffset);
+
+		//qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
+		//emit pThis->OnReloadDebugger();
 	}
 	UpdatePatchTable();
 }

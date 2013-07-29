@@ -365,10 +365,12 @@ void qtDLGNanomite::GenerateMenu(bool isAllEnabled)
 	menu.addSeparator();
 
 	if(isAllEnabled)
+	{
 		qAction = new QAction("All",this);
-	
+		menu.addAction(qAction);
+	}
+
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(GenerateMenuCallback(QAction*)));
-	menu.addAction(qAction);
 	menu.exec(QCursor::pos());
 }
 

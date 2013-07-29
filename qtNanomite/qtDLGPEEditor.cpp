@@ -122,7 +122,8 @@ void qtDLGPEEditor::InsertExports()
 
 	QTreeWidgetItem *topElement,
 					*exportElement;
-	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule((PTCHAR)clsHelperClass::reverseStrip((PTCHAR)m_currentFile.c_str(),'\\'),NULL,m_processID);
+	PTCHAR currentFileBase = clsHelperClass::reverseStrip((PTCHAR)m_currentFile.c_str(),'\\');
+	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule(currentFileBase,NULL,m_processID);
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Exports");
@@ -134,6 +135,8 @@ void qtDLGPEEditor::InsertExports()
 		exportElement->setText(0,exports.at(exportsCount).APIName);
 		exportElement->setText(1,QString("%1").arg(exports.value(exportsCount).APIOffset + moduleBase,16,16,QChar('0')));  
 	}
+
+	clsMemManager::CFree(currentFileBase);
 }
 
 void qtDLGPEEditor::InsertDosHeader()
