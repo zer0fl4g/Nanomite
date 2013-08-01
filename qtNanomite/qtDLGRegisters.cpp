@@ -164,33 +164,31 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->wowProcessContext.SegFs,16,16,QChar('0')));
 		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->wowProcessContext.SegGs,16,16,QChar('0')));
 		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->wowProcessContext.SegSs,16,16,QChar('0')));
-
-		double value;		
+						
 		for (int i = 0; i < 8; i++) {
-			value = readFloat80(&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10]);
+			double value = readFloat80(&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10]);
 			PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
 		}
 		
-		// correspond to http://maximumcrack.wordpress.com/2011/08/07/fpu-mmx-xmm-and-bbq/ i do not
-		// need to use something like wowProcessContext
 		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
 			DWORD64* pMMX;
 			for (int i = 0; i < 8; i++) {
-				pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10];
-				PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX, 16, 16, QChar('0')));
+				pMMX = (DWORD64*)&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10];
+				PrintValueInTable(QString("MMX%1").arg(i), QString("%1").arg(*pMMX, 16, 16, QChar('0')));
 			}
 		}
 
 		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
 			uint128_t *pXMM;
 			for (int i = 0; i < 8; i++) {
-				pXMM = (uint128_t*)&coreDebugger->ProcessContext.ExtendedRegisters[(10 + i) * 16];
-				PrintValueInTable(QString("XMM%1").arg(i), QString("%1 %2").arg((*pXMM).low, 16, 16, QChar('0')).arg((*pXMM).high, 16, 16, QChar('0')));
+				pXMM = (uint128_t*)&coreDebugger->wowProcessContext.ExtendedRegisters[(10 + i) * 16];
+				PrintValueInTable(	QString("XMM%1").arg(i), 
+									QString("%1 %2").arg((*pXMM).low, 16, 16, QChar('0')).arg((*pXMM).high, 16, 16, QChar('0')));
 			}		
 		}
 
 		// EFlags
-		PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->wowProcessContext.EFlags,16,16,QChar('0')));
+		PrintValueInTable("EFlags", QString("%1").arg(coreDebugger->wowProcessContext.EFlags, 16, 16, QChar('0')));
 	}
 	else
 	{
@@ -219,27 +217,25 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->ProcessContext.SegFs,16,16,QChar('0')));
 		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,16,16,QChar('0')));
 		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,16,16,QChar('0')));
-
-		double value;		
+						
 		for (int i = 0; i < 8; i++) {
-			value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
-			PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
+			PrintValueInTable(	QString("ST(%1)").arg(i),
+								QString("%1 %2").arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16,QChar('0'))
+												.arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].High, 16, 16, QChar('0')));
 		}
 
 		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
-			DWORD64* pMMX;
 			for (int i = 0; i < 8; i++) {
-				pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10];
-				PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX, 16, 16, QChar('0')));
+				PrintValueInTable(	QString("MMX%1").arg(i),
+									QString("%1").arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16, QChar('0')));
 			}
 		}
 
 		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
 			for(int i = 0; i < 16; i++) {
-				DWORD64 MMX_LOW = coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low;
-				DWORD64 MMX_HIGH = coreDebugger->ProcessContext.FltSave.FloatRegisters[i].High;
-
-				PrintValueInTable(QString("XMM%1").arg(i),QString("%1 %2").arg(MMX_LOW, 16, 16,QChar('0')).arg(MMX_HIGH, 16, 16, QChar('0')));
+				PrintValueInTable(	QString("XMM%1").arg(i), 
+									QString("%1 %2").arg(coreDebugger->ProcessContext.FltSave.XmmRegisters[i].Low, 16, 16,QChar('0'))
+													.arg(coreDebugger->ProcessContext.FltSave.XmmRegisters[i].High, 16, 16, QChar('0')));
 			}
 		}
 
@@ -265,10 +261,9 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,8,16,QChar('0')));
 	PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,8,16,QChar('0')));
 
-	double value;
 	for (int i = 0; i < 8; i++) {
-		value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
-		PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
+		double value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
+		PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));	
 	}
 
 	if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
@@ -327,7 +322,7 @@ void qtDLGRegisters::PrintValueInTable(QString regName, QString regValue)
 	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(regValue));
 }
 
-// FIXME: maybe rewrite this function, because it was taken from some link in internet
+// FIXME: maybe rewrite this function
 double qtDLGRegisters::readFloat80(const uint8_t buffer[10]) 
 {
 	 //80 bit floating point value according to IEEE-754:
