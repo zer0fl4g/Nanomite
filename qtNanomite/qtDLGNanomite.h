@@ -87,6 +87,9 @@ public:
 	qtDLGNanomite(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGNanomite();
 
+public slots:
+	void UpdateStateBar(int actionType, quint64 stepCount = 0);
+
 private slots:
 	void action_FileOpenNewFile();
 	void action_FileAttachTo();
@@ -120,7 +123,6 @@ private slots:
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();
 		
-	void UpdateStateBar(int actionType, quint64 stepCount = 0);
 	void AskForException(DWORD exceptionCode);
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();

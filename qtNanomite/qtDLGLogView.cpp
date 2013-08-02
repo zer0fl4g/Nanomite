@@ -26,8 +26,6 @@
 #include <QFileDialog>
 #include <QMenu>
 
-using namespace std;
-
 qtDLGLogView::qtDLGLogView(QWidget *parent)
 	: QDockWidget(parent)
 {
@@ -52,8 +50,7 @@ void qtDLGLogView::OnContextMenu(QPoint qPoint)
 
 	m_selectedRow = tblLogBox->indexAt(qPoint).row();
 	if(m_selectedRow < 0) return;
-
-
+	
 	menu.addAction(new QAction("Clear Log",this));
 	menu.addAction(new QAction("Write Log to File",this));
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
@@ -103,7 +100,7 @@ void qtDLGLogView::MenuCallback(QAction* pAction)
 	}
 }
 
-void qtDLGLogView::OnLog(wstring logString)
+void qtDLGLogView::OnLog(QString logString)
 {
 	time_t tTime;
 	tm timeInfo;
@@ -116,7 +113,12 @@ void qtDLGLogView::OnLog(wstring logString)
 		new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec)));
 	
 	tblLogBox->setItem(tblLogBox->rowCount() - 1,1,
-		new QTableWidgetItem(QString::fromStdWString(logString)));
+		new QTableWidgetItem(logString));
 	
 	tblLogBox->scrollToBottom();
+}
+
+void qtDLGLogView::OnLog(std::wstring logString)
+{
+	OnLog(QString::fromStdWString(logString));
 }
