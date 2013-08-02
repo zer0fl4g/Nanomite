@@ -49,9 +49,11 @@
 + fixed a bug in hardware breakpoints which did not activate them on the current thread
 + fixed a bug where by detaching from a suspended process didn't resume the process
 + fixed a bug which did not handle hardware breakpoints for wow64 targets
++ fixed a bug which showed a wrong menu if child processes where present in the debugging session
++ fixed a bug which reloaded the disassembler to the wrong offset after adding a new patch
 + fixed handling of "call * ptr []" and "jmp * ptr []"
 + fixed some handle leaks
-+ added f5 hotkey to attach dialog to reload the processlist
++ added f5 hotkey on attach dialog to reload the processlist
 + added type column in attach dialog
 + added state update when doing a trace
 + added trace to selected disassembly line

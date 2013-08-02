@@ -36,7 +36,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	pThis = this;
 	
 	m_statusBarTimer = new QTimer(this);
-	m_statusBarTimer->setInterval(2000);
+	m_statusBarTimer->setInterval(1000);
 	m_statusBarTimer->stop();
 
 	tblTraceLog->horizontalHeader()->resizeSection(0,80); //PID
@@ -189,7 +189,7 @@ void qtDLGTrace::MenuCallback(QAction* pAction)
 void qtDLGTrace::OnUpdateStatusBar()
 {
 	quint64 temp = m_traceData.size();
-	m_stepsDoneInSecond =  (temp - m_prevStepsDone) / 2;
+	m_stepsDoneInSecond =  (temp - m_prevStepsDone);
 	m_prevStepsDone = temp;
 
 	emit OnUpdateStatusBar(4,m_stepsDoneInSecond);

@@ -17,9 +17,10 @@
 #ifndef QTDLGLOGVIEW_H
 #define QTDLGLOGVIEW_H
 
-#include <string>
-
 #include <QDockWidget>
+#include <QString>
+
+#include <string>
 
 #include "ui_qtDLGLogView.h"
 
@@ -45,6 +46,14 @@ public:
 	* @return no
 	*/
 	~qtDLGLogView();
+
+	/**
+	* @brief Is called from the OnLog Slot or if some message directly needs to be displayed
+	* @param logString The line which will be saved to gui
+	* 
+	* @return no
+	*/
+	void OnLog(QString logString);
 
 public slots:
 	/**
