@@ -87,6 +87,7 @@
     <addaction name="actionFile_Detach"/>
     <addaction name="separator"/>
     <addaction name="actionFile_Exit"/>
+    <addaction name="separator"/>
    </widget>
    <widget class="QMenu" name="menuDebug">
     <property name="sizePolicy">

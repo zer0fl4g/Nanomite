@@ -138,7 +138,8 @@ void clsAppSettings::SaveDefaultJITDebugger(QString savedJIT)
 void clsAppSettings::LoadDebuggerSettings(clsDebugger *pDebugger)
 {
 	readWriteMutex->lockInline();
-
+	
+	userSettings->sync();
 	pDebugger->dbgSettings.bDebugChilds = userSettings->value("DebugChilds").toBool();
 	pDebugger->dbgSettings.bAutoLoadSymbols = userSettings->value("AutoLoadSym").toBool();
 	pDebugger->dbgSettings.bBreakOnNewDLL = userSettings->value("BreakOnNewDLL").toBool();
@@ -166,7 +167,6 @@ void clsAppSettings::LoadDebuggerSettings(clsDebugger *pDebugger)
 		exceptionString = userSettings->value(QString("EXCEPTION%1").arg(i)).toString();
 	}
 
-	userSettings->sync();
 	readWriteMutex->unlockInline();
 }
 
@@ -174,6 +174,7 @@ void clsAppSettings::LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisass
 {
 	readWriteMutex->lockInline();
 
+	userSettings->sync();
 	pDisassemlberColor->colorBP = userSettings->value("COLOR_BP").toString();
 	pDisassemlberColor->colorCall = userSettings->value("COLOR_CALL").toString();
 	pDisassemlberColor->colorJump = userSettings->value("COLOR_JUMP").toString();
@@ -181,7 +182,6 @@ void clsAppSettings::LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisass
 	pDisassemlberColor->colorStack = userSettings->value("COLOR_STACK").toString();
 	pDisassemlberColor->colorMath = userSettings->value("COLOR_MATH").toString();
 
-	userSettings->sync();
 	readWriteMutex->unlockInline();
 }
 
@@ -189,9 +189,9 @@ void clsAppSettings::LoadDefaultJITDebugger(QString& savedJIT)
 {
 	readWriteMutex->lockInline();
 
+	userSettings->sync();
 	savedJIT = userSettings->value("defaultJIT").toString();
 
-	userSettings->sync();
 	readWriteMutex->unlockInline();
 }
 
@@ -263,7 +263,38 @@ void clsAppSettings::WriteDefaultSettings()
 		exceptionString = userSettings->value(QString("EXCEPTION%1").arg(i)).toString();
 	}
 
+	for(int i = 0; i < 5; i++)
+	{
+		userSettings->setValue(QString("RECENTFILE%1").arg(i),"");
+	}
+
 	userSettings->sync();
 	//readWriteMutex->unlockInline();
 	return;
+}
+
+void clsAppSettings::SaveRecentDebuggedFiles(QStringList recentDebuggedFiles)
+{
+	readWriteMutex->lockInline();
+
+	for(int i = 0; i < 5; i++)
+	{
+		userSettings->setValue(QString("RECENTFILE%1").arg(i), recentDebuggedFiles.value(i));
+	}
+
+	userSettings->sync();
+	readWriteMutex->unlockInline();
+}
+
+void clsAppSettings::LoadRecentDebuggedFiles(QStringList &recentDebuggedFiles)
+{
+	readWriteMutex->lockInline();
+
+	userSettings->sync();
+	for(int i = 0; i < 5; i++)
+	{
+		recentDebuggedFiles.append(userSettings->value(QString("RECENTFILE%1").arg(i)).toString());
+	}
+
+	readWriteMutex->unlockInline();
 }

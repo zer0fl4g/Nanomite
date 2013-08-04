@@ -56,24 +56,8 @@ clsDebugger::clsDebugger()
 	pThis = this;
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
 	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
-}
 
-clsDebugger::clsDebugger(wstring sTarget)
-{
-	ZeroMemory(&_si, sizeof(_si));
-	_si.cb = sizeof(_si);
-	ZeroMemory(&_pi, sizeof(_pi));
-
-	_sTarget = sTarget;
-	_NormalDebugging = true;
-	_isDebugging = false;
-	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
-	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false,false};
-	dbgSettings = tempSet;
-	pThis = this;
-	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
-	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
+	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
 }
 
 clsDebugger::~clsDebugger()

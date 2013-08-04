@@ -168,7 +168,7 @@ void qtDLGCallstack::OnCallStack(quint64 stackAddress,
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
 			new QTableWidgetItem(QString::fromStdWString(currentModuleName).append(".").append(QString("%1").arg(currentOffset,16,16,QChar('0')))));
 	else
-		tblCallstack->setItem(tblCallstack->rowCount() - 1,24,
+		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
 			new QTableWidgetItem(""));
 
 	// Return To

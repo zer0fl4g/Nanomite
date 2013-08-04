@@ -136,7 +136,6 @@ public:
 	clsDebuggerSettings dbgSettings;
 
 	clsDebugger();
-	clsDebugger(std::wstring sTarget);
 	~clsDebugger();
 
 	static bool IsOffsetAnBP(quint64 Offset);

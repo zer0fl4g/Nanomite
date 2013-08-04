@@ -15,6 +15,7 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <QShortcut>
+#include <QClipboard>
 
 #include "qtDLGNanomite.h"
 #include "qtDLGRegEdit.h"
@@ -29,8 +30,6 @@
 #include "clsMemManager.h"
 
 #include <Psapi.h>
-
-#include <QClipboard>
 
 using namespace std;
 
@@ -75,6 +74,10 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	settings->CheckIfFirstRun();
 	settings->LoadDebuggerSettings(coreDebugger);
 	settings->LoadDisassemblerColor(qtNanomiteDisAsColor);
+	settings->LoadRecentDebuggedFiles(m_recentDebuggedFiles);
+	
+	m_pRecentFiles = new QMenu(menuFile);
+	LoadRecentFileMenu();
 
 	DisAsGUI = new qtDLGDisassembler(this);
 	this->setCentralWidget(DisAsGUI);
@@ -170,6 +173,7 @@ qtDLGNanomite::~qtDLGNanomite()
 {
 	settings->SaveDebuggerSettings(coreDebugger);
 	settings->SaveDisassemblerColor(qtNanomiteDisAsColor);
+	settings->SaveRecentDebuggedFiles(m_recentDebuggedFiles);
 
 	delete coreDebugger;
 	delete coreDisAs;
@@ -187,6 +191,7 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete stackView;
 	delete logView;
 	delete DisAsGUI;
+	delete m_pRecentFiles;
 }
 
 qtDLGNanomite* qtDLGNanomite::GetInstance()
@@ -336,7 +341,8 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	this->setWindowTitle(QString("[Nanomite v 0.1]"));
 	qtDLGTrace::disableStatusBarTimer();
 	UpdateStateBar(STATE_TERMINATE);
-	
+	LoadRecentFileMenu();
+
 	if(m_IsRestart)
 	{
 		m_IsRestart = false;
@@ -459,4 +465,41 @@ void qtDLGNanomite::AskForException(DWORD exceptionCode)
 	connect(newException,SIGNAL(ContinueException(int)),coreDebugger,SLOT(HandleForException(int)),Qt::QueuedConnection);
 
 	newException->exec();
+}
+
+void qtDLGNanomite::LoadRecentFileMenu()
+{
+	delete m_pRecentFiles;
+	m_pRecentFiles = new QMenu(menuFile);
+	m_pRecentFiles->setTitle("Recent Files");
+
+	for(int i = 0; i < 5; i++)
+	{
+		if(m_recentDebuggedFiles.value(i).length() > 0)
+			m_pRecentFiles->addAction(new QAction(m_recentDebuggedFiles.value(i),this));
+	}
+
+	menuFile->addMenu(m_pRecentFiles);
+	connect(m_pRecentFiles,SIGNAL(triggered(QAction*)),this,SLOT(DebugRecentFile(QAction*)));
+}
+
+void qtDLGNanomite::DebugRecentFile(QAction *qAction)
+{
+	coreDebugger->SetTarget(qAction->text().toStdWString());
+	action_DebugStart();
+}
+
+void qtDLGNanomite::InsertRecentDebuggedFile(QString fileName)
+{
+	QStringList tempFileList;
+
+	tempFileList.append(fileName);
+
+	for(int i = 0; i < 4; i++)
+	{
+		if(!m_recentDebuggedFiles.value(i).contains(fileName))
+			tempFileList.append(m_recentDebuggedFiles.value(i));
+	}
+
+	m_recentDebuggedFiles = tempFileList;
 }

@@ -66,10 +66,10 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 
 	IMAGEHLP_MODULEW64 imgMod = {0};
 	imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
-	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
-	memset(pSymbol, 0, sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
+	memset(pSymbol, 0, sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
 	pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
-	pSymbol->MaxNameLen = MAX_SYM_NAME;
+	pSymbol->MaxNameLen = MAX_PATH;
 	quint64 dwDisplacement;
 
 	bTest = SymGetModuleInfoW64(hProc,dwOffset,&imgMod);

@@ -209,7 +209,7 @@ bool clsDebugger::ShowCallStack()
 		return false;
 
 	HANDLE hProc,hThread = OpenThread(THREAD_GETSET_CONTEXT,false,_dwCurTID);
-	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
 	DWORD dwMaschineMode = NULL;
 	LPVOID pContext;
 	STACKFRAME64 stackFr = {0};
@@ -298,9 +298,9 @@ bool clsDebugger::ShowCallStack()
 
 		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
 		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
-		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
 		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
-		pSymbol->MaxNameLen = MAX_SYM_NAME;
+		pSymbol->MaxNameLen = MAX_PATH;
 
 		bSuccess = SymGetModuleInfoW64(hProc,dwEIP,&imgMod);
 		bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
@@ -310,9 +310,9 @@ bool clsDebugger::ShowCallStack()
 
 		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
 		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
-		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME);
+		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
 		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
-		pSymbol->MaxNameLen = MAX_SYM_NAME;
+		pSymbol->MaxNameLen = MAX_PATH;
 
 		bSuccess = SymGetModuleInfoW64(hProc,dwReturnTo,&imgMod);
 		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);

@@ -111,7 +111,7 @@ void* clsMemManager::CAlloc(size_t ulSize)
   
     HANDLE	hProc = GetCurrentProcess(),
 			hThread = GetCurrentThread(); 
-    PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)pThis->Alloc(sizeof(SYMBOL_INFOW) + MAX_SYM_NAME); 
+    PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)pThis->Alloc(sizeof(SYMBOL_INFOW) + MAX_PATH * 2); 
 #ifdef _AMD64_
     DWORD dwMaschineMode = IMAGE_FILE_MACHINE_AMD64; 
 #else
@@ -130,6 +130,7 @@ void* clsMemManager::CAlloc(size_t ulSize)
     quint64 dwReturnTo, 
         dwEIP, 
         dwDisplacement; 
+	SymSetOptions(SYMOPT_DEFERRED_LOADS);
     BOOL bSuccess = SymInitialize(hProc,NULL,true); 
   
     CONTEXT context; 
@@ -159,9 +160,9 @@ void* clsMemManager::CAlloc(size_t ulSize)
   
         memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64)); 
         imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64); 
-        memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_SYM_NAME); 
+        memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_PATH * 2); 
         pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW); 
-        pSymbol->MaxNameLen = MAX_SYM_NAME; 
+        pSymbol->MaxNameLen = MAX_PATH;
   
         bSuccess = SymGetModuleInfoW64(hProc,dwEIP,&imgMod); 
         bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol); 

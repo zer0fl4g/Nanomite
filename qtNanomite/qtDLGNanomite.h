@@ -127,10 +127,15 @@ private slots:
 	void OnDebuggerBreak();
 	void OnDebuggerTerminated();
 	void GenerateMenuCallback(QAction *qAction);
+	void DebugRecentFile(QAction *qAction);
 
 private:
 	int m_iMenuProcessID;
 	int m_iSelectedRow;
+
+	QMenu *m_pRecentFiles;
+
+	QStringList m_recentDebuggedFiles;
 
 	bool m_IsRestart;
 
@@ -139,7 +144,9 @@ private:
 	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void LoadWidgets();
+	void LoadRecentFileMenu();
 	void ParseCommandLineArgs();
+	void InsertRecentDebuggedFile(QString fileName);
 
 protected:
 	void dragEnterEvent(QDragEnterEvent* pEvent);
