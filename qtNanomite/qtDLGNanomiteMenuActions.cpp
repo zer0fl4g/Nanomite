@@ -128,6 +128,7 @@ void qtDLGNanomite::action_DebugStart()
 			return;
 		}
 		
+		InsertRecentDebuggedFile(QString::fromStdWString(coreDebugger->GetTarget()));
 		coreDebugger->start();
 
 		UpdateStateBar(STATE_RUN);
@@ -158,6 +159,7 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 
 		qtDLGPatchManager::ClearAllPatches();
 
+		InsertRecentDebuggedFile(FilePath);
 		coreDebugger->SetTarget(filePath);
 		coreDebugger->AttachToProcess(iPID);
 		coreDebugger->start();

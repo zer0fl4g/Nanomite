@@ -42,6 +42,8 @@ public:
 	void LoadDefaultJITDebugger(QString& savedJIT);
 	void WriteDefaultSettings();
 	void CheckIfFirstRun();
+	void SaveRecentDebuggedFiles(QStringList recentDebuggedFiles);
+	void LoadRecentDebuggedFiles(QStringList &recentDebuggedFiles);
 
 	static clsAppSettings* SharedInstance();
 
