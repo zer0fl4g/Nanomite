@@ -24,6 +24,9 @@
 #include <QClipboard>
 #include <QMenu>
 
+#include <cmath>
+#include <limits>
+
 qtDLGRegisters::qtDLGRegisters(QWidget *parent)
 	: QDockWidget(parent)
 {
@@ -161,16 +164,31 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->wowProcessContext.SegFs,16,16,QChar('0')));
 		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->wowProcessContext.SegGs,16,16,QChar('0')));
 		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->wowProcessContext.SegSs,16,16,QChar('0')));
+						
+		for (int i = 0; i < 8; i++) {
+			double value = readFloat80(&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10]);
+			PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));
+		}
+		
+		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+			DWORD64* pMMX;
+			for (int i = 0; i < 8; i++) {
+				pMMX = (DWORD64*)&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10];
+				PrintValueInTable(QString("MMX%1").arg(i), QString("%1").arg(*pMMX, 16, 16, QChar('0')));
+			}
+		}
 
-		//for(int i = 0; i < 8; i++)
-		//{
-		//	// MMX
-		//	DWORD64* pMMX = (DWORD64*)&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i];
-		//	PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX,16,16,QChar('0')));
-		//}
+		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
+			uint128_t *pXMM;
+			for (int i = 0; i < 8; i++) {
+				pXMM = (uint128_t*)&coreDebugger->wowProcessContext.ExtendedRegisters[(10 + i) * 16];
+				PrintValueInTable(	QString("XMM%1").arg(i), 
+									QString("%1 %2").arg((*pXMM).low, 16, 16, QChar('0')).arg((*pXMM).high, 16, 16, QChar('0')));
+			}		
+		}
 
 		// EFlags
-		PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->wowProcessContext.EFlags,16,16,QChar('0')));
+		PrintValueInTable("EFlags", QString("%1").arg(coreDebugger->wowProcessContext.EFlags, 16, 16, QChar('0')));
 	}
 	else
 	{
@@ -199,15 +217,27 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		PrintValueInTable("SegFs",QString("%1").arg(coreDebugger->ProcessContext.SegFs,16,16,QChar('0')));
 		PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,16,16,QChar('0')));
 		PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,16,16,QChar('0')));
+						
+		for (int i = 0; i < 8; i++) {
+			PrintValueInTable(	QString("ST(%1)").arg(i),
+								QString("%1 %2").arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16,QChar('0'))
+												.arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].High, 16, 16, QChar('0')));
+		}
 
-		//for(int i = 0; i < 8; i++)
-		//{
-		//	// MMX
-		//	DWORD64 MMX_LOW = coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low;
-		//	DWORD64 MMX_HIGH = coreDebugger->ProcessContext.FltSave.FloatRegisters[i].High;
+		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+			for (int i = 0; i < 8; i++) {
+				PrintValueInTable(	QString("MMX%1").arg(i),
+									QString("%1").arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16, QChar('0')));
+			}
+		}
 
-		//	PrintValueInTable(QString("MMX%1").arg(i),QString("%1 %2").arg(MMX_LOW,16,16,QChar('0')).arg(MMX_HIGH,16,16,QChar('0')));
-		//}
+		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
+			for(int i = 0; i < 16; i++) {
+				PrintValueInTable(	QString("XMM%1").arg(i), 
+									QString("%1 %2").arg(coreDebugger->ProcessContext.FltSave.XmmRegisters[i].Low, 16, 16,QChar('0'))
+													.arg(coreDebugger->ProcessContext.FltSave.XmmRegisters[i].High, 16, 16, QChar('0')));
+			}
+		}
 
 		// EFlags
 		PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0')));
@@ -231,12 +261,26 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	PrintValueInTable("SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,8,16,QChar('0')));
 	PrintValueInTable("SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,8,16,QChar('0')));
 
-	//for(int i = 0; i < 8; i++)
-	//{
-		// MMX
-		//DWORD64* pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i];
-		//PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX,16,16,QChar('0')));
-	//}
+	for (int i = 0; i < 8; i++) {
+		double value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
+		PrintValueInTable(QString("ST(%1)").arg(i), QString("%1").arg(value));	
+	}
+
+	if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+		DWORD64* pMMX;
+		for (int i = 0; i < 8; i++) {
+			pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10];
+			PrintValueInTable(QString("MMX%1").arg(i),QString("%1").arg(*pMMX, 16, 16, QChar('0')));
+		}
+	}
+
+	if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
+		uint128_t *pXMM;
+		for (int i = 0; i < 8; i++) {
+			pXMM = (uint128_t*)&coreDebugger->ProcessContext.ExtendedRegisters[(10 + i) * 16];
+			PrintValueInTable(QString("XMM%1").arg(i), QString("%1 %2").arg((*pXMM).low, 16, 16, QChar('0')).arg((*pXMM).high, 16, 16, QChar('0')));
+		}		
+	}
 
 	// EFlags
 	PrintValueInTable("EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,8,16,QChar('0')));
@@ -276,4 +320,52 @@ void qtDLGRegisters::PrintValueInTable(QString regName, QString regValue)
 	tblRegView->insertRow(tblRegView->rowCount());
 	tblRegView->setItem(tblRegView->rowCount() - 1,0,new QTableWidgetItem(regName));
 	tblRegView->setItem(tblRegView->rowCount() - 1,1,new QTableWidgetItem(regValue));
+}
+
+// FIXME: maybe rewrite this function
+double qtDLGRegisters::readFloat80(const uint8_t buffer[10]) 
+{
+	 //80 bit floating point value according to IEEE-754:
+    //1 bit sign, 15 bit exponent, 64 bit mantissa
+
+    const uint16_t SIGNBIT    = 1 << 15;
+    const uint16_t EXP_BIAS   = (1 << 14) - 1; // 2^(n-1) - 1 = 16383
+    const uint16_t SPECIALEXP = (1 << 15) - 1; // all bits set
+    const uint64_t HIGHBIT    = (uint64_t)1 << 63;
+    const uint64_t QUIETBIT   = (uint64_t)1 << 62;
+
+    // Extract sign, exponent and mantissa
+    uint16_t exponent = *((uint16_t*)&buffer[8]);
+    uint64_t mantissa = *((uint64_t*)&buffer[0]);
+
+    double sign = (exponent & SIGNBIT) ? -1.0 : 1.0;
+    exponent   &= ~SIGNBIT;
+
+    // Check for undefined values
+    if((!exponent && (mantissa & HIGHBIT)) || (exponent && !(mantissa & HIGHBIT))) {
+        return std::numeric_limits<double>::quiet_NaN();
+    }
+
+    // Check for special values (infinity, NaN)
+    if(exponent == 0) {
+        if(mantissa == 0) {
+            return sign * 0.0;
+        } else {
+            // denormalized
+        }
+    } else if(exponent == SPECIALEXP) {
+        if(!(mantissa & ~HIGHBIT)) {
+            return sign * std::numeric_limits<double>::infinity();
+        } else {
+            if(mantissa & QUIETBIT) {
+                return std::numeric_limits<double>::quiet_NaN();
+            } else {
+                return std::numeric_limits<double>::signaling_NaN();
+            }
+        }
+    }
+
+    //value = (-1)^s * (m / 2^63) * 2^(e - 16383)
+    double significand = ((double)mantissa / ((uint64_t)1 << 63));
+    return sign * ldexp(significand, exponent - EXP_BIAS);
 }

@@ -23,6 +23,8 @@
 
 #include "ui_qtDLGRegisters.h"
 
+#include <stdint.h>
+
 class qtDLGRegisters : public QDockWidget, public Ui_qtDLGRegisters
 {
 	Q_OBJECT
@@ -40,9 +42,15 @@ signals:
 	void OnDisplayDisassembly(quint64 dwEIP);
 
 private:
+	typedef struct {
+		DWORD64 low;
+		DWORD64 high;
+	} uint128_t;
+
 	int m_iSelectedRow;
 
 	void PrintValueInTable(QString regName, QString regValue);
+	double readFloat80(const uint8_t buffer[10]);
 
 private slots:
 	void OnContextMenu(QPoint);
