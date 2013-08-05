@@ -22,11 +22,15 @@
 
 using namespace std;
 
+qtDLGBreakPointManager *qtDLGBreakPointManager::pThis = NULL;
+
 qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
+
+	pThis = this;
 
 	// List BP Manager
 	tblBPs->horizontalHeader()->resizeSection(0,75);
@@ -253,4 +257,9 @@ void qtDLGBreakPointManager::OnDelete(quint64 breakpointOffset)
 			i = 0;
 		}
 	}
+}
+
+QStringList qtDLGBreakPointManager::ReturnCompleterList()
+{
+	return pThis->m_completerList;
 }

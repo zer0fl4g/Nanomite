@@ -144,7 +144,7 @@ private:
 	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void LoadWidgets();
-	void LoadRecentFileMenu();
+	void LoadRecentFileMenu(bool isFirstLoad = false);
 	void ParseCommandLineArgs();
 	void InsertRecentDebuggedFile(QString fileName);
 

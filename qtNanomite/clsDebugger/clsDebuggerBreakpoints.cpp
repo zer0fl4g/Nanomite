@@ -322,13 +322,13 @@ bool clsDebugger::InitBP()
 bool clsDebugger::RemoveBPs()
 {
 	for(size_t i = 0; i < SoftwareBPs.size(); i++)
-		RemoveBPFromList(SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwTypeFlag);
+		RemoveBPFromList(SoftwareBPs[i].dwOffset,0);
 
 	for(size_t i = 0; i < MemoryBPs.size(); i++)
-		RemoveBPFromList(MemoryBPs[i].dwOffset,MemoryBPs[i].dwTypeFlag);
+		RemoveBPFromList(MemoryBPs[i].dwOffset,1);
 
 	for(size_t i = 0; i < HardwareBPs.size(); i++)	
-		RemoveBPFromList(HardwareBPs[i].dwOffset,HardwareBPs[i].dwTypeFlag);
+		RemoveBPFromList(HardwareBPs[i].dwOffset,2);
 
 	SoftwareBPs.clear();
 	HardwareBPs.clear();

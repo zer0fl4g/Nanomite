@@ -52,18 +52,27 @@
 + fixed a bug which showed a wrong menu if child processes where present in the debugging session
 + fixed a bug which reloaded the disassembler to the wrong offset after adding a new patch
 + fixed handling of "call * ptr []" and "jmp * ptr []"
-+ fixed some handle leaks
-+ added f5 hotkey on attach dialog to reload the processlist
++ fixed some handle and memory leaks
++ added saving of input in goto dialog 
++ added support of functions in goto dialog
++ added different hotkeys see notes for more details
 + added type column in attach dialog
 + added state update when doing a trace
 + added trace to selected disassembly line
-+ added toggle breakpoint on selected disassembly line
-+ added double click event in function widget to view function in disassembler
++ added toggle breakpoint on selected disassembly line to context menu
 + updated to qt 4.8.5
 + updated nasm to 2.10.09
 + updated file open dialog to remove annoying messagebox for commandline
 + updated the internal pe handling
 + updated resizeevent of Disassembler and Stack
 + updated Stack scroll
+
+####Notes:
+	- function in the goto dialog should look like this: "module::function"
+	  e.g KERNEL32::IsDebuggerPresent
+	- added hotkeys:
+		- "escape" to assembler and goto dialog to close the window
+		- "f5" to attach dialog to reload the processlist
+		- "double click" in function widget to view a function in diassembler
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

@@ -17,6 +17,7 @@
 #include "qtDLGDisassembler.h"
 #include "qtDLGAssembler.h"
 #include "qtDLGNanomite.h"
+#include "qtDLGGoToDialog.h"
 
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
@@ -46,7 +47,7 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	
 	// eventFilter for mouse scroll
 	tblDisAs->installEventFilter(this);
-    tblDisAs->viewport()->installEventFilter(this);
+	tblDisAs->viewport()->installEventFilter(this);
 	
 	// List DisAs
 	tblDisAs->horizontalHeader()->resizeSection(0,135);
@@ -214,7 +215,7 @@ bool qtDLGDisassembler::eventFilter(QObject *pObject, QEvent *event)
 		QWheelEvent *pWheel = (QWheelEvent*)event;
 		
 		OnDisAsScroll(pWheel->delta() * -1);
-			return true;
+		return true;
 	}
 	return false;
 }
@@ -235,7 +236,7 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 
 	menu.addMenu(submenu);
 	menu.addAction(new QAction("Edit Instruction",this));	
-	menu.addAction(new QAction("Goto Offset",this));
+	menu.addAction(new QAction("Goto Offset / Function",this));
 	menu.addAction(new QAction("Set R/EIP to this",this));
 	menu.addAction(new QAction("Show Source",this));	
 	menu.addAction(new QAction("Toggle SW Breakpoint", this));
@@ -282,14 +283,35 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
 		dlgAssembler->show();
 	}
-	else if(QString().compare(pAction->text(),"Goto Offset") == 0)
+	else if(QString().compare(pAction->text(),"Goto Offset / Function") == 0)
 	{
-		bool bOk = false;
-		QString strNewOffset = QInputDialog::getText(this,"Please give a Offset:","VA:",QLineEdit::Normal,NULL,&bOk);
+		QString searchedOffset;
 
-		if(bOk && !strNewOffset.isEmpty())
-			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),strNewOffset.toULongLong(0,16)))
-				OnDisplayDisassembly(strNewOffset.toULongLong(0,16));		
+		qtDLGGoToDialog newGoToDLG(&searchedOffset, m_searchedOffsetList, this, Qt::Window);
+		newGoToDLG.exec();
+
+		if(!searchedOffset.isEmpty())
+		{
+			if(searchedOffset.contains("::"))
+			{
+				QStringList SplitAPIList = searchedOffset.split("::");
+
+				if(SplitAPIList.count() >= 2)
+				{
+					quint64 dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,coreDebugger->GetCurrentPID());
+					dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[0],SplitAPIList[1],dwOffset,coreDebugger->GetCurrentPID());
+
+					if(dwOffset > 0)
+						searchedOffset = QString("%1").arg(dwOffset,16,16,QChar('0'));
+					else
+						return;
+				}
+			}
+
+			m_searchedOffsetList.append(searchedOffset);
+			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),searchedOffset.toULongLong(0,16)))
+				OnDisplayDisassembly(searchedOffset.toULongLong(0,16));	
+		}
 	}
 	else if(QString().compare(pAction->text(),"Show Source") == 0)
 	{

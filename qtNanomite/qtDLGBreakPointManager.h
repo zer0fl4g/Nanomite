@@ -54,6 +54,13 @@ public:
 	*/
 	void DeleteCompleterContent();
 
+	/**
+	* @brief Returns the current content of the completer list
+	*
+	* @return QStringList The current content of the completer list
+	*/
+	static QStringList ReturnCompleterList();
+
 public slots:
 	/**
 	* @brief A Qt slot which is called when the clsDebugger instance added a new breakpoint
@@ -89,6 +96,7 @@ public slots:
 private:
 	QStringList	m_completerList; /* a QStringList which contains all the imports of the loaded processes */
 	QCompleter	*m_pAPICompleter; /* a pointer to the current QCompleter */
+	static qtDLGBreakPointManager *pThis; /* a pointer to the instance of this BP Manager */
 
 private slots:
 	/**

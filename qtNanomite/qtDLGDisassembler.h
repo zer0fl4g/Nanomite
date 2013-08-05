@@ -84,6 +84,8 @@ private:
 
 	QList<quint64> m_offsetWalkHistory;
 
+	QStringList m_searchedOffsetList;
+
 	int m_iSelectedRow;
 
 	quint64 m_lastEIP;

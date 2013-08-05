@@ -76,8 +76,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	settings->LoadDisassemblerColor(qtNanomiteDisAsColor);
 	settings->LoadRecentDebuggedFiles(m_recentDebuggedFiles);
 	
-	m_pRecentFiles = new QMenu(menuFile);
-	LoadRecentFileMenu();
+	LoadRecentFileMenu(true);
 
 	DisAsGUI = new qtDLGDisassembler(this);
 	this->setCentralWidget(DisAsGUI);
@@ -467,9 +466,11 @@ void qtDLGNanomite::AskForException(DWORD exceptionCode)
 	newException->exec();
 }
 
-void qtDLGNanomite::LoadRecentFileMenu()
+void qtDLGNanomite::LoadRecentFileMenu(bool isFirstLoad)
 {
-	delete m_pRecentFiles;
+	if(!isFirstLoad)
+		delete m_pRecentFiles;
+	
 	m_pRecentFiles = new QMenu(menuFile);
 	m_pRecentFiles->setTitle("Recent Files");
 

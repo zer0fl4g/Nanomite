@@ -144,14 +144,13 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 				break;
 			}
 		}
+
 		memcpy(lpTempString,(LPVOID)&lpString[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
 		return lpTempString;
 	}					
-	else
-	{
-		clsMemManager::CFree(lpTempString);
-		return NULL;
-	}
+
+	clsMemManager::CFree(lpTempString);
+	return NULL;
 }
 
 QString clsHelperClass::LoadStyleSheet()

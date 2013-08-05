@@ -110,10 +110,8 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 {
 	DWORD64 CurAddress = NULL;
 	PTCHAR	lpFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH *sizeof(TCHAR)),
-			lpCurrentNameTemp = NULL,
+			lpCurrentNameTemp = clsHelperClass::reverseStrip(lpCurrentName,'\\'),
 			lpCurrentFileName = NULL;
-
-	lpCurrentNameTemp = clsHelperClass::reverseStrip(lpCurrentName,'\\');
 
 	MODULEENTRY32 pModEntry;
 	pModEntry.dwSize = sizeof(MODULEENTRY32);
@@ -130,8 +128,9 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 				{
 					ParseMemoryRangeForFunctions(hProc,(quint64)mbi.BaseAddress,mbi.RegionSize);
 				}				
+				
+				clsMemManager::CFree(lpCurrentFileName);
 			}
-			free(lpCurrentFileName);
 		}
 		CurAddress += mbi.RegionSize;
 	}

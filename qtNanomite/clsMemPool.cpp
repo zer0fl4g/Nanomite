@@ -65,10 +65,14 @@ clsMemPool::~clsMemPool()
 	qDebug() << "There have been" << countFree << " frees";
 	if(countAlloc > 0)
 		qDebug() << "Average size was " << averageSize / countAlloc << " bytes";
+
+	if(countAlloc != countFree)
+		MessageBoxW(NULL,L"There have been some memory leaks!",L"Nanomite",MB_OK);
 #endif
 
 	if(m_pMemBlock != NULL)
 		free(m_pMemBlock);
+
 	LeaveCriticalSection(&CriticalSection);
 	DeleteCriticalSection(&CriticalSection);
 }

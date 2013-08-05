@@ -33,6 +33,7 @@ qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setFixedSize(this->width(),this->height());
 
+	connect(new QShortcut(QKeySequence(Qt::Key_Escape),this),SIGNAL(activated()),this,SLOT(close()));
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(InsertNewInstructions()));
 }
 
