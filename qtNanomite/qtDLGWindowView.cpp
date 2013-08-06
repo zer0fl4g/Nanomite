@@ -50,6 +50,7 @@ qtDLGWindowView::qtDLGWindowView(QWidget *parent, Qt::WFlags flags,qint32 proces
 	}
 
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(EnumWindow()));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
 	EnumWindow();
 }
@@ -81,14 +82,15 @@ bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		
 		pThis->tblWindowView->insertRow(pThis->tblWindowView->rowCount());
 		PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+
 		// PID
 		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,0,
 			new QTableWidgetItem(QString("%1").arg(dwHwPID,8,16,QChar('0'))));
 
 		// GetWindowName
-		GetWindowText(hWnd,sTemp,MAX_PATH);
-		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,1,
-			new QTableWidgetItem(QString::fromStdWString(sTemp)));
+		if(GetWindowText(hWnd,sTemp,MAX_PATH) > 0)
+			pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,1,
+				new QTableWidgetItem(QString::fromStdWString(sTemp)));
 
 		// IsVisible
 		pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,2,
@@ -101,11 +103,8 @@ bool CALLBACK qtDLGWindowView::EnumWindowCallBack(HWND hWnd,LPARAM lParam)
 		// GetModuleName
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 		if(GetModuleFileNameEx(hProcess,NULL,sTemp,MAX_PATH) > 0)
-			pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,5,
+			pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,4,
 				new QTableWidgetItem(QString::fromStdWString(sTemp)));
-		else
-			pThis->tblWindowView->setItem(pThis->tblWindowView->rowCount() - 1,5,
-				new QTableWidgetItem(""));
 
 		CloseHandle(hProcess);
 		clsMemManager::CFree(sTemp);

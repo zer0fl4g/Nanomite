@@ -49,7 +49,8 @@ private:
 
 	int m_iSelectedRow;
 
-	void PrintValueInTable(QString regName, QString regValue);
+	void PrintValueInTable(QTableWidget *pTable, QString regName, QString regValue);
+
 	double readFloat80(const uint8_t buffer[10]);
 
 private slots:

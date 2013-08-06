@@ -35,6 +35,8 @@ qtDLGPatchManager::qtDLGPatchManager(QWidget *parent, Qt::WFlags flags)
 	this->setLayout(verticalLayout);
 
 	connect(tblPatches,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnPatchRemove()));
 
 	//Init List
 	tblPatches->horizontalHeader()->resizeSection(0,75);
@@ -496,4 +498,13 @@ void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
 			clsMemManager::CFree(pCurrentFileName);
 		}
 	}
+}
+
+void qtDLGPatchManager::OnPatchRemove()
+{
+	if(tblPatches->selectedItems().count() <= 0) return;
+
+	QTableWidgetItem *pItem = tblPatches->selectedItems()[0];
+	DeletePatch(tblPatches->item(pItem->row(),0)->text().toULongLong(0,16),tblPatches->item(pItem->row(),1)->text().toULongLong(0,16));
+	UpdatePatchTable();
 }

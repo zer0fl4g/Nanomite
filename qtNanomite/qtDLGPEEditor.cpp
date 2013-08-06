@@ -30,6 +30,7 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 
 	connect(treePE,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
 	m_processID = PID;
 	m_pEManager = PEManager;

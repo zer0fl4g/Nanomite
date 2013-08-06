@@ -102,6 +102,12 @@ private slots:
 	* @return no
 	*/
 	void OnSendToDisassembler(QTableWidgetItem *pSelectedRow);
+	/**
+	* @brief A Qt slot which is called when the user pressed return
+	*
+	* @return no
+	*/
+	void OnReturnPressed();
 
 protected:
 	/**

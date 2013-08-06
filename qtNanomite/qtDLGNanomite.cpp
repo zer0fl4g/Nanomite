@@ -356,27 +356,42 @@ void qtDLGNanomite::GenerateMenuCallback(QAction *qAction)
 
 void qtDLGNanomite::GenerateMenu(bool isAllEnabled)
 {
-	QAction *qAction;
-	QMenu menu;
-
+	int activeProcessCount = 0;
+	
 	for(int i = 0; i < coreDebugger->PIDs.size(); i++)
 	{
 		if(coreDebugger->PIDs[i].bRunning)
+			activeProcessCount++;
+	}
+
+	if(activeProcessCount > 1)
+	{
+		QAction *qAction;
+		QMenu menu;
+
+		for(int i = 0; i < coreDebugger->PIDs.size(); i++)
 		{
-			qAction = new QAction(QString().sprintf("%08X",coreDebugger->PIDs[i].dwPID),this);
+			if(coreDebugger->PIDs[i].bRunning)
+			{
+				qAction = new QAction(QString().sprintf("%08X",coreDebugger->PIDs[i].dwPID),this);
+				menu.addAction(qAction);
+			}
+		}
+		menu.addSeparator();
+
+		if(isAllEnabled)
+		{
+			qAction = new QAction("All",this);
 			menu.addAction(qAction);
 		}
-	}
-	menu.addSeparator();
 
-	if(isAllEnabled)
+		connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(GenerateMenuCallback(QAction*)));
+		menu.exec(QCursor::pos());
+	}
+	else
 	{
-		qAction = new QAction("All",this);
-		menu.addAction(qAction);
+		m_iMenuProcessID = coreDebugger->PIDs[0].dwPID;
 	}
-
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(GenerateMenuCallback(QAction*)));
-	menu.exec(QCursor::pos());
 }
 
 void qtDLGNanomite::dragEnterEvent(QDragEnterEvent* pEvent)
@@ -423,7 +438,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 			if(GetModuleFileNameEx(hProc,NULL,processFile,MAX_PATH) <= 0)
 			{
 				CloseHandle(hProc);
-				free(processFile);
+				clsMemManager::CFree(processFile);
 				return;
 			}
 			QString procFile = QString::fromWCharArray(processFile,MAX_PATH);

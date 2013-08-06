@@ -48,6 +48,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	m_pHexDataWorker = new clsHexViewWorker(dwPID,hProcess,StartOffset,Size);
 	connect(m_pHexDataWorker,SIGNAL(finished()),this,SLOT(DisplayData()),Qt::QueuedConnection);
 	connect(memoryScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 }
 
 qtDLGHexView::~qtDLGHexView()

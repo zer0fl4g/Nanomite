@@ -71,6 +71,7 @@ private:
 		void MenuCallback(QAction*);
 		void UpdateOffsetPatch(HANDLE newOffset, int newPID);
 		void OnCustomContextMenuRequested(QPoint qPoint);
+		void OnPatchRemove();
 };
 
 #endif

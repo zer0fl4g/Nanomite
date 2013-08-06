@@ -43,6 +43,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(pbAddUpdate,SIGNAL(clicked()),this,SLOT(OnAddUpdate()));
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
 	m_pAPICompleter = new QCompleter(m_completerList, this);
 }

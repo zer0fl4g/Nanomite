@@ -80,7 +80,7 @@
      </sizepolicy>
     </property>
     <property name="title">
-     <string>File</string>
+     <string>&amp;File</string>
     </property>
     <addaction name="actionFile_OpenNew"/>
     <addaction name="actionFile_AttachTo"/>
@@ -217,10 +217,16 @@
    <property name="text">
     <string>Attach To</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+A</string>
+   </property>
   </action>
   <action name="actionFile_Detach">
    <property name="text">
     <string>Detach</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+D</string>
    </property>
   </action>
   <action name="actionFile_Exit">
@@ -249,7 +255,7 @@
     <string>Stop</string>
    </property>
    <property name="shortcut">
-    <string>Ctrl+F4</string>
+    <string>Ctrl+S</string>
    </property>
   </action>
   <action name="actionDebug_Suspend">
@@ -260,6 +266,9 @@
    <property name="text">
     <string>Suspend</string>
    </property>
+   <property name="shortcut">
+    <string>Pause</string>
+   </property>
   </action>
   <action name="actionDebug_Restart">
    <property name="icon">
@@ -268,6 +277,9 @@
    </property>
    <property name="text">
     <string>Restart</string>
+   </property>
+   <property name="shortcut">
+    <string>Ctrl+R</string>
    </property>
   </action>
   <action name="actionDebug_Step_In">
@@ -315,6 +327,9 @@
    <property name="text">
     <string>Detail Information</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+I</string>
+   </property>
   </action>
   <action name="actionWindow_Breakpoint_Manager">
    <property name="icon">
@@ -336,6 +351,9 @@
    <property name="text">
     <string>Memory</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+1</string>
+   </property>
   </action>
   <action name="actionWindow_Show_Heap">
    <property name="icon">
@@ -344,6 +362,9 @@
    </property>
    <property name="text">
     <string>Heap</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+2</string>
    </property>
   </action>
   <action name="actionWindow_Show_Strings">
@@ -354,6 +375,9 @@
    <property name="text">
     <string>Strings</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+3</string>
+   </property>
   </action>
   <action name="actionWindow_Show_Debug_Output">
    <property name="icon">
@@ -362,6 +386,9 @@
    </property>
    <property name="text">
     <string>Debug Output</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+4</string>
    </property>
   </action>
   <action name="actionWindow_Show_Handles">
@@ -372,6 +399,9 @@
    <property name="text">
     <string>Handles</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+5</string>
+   </property>
   </action>
   <action name="actionWindow_Show_Windows">
    <property name="icon">
@@ -381,6 +411,9 @@
    <property name="text">
     <string>Windows</string>
    </property>
+   <property name="shortcut">
+    <string>Alt+6</string>
+   </property>
   </action>
   <action name="actionWindow_Show_PEEditor">
    <property name="icon">
@@ -389,6 +422,9 @@
    </property>
    <property name="text">
     <string>PE-Editor</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+7</string>
    </property>
   </action>
   <action name="action_Debug_Run_to_UserCode">
@@ -427,6 +463,9 @@
    <property name="text">
     <string>Trace Info</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+T</string>
+   </property>
   </action>
   <action name="actionDebug_Step_Out">
    <property name="icon">
@@ -436,6 +475,9 @@
    <property name="text">
     <string>Step Out</string>
    </property>
+   <property name="shortcut">
+    <string>F6</string>
+   </property>
   </action>
   <action name="actionWindow_Show_Functions">
    <property name="icon">
@@ -444,6 +486,9 @@
    </property>
    <property name="text">
     <string>Functions</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+8</string>
    </property>
   </action>
   <action name="actionWindow_Show_Patches">
@@ -455,6 +500,9 @@
    <property name="text">
     <string>Patches</string>
    </property>
+   <property name="shortcut">
+    <string>Ctrl+P</string>
+   </property>
   </action>
   <action name="actionWindow_Show_Privileges">
    <property name="icon">
@@ -464,6 +512,9 @@
    </property>
    <property name="text">
     <string>Privileges</string>
+   </property>
+   <property name="shortcut">
+    <string>Alt+9</string>
    </property>
   </action>
   <action name="actionOptions_Update">

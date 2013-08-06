@@ -33,6 +33,8 @@ qtDLGTIBView::qtDLGTIBView(HANDLE processHandle, HANDLE threadHandle, QWidget *p
 
 	treeTIB->header()->resizeSection(0,250);
 
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+
 	ShowTIBForThread(processHandle,threadHandle);
 }
 

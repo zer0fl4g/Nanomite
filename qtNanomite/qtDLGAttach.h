@@ -67,6 +67,12 @@ private slots:
 	* @return no
 	*/
 	void FillProcessList();
+	/**
+	* @brief A qt slot which is triggered when the user pressed the return key
+	*
+	* @return no
+	*/
+	void OnReturnPressed();
 };
 
 #endif

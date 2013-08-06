@@ -63,8 +63,8 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 processI
 	m_pFunctionWorker = new clsFunctionsViewWorker(dataForProcessing);
 	connect(m_pFunctionWorker,SIGNAL(finished()),this,SLOT(DisplayFunctionLists()),Qt::QueuedConnection);
 	connect(functionScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
-
-	return;
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnReturnPressed()));
 }
 
 qtDLGFunctions::~qtDLGFunctions()
@@ -173,4 +173,11 @@ void qtDLGFunctions::wheelEvent(QWheelEvent *event)
 void qtDLGFunctions::OnSendToDisassembler(QTableWidgetItem *pSelectedRow)
 {
 	emit ShowInDisAs(tblFunctions->item(pSelectedRow->row(),2)->text().toULongLong(0,16));
+}
+
+void qtDLGFunctions::OnReturnPressed()
+{
+	if(tblFunctions->selectedItems().count() <= 0) return;
+
+	OnSendToDisassembler(tblFunctions->selectedItems()[0]);
 }

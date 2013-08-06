@@ -19,6 +19,7 @@
 #include "clsMemManager.h"
 
 #include <QClipboard>
+#include <QShortcut>
 #include <QMenu>
 
 using namespace std;
@@ -35,6 +36,7 @@ qtDLGDebugStrings::qtDLGDebugStrings(QWidget *parent, Qt::WFlags flags)
 	setLayout(verticalLayout);
 
 	connect(tblDebugStrings,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 }
 
 qtDLGDebugStrings::~qtDLGDebugStrings()

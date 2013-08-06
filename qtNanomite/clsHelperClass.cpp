@@ -183,6 +183,9 @@ bool clsHelperClass::IsWindowsXP()
 
 wstring clsHelperClass::replaceAll(wstring orgString, wchar_t oldString, wchar_t newString)
 {
+	if(orgString.find(oldString) == std::string::npos)
+		return orgString;
+
 	for(int i = 0; i < orgString.length(); i++)
 	{
 		if(orgString.c_str()[i] == oldString)
@@ -354,7 +357,7 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString moduleName, QString apiName, q
 	bool isFullString = false;
 	CHAR oneCharOfFunction = '\0';
 
-	for(int i = 0; i < exportTable.NumberOfNames; i++)
+	for(unsigned int i = 0; i < exportTable.NumberOfNames; i++)
 	{ 
 		isFullString = false;
 		functioName.clear(); 

@@ -17,6 +17,8 @@
 #include "qtDLGSourceViewer.h"
 
 #include <QFile>
+#include <QShortcut>
+
 #include <Windows.h>
 
 qtDLGSourceViewer::qtDLGSourceViewer(QWidget *parent, Qt::WFlags flags)
@@ -25,6 +27,8 @@ qtDLGSourceViewer::qtDLGSourceViewer(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
+
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 }
 
 qtDLGSourceViewer::~qtDLGSourceViewer()

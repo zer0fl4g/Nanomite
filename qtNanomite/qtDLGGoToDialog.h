@@ -32,7 +32,6 @@ private:
 	QCompleter *m_pLineCompleter;
 
 private slots:
-	void OnCancel();
 	void OpenNewData();
 };
 

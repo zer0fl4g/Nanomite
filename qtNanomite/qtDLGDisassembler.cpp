@@ -308,6 +308,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 				}
 			}
 
+			m_offsetWalkHistory.append(searchedOffset.toULongLong(0,16));
 			m_searchedOffsetList.append(searchedOffset);
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),searchedOffset.toULongLong(0,16)))
 				OnDisplayDisassembly(searchedOffset.toULongLong(0,16));	

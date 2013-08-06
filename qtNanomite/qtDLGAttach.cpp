@@ -24,6 +24,7 @@
 #include <Psapi.h>
 #include <TlHelp32.h>
 
+
 qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
 {
@@ -38,6 +39,7 @@ qtDLGAttach::qtDLGAttach(QWidget *parent, Qt::WFlags flags)
 
 	connect(tblProcList,SIGNAL(cellDoubleClicked(int,int)),this,SLOT(OnProcessDoubleClick(int,int)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(FillProcessList()));
+	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnReturnPressed()));
 
 	FillProcessList();
 }
@@ -59,7 +61,7 @@ void qtDLGAttach::FillProcessList()
 
 		if(Process32First(hToolSnapShot,&pProcessEntry))
 		{
-			PTCHAR ProcessFile = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
+			PTCHAR ProcessFile = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 			do 
 			{
 				HANDLE hProc = OpenProcess(PROCESS_QUERY_INFORMATION | PROCESS_VM_READ,false,pProcessEntry.th32ProcessID);
@@ -67,7 +69,7 @@ void qtDLGAttach::FillProcessList()
 				{
 					tblProcList->insertRow(tblProcList->rowCount());
 
-					// ProcessName
+					// ProcessName		
 					tblProcList->setItem(tblProcList->rowCount() - 1,0,
 						new QTableWidgetItem(QString().fromWCharArray(pProcessEntry.szExeFile)));
 
@@ -98,8 +100,27 @@ void qtDLGAttach::FillProcessList()
 					// Process Path
 					memset(ProcessFile,0,MAX_PATH * sizeof(TCHAR));
 					if(GetModuleFileNameEx(hProc,NULL,ProcessFile,MAX_PATH) > 0)
+					{
+						QString processPath = QString().fromWCharArray(ProcessFile);
+						if(processPath.contains("SystemRoot"))
+						{
+							PTCHAR tempPath = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+
+							processPath.replace("SystemRoot","%SystemRoot%");
+							processPath.toWCharArray(ProcessFile);
+
+							if(ExpandEnvironmentStrings(ProcessFile,tempPath,MAX_PATH))
+							{
+								processPath = QString().fromWCharArray(tempPath);
+								processPath.replace("\\C:\\","C:\\");
+							}
+
+							clsMemManager::CFree((LPVOID)tempPath);
+						}
+
 						tblProcList->setItem(tblProcList->rowCount() - 1,3,
-							new QTableWidgetItem(QString().fromWCharArray(ProcessFile)));
+							new QTableWidgetItem(processPath));
+					}
 					else
 						tblProcList->removeRow(tblProcList->rowCount() - 1);
 					//	tblProcList->setItem(tblProcList->rowCount() - 1,3,
@@ -108,7 +129,7 @@ void qtDLGAttach::FillProcessList()
 					CloseHandle(hProc);
 				}
 			} while (Process32Next(hToolSnapShot,&pProcessEntry));
-			free(ProcessFile);
+			clsMemManager::CFree(ProcessFile);
 		}
 
 		CloseHandle(hToolSnapShot);
@@ -126,3 +147,13 @@ void qtDLGAttach::OnProcessDoubleClick(int iRow,int iColumn)
 	else
 		MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
 }
+
+void qtDLGAttach::OnReturnPressed()
+{
+	if(tblProcList->selectedItems().count() <= 0) return;
+
+	QTableWidgetItem *pItem = tblProcList->selectedItems()[0];
+
+	OnProcessDoubleClick(pItem->row(),pItem->column());
+}
+

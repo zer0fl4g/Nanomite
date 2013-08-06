@@ -34,7 +34,8 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 proces
 
 	connect(tblHandleView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(OnDisplayHandles()));
-
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+	
 	// Init List
 	tblHandleView->horizontalHeader()->resizeSection(0,75);
 	tblHandleView->horizontalHeader()->resizeSection(1,135);

@@ -70,6 +70,7 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 	connect(tblPIDs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomPIDContextMenu(QPoint)));
 	connect(tblExceptions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomExceptionContextMenu(QPoint)));
 	connect(tblModules,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomModuleContextMenu(QPoint)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 }
 
 qtDLGDetailInfo::~qtDLGDetailInfo()
@@ -533,8 +534,6 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 		tblExceptions->setItem(tblExceptions->rowCount() - 1,3,
 			new QTableWidgetItem(QString::fromStdWString(moduleName).append(".").append(QString::fromStdWString(functionName))));
 
-	tblExceptions->scrollToBottom();
-
 
 	QString logMessage;
 
@@ -574,8 +573,6 @@ void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypoin
 
 		tblModules->setItem(tblModules->rowCount() - 1,3,
 			new QTableWidgetItem(QString::fromStdWString(sDLLPath)));
-
-		tblModules->scrollToBottom();
 	}
 	else
 	{

@@ -23,6 +23,7 @@
 #include <TlHelp32.h>
 
 #include <QClipboard>
+#include <QShortcut>
 
 qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int processID)
 	: QWidget(parent, flags),
@@ -38,6 +39,7 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int processID)
 	connect(tblHeapBlocks,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(tblHeapView,SIGNAL(itemSelectionChanged()),this,SLOT(OnSelectionChanged()));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayHeap()));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
 	tblHeapView->horizontalHeader()->resizeSection(0,75);
 	tblHeapView->horizontalHeader()->resizeSection(1,75);

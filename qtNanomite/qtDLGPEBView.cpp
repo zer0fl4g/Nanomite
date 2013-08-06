@@ -33,6 +33,8 @@ qtDLGPEBView::qtDLGPEBView(HANDLE hProc, QWidget *parent, Qt::WFlags flags)
 
 	treePEB->header()->resizeSection(0,250);
 
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+
 	ShowPEBForProcess(hProc);
 }
 

@@ -53,6 +53,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 proce
 	connect(stringScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
 	connect(tblStringView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DataProcessing()));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
 	DataProcessing();
 }

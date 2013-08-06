@@ -32,6 +32,7 @@ qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags, 
 
 	connect(tblProcPriv,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(QKeySequence("F5"),this),SIGNAL(activated()),this,SLOT(DisplayPrivileges()));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
 	// Init List
 	tblProcPriv->horizontalHeader()->resizeSection(0,75);

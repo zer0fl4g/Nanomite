@@ -36,18 +36,11 @@ qtDLGGoToDialog::qtDLGGoToDialog(QString *pData, QStringList completerList, QWid
 
 	connect(new QShortcut(QKeySequence(Qt::Key_Escape),this),SIGNAL(activated()),this,SLOT(close()));
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(OpenNewData()));
-	connect(pbOk,SIGNAL(clicked()),this,SLOT(OpenNewData()));
-	connect(pbCancel,SIGNAL(clicked()),this,SLOT(OnCancel()));
 }
 
 qtDLGGoToDialog::~qtDLGGoToDialog()
 {
 	delete m_pLineCompleter;
-}
-
-void qtDLGGoToDialog::OnCancel()
-{
-	close();
 }
 
 void qtDLGGoToDialog::OpenNewData()

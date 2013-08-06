@@ -49,6 +49,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 	connect(m_statusBarTimer,SIGNAL(timeout()),this,SLOT(OnUpdateStatusBar()));
 	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 }
 
 qtDLGTrace::~qtDLGTrace()
