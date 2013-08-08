@@ -42,19 +42,25 @@ public:
 	~clsDisassembler();
 
 	bool InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClear = false);
+	bool GetPageRangeForOffset(quint64 IP, quint64 &PageBase, quint64 &PageEnd);
 
 signals:
 	void DisAsFinished(quint64 dwEIP);
 
 private:
-	HANDLE	_hProc;
-	quint64 _dwEIP,
-			_dwStartOffset,
-			_dwEndOffset;
+	HANDLE	m_processHandle;
+	quint64 m_searchedOffset,
+			m_startOffset,
+			m_endOffset;
+
+	bool m_isWorking;
 
 	bool IsNewInsertNeeded();
 	bool IsNewInsertPossible();
-	
+
+private slots:
+	void OnThreadFinished();
+
 protected:
 	void run();
 };

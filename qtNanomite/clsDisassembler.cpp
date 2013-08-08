@@ -20,18 +20,16 @@
 #include "clsHelperClass.h"
 #include "clsSymbolAndSyntax.h"
 
-#include <string>
-#include <TlHelp32.h>
-
 #define BEA_ENGINE_STATIC
 #define BEA_USE_STDCALL
 #include <BeaEngine.h>
 
-using namespace std;
-
 clsDisassembler::clsDisassembler()
 {
-	_dwStartOffset = 0;_dwEndOffset = 0;
+	m_startOffset = 0;m_endOffset = 0;
+	m_isWorking = false;
+
+	connect(this,SIGNAL(finished()),this,SLOT(OnThreadFinished()),Qt::QueuedConnection);
 }
 
 clsDisassembler::~clsDisassembler()
@@ -39,61 +37,17 @@ clsDisassembler::~clsDisassembler()
 
 }
 
-bool clsDisassembler::IsNewInsertNeeded()
-{
-	if(_dwEIP <= _dwStartOffset || _dwEIP >= _dwEndOffset || SectionDisAs.count() <= 0)
-	{
-		_dwStartOffset = _dwEIP - 300;
-		_dwEndOffset = _dwEIP + 300;
-
-		return IsNewInsertPossible();
-	}
-	return false;
-}
-
-bool clsDisassembler::IsNewInsertPossible()
-{
-	MODULEENTRY32 pModEntry;
-	pModEntry.dwSize = sizeof(MODULEENTRY32);
-	MEMORY_BASIC_INFORMATION mbi;
-
-	quint64 dwAddress = NULL;
-	while(VirtualQueryEx(_hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
-	{
-		quint64 dwBaseBegin = (quint64)mbi.BaseAddress,
-				dwBaseEnd	= ((quint64)mbi.BaseAddress + mbi.RegionSize);
-
-		if(_dwEIP >= dwBaseBegin && _dwEIP <= dwBaseEnd)
-		{
-			switch (mbi.State)
-			{
-				case MEM_COMMIT:
-					{
-						switch (mbi.Type)
-						{
-							case MEM_IMAGE:		
-							case MEM_MAPPED:
-								return true;
-								break;
-						}
-						break;
-					}
-			}
-		}
-		dwAddress += mbi.RegionSize;
-	}
-	return false;
-}
-
 bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClear)
 {
-	if(_hProc == INVALID_HANDLE_VALUE || dwEIP == NULL)
+	if(m_processHandle == INVALID_HANDLE_VALUE || m_processHandle == NULL|| dwEIP == NULL || m_isWorking)
 		return false;
 
-	_dwEIP = dwEIP;
-	_hProc = hProc;
+	m_isWorking = true;
+	m_searchedOffset = dwEIP;
+	m_processHandle = hProc;
 
-	if(bClear) SectionDisAs.clear();
+	if(bClear) 
+		SectionDisAs.clear();
 
 	if(IsNewInsertNeeded())
 	{
@@ -101,24 +55,67 @@ bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClea
 		this->start();
 		return true;
 	}
-	else 
+	
+	
+	m_isWorking = false;
+	return false;
+}
+
+bool clsDisassembler::IsNewInsertNeeded()
+{
+	if(m_searchedOffset <= m_startOffset || m_searchedOffset >= m_endOffset || SectionDisAs.count() <= 0)
+		return IsNewInsertPossible();
+
+	return false;
+}
+
+bool clsDisassembler::IsNewInsertPossible()
+{
+	quint64 PageBase = NULL,
+			PageEnd	= NULL;
+
+	if(!GetPageRangeForOffset(m_searchedOffset, PageBase, PageEnd))
 		return false;
+
+	if((m_searchedOffset - 300) <= PageBase)
+	{
+		quint64 PageBaseBelow = NULL,
+				PageEndBelow = NULL;
+
+		if(GetPageRangeForOffset(m_searchedOffset - 300, PageBaseBelow, PageEndBelow))
+			m_startOffset = m_searchedOffset - 300;
+		else
+			m_startOffset = PageBase;
+	}
+	else
+		m_startOffset = m_searchedOffset - 300;
+
+	if((m_searchedOffset + 300) >= PageEnd)
+	{
+		quint64 PageBaseAbove = NULL,
+				PageEndAbove = NULL;
+
+		if(GetPageRangeForOffset(m_searchedOffset + 300, PageBaseAbove, PageEndAbove))
+			m_endOffset = m_searchedOffset + 300;
+		else
+			m_endOffset = PageEnd;
+	}
+	else
+		m_endOffset = m_searchedOffset + 300;
+
+	return true;
 }
 
 void clsDisassembler::run()
 {
-	if(_dwStartOffset == 0 || _dwEndOffset == 0)
+	if(m_startOffset == 0 || m_endOffset == 0)
 		return;
 
-	quint64 dwSize = _dwEndOffset - _dwStartOffset;
-	DWORD	dwOldProtection = 0,
-			dwNewProtection = PAGE_EXECUTE_READWRITE;
+	quint64 dwSize = m_endOffset - m_startOffset;
 	LPVOID pBuffer = malloc(dwSize);
-	bool	IsFullRun = false;
-	clsSymbolAndSyntax DataVisualizer(_hProc);
+	clsSymbolAndSyntax DataVisualizer(m_processHandle);
 
-//	bool bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwNewProtection,&dwOldProtection);	
-	if(ReadProcessMemory(_hProc,(LPVOID)_dwStartOffset,pBuffer,dwSize,NULL))
+	if(ReadProcessMemory(m_processHandle,(LPVOID)m_startOffset,pBuffer,dwSize,NULL))
 	{
 		DISASM newDisAss;
 		bool bContinueDisAs = true;
@@ -129,41 +126,43 @@ void clsDisassembler::run()
 		memset(&newDisAss, 0, sizeof(DISASM));
 
 		newDisAss.EIP = (quint64)pBuffer;
-		newDisAss.VirtualAddr = _dwStartOffset;
+		newDisAss.VirtualAddr = m_startOffset;
 #ifdef _AMD64_
 		newDisAss.Archi = 64;
 #else
 		newDisAss.Archi = 0;
 #endif
 
-		PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+		PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(64 * sizeof(TCHAR));
 		while(bContinueDisAs)
 		{
-			newDisAss.SecurityBlock = (int)_dwEndOffset - newDisAss.VirtualAddr;
+			newDisAss.SecurityBlock = (int)m_endOffset - newDisAss.VirtualAddr;
 
 			iLen = Disasm(&newDisAss);
 			if (iLen == OUT_OF_BLOCK)
 				bContinueDisAs = false;
 			else if(iLen != UNKNOWN_OPCODE)
 			{	
-				memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
-				
 				// OpCodez
-				int iTempLen = ((iLen == UNKNOWN_OPCODE) ? 0 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? 1 : iLen));
-				if(iTempLen > 0) 
+				if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
+					iLen = 1;
+
+				if(iLen > 0) 
 				{
-					for(size_t i = 0;i < iTempLen;i++)
+					memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
+					
+					for(size_t i = 0;i < iLen;i++)
 					{
-						memcpy(&bBuffer,(LPVOID)((quint64)newDisAss.EIP + i),1);
-						wsprintf(sTemp,L"%s %02X",sTemp,bBuffer);
+						memcpy(&bBuffer, (LPVOID)((quint64)newDisAss.EIP + i), 1);
+						wsprintf(sTemp, L"%s %02X", sTemp, bBuffer);
 					}
 					newRow.OpCodes = QString::fromWCharArray(sTemp);
 
 					// Instruction
 					if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
-						wsprintf(sTemp,L"%s",L"db 00");
+						wsprintf(sTemp, L"%s", L"db 00");
 					else
-						wsprintf(sTemp,L"%S",newDisAss.CompleteInstr);	
+						wsprintf(sTemp, L"%S", newDisAss.CompleteInstr);	
 					newRow.ASM = QString::fromWCharArray(sTemp);
 				
 					// Comment/Symbol && itemStyle		
@@ -173,11 +172,14 @@ void clsDisassembler::run()
 					SectionDisAs.insert(newRow.Offset,newRow);
 				}
 			}
+			else if(iLen == UNKNOWN_OPCODE)
+				iLen = 1;
 
-			newDisAss.EIP += ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
-			newDisAss.VirtualAddr += ((iLen == UNKNOWN_OPCODE) ? 1 : ((newDisAss.Instruction.Opcode == 0x00 && iLen == 2) ? iLen -= 1 : iLen));
+			newDisAss.EIP += iLen;
+			newDisAss.VirtualAddr += iLen;
+			
 
-			if (newDisAss.VirtualAddr >= _dwEndOffset)
+			if (newDisAss.VirtualAddr >= m_endOffset)
 				bContinueDisAs = false;
 		}
 		clsMemManager::CFree(sTemp);
@@ -189,16 +191,55 @@ void clsDisassembler::run()
 		return;
 	}
 
-//	bProtect = VirtualProtectEx(_hProc,(LPVOID)_dwStartOffset,dwSize,dwOldProtection,&dwNewProtection);
 	free(pBuffer);
 
 	if(SectionDisAs.count() > 0)
 	{
 		QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
-		_dwEndOffset = iEnd.key().toULongLong(0,16);
+		m_endOffset = iEnd.key().toULongLong(0,16);
 	}
 	else
-		_dwEndOffset = 0;
+		m_endOffset = 0;
 
-	emit DisAsFinished(_dwEIP);
+	emit DisAsFinished(m_searchedOffset);
+}
+
+bool clsDisassembler::GetPageRangeForOffset(quint64 IP, quint64 &PageBase, quint64 &PageEnd)
+{
+	MEMORY_BASIC_INFORMATION mbi;
+	quint64 dwAddress = IP;
+	
+	if(VirtualQueryEx(m_processHandle,(LPVOID)dwAddress,&mbi,sizeof(mbi)))
+	{		
+		switch (mbi.State)
+		{
+			case MEM_COMMIT:
+				{
+					switch (mbi.Type)
+					{
+						case MEM_IMAGE:		
+						case MEM_MAPPED:
+							if((mbi.Protect & PAGE_EXECUTE) ||
+								(mbi.Protect & PAGE_EXECUTE_READ) ||
+								(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
+								(mbi.Protect & PAGE_EXECUTE_WRITECOPY))
+							{
+								PageBase = (quint64)mbi.BaseAddress;
+								PageEnd = (quint64)mbi.BaseAddress + mbi.RegionSize;
+
+								return true;
+							}
+							break;
+					}
+					break;
+				}
+		}
+	}
+
+	return false;
+}
+
+void clsDisassembler::OnThreadFinished()
+{
+	m_isWorking = false;
 }

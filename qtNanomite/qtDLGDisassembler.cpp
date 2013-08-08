@@ -106,7 +106,8 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			{
 				if(!i.value().Offset.isEmpty() && i.value().Offset.compare(coreDisAs->SectionDisAs.begin().value().Offset) == 0)
 				{
-					coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16));
+					if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16)))
+						break;
 					return;
 				}			
 				--i;
@@ -374,5 +375,6 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 
 void qtDLGDisassembler::resizeEvent(QResizeEvent *event)
 {
-	OnDisplayDisassembly(m_lastEIP);
+	if(coreDebugger->GetDebuggingState())
+		OnDisplayDisassembly(m_lastEIP);
 }

@@ -118,6 +118,7 @@
 + updated resize event of Disassembler and Stack
 + updated Stack scroll
 + updated PID dropdown to be only displayed if more then 1 process is running
++ updated disassembler logic
 
 ####Notes:
 	- function in the goto dialog should look like this: "module::function"
