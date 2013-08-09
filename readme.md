@@ -40,7 +40,7 @@
 ### Hotkeys
 - most windows can be closed with "esc"
 - most windows can be reloaded with "F5"
-- STRG + C can be used to copy data from selected field in tables
+- STRG + C can be used to copy data from selected field in table - for more check context menu
 - MainWindow
 	+ STRG + B		= Breakpoint Manager
 	+ STRG + O		= Open new file
@@ -100,6 +100,7 @@
 + fixed a bug which did not handle hardware breakpoints for wow64 targets
 + fixed a bug which showed a wrong menu if child processes where present in the debugging session
 + fixed a bug which reloaded the disassembler to the wrong offset after adding a new patch
++ fixed a bug which caused wrong scrolling of disassembler and stack while the process is running
 + fixed paths in attach dialog with SystemRoot enviroment string
 + fixed handling of "call * ptr []" and "jmp * ptr []"
 + fixed some handle and memory leaks

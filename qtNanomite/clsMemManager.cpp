@@ -31,14 +31,14 @@ clsMemManager::clsMemManager()
 	InitializeCriticalSection(&CriticalSection);
 #endif
 
-    // Create a 5000x200Byte Pool 
-    PoolUnitCount_200 = 5000; 
+    // Create a 3000x200Byte Pool 
+    PoolUnitCount_200 = 3000; 
     PoolUnitSize_200 = 200; 
     pPool_200 = new clsMemPool(PoolBufferBase_200,PoolBufferSize_200,PoolUnitCount_200,PoolUnitSize_200); 
     PoolBufferEnd_200 = PoolBufferBase_200 + PoolBufferSize_200; 
   
-    // Create a 75000x50Byte Pool 
-    PoolUnitCount_50 = 75000; 
+    // Create a 80000x50Byte Pool 
+    PoolUnitCount_50 = 80000; 
     PoolUnitSize_50 = 50; 
     pPool_50 = new clsMemPool(PoolBufferBase_50,PoolBufferSize_50,PoolUnitCount_50,PoolUnitSize_50); 
     PoolBufferEnd_50 = PoolBufferBase_50 + PoolBufferSize_50; 
@@ -148,6 +148,8 @@ void* clsMemManager::CAlloc(size_t ulSize)
 	stackFr.AddrStack.Offset = context.Esp;  
 #endif  
 
+	int stackFrameCounter = 0;
+
 	do
     { 
         bSuccess = StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0); 
@@ -187,7 +189,8 @@ void* clsMemManager::CAlloc(size_t ulSize)
 
         newAlloc.callstackTrace.append(newCallstack); 
 	
-	}while(stackFr.AddrReturn.Offset != 0); 
+		stackFrameCounter++;
+	}while(stackFr.AddrReturn.Offset != 0 || stackFrameCounter <= MAX_STACKFRAME); 
   
     free(pSymbol); 
     CloseHandle(hThread); 

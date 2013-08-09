@@ -149,7 +149,7 @@ void clsDisassembler::run()
 
 				if(iLen > 0) 
 				{
-					memset(sTemp,0,MAX_PATH *  sizeof(TCHAR));
+					memset(sTemp,0,64 *  sizeof(TCHAR));
 					
 					for(size_t i = 0;i < iLen;i++)
 					{

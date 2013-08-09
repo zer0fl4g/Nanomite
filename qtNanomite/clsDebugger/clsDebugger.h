@@ -166,7 +166,7 @@ public:
 
 	DWORD GetCurrentPID();
 	DWORD GetCurrentTID();
-
+		
 	void ClearTarget();
 	void ClearCommandLine();
 	void SetTarget(std::wstring sTarget);
@@ -213,10 +213,12 @@ private:
 
 	STARTUPINFO _si;
 	PROCESS_INFORMATION _pi;
+	PROCESS_INFORMATION m_dbgPI;
 	bool _isDebugging;
 	bool _NormalDebugging;
 	bool _bStopDebugging;
 	bool _bSingleStepFlag;
+	bool m_debuggerBreak;
 	HANDLE _hDbgEvent;
 	HANDLE _hCurProc;
 	HANDLE m_waitForGUI;
@@ -251,10 +253,13 @@ private:
 	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
 	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);
+	bool IsDebuggerSuspended();
 
 	HANDLE GetCurrentProcessHandle(DWORD dwPID);
 
 	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle);
+	DWORD GetMainProcessID();
+	DWORD GetMainThreadID();
 
 	PTCHAR GetFileNameFromHandle(HANDLE hFile);
 

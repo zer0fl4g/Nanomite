@@ -107,10 +107,28 @@ bool clsSymbolAndSyntax::CreateDataForRow(DisAsDataRow *pDataRow)
 
 	if(bNeedsComment)
 	{
-		if(strInstructions.count() > 3)
-			pDataRow->Comment = CreateSymbols(strInstructions[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16));
+		quint64 offsetForSymbol = NULL;
+
+		if(pDataRow->ASM.contains("ptr"))
+		{
+			if(strInstructions[1].compare("qword") == 0)
+			{
+				ReadProcessMemory(_hProc,
+					(LPVOID)strInstructions[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16),
+					(LPVOID)&offsetForSymbol, sizeof(DWORD64),NULL);
+			}
+			else if(strInstructions[1].compare("dword") == 0)
+			{
+				ReadProcessMemory(_hProc,
+					(LPVOID)strInstructions[3].replace("h","").replace("[","").replace("]","").toULongLong(0,16),
+					(LPVOID)&offsetForSymbol, sizeof(DWORD),NULL);
+			}
+		}
 		else
-			pDataRow->Comment = CreateSymbols(strInstructions[1].replace("h","").toULongLong(0,16));
+			offsetForSymbol = strInstructions[1].replace("h","").toULongLong(0,16);
+
+		if(offsetForSymbol != 0)
+			pDataRow->Comment = CreateSymbols(offsetForSymbol);
 	}
 	else
 		pDataRow->Comment = "";

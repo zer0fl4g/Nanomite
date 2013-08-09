@@ -94,22 +94,22 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
 		QMap<QString,DisAsDataRow>::const_iterator iEnd = coreDisAs->SectionDisAs.constEnd();--iEnd;
 
-		if((QMapData::Node *)i == (QMapData::Node *)coreDisAs->SectionDisAs.constEnd())
+		if(i == coreDisAs->SectionDisAs.constEnd())
 		{
 			coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
 			return;
 		}
-
-		if((QMapData::Node *)i != (QMapData::Node *)coreDisAs->SectionDisAs.constBegin())
+		else if(i == coreDisAs->SectionDisAs.constBegin())
 		{
-			for(int iBack = 0; iBack <= 5; iBack++)
+			coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16));
+			return;
+		}
+		else
+		{
+			for(int iBack = 0; iBack < 5; iBack++)
 			{
-				if(!i.value().Offset.isEmpty() && i.value().Offset.compare(coreDisAs->SectionDisAs.begin().value().Offset) == 0)
-				{
-					if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16)))
-						break;
-					return;
-				}			
+				if(i == coreDisAs->SectionDisAs.constBegin())
+					break;
 				--i;
 			}
 		}
@@ -148,7 +148,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 
 			tblDisAs->setItem(tblDisAs->rowCount() - 1, 3,new QTableWidgetItem(i.value().Comment));
 
-			if(!i.value().Offset.isEmpty() && i.value().Offset.compare(iEnd.value().Offset) == 0)
+			if(i == iEnd)
 			{
 				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(4,0)->text().toULongLong(0,16),true);
 				return;
@@ -198,7 +198,9 @@ void qtDLGDisassembler::OnDisAsReturnPressed()
 	if(dwSelectedVA != 0)
 	{
 		m_offsetWalkHistory.append(currentSelectedItems.value(0)->text().toULongLong(0,16));
-		coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwSelectedVA);
+
+		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwSelectedVA))
+			OnDisplayDisassembly(dwSelectedVA);
 	}
 	return;
 }
@@ -206,7 +208,10 @@ void qtDLGDisassembler::OnDisAsReturnPressed()
 void qtDLGDisassembler::OnDisAsReturn()
 {
 	if(m_offsetWalkHistory.isEmpty()) return;
-	coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),m_offsetWalkHistory.takeLast());
+
+	quint64 lastOffset = m_offsetWalkHistory.takeLast();
+	if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),lastOffset))
+		OnDisplayDisassembly(lastOffset);
 }
 
 bool qtDLGDisassembler::eventFilter(QObject *pObject, QEvent *event)

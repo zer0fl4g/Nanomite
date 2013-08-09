@@ -352,12 +352,18 @@ void clsDebugger::SetTarget(wstring sTarget)
 
 DWORD clsDebugger::GetCurrentPID()
 {
-	return _dwCurPID;
+	if(IsDebuggerSuspended())
+		return _dwCurPID;
+	else
+		return GetMainProcessID();
 }
 
 DWORD clsDebugger::GetCurrentTID()
 {
-	return _dwCurTID;
+	if(IsDebuggerSuspended())
+		return _dwCurTID;
+	else
+		return GetMainThreadID();
 }
 
 void clsDebugger::SetCommandLine(std::wstring CommandLine)
@@ -372,7 +378,10 @@ void clsDebugger::ClearCommandLine()
 
 HANDLE clsDebugger::GetCurrentProcessHandle()
 {
-	return _hCurProc;
+	if(IsDebuggerSuspended())
+		return _hCurProc;
+	else
+		return GetProcessHandleByPID(-1);
 }
 
 wstring clsDebugger::GetCMDLine()
@@ -405,4 +414,19 @@ bool clsDebugger::SetTraceFlagForPID(DWORD dwPID,bool bIsEnabled)
 		}
 	}
 	return false;
+}
+
+bool clsDebugger::IsDebuggerSuspended()
+{
+	return m_debuggerBreak;
+}
+
+DWORD clsDebugger::GetMainProcessID()
+{
+	return m_dbgPI.dwProcessId;
+}
+
+DWORD clsDebugger::GetMainThreadID()
+{
+	return m_dbgPI.dwThreadId;
 }

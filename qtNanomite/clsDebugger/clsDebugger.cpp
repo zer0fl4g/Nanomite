@@ -47,13 +47,17 @@ clsDebugger::clsDebugger()
 	_si.cb = sizeof(_si);
 	ZeroMemory(&_pi, sizeof(_pi));
 
+	ZeroMemory(&dbgSettings, sizeof(clsDebuggerSettings));
+
 	_NormalDebugging = true;
 	_isDebugging = false;
+	m_debuggerBreak = false;
+	
+	pThis = this;
+
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = L"";
-	clsDebuggerSettings tempSet = {0,0,false,false,false,false,false,false,false,false,false,false,false,false};
-	dbgSettings = tempSet;
-	pThis = this;
+
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
 	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
@@ -120,6 +124,9 @@ void clsDebugger::CleanWorkSpace()
 		_si.cb = sizeof(_si);
 		ZeroMemory(&_pi, sizeof(_pi));
 	}
+	
+	ZeroMemory(&m_dbgPI, sizeof(m_dbgPI));
+
 }
 
 PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile) 
@@ -273,6 +280,7 @@ void clsDebugger::DebuggingLoop()
 	DEBUG_EVENT debug_event = {0};
 	bool bContinueDebugging = true;
 	DWORD dwContinueStatus = DBG_CONTINUE;
+	ZeroMemory(&m_dbgPI, sizeof(m_dbgPI));
 
 	DebugSetProcessKillOnExit(false);
 
@@ -294,6 +302,15 @@ void clsDebugger::DebuggingLoop()
 		case CREATE_PROCESS_DEBUG_EVENT:
 			{
 				HANDLE hProc = debug_event.u.CreateProcessInfo.hProcess;
+
+				if(m_dbgPI.hProcess == NULL)
+				{
+					m_dbgPI.hProcess = debug_event.u.CreateProcessInfo.hProcess;
+					m_dbgPI.hThread = debug_event.u.CreateProcessInfo.hThread;
+					m_dbgPI.dwProcessId = debug_event.dwProcessId;
+					m_dbgPI.dwThreadId = debug_event.dwThreadId;
+				}
+
 				PTCHAR tcDllFilepath = GetFileNameFromHandle(debug_event.u.CreateProcessInfo.hFile);
 				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,hProc);
 
@@ -807,6 +824,7 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 			_dwCurPID = debug_event->dwProcessId;
 			_dwCurTID = debug_event->dwThreadId;
 			_hCurProc = GetCurrentProcessHandle(debug_event->dwProcessId);
+			m_debuggerBreak = true;
 
 #ifdef _AMD64_
 			BOOL bIsWOW64 = false;
@@ -841,6 +859,7 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 			SetThreadContext(hThread,&ProcessContext);
 #endif
 			_dwCurPID = NULL;_dwCurTID = NULL;_hCurProc = NULL;
+			m_debuggerBreak = false;
 
 			CloseHandle(hThread);
 			return DBG_EXCEPTION_HANDLED;
@@ -1052,7 +1071,7 @@ HANDLE clsDebugger::GetCurrentProcessHandle(DWORD dwPID)
 		if(PIDs[i].dwPID == dwPID)
 			return PIDs[i].hProc;
 	}
-	return _pi.hProcess;
+	return m_dbgPI.hProcess;
 }
 
 HANDLE clsDebugger::GetProcessHandleByPID(DWORD PID)

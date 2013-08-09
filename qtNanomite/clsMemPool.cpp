@@ -85,9 +85,6 @@ void* clsMemPool::Alloc(size_t ulSize)
 #ifdef _DEBUG
 		if(NULL == m_pFreeMemBlock)
 			qDebug() << "Out of Blocks!!";
-
-		if(ulSize > m_ulUnitSize)
-			qDebug() << "Alloc too huge! - " << ulSize << " bytes";
 #endif
 		LeaveCriticalSection(&CriticalSection);
         return malloc(ulSize);
