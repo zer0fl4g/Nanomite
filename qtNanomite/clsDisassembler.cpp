@@ -39,7 +39,7 @@ clsDisassembler::~clsDisassembler()
 
 bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClear)
 {
-	if(m_processHandle == INVALID_HANDLE_VALUE || m_processHandle == NULL|| dwEIP == NULL || m_isWorking)
+	if(hProc == INVALID_HANDLE_VALUE || hProc == NULL|| dwEIP == NULL || m_isWorking)
 		return false;
 
 	m_isWorking = true;
