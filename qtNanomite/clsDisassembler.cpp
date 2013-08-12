@@ -141,7 +141,9 @@ void clsDisassembler::run()
 			iLen = Disasm(&newDisAss);
 			if (iLen == OUT_OF_BLOCK)
 				bContinueDisAs = false;
-			else if(iLen != UNKNOWN_OPCODE)
+			else if(iLen == UNKNOWN_OPCODE)
+				iLen = 1;
+			else
 			{	
 				// OpCodez
 				if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
@@ -172,8 +174,6 @@ void clsDisassembler::run()
 					SectionDisAs.insert(newRow.Offset,newRow);
 				}
 			}
-			else if(iLen == UNKNOWN_OPCODE)
-				iLen = 1;
 
 			newDisAss.EIP += iLen;
 			newDisAss.VirtualAddr += iLen;

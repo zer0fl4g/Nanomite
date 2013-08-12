@@ -143,7 +143,8 @@ void qtDLGFunctions::InsertDataFrom(int position)
 
 			// Func Size
 			tblFunctions->setItem(tblFunctions->rowCount() - 1,3,
-				new QTableWidgetItem(QString("%1").arg(i->FunctionSize,8,16,QChar('0'))));
+				new QTableWidgetItem(QString("%1").arg(i->FunctionSize,6,10,QChar('0'))));
+
 			++i;numberOfLines++;
 		}
 	}

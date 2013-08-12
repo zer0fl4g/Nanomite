@@ -22,6 +22,10 @@
 #include <Psapi.h>
 #include <string>
 
+#define BEA_ENGINE_STATIC
+#define BEA_USE_STDCALL
+#include <BeaEngine.h>
+
 using namespace std;
 
 clsFunctionsViewWorker::clsFunctionsViewWorker(QList<FunctionProcessingData> dataForProcessing)
@@ -43,67 +47,6 @@ void clsFunctionsViewWorker::run()
 		InsertSymbolsIntoLists(i->hProc,i->PID);
 	}
 	return;
-}
-
-QList<FunctionData> clsFunctionsViewWorker::GetPossibleFunctionBeginning(int PID, quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen)
-{
-	QList<FunctionData> functions;
-
-	for(quint64 i = StartOffset; i < (StartOffset + Size); i++)
-	{
-		int counter = 0;
-		if(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
-		{
-			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-			counter++;
-
-			while(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
-			{
-				lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-				counter++;i++;
-			}
-		}
-		else
-			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-
-		if(counter > SpaceLen)
-		{
-			// possible beginning
-			FunctionData newFunction;
-			newFunction.PID = PID;
-			newFunction.FunctionOffset = i + 1;
-			newFunction.FunctionSize = GetPossibleFunctionEnding(i + 1,(StartOffset + Size) - i + 1,SearchPattern,(LPVOID)((quint64)lpBuffer + 1),SpaceLen);
-
-			if(newFunction.FunctionSize > 4)
-				functions.append(newFunction);
-		}
-	}
-	return functions;
-}
-
-quint64 clsFunctionsViewWorker::GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen)
-{
-	for(quint64 i = BaseAddress; i < (BaseAddress + Size); i++)
-	{
-		int counter = 0;
-		if(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
-		{
-			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-			counter++;
-
-			while(memcmp(lpBuffer,&SearchPattern,0x1) == 0)
-			{
-				lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-				counter++;i++;		
-			}
-		}
-		else
-			lpBuffer = (LPVOID)((quint64)lpBuffer + 1);
-
-		if(counter > SpaceLen)
-			return i - BaseAddress - counter;
-	}
-	return 0;
 }
 
 void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc)
@@ -142,29 +85,190 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 void clsFunctionsViewWorker::ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size)
 {
 	LPVOID lpBuffer = malloc(Size);
-	DWORD	//searchPattern	= NULL,
-			searchPattern2	= 0x90909090,
-			searchPattern3	= 0xCCCCCCCC;
-	//		dwOldProtection = NULL,
-	//		dwNewProtection = PAGE_EXECUTE_READWRITE;
-
 	if(lpBuffer == NULL) return;
-//	if(!VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwNewProtection,&dwOldProtection))
-//		return;
 
 	if(!ReadProcessMemory(hProc,(LPVOID)BaseAddress,lpBuffer,Size,NULL))
 	{
 		free(lpBuffer);
 		return;
 	}
-	
-	//VirtualProtectEx(hProc,(LPVOID)BaseAddress,Size,dwOldProtection,&dwNewProtection);
 
-	//functionList.append(GetPossibleFunctionBeginning(BaseAddress,Size,searchPattern,lpBuffer,4));
-	functionList.append(GetPossibleFunctionBeginning(GetProcessId(hProc),BaseAddress,Size,searchPattern2,lpBuffer,4));
-	functionList.append(GetPossibleFunctionBeginning(GetProcessId(hProc),BaseAddress,Size,searchPattern3,lpBuffer,4));
+	DISASM newDisAss;
+	FunctionData newFunction;
+	quint64 endOffset = BaseAddress + Size;
+	int processID = GetProcessId(hProc);
+	bool bContinueDisAs = true,
+		isContained = false;
+	int iLen = 0;
+
+	memset(&newDisAss, 0, sizeof(DISASM));
+
+	newDisAss.EIP = (quint64)lpBuffer;
+	newDisAss.VirtualAddr = BaseAddress;
+#ifdef _AMD64_
+	newDisAss.Archi = 64;
+#else
+	newDisAss.Archi = 0;
+#endif
+
+	while(bContinueDisAs)
+	{
+		newDisAss.SecurityBlock = (int)endOffset - newDisAss.VirtualAddr;
+
+		iLen = Disasm(&newDisAss);
+		if (iLen == OUT_OF_BLOCK)
+			bContinueDisAs = false;
+		else if(iLen == UNKNOWN_OPCODE)
+			iLen = 1;
+		else
+		{	
+			if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
+				iLen = 1;
+
+			if(iLen > 0 &&
+				newDisAss.Instruction.BranchType == CallType &&
+				newDisAss.Instruction.AddrValue >= BaseAddress &&
+				newDisAss.Instruction.AddrValue <= endOffset) 
+			{
+				for(QList<FunctionData>::const_iterator functionIT = functionList.constBegin(); functionIT != functionList.constEnd(); ++functionIT)
+				{
+					if(functionIT->FunctionOffset == newDisAss.Instruction.AddrValue)
+					{
+						isContained = true;
+						break;
+					}
+				}
+
+				if(!isContained)
+				{
+					newFunction.FunctionOffset = newDisAss.Instruction.AddrValue;
+					newFunction.FunctionSize = GetFunctionSizeFromCallPoint(hProc, newDisAss.Instruction.AddrValue, endOffset);
+					newFunction.functionSymbol = "";
+					newFunction.PID = processID;
+					functionList.append(newFunction);
+				}
+
+				isContained = false;
+			}
+		}
+
+		newDisAss.EIP += iLen;
+		newDisAss.VirtualAddr += iLen;
+			
+
+		if (newDisAss.VirtualAddr >= endOffset)
+			bContinueDisAs = false;
+	}
 
 	free(lpBuffer);
+}
+
+DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle, quint64 functionOffset, quint64 pageEnd)
+{
+	LPVOID lpBuffer = malloc(pageEnd - functionOffset);
+	if(lpBuffer == NULL) return 0;
+
+	if(!ReadProcessMemory(processHandle, (LPVOID)functionOffset, lpBuffer, pageEnd - functionOffset, NULL))
+	{
+		free(lpBuffer);
+		return 0;
+	}
+
+	QList<JumpData> jumpsInFunction;
+	DISASM newDisAss;
+	JumpData newJump;
+	bool bContinueDisAs = true,
+		isNotFunctionEnd = false;
+	int iLen = 0;
+
+	memset(&newDisAss, 0, sizeof(DISASM));
+
+	newDisAss.EIP = (quint64)lpBuffer;
+	newDisAss.VirtualAddr = functionOffset;
+#ifdef _AMD64_
+	newDisAss.Archi = 64;
+#else
+	newDisAss.Archi = 0;
+#endif
+	
+
+	while(bContinueDisAs)
+	{
+		newDisAss.SecurityBlock = (int)pageEnd - newDisAss.VirtualAddr;
+
+		iLen = Disasm(&newDisAss);
+		if (iLen == OUT_OF_BLOCK)
+			bContinueDisAs = false;
+		else if(iLen == UNKNOWN_OPCODE)
+			iLen = 1;
+		else
+		{	
+			if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
+				iLen = 1;
+			else if(newDisAss.Instruction.Opcode == 0x00 ||
+				newDisAss.Instruction.Opcode == 0xCC)
+			{
+				free(lpBuffer);
+				return (newDisAss.VirtualAddr - functionOffset - iLen);
+			}
+
+			if(iLen > 0)
+			{
+				if(newDisAss.Instruction.BranchType == RetType)
+				{
+					for(QList<JumpData>::const_iterator jumpIT = jumpsInFunction.constBegin(); jumpIT != jumpsInFunction.constEnd(); ++jumpIT)
+					{
+						if(jumpIT->jumpTarget < functionOffset)
+						{
+							// a jump above our function entry
+							// A
+							// |
+							// |
+							free(lpBuffer);
+							return jumpIT->jumpOffset - functionOffset + iLen;
+						}
+						else if(jumpIT->jumpTarget > newDisAss.VirtualAddr)
+						{
+							// a jump over the found ret
+							// |
+							// |
+							// V
+							isNotFunctionEnd = true;
+						}
+					}
+
+					if(!isNotFunctionEnd)
+					{
+						free(lpBuffer);
+						return newDisAss.VirtualAddr - functionOffset + iLen;
+					}
+					else
+					{
+						jumpsInFunction.clear();
+						isNotFunctionEnd = false;
+					}
+				}
+				else if(newDisAss.Instruction.BranchType == JmpType || 
+					(newDisAss.Instruction.BranchType <= -1 && newDisAss.Instruction.BranchType >= -8) ||
+					(newDisAss.Instruction.BranchType >= 1 && newDisAss.Instruction.BranchType <= 8))
+				{
+					newJump.jumpOffset = newDisAss.VirtualAddr;
+					newJump.jumpTarget = newDisAss.Instruction.AddrValue;
+
+					jumpsInFunction.append(newJump);
+				}
+			}
+		}
+
+		newDisAss.EIP += iLen;
+		newDisAss.VirtualAddr += iLen;
+
+		if (newDisAss.VirtualAddr >= pageEnd)
+			bContinueDisAs = false;
+	}
+
+	free(lpBuffer);
+	return 0;
 }
 
 void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE hProc,WORD PID)
@@ -179,11 +283,7 @@ void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE hProc,WORD PID)
 			{
 				clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,functionList[i].FunctionOffset,hProc);
 				if(sFuncName.length() > 0)
-				{
-					wstring *sFuncTemp = &sFuncName;
-					functionList[i].functionSymbol = QString().fromStdWString(*sFuncTemp);
-					functionList[i].PID = PID;
-				}
+					functionList[i].functionSymbol = QString().fromStdWString(sFuncName);
 				else
 					functionList[i].functionSymbol = QString("sub_%1").arg(functionList[i].FunctionOffset,16,16,QChar('0'));
 			}		

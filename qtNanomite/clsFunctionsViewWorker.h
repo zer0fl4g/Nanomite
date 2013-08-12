@@ -37,6 +37,12 @@ struct FunctionProcessingData
 	int PID;
 };
 
+struct JumpData
+{
+	quint64 jumpOffset;
+	quint64 jumpTarget;
+};
+
 class clsFunctionsViewWorker : public QThread
 {
 	Q_OBJECT
@@ -53,10 +59,8 @@ private:
 	void GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc);
 	void ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
 	void InsertSymbolsIntoLists(HANDLE hProc,WORD PID);
-
-	quint64 GetPossibleFunctionEnding(quint64 BaseAddress,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen);
-
-	QList<FunctionData> GetPossibleFunctionBeginning(int PID, quint64 StartOffset,quint64 Size,DWORD SearchPattern,LPVOID lpBuffer,int SpaceLen);
+	
+	DWORD GetFunctionSizeFromCallPoint(HANDLE processHandle, quint64 functionOffset, quint64 pageEnd);
 
 protected:
 	void run();
