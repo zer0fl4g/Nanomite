@@ -314,14 +314,14 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,threadID);
 		if(hThread == INVALID_HANDLE_VALUE) 
 		{
-			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Have not been able to open this Thread!",QMessageBox::Ok,QMessageBox::Ok);
 			return;
 		}
 
 		if(SuspendThread(hThread) != -1)
 			tblTIDs->item(m_selectedRow,4)->setText("Suspended");
 		else
-			MessageBoxW(NULL,L"ERROR, have not been able to suspend this Thread!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Have not been able to suspend this Thread!",QMessageBox::Ok,QMessageBox::Ok);
 
 		CloseHandle(hThread);
 	}
@@ -331,14 +331,14 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		HANDLE hThread = OpenThread(THREAD_SUSPEND_RESUME,false,threadID);
 		if(hThread == INVALID_HANDLE_VALUE) 
 		{
-			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Have not been able to open this Thread!",QMessageBox::Ok,QMessageBox::Ok);
 			return;
 		}
 
 		if(ResumeThread(hThread) != -1)
 			tblTIDs->item(m_selectedRow,4)->setText("Running");
 		else
-			MessageBoxW(NULL,L"ERROR, have not been able to resume this Thread!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Have not been able to resume this Thread!",QMessageBox::Ok,QMessageBox::Ok);
 
 		CloseHandle(hThread);
 	}
@@ -350,7 +350,7 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		HANDLE hThread = OpenThread(THREAD_QUERY_INFORMATION,false,threadID);
 		if(hThread == INVALID_HANDLE_VALUE) 
 		{
-			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Have not been able to open this Thread!",QMessageBox::Ok,QMessageBox::Ok);
 			return;
 		}
 
@@ -367,7 +367,7 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 
 		if(hThread == INVALID_HANDLE_VALUE && hProc == NULL) 
 		{
-			MessageBoxW(NULL,L"ERROR, have not been able to open this Thread!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Have not been able to open this Thread!",QMessageBox::Ok,QMessageBox::Ok);
 			return;
 		}
 		
@@ -606,7 +606,7 @@ bool qtDLGDetailInfo::SetThreadPriorityByTid(DWORD threadID, int threadPrio)
 
 	bool bSuccess = false;
 	if(!(bSuccess = SetThreadPriority(hThread,threadPrio)))
-		MessageBoxW(NULL,L"ERROR, could not set the thread priority",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","Could not set the thread priority!",QMessageBox::Ok,QMessageBox::Ok);
 	CloseHandle(hThread);
 	return bSuccess;
 }
@@ -618,7 +618,7 @@ bool qtDLGDetailInfo::SetProcessPriorityByPid(DWORD processID, int processPrio)
 
 	bool bSuccess = false;
 	if(!(bSuccess = SetPriorityClass(hProc, processPrio)))
-		MessageBoxW(NULL, L"ERROR, could not set the process priority", L"Nanomite", MB_OK);
+		QMessageBox::critical(this,"Nanomite","Could not set the thread priority!",QMessageBox::Ok,QMessageBox::Ok);
 	CloseHandle(hProc);
 	return bSuccess;
 }

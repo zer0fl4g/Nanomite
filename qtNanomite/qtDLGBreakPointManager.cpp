@@ -132,7 +132,7 @@ void qtDLGBreakPointManager::OnAddUpdate()
 
 			if(dwOffset <= 0)
 			{
-				MessageBoxW(NULL,L"Please use a correct API Name!",L"Nanomite - Breakpoint Manager",MB_OK);
+				QMessageBox::critical(this,"Nanomite","Please use a correct API Name!",QMessageBox::Ok,QMessageBox::Ok);
 				return;
 			}
 			else

@@ -43,7 +43,8 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 			m_currentFile = m_pEManager->getFilenameFromPID(m_processID);
 		if(m_currentFile.length() <= 0) 
 		{
-			MessageBoxW(NULL,L"Could not load File!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","Could not load File!",QMessageBox::Ok,QMessageBox::Ok);
+
 			close();
 		}
 
@@ -54,7 +55,8 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 	}
 	else
 	{
-		MessageBoxW(NULL,L"Could not load File!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","Could not load File!",QMessageBox::Ok,QMessageBox::Ok);
+
 		close();
 	}
 }

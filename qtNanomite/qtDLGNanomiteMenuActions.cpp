@@ -122,7 +122,8 @@ void qtDLGNanomite::action_DebugStart()
 		if(!PEManager->OpenFile(coreDebugger->GetTarget()) || 
 			!PEManager->isValidPEFile(coreDebugger->GetTarget()))
 		{
-			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","This is a invalid File! Please select another one!",QMessageBox::Ok,QMessageBox::Ok);
+
 			PEManager->CloseFile(coreDebugger->GetTarget(),0);
 			coreDebugger->ClearTarget();
 			return;
@@ -152,7 +153,8 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 		PEManager->OpenFile(filePath);
 		if(!PEManager->isValidPEFile(filePath))
 		{
-			MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+			QMessageBox::critical(this,"Nanomite","This is a invalid File! Please select another one!",QMessageBox::Ok,QMessageBox::Ok);
+
 			PEManager->CloseFile(coreDebugger->GetTarget(),0);
 			return;
 		}

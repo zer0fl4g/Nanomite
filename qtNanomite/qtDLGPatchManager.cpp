@@ -92,8 +92,10 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 			RemovePatch(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
 			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 
-		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		emit pThis->OnReloadDebugger();
+		qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16),
+			true);
+
 		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Remove Patch") == 0)
@@ -103,8 +105,10 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 		DeletePatch(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
 			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 
-		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		emit pThis->OnReloadDebugger();
+		qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16),
+			true);
+
 		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Remove All Patches") == 0)
@@ -390,14 +394,8 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 	}
 
 	if(bThingsChanged)
-	{
-		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		if(!qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),latestPatchOffset))
-			qtDLGNanomite::GetInstance()->DisAsGUI->OnDisplayDisassembly(latestPatchOffset);
+		qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),latestPatchOffset,true);
 
-		//qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		//emit pThis->OnReloadDebugger();
-	}
 	UpdatePatchTable();
 }
 
@@ -505,6 +503,12 @@ void qtDLGPatchManager::OnPatchRemove()
 	if(tblPatches->selectedItems().count() <= 0) return;
 
 	QTableWidgetItem *pItem = tblPatches->selectedItems()[0];
+	RemovePatch(tblPatches->item(pItem->row(),0)->text().toULongLong(0,16),tblPatches->item(pItem->row(),1)->text().toULongLong(0,16));
 	DeletePatch(tblPatches->item(pItem->row(),0)->text().toULongLong(0,16),tblPatches->item(pItem->row(),1)->text().toULongLong(0,16));
-	UpdatePatchTable();
+	
+	qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),
+		tblPatches->item(pItem->row(),1)->text().toULongLong(0,16),
+		true);
+
+	UpdatePatchTable();	
 }

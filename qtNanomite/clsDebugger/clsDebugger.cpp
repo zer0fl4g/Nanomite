@@ -921,9 +921,10 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 	if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && _bSingleStepFlag)
 		return true;
 
-	if(dwExceptionType == EXCEPTION_BREAKPOINT ||
-		dwExceptionType == 0x4000001f	||
+	if(dwExceptionType == EXCEPTION_BREAKPOINT	||
+		dwExceptionType == 0x4000001f			||
 		dwExceptionType == EXCEPTION_GUARD_PAGE ||
+		dwExceptionType == 0x4000001E			||
 		dwExceptionType == EXCEPTION_SINGLE_STEP)
 	{
 		for(size_t i = 0;i < SoftwareBPs.size();i++)

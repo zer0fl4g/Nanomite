@@ -19,10 +19,12 @@
 
 #include <Windows.h>
 
+#include <QtGui>
+
 class clsMemDump
 {
 public:
-	clsMemDump(HANDLE hProc, PTCHAR FileName, DWORD64 BaseOffset, DWORD Size);
+	clsMemDump(HANDLE hProc, PTCHAR FileName, DWORD64 BaseOffset, DWORD Size, QWidget *pParent = NULL);
 	~clsMemDump();
 };
 

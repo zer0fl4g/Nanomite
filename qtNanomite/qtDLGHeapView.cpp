@@ -105,7 +105,8 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 		clsMemDump memDump(hProc,
 			L"Heap",
 			tblHeapBlocks->item(m_selectedRow,2)->text().toULongLong(0,16),
-			tblHeapBlocks->item(m_selectedRow,3)->text().toULongLong(0,16));
+			tblHeapBlocks->item(m_selectedRow,3)->text().toULongLong(0,16),
+			this);
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{

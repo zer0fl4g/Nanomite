@@ -757,6 +757,9 @@
     <CustomBuild Include="qtDLGGoToDialog.h">
       <Filter>Header Dateien\Dialogs</Filter>
     </CustomBuild>
+    <CustomBuild Include="clsMemDump.h">
+      <Filter>Header Dateien</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NativeHeaders.h">
@@ -787,9 +790,6 @@
       <Filter>Header Dateien</Filter>
     </ClInclude>
     <ClInclude Include="clsMemPool.h">
-      <Filter>Header Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="clsMemDump.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
     <ClInclude Include="resource.h">

@@ -50,7 +50,8 @@ void qtDLGPEBView::ShowPEBForProcess(HANDLE hProc)
 	
 	if(clsAPIImport::pNtQueryInformationProcess(hProc,ProcessBasicInformation,&pPBI,sizeof(pPBI),&retLen) != NULL)
 	{
-		MessageBoxW(NULL,L"ERROR, NtQueryInformationProcess failed!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","NtQueryInformationProcess failed!",QMessageBox::Ok,QMessageBox::Ok);
+
 		this->close();
 		return;
 	}
@@ -59,7 +60,8 @@ void qtDLGPEBView::ShowPEBForProcess(HANDLE hProc)
 	SIZE_T bytesRead = NULL;
 	if(!ReadProcessMemory(hProc,pPBI.PebBaseAddress,pPEB,sizeof(_PEB),&bytesRead))
 	{
-		MessageBoxW(NULL,L"ERROR, Read from process memory to get PEB failed!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","Read from process memory to get PEB failed!",QMessageBox::Ok,QMessageBox::Ok);
+
 		clsMemManager::CFree(pPEB);
 		this->close();
 		return;

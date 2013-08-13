@@ -325,7 +325,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		if(dlgSourceViewer->IsSourceAvailable)
 			dlgSourceViewer->show();
 		else
-			MessageBoxW(NULL,L"Sorry, there is no source available!",L"Nanomite",MB_OK);
+			QMessageBox::information(this,"Nanomite","Sorry, there is no source available!",QMessageBox::Ok,QMessageBox::Ok);
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{

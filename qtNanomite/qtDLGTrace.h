@@ -66,6 +66,7 @@ private slots:
 	void OnCustomContextMenu(QPoint qPoint);
 	void MenuCallback(QAction* pAction);
 	void OnUpdateStatusBar();
+	void OnDoubleClickFunction(QTableWidgetItem *pItem);
 
 protected:
 	void showEvent(QShowEvent * event);

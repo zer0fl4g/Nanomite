@@ -17,7 +17,10 @@
 #include "clsMemDump.h"
 #include "clsMemManager.h"
 
-clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD Size)
+#include <QFileDialog>
+#include <QMessageBox>
+
+clsMemDump::clsMemDump( HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD Size, QWidget *pParent)
 {
 	bool	isProtectionChanged = false;
 	DWORD	OldProtection	= NULL,
@@ -30,7 +33,7 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 	{
 		if(!VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,NewProtection,&OldProtection))
 		{
-			MessageBoxW(NULL,L"Failed to access Memory!",L"Nanomite",MB_OK);
+			QMessageBox::critical(pParent,"Nanomite","Failed to access Memory!",QMessageBox::Ok,QMessageBox::Ok);
 			free(pBuffer);
 			return;
 		}
@@ -38,7 +41,7 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 
 		if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
 		{
-			MessageBoxW(NULL,L"Failed to read Memory!",L"Nanomite",MB_OK);
+			QMessageBox::critical(pParent,"Nanomite","Failed to read Memory!",QMessageBox::Ok,QMessageBox::Ok);
 			free(pBuffer);
 			return;
 		}
@@ -50,26 +53,33 @@ clsMemDump::clsMemDump(HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DW
 	else
 		wsprintf(FileName,L"%s_%016I64X-%016I64X_%08X.bin",FileBaseName,BaseOffset,BaseOffset + Size,Size);
 
-	HANDLE hFile = CreateFile(FileName, GENERIC_READ | GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
+	QString filePath = QFileDialog::getSaveFileName(NULL,
+		"Please select a place to save the dump",
+		QString("%1\\%2").arg(QDir::currentPath()).arg(QString::fromWCharArray(FileName)),
+		"Dump files (*.dmp *.bin)",
+		NULL,
+		NULL);
+
+	free(FileName);
+
+	HANDLE hFile = CreateFile(filePath.toStdWString().c_str(), GENERIC_READ | GENERIC_WRITE, NULL, NULL, CREATE_ALWAYS, FILE_ATTRIBUTE_NORMAL, NULL);
 	if(hFile == INVALID_HANDLE_VALUE)
 	{
-		MessageBoxW(NULL,L"Failed to create File!",L"Nanomite",MB_OK);
-		free(FileName);
+		QMessageBox::critical(pParent,"Nanomite","Failed to create File!",QMessageBox::Ok,QMessageBox::Ok);
 		free(pBuffer);
 		return;
 	}
 
 	if(!WriteFile(hFile,pBuffer,Size,&BytesWrote,NULL))
-		MessageBoxW(NULL,L"Failed to write to File!",L"Nanomite",MB_OK);
+		QMessageBox::critical(pParent,"Nanomite","Failed to write to File!",QMessageBox::Ok,QMessageBox::Ok);
 
-	free(FileName);
 	free(pBuffer);
 	CloseHandle(hFile);
 
 	if(isProtectionChanged && !VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,OldProtection,&NewProtection))
-		MessageBoxW(NULL,L"Failed to reprotect the Memory!",L"Nanomite",MB_OK);
+		QMessageBox::critical(pParent,"Nanomite","Failed to reprotect the Memory!",QMessageBox::Ok,QMessageBox::Ok);
 	
-	MessageBoxW(NULL,L"Memory Dump finished!",L"Nanomite",MB_OK);
+	QMessageBox::information(pParent,"Nanomite","Memory Dump finished!",QMessageBox::Ok,QMessageBox::Ok);
 }
 
 clsMemDump::~clsMemDump()

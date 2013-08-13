@@ -145,7 +145,7 @@ void qtDLGAttach::OnProcessDoubleClick(int iRow,int iColumn)
 		close();
 	}	
 	else
-		MessageBoxW(NULL,L"This is a invalid File! Please select another one!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","This is a invalid File! Please select another one!",QMessageBox::Ok,QMessageBox::Ok);
 }
 
 void qtDLGAttach::OnReturnPressed()

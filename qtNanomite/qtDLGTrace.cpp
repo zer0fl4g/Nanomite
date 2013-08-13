@@ -48,6 +48,7 @@ qtDLGTrace::qtDLGTrace(QWidget *parent, Qt::WFlags flags)
 
 	connect(m_statusBarTimer,SIGNAL(timeout()),this,SLOT(OnUpdateStatusBar()));
 	connect(tblTraceLog,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
+	connect(tblTraceLog,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnDoubleClickFunction(QTableWidgetItem *)));
 	connect(scrollTrace,SIGNAL(valueChanged(int)),this,SLOT(OnShow(int)));
 	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 }
@@ -205,4 +206,9 @@ void qtDLGTrace::disableStatusBarTimer()
 {
 	pThis->m_statusBarTimer->stop();
 	pThis->m_prevStepsDone = 0;
+}
+
+void qtDLGTrace::OnDoubleClickFunction(QTableWidgetItem *pItem)
+{
+	emit OnDisplayDisassembly(tblTraceLog->item(pItem->row(),2)->text().toULongLong(0,16));
 }

@@ -174,7 +174,8 @@ void qtDLGMemoryView::MenuCallback(QAction* pAction)
 		clsMemDump memDump(hProc,
 			(PTCHAR)tblMemoryView->item(m_selectedRow,3)->text().utf16(),
 			tblMemoryView->item(m_selectedRow,1)->text().toULongLong(0,16),
-			tblMemoryView->item(m_selectedRow,2)->text().toULongLong(0,16));
+			tblMemoryView->item(m_selectedRow,2)->text().toULongLong(0,16),
+			this);
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
@@ -364,7 +365,7 @@ void qtDLGMemoryView::SetPageProctection(DWORD protectionFlag)
 	if(!VirtualProtectEx(hProcess, (LPVOID)tblMemoryView->item(m_selectedRow,1)->text().toULongLong(0,16),
 		tblMemoryView->item(m_selectedRow,2)->text().toULongLong(0,16), protectionFlag, &oldProtection))
 	{
-		MessageBoxW(NULL, L"ERROR, Failed to change the Page protection!", L"Nanomite", MB_OK);
+		QMessageBox::critical(this,"Nanomite","Failed to change the Page protection!",QMessageBox::Ok,QMessageBox::Ok);
 	}
 	else
 		DisplayMemory();

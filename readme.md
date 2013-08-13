@@ -85,9 +85,15 @@
 	+ Del			= Remove selected patch
 - Register Window
 	+ Double Click	= Opens reg edit window
+- Trace Window
+	+ Double Click	= Sends offset to disassembler
 
 ## Changelog
 ###Version 0.1 beta 15
++ fixed a bug which did not reload the gui when deleting a patch from patchmanager using hotkey
++ added save file dialog to memory dump
++ added double click handler in trace view to send a offset to disassembler window
 + updated function view algorithm
++ updated winapi messagebox to qt
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

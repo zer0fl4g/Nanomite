@@ -50,7 +50,8 @@ void qtDLGTIBView::ShowTIBForThread(HANDLE processHandle, HANDLE threadHandle)
 
 	if(clsAPIImport::pNtQueryInformationThread(threadHandle,ThreadBasicInformation,&pTIB,sizeof(pTIB),&retLen) != NULL)
 	{
-		MessageBoxW(NULL,L"ERROR, NtQueryInformationThread failed!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","NtQueryInformationProcess failed!",QMessageBox::Ok,QMessageBox::Ok);
+
 		this->close();
 		return;
 	}
@@ -59,7 +60,8 @@ void qtDLGTIBView::ShowTIBForThread(HANDLE processHandle, HANDLE threadHandle)
 	SIZE_T bytesRead = NULL;
 	if(!ReadProcessMemory(processHandle,pTIB.TebBaseAddress,pTEB,sizeof(TEB),&bytesRead))
 	{
-		MessageBoxW(NULL,L"ERROR, Could not read the TEB address!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","Read from process memory to get TEB failed!",QMessageBox::Ok,QMessageBox::Ok);
+
 		clsMemManager::CFree(pTEB);
 		this->close();
 		return;

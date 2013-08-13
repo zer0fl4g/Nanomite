@@ -82,7 +82,7 @@ void qtDLGAssembler::InsertNewInstructions()
 
 	if(!CreateProcess(NULL,szCommandLine,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&si,&pi)) 
     {
-        MessageBoxW(NULL,L"Error, unable to launch assembler!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","unable to launch assembler!",QMessageBox::Ok,QMessageBox::Ok);
 		close();
 		return;
     }
@@ -107,7 +107,7 @@ void qtDLGAssembler::InsertNewInstructions()
 		CloseHandle(hFile);
 		DeleteFile(L"nanomite.bin");
 		clsMemManager::CFree(pFileBuffer);
-		MessageBoxW(NULL,L"Error, no valid opcodes found!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","no valid opcodes found!",QMessageBox::Ok,QMessageBox::Ok);
 		close();
 		return;
 	}
@@ -118,7 +118,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	if(BytesRead <= 0)
 	{
 		clsMemManager::CFree(pFileBuffer);
-		MessageBoxW(NULL,L"Error, no valid opcodes found!",L"Nanomite",MB_OK);
+		QMessageBox::critical(this,"Nanomite","no valid opcodes found!",QMessageBox::Ok,QMessageBox::Ok);
 		close();
 		return;
 	}

@@ -25,6 +25,7 @@
 #include <QTextStream>
 #include <QFileDialog>
 #include <QMenu>
+#include <QMessageBox>
 
 qtDLGLogView::qtDLGLogView(QWidget *parent)
 	: QDockWidget(parent)
@@ -81,7 +82,8 @@ void qtDLGLogView::MenuCallback(QAction* pAction)
 			out << tblLogBox->item(i,0)->text() << "\t" << tblLogBox->item(i,1)->text() << "\n";
 
 		tempOutput.close();
-		MessageBoxW(NULL,L"The log file has been written to disk!",L"Nanomite",MB_OK);
+
+		QMessageBox::information(this,"Nanomite","The log file has been written to disk!",QMessageBox::Ok,QMessageBox::Ok);
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
