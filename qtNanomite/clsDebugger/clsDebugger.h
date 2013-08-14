@@ -100,6 +100,7 @@ struct BPStruct
 	|   0x1 - keep
 	|   0x2 - step , remove it
 	|   0x3 - offset changed
+	|	0x4 - trace end bp
 	*/
 	quint64 dwOffset;
 	quint64 dwBaseOffset;
@@ -115,6 +116,22 @@ struct customException
 	DWORD dwAction;
 	DWORD dwExceptionType;
 	quint64 dwHandler;
+};
+
+enum BREAKPOINT
+{
+	SOFTWARE_BP = 0,
+	MEMORY_BP	= 1,
+	HARDWARE_BP = 2
+};
+
+enum BREAKPOINT_TYPE
+{
+	BP_DONOTKEEP	= 0,
+	BP_KEEP			= 1,
+	BP_STEPOVER		= 2,
+	BP_OFFSETUPDATE = 3,
+	BP_TRACETO		= 4
 };
 
 class clsDebugger : public QThread
@@ -250,7 +267,7 @@ private:
 	bool dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot);
 	bool InitBP();
 	bool CheckProcessState(DWORD dwPID);
-	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag);
+	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag, bool isExceptionRelevant = true);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
 	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);
 	bool IsDebuggerSuspended();

@@ -56,10 +56,7 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 			lpCurrentNameTemp = clsHelperClass::reverseStrip(lpCurrentName,'\\'),
 			lpCurrentFileName = NULL;
 
-	MODULEENTRY32 pModEntry;
-	pModEntry.dwSize = sizeof(MODULEENTRY32);
 	MEMORY_BASIC_INFORMATION mbi;
-
 	while(VirtualQueryEx(hProc,(LPVOID)CurAddress,&mbi,sizeof(mbi)))
 	{
 		if(GetMappedFileName(hProc,(LPVOID)CurAddress,lpFileName,MAX_PATH) > 0)
@@ -67,7 +64,8 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 			lpCurrentFileName = clsHelperClass::reverseStrip(lpFileName,'\\');
 			if(lpCurrentFileName != NULL && wcslen(lpCurrentFileName) > 0)
 			{
-				if(wcscmp(lpCurrentFileName,lpCurrentNameTemp) == 0)
+				if(wcscmp(lpCurrentFileName,lpCurrentNameTemp) == 0 &&
+					((mbi.Protect & PAGE_EXECUTE) || (mbi.Protect & PAGE_EXECUTE_READ) || (mbi.Protect & PAGE_EXECUTE_READWRITE) || (mbi.Protect & PAGE_EXECUTE_WRITECOPY)))
 				{
 					ParseMemoryRangeForFunctions(hProc,(quint64)mbi.BaseAddress,mbi.RegionSize);
 				}				
@@ -179,7 +177,8 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 	JumpData newJump;
 	bool bContinueDisAs = true,
 		isNotFunctionEnd = false;
-	int iLen = 0;
+	int iLen = NULL,
+		trashCounter = NULL;
 
 	memset(&newDisAss, 0, sizeof(DISASM));
 
@@ -205,18 +204,24 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 		{	
 			if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
 				iLen = 1;
-			else if(newDisAss.Instruction.Opcode == 0x00 ||
-				newDisAss.Instruction.Opcode == 0xCC)
-			{
-				free(lpBuffer);
-				return (newDisAss.VirtualAddr - functionOffset - iLen);
-			}
 
 			if(iLen > 0)
 			{
-				if(newDisAss.Instruction.BranchType == RetType)
+				if(newDisAss.Instruction.Opcode == 0x00 ||
+					newDisAss.Instruction.Opcode == 0x90 ||
+					newDisAss.Instruction.Opcode == 0xCC)
 				{
-					for(QList<JumpData>::const_iterator jumpIT = jumpsInFunction.constBegin(); jumpIT != jumpsInFunction.constEnd(); ++jumpIT)
+					trashCounter++;
+
+					if(trashCounter >= 4)
+					{
+						free(lpBuffer);
+						return (newDisAss.VirtualAddr - functionOffset - trashCounter);
+					}
+				} 
+				else if(newDisAss.Instruction.BranchType == RetType)
+				{
+					for(QList<JumpData>::iterator jumpIT = jumpsInFunction.begin(); jumpIT != jumpsInFunction.end(); ++jumpIT)
 					{
 						if(jumpIT->jumpTarget < functionOffset)
 						{
@@ -235,6 +240,13 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 							// V
 							isNotFunctionEnd = true;
 						}
+						else if(jumpIT->jumpTarget == newDisAss.VirtualAddr)
+						{
+							jumpIT = jumpsInFunction.erase(jumpIT);
+						}
+
+						if(jumpIT == jumpsInFunction.end())
+							break;
 					}
 
 					if(!isNotFunctionEnd)
@@ -244,7 +256,8 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 					}
 					else
 					{
-						jumpsInFunction.clear();
+						//jumpsInFunction.clear();
+						trashCounter = NULL;
 						isNotFunctionEnd = false;
 					}
 				}
@@ -255,6 +268,7 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 					newJump.jumpOffset = newDisAss.VirtualAddr;
 					newJump.jumpTarget = newDisAss.Instruction.AddrValue;
 
+					trashCounter = NULL;
 					jumpsInFunction.append(newJump);
 				}
 			}

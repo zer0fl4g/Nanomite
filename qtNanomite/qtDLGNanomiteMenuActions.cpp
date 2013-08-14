@@ -378,8 +378,6 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 
 	lpCurrentName = clsHelperClass::reverseStrip(lpCurrentNameTemp,'\\');
 
-	MODULEENTRY32 pModEntry;
-	pModEntry.dwSize = sizeof(MODULEENTRY32);
 	MEMORY_BASIC_INFORMATION mbi;
 		
 	while(VirtualQueryEx(hProcess,(LPVOID)CurAddress,&mbi,sizeof(mbi)))

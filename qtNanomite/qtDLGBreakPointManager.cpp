@@ -42,6 +42,8 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(pbClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(pbAddUpdate,SIGNAL(clicked()),this,SLOT(OnAddUpdate()));
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
+	connect(tblBPs,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
+
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
 	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
@@ -60,7 +62,7 @@ void qtDLGBreakPointManager::OnClose()
 
 void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 {
-	if(newBP.dwHandle == 0x1)
+	if(newBP.dwHandle == BP_KEEP)
 	{
 		tblBPs->insertRow(tblBPs->rowCount());
 
@@ -101,7 +103,7 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 		}
 		tblBPs->setItem(tblBPs->rowCount() - 1,4,new QTableWidgetItem(TempString));
 	}
-	else if(newBP.dwHandle == 0x3)
+	else if(newBP.dwHandle == BP_OFFSETUPDATE)
 	{ // BP got new Offset
 		for(int i = 0; i < tblBPs->rowCount(); i++)
 		{
@@ -110,7 +112,7 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 				tblBPs->removeRow(i);
 			}
 		}
-		newBP.dwHandle = 0x1;
+		newBP.dwHandle = BP_KEEP;
 
 		OnUpdate(newBP,breakpointType);
 	}
@@ -263,4 +265,9 @@ void qtDLGBreakPointManager::OnDelete(quint64 breakpointOffset)
 QStringList qtDLGBreakPointManager::ReturnCompleterList()
 {
 	return pThis->m_completerList;
+}
+
+void qtDLGBreakPointManager::OnSendToDisassembler(QTableWidgetItem *pItem)
+{
+	emit OnDisplayDisassembly(tblBPs->item(pItem->row(),1)->text().toULongLong(0,16));
 }

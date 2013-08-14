@@ -148,7 +148,7 @@ bool clsDebugger::IsTargetSet()
 bool clsDebugger::StepOver(quint64 dwNewOffset)
 {
 	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it) {
-		if(it->dwHandle == 0x2)
+		if(it->dwHandle != BP_KEEP)
 		{
 			dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
 			clsMemManager::CFree(it->moduleName);
@@ -163,7 +163,7 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 
 	BPStruct newBP;
 	newBP.dwOffset = dwNewOffset;
-	newBP.dwHandle = 0x2;
+	newBP.dwHandle = BP_STEPOVER;
 	newBP.bRestoreBP = false;
 	newBP.dwSize = 0x1;
 	newBP.bOrgByte = NULL;

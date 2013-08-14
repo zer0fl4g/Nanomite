@@ -61,6 +61,17 @@ public:
 	*/
 	static QStringList ReturnCompleterList();
 
+signals:
+	/**
+	* @brief A Qt signal which is send when the user wants to see a BP offset in the
+	* disassembly view
+	*
+	* @param breakpointOffset The offset which will be displayed
+	*
+	* @return QStringList The current content of the completer list
+	*/
+	void OnDisplayDisassembly(quint64 breakpointOffset);
+
 public slots:
 	/**
 	* @brief A Qt slot which is called when the clsDebugger instance added a new breakpoint
@@ -119,6 +130,14 @@ private slots:
 	* @return no
 	*/
 	void OnSelectedBPChanged(int iRow, int iCol);
+	/**
+	* @brief A Qt slot which is called from the clsDebugger instance when the user double 
+	* clicks a line in the table widget
+	* @param pItem A pointer to the selected row
+	*
+	* @return no
+	*/
+	void OnSendToDisassembler(QTableWidgetItem *pItem);
 };
 
 #endif

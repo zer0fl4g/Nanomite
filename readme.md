@@ -71,6 +71,7 @@
 	+ Return		= Attach to selected process
 - Breakpoint Manager
 	+ Del			= Remove selected breakpoint
+	+ Double Click	= Send offset to disassembler
 - Disassembler Window
 	+ F2			= Set software breakpoint to selected line
 	+ Return		= Follow selected jump, call
@@ -86,13 +87,14 @@
 - Register Window
 	+ Double Click	= Opens reg edit window
 - Trace Window
-	+ Double Click	= Sends offset to disassembler
+	+ Double Click	= Send offset to disassembler
 
 ## Changelog
 ###Version 0.1 beta 15
 + fixed a bug which did not reload the gui when deleting a patch from patchmanager using hotkey
++ fixed a bug which did a break when continue was used after a trace
 + added save file dialog to memory dump
-+ added double click handler in trace view to send a offset to disassembler window
++ added double click handler in trace view and bp manager to send a offset to disassembler window
 + updated function view algorithm
 + updated winapi messagebox to qt
 

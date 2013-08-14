@@ -235,8 +235,6 @@ void qtDLGMemoryView::DisplayMemory()
 	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 	PTCHAR sTemp2 = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
-	MODULEENTRY32 pModEntry;
-	pModEntry.dwSize = sizeof(MODULEENTRY32);
 	MEMORY_BASIC_INFORMATION mbi;
 
 	tblMemoryView->setRowCount(0);
