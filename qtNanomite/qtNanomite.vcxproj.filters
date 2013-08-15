@@ -509,6 +509,9 @@
     <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGGoToDialog.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
+    <ClCompile Include="clsProcessDump.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -908,6 +911,9 @@
     </ClInclude>
     <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGGoToDialog.h">
       <Filter>Generierte Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsProcessDump.h">
+      <Filter>Header Dateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

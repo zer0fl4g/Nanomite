@@ -46,6 +46,9 @@ void clsFunctionsViewWorker::run()
 		GetValidMemoryParts((PTCHAR)i->currentModule,i->hProc);
 		InsertSymbolsIntoLists(i->hProc,i->PID);
 	}
+
+	qSort(functionList.begin(),functionList.end(),OffsetLessThan);
+
 	return;
 }
 
@@ -179,6 +182,7 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 		isNotFunctionEnd = false;
 	int iLen = NULL,
 		trashCounter = NULL;
+	quint64 instructionCounter = NULL;
 
 	memset(&newDisAss, 0, sizeof(DISASM));
 
@@ -207,6 +211,8 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 
 			if(iLen > 0)
 			{
+				instructionCounter++;
+
 				if(newDisAss.Instruction.Opcode == 0x00 ||
 					newDisAss.Instruction.Opcode == 0x90 ||
 					newDisAss.Instruction.Opcode == 0xCC)
@@ -265,6 +271,9 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 					(newDisAss.Instruction.BranchType <= -1 && newDisAss.Instruction.BranchType >= -8) ||
 					(newDisAss.Instruction.BranchType >= 1 && newDisAss.Instruction.BranchType <= 8))
 				{
+					if(instructionCounter == 1)
+						return newDisAss.VirtualAddr - functionOffset + iLen;
+
 					newJump.jumpOffset = newDisAss.VirtualAddr;
 					newJump.jumpTarget = newDisAss.Instruction.AddrValue;
 
@@ -303,4 +312,9 @@ void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE hProc,WORD PID)
 			}		
 		}
 	}
+}
+
+bool OffsetLessThan(const FunctionData &f1, const FunctionData &f2)
+{
+	return f1.FunctionOffset < f2.FunctionOffset;
 }

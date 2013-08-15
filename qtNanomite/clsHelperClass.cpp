@@ -275,7 +275,7 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 				clsMemManager::CFree(sTemp2);
 				clsMemManager::CFree(sTemp);
 
-				return dwBase;
+				return (DWORD64)mbi.BaseAddress;
 			}
 		}
 		else
@@ -289,7 +289,7 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 	return Offset;
 }
 
-DWORD64 clsHelperClass::RemoteGetProcAddr(QString moduleName, QString apiName, quint64 moduleBase, quint64 processID)
+DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, quint64 processID)
 {
 	HANDLE processHandle = clsDebugger::GetProcessHandleByPID(processID); // do not close
 	IMAGE_DOS_HEADER IDH = {0};

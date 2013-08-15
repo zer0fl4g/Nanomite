@@ -335,13 +335,13 @@ void clsDebugger::DebuggingLoop()
 				else
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
-				AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,0x2);
+				AddBreakpointToList(SOFTWARE_BP,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,BP_DONOTKEEP);
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
 					DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
 					if(tlsCallback > 0)
-						AddBreakpointToList(NULL,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,0x2);
+						AddBreakpointToList(SOFTWARE_BP,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,BP_DONOTKEEP);
 				}
 				
 				InitBP();

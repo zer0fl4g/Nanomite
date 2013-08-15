@@ -121,6 +121,7 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 void qtDLGBreakPointManager::OnAddUpdate()
 {
 	int iUpdateLine = -1;
+	quint64 dwOffset = NULL;
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
 	if(leOffset->text().contains("::"))
@@ -129,22 +130,37 @@ void qtDLGBreakPointManager::OnAddUpdate()
 
 		if(SplitAPIList.count() >= 2)
 		{
-			quint64 dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,lePID->text().toULong(0,16));
-			dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[0],SplitAPIList[1],dwOffset,lePID->text().toULong(0,16));
+			dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,lePID->text().toULong(0,16));
+			dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[1],dwOffset,lePID->text().toULong(0,16));
 
 			if(dwOffset <= 0)
 			{
 				QMessageBox::critical(this,"Nanomite","Please use a correct API Name!",QMessageBox::Ok,QMessageBox::Ok);
 				return;
 			}
-			else
-				leOffset->setText(QString("%1").arg(dwOffset,16,16,QChar('0')));
+
+			leOffset->setText(QString("%1").arg(dwOffset,16,16,QChar('0')));
 		}
+	}
+	else
+	{
+		dwOffset = leOffset->text().toULongLong(0,16);
+
+		if(dwOffset <= 0)
+		{
+			QMessageBox::critical(this,"Nanomite","This offset seems to be invalid!",QMessageBox::Ok,QMessageBox::Ok);
+			return;
+		}	
 	}
 
 	for(int i = 0; i < tblBPs->rowCount(); i++)
+	{
 		if(QString().compare(tblBPs->item(i,1)->text(),leOffset->text()) == 0)
+		{
 			iUpdateLine = i;		
+			break;
+		}
+	}
 
 	if(iUpdateLine != -1)
 	{
@@ -164,11 +180,11 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		dwBreakOn = 0;
 
 	if(cbType->currentText().compare("Software BP - int3") == 0)
-		dwType = 0;
+		dwType = SOFTWARE_BP;
 	else if(cbType->currentText().compare("Hardware BP - Dr[0-3]") == 0)
-		dwType = 2;
+		dwType = HARDWARE_BP;
 	else if(cbType->currentText().compare("Memory BP - Page Guard") == 0)
-		dwType = 1;
+		dwType = MEMORY_BP;
 
 	if(cbBreakOn->currentText().compare("Execute") == 0)
 		dwBreakOn = DR_EXECUTE;
@@ -178,9 +194,9 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		dwBreakOn = DR_WRITE;
 
 	if(lePID->text().toInt() == -1)
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),leOffset->text().toULongLong(0,16),0,true);
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,0,BP_KEEP);
 	else
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),leOffset->text().toULongLong(0,16),0,true);
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,0,BP_KEEP);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)

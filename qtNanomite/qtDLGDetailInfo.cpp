@@ -25,6 +25,7 @@
 #include "clsHelperClass.h"
 #include "clsPEManager.h"
 #include "clsAPIImport.h"
+#include "clsProcessDump.h"
 
 #include <QtCore>
 #include <QMenu>
@@ -89,6 +90,7 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 
 	m_selectedOffset = tblPIDs->item(m_selectedRow,1)->text().toULongLong(0,16);
 
+	menu.addAction(new QAction("Create full process dump",this));
 	menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show PBI/PEB",this));
 
@@ -164,7 +166,6 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 
 	m_selectedOffset = tblTIDs->item(m_selectedRow,2)->text().toULongLong(0,16);
 
-	//menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show Registers",this));
 	menu.addAction(new QAction("Show TBI/TEB",this));
 	menu.addAction(new QAction("Suspend",this));
@@ -251,7 +252,6 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 
 	m_selectedOffset = tblModules->item(m_selectedRow,1)->text().toULongLong(0,16);
 
-	//menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Open Module in PE View",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
@@ -267,6 +267,12 @@ void qtDLGDetailInfo::PIDMenuCallback(QAction* pAction)
 			emit ShowInDisassembler(m_selectedOffset);
 			m_selectedOffset = NULL;
 		}
+	}
+	else if(QString().compare(pAction->text(),"Create full process dump") == 0)
+	{
+		clsProcessDump newProcessDumper(clsDebugger::GetProcessHandleByPID(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16)),
+			tblPIDs->item(m_selectedRow,0)->text().toInt(0,16),
+			tblPIDs->item(m_selectedRow,3)->text());
 	}
 	else if(QString().compare(pAction->text(),"Show PBI/PEB") == 0)
 	{
@@ -299,8 +305,7 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
 		dlgPEEditor->show();
 	}
-	else if(QString().compare(pAction->text(),"Show EntryPoint in disassembler") == 0 || 
-		QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
+	else if(QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
 	{
 		if(m_selectedOffset >= 0)
 		{

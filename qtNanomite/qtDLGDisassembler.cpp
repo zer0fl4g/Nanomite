@@ -278,7 +278,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		int processID = coreDebugger->GetCurrentPID();
 		qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 
-		coreDebugger->AddBreakpointToList(NULL,2,processID,tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),NULL,0x4);
+		coreDebugger->AddBreakpointToList(SOFTWARE_BP,2,processID,tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),NULL,BP_TRACETO);
 		qtDLGTrace::clearTraceData();
 		pMainWindow->actionDebug_Trace_Stop->setEnabled(true);
 		pMainWindow->actionDebug_Trace_Start->setEnabled(false);
@@ -305,7 +305,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 				if(SplitAPIList.count() >= 2)
 				{
 					quint64 dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,coreDebugger->GetCurrentPID());
-					dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[0],SplitAPIList[1],dwOffset,coreDebugger->GetCurrentPID());
+					dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[1],dwOffset,coreDebugger->GetCurrentPID());
 
 					if(dwOffset > 0)
 						searchedOffset = QString("%1").arg(dwOffset,16,16,QChar('0'));
@@ -368,11 +368,11 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 	if(currentSelectedItems.count() <= 0) return;
 
 	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
-	if(coreDebugger->AddBreakpointToList(NULL,DR_EXECUTE,-1,dwSelectedVA,NULL,true))
+	if(coreDebugger->AddBreakpointToList(SOFTWARE_BP,DR_EXECUTE,-1,dwSelectedVA,NULL,BP_KEEP))
 		currentSelectedItems.value(0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 	else
 	{// exists
-		coreDebugger->RemoveBPFromList(dwSelectedVA,NULL);
+		coreDebugger->RemoveBPFromList(dwSelectedVA,SOFTWARE_BP);
 		currentSelectedItems.value(0)->setForeground(QColor("Black"));
 	}	
 	return;

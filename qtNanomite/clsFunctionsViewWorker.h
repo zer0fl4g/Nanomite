@@ -66,4 +66,6 @@ protected:
 	void run();
 };
 
+bool OffsetLessThan(const FunctionData &f1, const FunctionData &f2);
+
 #endif

@@ -502,8 +502,16 @@ void qtDLGNanomite::LoadRecentFileMenu(bool isFirstLoad)
 
 void qtDLGNanomite::DebugRecentFile(QAction *qAction)
 {
-	coreDebugger->SetTarget(qAction->text().toStdWString());
-	action_DebugStart();
+	if(!coreDebugger->GetDebuggingState())
+	{
+		coreDebugger->RemoveBPs();
+		coreDebugger->ClearTarget();
+		coreDebugger->ClearCommandLine();
+		coreDebugger->SetTarget(qAction->text().toStdWString());
+		action_DebugStart();
+	}
+	else
+		QMessageBox::warning(this,"Nanomite","You have a process running. Please terminate this one first!",QMessageBox::Ok,QMessageBox::Ok);
 }
 
 void qtDLGNanomite::InsertRecentDebuggedFile(QString fileName)

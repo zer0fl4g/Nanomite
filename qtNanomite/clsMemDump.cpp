@@ -53,12 +53,12 @@ clsMemDump::clsMemDump( HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, D
 	else
 		wsprintf(FileName,L"%s_%016I64X-%016I64X_%08X.bin",FileBaseName,BaseOffset,BaseOffset + Size,Size);
 
-	QString filePath = QFileDialog::getSaveFileName(NULL,
+	QString filePath = QFileDialog::getSaveFileName(pParent,
 		"Please select a place to save the dump",
 		QString("%1\\%2").arg(QDir::currentPath()).arg(QString::fromWCharArray(FileName)),
 		"Dump files (*.dmp *.bin)",
 		NULL,
-		NULL);
+		QFileDialog::DontUseNativeDialog);
 
 	free(FileName);
 
