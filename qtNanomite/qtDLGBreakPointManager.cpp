@@ -43,7 +43,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(pbAddUpdate,SIGNAL(clicked()),this,SLOT(OnAddUpdate()));
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
 	connect(tblBPs,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
-
+	connect(cbType,SIGNAL(currentIndexChanged(const QString &)),this,SLOT(OnBPTypeSelectionChanged(const QString &)));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
 	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
@@ -166,11 +166,11 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	{
 		DWORD dwType = 0;
 		if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Software BP - int3") == 0)
-			dwType = 0;
+			dwType = SOFTWARE_BP;
 		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Hardware BP - Dr[0-3]") == 0)
-			dwType = 2;
+			dwType = HARDWARE_BP;
 		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Memory BP - Page Guard") == 0)
-			dwType = 1;
+			dwType = MEMORY_BP;
 
 		myMainWindow->coreDebugger->RemoveBPFromList(tblBPs->item(iUpdateLine,1)->text().toULongLong(0,16),dwType);
 		tblBPs->removeRow(iUpdateLine);
@@ -286,4 +286,20 @@ QStringList qtDLGBreakPointManager::ReturnCompleterList()
 void qtDLGBreakPointManager::OnSendToDisassembler(QTableWidgetItem *pItem)
 {
 	emit OnDisplayDisassembly(tblBPs->item(pItem->row(),1)->text().toULongLong(0,16));
+}
+
+void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedItemText)
+{
+	if(selectedItemText.compare("Software BP - int3") == 0)
+	{
+		cbBreakOn->setEnabled(false);
+	}
+	else if(selectedItemText.compare("Hardware BP - Dr[0-3]") == 0)
+	{
+		cbBreakOn->setEnabled(true);
+	}
+	else if(selectedItemText.compare("Memory BP - Page Guard") == 0)
+	{
+		cbBreakOn->setEnabled(false);
+	}
 }

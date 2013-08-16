@@ -18,9 +18,7 @@
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 
-#include <TlHelp32.h>
 #include <Psapi.h>
-#include <string>
 
 #define BEA_ENGINE_STATIC
 #define BEA_USE_STDCALL
@@ -272,7 +270,10 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 					(newDisAss.Instruction.BranchType >= 1 && newDisAss.Instruction.BranchType <= 8))
 				{
 					if(instructionCounter == 1)
+					{
+						free(lpBuffer);
 						return newDisAss.VirtualAddr - functionOffset + iLen;
+					}
 
 					newJump.jumpOffset = newDisAss.VirtualAddr;
 					newJump.jumpTarget = newDisAss.Instruction.AddrValue;

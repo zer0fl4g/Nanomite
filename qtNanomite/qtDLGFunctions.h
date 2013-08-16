@@ -35,13 +35,23 @@ class qtDLGFunctions : public QWidget, public Ui_qtDLGFunctionsClass
 public:
 	/**
 	* @brief Responsible for initializing and showing the GUI of the function view widget
+	* @param processID The process id of which the functions will be shown
 	* @param parent Takes the a QWidget pointer of the calling QObject
 	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
-	* @param processID The process id from which the functions will be shown
 	*
 	* @return no
 	*/
-	qtDLGFunctions(QWidget *parent = 0, Qt::WFlags flags = 0,qint32 processID = 0);
+	qtDLGFunctions(qint32 processID, QWidget *parent = 0, Qt::WFlags flags = 0);
+	/**
+	* @brief Responsible for initializing and showing the GUI of the function view widget
+	* @param processID The process id of which the functions will be shown
+	* @param modulePath The module path of which the functions will be shown
+	* @param parent Takes the a QWidget pointer of the calling QObject
+	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
+	*
+	* @return no
+	*/
+	qtDLGFunctions(qint32 processID, QString modulePath, QWidget *parent = 0, Qt::WFlags flags = 0);
 	/**
 	* @brief Deleting the worker data
 	*
@@ -62,6 +72,10 @@ signals:
 private:
 	int m_processID,	/* contains the process id from which the functions will be extracted */
 		m_selectedRow;	/* contains the selected row if the user opens the context menu */
+
+	PTCHAR m_modulePath; /* stores the module path for the function view called from DetailView */
+
+	bool isDetailView;
 
 	clsFunctionsViewWorker *m_pFunctionWorker; /* a pointer to the data background worker */
 

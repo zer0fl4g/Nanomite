@@ -98,6 +98,7 @@
 + added save file dialog to memory dump
 + added double click handler in trace view and bp manager to send a offset to disassembler window
 + added possibility to create a full process dump in detailview - process tab - context menu
++ added possibility to open function view for selected modules on detail view
 + updated function view algorithm
 + updated winapi messagebox to qt
 

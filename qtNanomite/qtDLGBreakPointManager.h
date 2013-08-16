@@ -138,6 +138,13 @@ private slots:
 	* @return no
 	*/
 	void OnSendToDisassembler(QTableWidgetItem *pItem);
+	/**
+	* @brief A Qt slot which is called from the combobox when the type is changed
+	* @param pItem A string which contains the text of the new selection
+	*
+	* @return no
+	*/
+	void OnBPTypeSelectionChanged(const QString &selectedItemText);
 };
 
 #endif

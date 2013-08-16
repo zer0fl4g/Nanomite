@@ -20,6 +20,7 @@
 #include "qtDLGRegEdit.h"
 #include "qtDLGTIBView.h"
 #include "qtDLGPEBView.h"
+#include "qtDLGFunctions.h"
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
@@ -253,6 +254,7 @@ void qtDLGDetailInfo::OnCustomModuleContextMenu(QPoint qPoint)
 	m_selectedOffset = tblModules->item(m_selectedRow,1)->text().toULongLong(0,16);
 
 	menu.addAction(new QAction("Open Module in PE View",this));
+	menu.addAction(new QAction("Open Module in Function View",this));
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(MenuCallback(QAction*)));
 
 	menu.exec(QCursor::pos());
@@ -304,6 +306,12 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		emit OpenFileInPEManager(temp,-1);
 		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
 		dlgPEEditor->show();
+	}
+	else if(QString().compare(pAction->text(),"Open Module in Function View") == 0)
+	{
+		qtDLGFunctions *dlgFunctions = new qtDLGFunctions(tblModules->item(m_selectedRow,0)->text().toULongLong(0,16), tblModules->item(m_selectedRow,3)->text(), this, Qt::Window);
+		connect(dlgFunctions,SIGNAL(ShowInDisAs(quint64)),qtDLGNanomite::GetInstance()->DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
+		dlgFunctions->show();
 	}
 	else if(QString().compare(pAction->text(),"Show Offset in disassembler") == 0)
 	{

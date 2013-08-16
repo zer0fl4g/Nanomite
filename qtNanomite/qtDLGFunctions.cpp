@@ -21,9 +21,10 @@
 
 using namespace std;
 
-qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 processID)
+qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags),
-	m_processID(processID)
+	m_processID(processID),
+	isDetailView(false)
 {
 	this->setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
@@ -67,9 +68,50 @@ qtDLGFunctions::qtDLGFunctions(QWidget *parent, Qt::WFlags flags,qint32 processI
 	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnReturnPressed()));
 }
 
+qtDLGFunctions::qtDLGFunctions(qint32 processID, QString modulePath, QWidget *parent, Qt::WFlags flags)
+	: QWidget(parent, flags),
+	m_processID(processID),
+	isDetailView(true)
+{
+	this->setupUi(this);
+	this->setAttribute(Qt::WA_DeleteOnClose,true);
+	this->setLayout(horizontalLayout);
+	tblFunctions->setRowCount(0);
+
+	connect(tblFunctions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
+	connect(tblFunctions,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
+
+	// Init List
+	tblFunctions->horizontalHeader()->resizeSection(0,75);
+	tblFunctions->horizontalHeader()->resizeSection(1,200);
+	tblFunctions->horizontalHeader()->resizeSection(2,135);
+	tblFunctions->horizontalHeader()->setFixedHeight(21);
+	
+	m_modulePath = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	ZeroMemory(m_modulePath,MAX_PATH * sizeof(TCHAR));
+	modulePath.toWCharArray(m_modulePath);
+
+	QList<FunctionProcessingData> dataForProcessing;
+	FunctionProcessingData newData;
+	newData.currentModule = m_modulePath;
+	newData.PID = processID;
+	newData.hProc = clsDebugger::GetProcessHandleByPID(processID);
+	dataForProcessing.append(newData);
+
+	
+	m_pFunctionWorker = new clsFunctionsViewWorker(dataForProcessing);
+	connect(m_pFunctionWorker,SIGNAL(finished()),this,SLOT(DisplayFunctionLists()),Qt::QueuedConnection);
+	connect(functionScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
+	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnReturnPressed()));
+}
+
 qtDLGFunctions::~qtDLGFunctions()
 {
 	delete m_pFunctionWorker;
+
+	if(isDetailView)
+		clsMemManager::CFree(m_modulePath);
 }
 
 void qtDLGFunctions::DisplayFunctionLists()
