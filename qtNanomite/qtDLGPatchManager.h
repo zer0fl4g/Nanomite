@@ -63,15 +63,16 @@ private:
 	static qtDLGPatchManager *pThis;
 
 	bool WritePatchToProc(HANDLE hProc, quint64 Offset, int PatchSize, LPVOID DataToWrite, LPVOID OriginalData, bool bRemove = false);
-	
-	void SavePatchToFile(int PID, quint64 Offset);
+	bool SavePatchToFile(QString patchFilePath, QString currentFilePath, QList<PatchData>::iterator currentPatch);
+
+	void SavePatch(quint64 Offset, bool saveAll = false);
 	void UpdatePatchTable();
 	
-	private slots:
-		void MenuCallback(QAction*);
-		void UpdateOffsetPatch(HANDLE newOffset, int newPID);
-		void OnCustomContextMenuRequested(QPoint qPoint);
-		void OnPatchRemove();
+private slots:
+	void MenuCallback(QAction*);
+	void UpdateOffsetPatch(HANDLE newOffset, int newPID);
+	void OnCustomContextMenuRequested(QPoint qPoint);
+	void OnPatchRemove();
 };
 
 #endif

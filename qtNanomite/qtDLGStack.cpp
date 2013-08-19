@@ -52,39 +52,28 @@ qtDLGStack::~qtDLGStack()
 
 void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 {
-	if(!m_pCoreDebugger->GetDebuggingState())
-		return;
-
 	bool bCheckVar = false;
-	SIZE_T dwBytesRead = NULL;
 	wstring sFuncName,sModName;
-	LPBYTE bBuffer;
-	PTCHAR sTemp;
 	HANDLE hProcess = m_pCoreDebugger->GetCurrentProcessHandle();
-	DWORD dwOldProtect = NULL,
-		dwNewProtect = PAGE_READWRITE,
-		dwRowCount = (tblStack->verticalHeader()->height() / 11),
-		dwSize = dwRowCount * stackAlign;
-	quint64	dwStartOffset = stackBaseOffset - stackAlign,
-		dwEndOffset = stackBaseOffset + stackAlign * (dwRowCount - 1);
+	DWORD	dwRowCount = (tblStack->verticalHeader()->height() / 11),
+			dwSize = dwRowCount * stackAlign;
+	LPBYTE bBuffer = (LPBYTE)clsMemManager::CAlloc(dwSize);
+	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	quint64	dwStartOffset = stackBaseOffset - stackAlign;
 
 	if(hProcess == INVALID_HANDLE_VALUE)
-		return;
-
-	if(!VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwNewProtect,&dwOldProtect))
-		return;
-
-	bBuffer = (LPBYTE)clsMemManager::CAlloc(dwSize);
-	if(bBuffer == NULL)
-		return;
-
-	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,&dwBytesRead))
 	{
 		clsMemManager::CFree(bBuffer);
+		clsMemManager::CFree(sTemp);
 		return;
 	}
 
-	sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,NULL))
+	{
+		clsMemManager::CFree(bBuffer);
+		clsMemManager::CFree(sTemp);
+		return;
+	}
 
 	tblStack->setRowCount(0);
 	for(size_t i = 0; i < dwRowCount; i++)
@@ -93,52 +82,33 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 		int itemIndex = tblStack->rowCount();
 
 		// Current Offset
-		wsprintf(sTemp,L"%016I64X",(dwStartOffset + i * stackAlign));
-		tblStack->setItem(itemIndex - 1,0,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
+		tblStack->setItem(itemIndex - 1,0,new QTableWidgetItem(QString("%1").arg((dwStartOffset + i * stackAlign),16,16,QChar('0'))));
 
 		// Value
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
-#ifdef _AMD64_
-		BOOL bIsWOW64 = false;
-		IsWow64Process(m_pCoreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
-
-		if(bIsWOW64)
-			for(int id = 3;id != -1;id--)
-				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
-		else
-			for(int id = 7;id != -1;id--)
-				wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
-
-#else
-		for(int id = 3;id != -1;id--)
+		for(int id = stackAlign - 1;id != -1;id--)
 			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
-#endif
 		tblStack->setItem(itemIndex - 1,1,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
 
 		// Comment
-		clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,QString::fromWCharArray(sTemp).toULongLong(0,16),
-			m_pCoreDebugger->GetCurrentProcessHandle());
+		clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,QString::fromWCharArray(sTemp).toULongLong(0,16),hProcess);
 		if(sFuncName.length() > 0 && sModName.length() > 0)
 			tblStack->setItem(itemIndex - 1,2,
 			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
-		else if(sFuncName.length() > 0)
-			tblStack->setItem(itemIndex - 1,2,new QTableWidgetItem(QString::fromStdWString(sFuncName)));	
 		else
 			tblStack->setItem(itemIndex- 1,2,new QTableWidgetItem(""));
 	}
 	
-	bCheckVar = VirtualProtectEx(hProcess,(LPVOID)dwStartOffset,dwSize,dwOldProtect,NULL);
 	clsMemManager::CFree(bBuffer);
 	clsMemManager::CFree(sTemp);
 }
 
 void qtDLGStack::OnStackScroll(int iValue)
 {
-	if(iValue == 5) return;
+	if(iValue == 5 || !m_pCoreDebugger->GetDebuggingState()) return;
 	
 	DWORD stackAlign = NULL;
 	quint64 dwOffset = NULL;
-	QString strTemp;
 
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
@@ -243,6 +213,9 @@ void qtDLGStack::MenuCallback(QAction* pAction)
 
 void qtDLGStack::resizeEvent(QResizeEvent *event)
 {
+	if(!m_pCoreDebugger->GetDebuggingState())
+		return;
+
 	quint64 dwEIP = NULL;
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;

@@ -24,6 +24,7 @@
 
 #include <QMenu>
 #include <QClipboard>
+#include <QMap>
 
 qtDLGPatchManager *qtDLGPatchManager::pThis = NULL;
 
@@ -120,18 +121,12 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Save Patch to File") == 0)
 	{
-		SavePatchToFile(tblPatches->item(m_iSelectedRow,0)->text().toULongLong(0,16),
-			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
-
+		SavePatch(tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Save All Patches to File") == 0)
 	{
-		for(int i = 0; i < tblPatches->rowCount(); i++)
-		{
-			SavePatchToFile(tblPatches->item(i,0)->text().toULongLong(0,16),
-			tblPatches->item(i,1)->text().toULongLong(0,16));
-		}
+		SavePatch(NULL,true);
 		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
@@ -399,103 +394,144 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 	UpdatePatchTable();
 }
 
-void qtDLGPatchManager::SavePatchToFile(int PID, quint64 Offset)
+void qtDLGPatchManager::SavePatch(quint64 Offset, bool saveAll)
 {
+	QMap<QString,QString> fileMapping;
+
 	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
-		if(i->Offset == Offset)
+		if(saveAll || i->Offset == Offset)
 		{
-			PTCHAR	pCurrentFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR)),
-					pNewFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+			PTCHAR pCurrentFilePath = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 
-			if(GetModuleFileNameEx(i->hProc,(HMODULE)i->BaseOffset,pCurrentFileName,MAX_PATH) < 0)
+			if(!GetModuleFileNameEx(i->hProc, (HMODULE)i->BaseOffset, pCurrentFilePath, MAX_PATH))
 			{
-				clsMemManager::CFree(pCurrentFileName);
-				clsMemManager::CFree(pNewFileName);
-				continue;
+				clsMemManager::CFree(pCurrentFilePath);
+				return;
 			}
 
-			wcscpy_s(pNewFileName,MAX_PATH,pCurrentFileName);
-			wcscat_s(pNewFileName,MAX_PATH,L"_patched.exe");
-			CopyFile(pCurrentFileName,pNewFileName,true);
+			QString patchFilePath, 
+					currentFilePath = QString::fromWCharArray(pCurrentFilePath);
+			QMap<QString,QString>::iterator fileMap = fileMapping.find(currentFilePath);
 
-			HANDLE hFile = CreateFileW(pNewFileName,GENERIC_READ | GENERIC_WRITE,NULL,NULL,OPEN_EXISTING,NULL,NULL);
-			if(hFile == INVALID_HANDLE_VALUE)
-			{
-				DeleteFile(pNewFileName);
-				clsMemManager::CFree(pCurrentFileName);
-				clsMemManager::CFree(pNewFileName);
-				continue;
+			bool isNewFile = false;
+
+			if(fileMap == fileMapping.end())
+			{		
+				bool isExeFile = false;
+				isNewFile = true;
+
+				if(currentFilePath.contains(".exe"))
+					isExeFile = true;
+
+				if(isExeFile)
+				{
+					QString tempPath = currentFilePath;
+					patchFilePath = QFileDialog::getSaveFileName(this,
+						"Please select a place to save the patched executable",
+						tempPath.replace(".exe", "_patched.exe"),
+						"Executable files (*.exe)",
+						NULL,
+						QFileDialog::DontUseNativeDialog);
+				}
+				else
+				{
+					QString tempPath = currentFilePath;
+					patchFilePath = QFileDialog::getSaveFileName(this,
+						"Please select a place to save the patched dll",
+						tempPath.replace(".dll", "_patched.dll"),
+						"Dynamic link library (*.dll)",
+						NULL,
+						QFileDialog::DontUseNativeDialog);
+				}
+
+				fileMapping.insert(currentFilePath, patchFilePath);
+
+				if(currentFilePath.compare(patchFilePath) == 0)
+					isNewFile = false;
+				else
+					CopyFile(currentFilePath.toStdWString().c_str(), patchFilePath.toStdWString().c_str(), true);
 			}
-			
-			HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READWRITE,NULL,NULL,NULL);
-			LPVOID lpFileBuffer = MapViewOfFile(hFileMap,FILE_MAP_WRITE | FILE_MAP_READ,NULL,NULL,NULL);
-			if(lpFileBuffer == NULL)
+			else
+				patchFilePath = fileMap.value();
+
+			i->bSaved = SavePatchToFile(patchFilePath, currentFilePath, i);
+
+			if(!i->bSaved && isNewFile)
 			{
-				UnmapViewOfFile(lpFileBuffer);
-				CloseHandle(hFileMap);
-				CloseHandle(hFile);
-
-				DeleteFile(pNewFileName);
-				clsMemManager::CFree(pNewFileName);
-				clsMemManager::CFree(pCurrentFileName);
-
-				continue;
-			}
-
-			DWORD64 fileDataOffset = (DWORD64)lpFileBuffer + clsPEManager::GetInstance()->VAtoRaw(pCurrentFileName,NULL,i->Offset - i->BaseOffset);
-			if(fileDataOffset <= NULL)
-			{
-				UnmapViewOfFile(lpFileBuffer);
-				CloseHandle(hFileMap);
-				CloseHandle(hFile);
-
-				DeleteFile(pNewFileName);
-				clsMemManager::CFree(pNewFileName);
-				clsMemManager::CFree(pCurrentFileName);
-
-				continue;
-			}
-
-			if(memcmp((LPVOID)fileDataOffset,i->orgData,i->PatchSize) != 0)
-			{
-				UnmapViewOfFile(lpFileBuffer);
-				CloseHandle(hFileMap);
-				CloseHandle(hFile);
-
-				DeleteFile(pNewFileName);
-				clsMemManager::CFree(pNewFileName);
-				clsMemManager::CFree(pCurrentFileName);
-
-				continue;
+				fileMapping.remove(currentFilePath);
+				DeleteFile(patchFilePath.toStdWString().c_str());
 			}
 
-			memcpy((LPVOID)fileDataOffset,i->newData,i->PatchSize);
-
-			DWORD BytesWritten = NULL;
-			if(!WriteFile(hFile,lpFileBuffer,GetFileSize(hFile,NULL),&BytesWritten,NULL))
-			{
-				UnmapViewOfFile(lpFileBuffer);
-				CloseHandle(hFileMap);
-				CloseHandle(hFile);
-
-				DeleteFile(pNewFileName);
-				clsMemManager::CFree(pNewFileName);
-				clsMemManager::CFree(pCurrentFileName);
-
-				continue;
-			}
-
-			i->bSaved = true;
-
-			UnmapViewOfFile(lpFileBuffer);
-			CloseHandle(hFileMap);
-			CloseHandle(hFile);
-
-			clsMemManager::CFree(pNewFileName);
-			clsMemManager::CFree(pCurrentFileName);
+			clsMemManager::CFree(pCurrentFilePath);
 		}
 	}
+}
+
+bool qtDLGPatchManager::SavePatchToFile(QString patchFilePath, QString currentFilePath, QList<PatchData>::iterator currentPatch)
+{
+	HANDLE hFile = CreateFileW(patchFilePath.toStdWString().c_str(),GENERIC_READ | GENERIC_WRITE,NULL,NULL,OPEN_EXISTING,NULL,NULL);
+	if(hFile == INVALID_HANDLE_VALUE)
+		return false;
+
+	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READWRITE,NULL,NULL,NULL);
+	LPVOID lpFileBuffer = MapViewOfFile(hFileMap,FILE_MAP_WRITE | FILE_MAP_READ,NULL,NULL,NULL);
+	if(lpFileBuffer == NULL)
+	{
+		UnmapViewOfFile(lpFileBuffer);
+		CloseHandle(hFileMap);
+		CloseHandle(hFile);
+
+		return false;
+	}
+
+	clsPEManager *pPEManager = clsPEManager::GetInstance();
+	DWORD64 rawOffset = pPEManager->VAtoRaw(currentFilePath.toStdWString().c_str(),NULL,currentPatch->Offset - currentPatch->BaseOffset);
+	if(rawOffset <= 0)
+	{
+		pPEManager->OpenFile(currentFilePath.toStdWString());
+
+		rawOffset = pPEManager->VAtoRaw(currentFilePath.toStdWString().c_str(),NULL,currentPatch->Offset - currentPatch->BaseOffset);
+		
+		pPEManager->CloseFile(currentFilePath.toStdWString(),-1);
+	}
+
+	DWORD64 fileDataOffset = (DWORD64)lpFileBuffer + rawOffset;
+	if(fileDataOffset <= NULL)
+	{
+		UnmapViewOfFile(lpFileBuffer);
+		CloseHandle(hFileMap);
+		CloseHandle(hFile);
+
+		return false;
+	}
+
+	if(memcmp((LPVOID)fileDataOffset,currentPatch->orgData,currentPatch->PatchSize) != 0)
+	{
+		UnmapViewOfFile(lpFileBuffer);
+		CloseHandle(hFileMap);
+		CloseHandle(hFile);
+
+		return false;
+	}
+
+	memcpy((LPVOID)fileDataOffset,currentPatch->newData,currentPatch->PatchSize);
+
+	DWORD BytesWritten = NULL;
+	if(!WriteFile(hFile,lpFileBuffer,GetFileSize(hFile,NULL),&BytesWritten,NULL))
+	{
+		UnmapViewOfFile(lpFileBuffer);
+		CloseHandle(hFileMap);
+		CloseHandle(hFile);
+
+		return false;
+	}
+
+	UnmapViewOfFile(lpFileBuffer);
+	CloseHandle(hFileMap);
+	CloseHandle(hFile);
+
+	return true;
 }
 
 void qtDLGPatchManager::OnPatchRemove()

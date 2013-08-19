@@ -38,7 +38,6 @@ void clsHexViewWorker::run()
 
 	SIZE_T dwBytesRead = NULL;
 	DWORD dwCounter = NULL,
-	//	dwProtection = NULL,
 		dwStepSize = 0x10;
 	DWORD64	dwBaseOffset = m_startOffset;
 	LPVOID pBuffer = malloc(m_dataLength);
@@ -52,14 +51,6 @@ void clsHexViewWorker::run()
 		clsMemManager::CFree(tcTempBuffer);
 		return;
 	}
-
-	//if(!VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,PAGE_EXECUTE_READWRITE,&dwProtection))
-	//{
-	//	clsMemManager::CFree(pBuffer);
-	//	clsMemManager::CFree(tcAsciiHexTemp);
-	//	clsMemManager::CFree(tcTempBuffer);
-	//	return;
-	//}
 
 	if(!ReadProcessMemory(m_hProc,(LPVOID)m_startOffset,(LPVOID)pBuffer,m_dataLength,&dwBytesRead))
 	{
@@ -113,8 +104,6 @@ void clsHexViewWorker::run()
 		m_startOffset += dwStepSize;
 		dwCounter += dwStepSize;
 	}
-
-	//VirtualProtectEx(hProcess,(LPVOID)StartOffset,Size,dwProtection,NULL);
 
 	clsMemManager::CFree(pBuffer);
 	clsMemManager::CFree(tcAsciiHexTemp);

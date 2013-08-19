@@ -21,8 +21,8 @@
 using namespace std;
 
 clsPEFile::clsPEFile(wstring FileName,bool *bLoaded)
+	: _FileName(FileName)
 {
-	_FileName = clsHelperClass::replaceAll(FileName,'\\','/');
 	*bLoaded = m_isLoaded = LoadFile(_FileName);
 }
 
@@ -92,18 +92,20 @@ bool clsPEFile::LoadFile(wstring FileName)
 	}
 
 	if(m_is64Bit)
+	{
 		fileImports = loadImports64();
+		m_tlsOffset = loadTLSCallbackOffset64();
+	}
 	else
+	{
 		fileImports = loadImports32();
+		m_tlsOffset = loadTLSCallbackOffset32();
+	}
 
 	fileExports = loadExports();
 
 	fileSections = loadSections();
 
-	if(m_is64Bit)
-		m_tlsOffset = loadTLSCallbackOffset64();
-	else
-		m_tlsOffset = loadTLSCallbackOffset32();
 
 	UnmapViewOfFile(m_fileBuffer);
 	CloseHandle(hFile);

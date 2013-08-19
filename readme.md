@@ -16,6 +16,7 @@
 - Supporting child processes
 - Supporting multithreading
 - Display source code
+- Patching of instructions
 - Detailed view of:
 	- disassembly
 	- windows
@@ -29,7 +30,6 @@
 	- strings
 	- callstack
 	- stack
-	- memory
 	- heap
 	- cpu registers
 	- functions
@@ -95,10 +95,13 @@
 + fixed a bug which caused a break when continue was used after a trace
 + fixed a bug which returned wrong offset when adding a breakpoint to a wow64 process
 + fixed a bug which did not clean up properly if using the "recent file" menu to debug new process
-+ added save file dialog to memory dump
++ fixed a bug which did not replace memory breakpoints correctly
++ added save file dialog to memory dump and patch manager
++ added the correct offsets for module imports in the peeditor
 + added double click handler in trace view and bp manager to send a offset to disassembler window
 + added possibility to create a full process dump in detailview - process tab - context menu
 + added possibility to open function view for selected modules on detail view
++ added support for saving patches in dlls
 + updated function view algorithm
 + updated winapi messagebox to qt
 

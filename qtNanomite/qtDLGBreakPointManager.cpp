@@ -32,6 +32,8 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 
 	pThis = this;
 
+	cbBreakOn->setEnabled(false);
+
 	// List BP Manager
 	tblBPs->horizontalHeader()->resizeSection(0,75);
 	tblBPs->horizontalHeader()->resizeSection(1,135);

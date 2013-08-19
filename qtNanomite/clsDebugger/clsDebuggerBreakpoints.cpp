@@ -58,7 +58,7 @@ bool clsDebugger::wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwKe
 {
 	MEMORY_BASIC_INFORMATION MBI;
 	DWORD dwOldProtection;
-	HANDLE hPID = _pi.hProcess;
+	HANDLE hPID = m_dbgPI.hProcess;
 
 	for(size_t i = 0;i < PIDs.size(); i++)
 		if(PIDs[i].dwPID == dwPID)
@@ -293,7 +293,7 @@ bool clsDebugger::dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize)
 {
 	MEMORY_BASIC_INFORMATION MBI;
 	DWORD dwOldProtection;
-	HANDLE hPID = _pi.hProcess;
+	HANDLE hPID = m_dbgPI.hProcess;
 
 	for(size_t i = 0;i < PIDs.size(); i++)
 		if(PIDs[i].dwPID == dwPID)
@@ -301,7 +301,7 @@ bool clsDebugger::dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize)
 
 	VirtualQueryEx(hPID,(LPVOID)dwOffset,&MBI,sizeof(MBI));
 
-	if(!VirtualProtectEx(hPID,(LPVOID)dwOffset,dwSize,MBI.Protect & PAGE_GUARD,&dwOldProtection))
+	if(!VirtualProtectEx(hPID,(LPVOID)dwOffset,dwSize,MBI.Protect & ~PAGE_GUARD,&dwOldProtection))
 		return false;
 	return true;
 }

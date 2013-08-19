@@ -412,7 +412,7 @@ void clsDebugger::DebuggingLoop()
 						hProc = PIDs[i].hProc;iPid = i;
 				}
 
-				if(PIDs[iPid].bSymLoad && dbgSettings.bAutoLoadSymbols == true)
+				if(PIDs[iPid].bSymLoad && dbgSettings.bAutoLoadSymbols)
 					SymLoadModuleExW(hProc,NULL,sDLLFileName,0,(quint64)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);
 				else
 				{
@@ -704,6 +704,8 @@ void clsDebugger::DebuggingLoop()
 						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,EXCEPTION_GUARD_PAGE,debug_event.dwProcessId,true);
 						if(bIsBP)
 						{
+							bool directBP = false;
+
 							SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
 							PIDs[iPid].dwBPRestoreFlag = 0x4;
 							PIDs[iPid].bTrapFlag = true;
@@ -712,6 +714,7 @@ void clsDebugger::DebuggingLoop()
 							{
 								if(MemoryBPs[i].dwOffset == (quint64)exInfo.ExceptionRecord.ExceptionAddress)
 								{
+									directBP = true;
 									MemoryBPs[i].bRestoreBP = true;
 
 									memset(tcLogString,0x00,LOGBUFFER);
@@ -727,48 +730,38 @@ void clsDebugger::DebuggingLoop()
 								}
 							}
 
+
+							if(!directBP)
+							{ // PAGE_GUARD on a page where we placed an BP
+								MEMORY_BASIC_INFORMATION mbi;
+
+								quint64 pageBase = NULL,
+										pageSize = NULL;
+
+								HANDLE processHandle = GetProcessHandleByPID(debug_event.dwProcessId);
+
+								if(VirtualQueryEx(processHandle,(LPVOID)exInfo.ExceptionRecord.ExceptionAddress,&mbi,sizeof(mbi)))
+								{
+									if((DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress >= (DWORD64)mbi.BaseAddress && (DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
+									{
+										pageSize = mbi.RegionSize; 
+										pageBase = (DWORD64)mbi.BaseAddress;
+									}
+								}
+
+								for(size_t i = 0;i < MemoryBPs.size(); i++)
+								{
+									if(MemoryBPs[i].dwOffset <= (pageBase + pageSize) && MemoryBPs[i].dwOffset >= pageBase)
+									{
+										MemoryBPs[i].bRestoreBP = true;
+										break;
+									}
+								}
+							}
 						}
 						else
 						{
-							MEMORY_BASIC_INFORMATION mbi;
-
-							quint64 dwAddress = NULL,
-								pageBase = NULL,
-								pageSize = NULL;
-
-							HANDLE processHandle = GetProcessHandleByPID(debug_event.dwProcessId);
-
-							while(VirtualQueryEx(processHandle,(LPVOID)exInfo.ExceptionRecord.ExceptionAddress,&mbi,sizeof(mbi)))
-							{
-								if((DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress >= (DWORD64)mbi.BaseAddress && (DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
-								{
-									pageSize = mbi.RegionSize; 
-									pageBase = (DWORD64)mbi.BaseAddress;
-									break;
-								}
-
-								dwAddress += mbi.RegionSize;
-							}
-
-							for(size_t i = 0;i < MemoryBPs.size(); i++)
-							{
-								if(MemoryBPs[i].dwOffset <= (pageBase + pageSize) && MemoryBPs[i].dwOffset >= pageBase)
-								{
-									bIsBP = true;
-									break;
-								}
-							}
-
-							if(bIsBP)
-							{
-								SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
-								PIDs[iPid].dwBPRestoreFlag = 0x4;
-								PIDs[iPid].bTrapFlag = true;
-
-								dwContinueStatus = CallBreakDebugger(&debug_event,2);
-							}
-							else
-								dwContinueStatus = CallBreakDebugger(&debug_event,0);
+							dwContinueStatus = CallBreakDebugger(&debug_event,0);
 						}
 
 						break;
@@ -938,26 +931,43 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 			PIDs[iPID].bTrapFlag = false;
 		return true;
 	}
-
-	if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && _bSingleStepFlag)
+	else if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && _bSingleStepFlag)
 		return isExceptionRelevant;
-
-	if(dwExceptionType == EXCEPTION_BREAKPOINT	||
-		dwExceptionType == 0x4000001f			||
-		dwExceptionType == EXCEPTION_GUARD_PAGE ||
-		dwExceptionType == 0x4000001E			||
-		dwExceptionType == EXCEPTION_SINGLE_STEP)
+	else if(dwExceptionType == EXCEPTION_BREAKPOINT	|| dwExceptionType == 0x4000001f)
 	{
 		for(size_t i = 0;i < SoftwareBPs.size();i++)
 			if(dwExceptionOffset == SoftwareBPs[i].dwOffset && (SoftwareBPs[i].dwPID == dwPID || SoftwareBPs[i].dwPID == -1))
+				return true;		
+	}
+	else if(dwExceptionType == EXCEPTION_GUARD_PAGE)
+	{
+		DWORD64 pageBase = NULL,
+				pageSize = NULL;
+
+		MEMORY_BASIC_INFORMATION mbi;
+
+		if(VirtualQueryEx(PIDs[iPID].hProc,(LPVOID)dwExceptionOffset,&mbi,sizeof(mbi)))
+		{
+			if(dwExceptionOffset >= (DWORD64)mbi.BaseAddress && dwExceptionOffset <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
+			{
+				pageSize = mbi.RegionSize; 
+				pageBase = (DWORD64)mbi.BaseAddress;
+			}
+		}
+
+		for(size_t i = 0;i < MemoryBPs.size(); i++)
+		{
+			if(MemoryBPs[i].dwOffset <= (pageBase + pageSize) && MemoryBPs[i].dwOffset >= pageBase)
 				return true;
-		for(size_t i = 0;i < MemoryBPs.size();i++)
-			if(dwExceptionOffset == MemoryBPs[i].dwOffset && (MemoryBPs[i].dwPID == dwPID || MemoryBPs[i].dwPID == -1))
-				return true;
+		}
+	}
+	else if(dwExceptionType == 0x4000001E || dwExceptionType == EXCEPTION_SINGLE_STEP)
+	{
 		for(size_t i = 0;i < HardwareBPs.size();i++)
 			if(dwExceptionOffset == HardwareBPs[i].dwOffset && (HardwareBPs[i].dwPID == dwPID || HardwareBPs[i].dwPID == -1))
 				return true;
 	}
+
 	return false;
 }
 
