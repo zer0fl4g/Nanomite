@@ -23,12 +23,6 @@
 #include <time.h>
 #include <QtCore>
 
-// Taken from GDB
-#define DR_EXECUTE	(0x00)		/* Break on instruction execution.  */
-#define DR_WRITE	(0x01)		/* Break on data writes.			*/
-#define DR_READ		(0x11)		/* Break on data reads or writes.	*/
-//
-
 #define LOGBUFFER (512 * sizeof(TCHAR))
 #define LOGBUFFERCHAR (512)
 #define THREAD_GETSET_CONTEXT	(0x0018) 
@@ -88,20 +82,9 @@ struct BPStruct
 {
 	DWORD dwSize;
 	DWORD dwSlot;
-	DWORD dwTypeFlag;
-	/*
-	|	DR_EXECUTE
-	|	DR_WRITE
-	|	DR_READ
-	*/
-	DWORD dwHandle;
-	/*
-	|	0x0 - don´t keep
-	|   0x1 - keep
-	|   0x2 - step , remove it
-	|   0x3 - offset changed
-	|	0x4 - trace end bp
-	*/
+	DWORD dwTypeFlag;	/* see BP_BREAKON		*/
+	DWORD dwHandle;		/* see BREAKPOINT_TYPE	*/
+	DWORD dwOldProtection;
 	quint64 dwOffset;
 	quint64 dwBaseOffset;
 	quint64 dwOldOffset;
@@ -132,6 +115,14 @@ enum BREAKPOINT_TYPE
 	BP_STEPOVER		= 2,
 	BP_OFFSETUPDATE = 3,
 	BP_TRACETO		= 4
+};
+
+enum BP_BREAKON
+{
+	BP_EXEC		= 0x00,
+	BP_WRITE	= 0x01,
+	BP_ACCESS	= 0x10,
+	BP_READ		= 0x11	
 };
 
 class clsDebugger : public QThread
@@ -178,7 +169,7 @@ public:
 	bool IsTargetSet();
 	bool RemoveBPFromList(quint64 dwOffset,DWORD dwType); //,DWORD dwPID);
 	bool RemoveBPs();
-	bool AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwKeep);
+	bool AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwHandle);
 	bool SetTraceFlagForPID(DWORD dwPID, bool bIsEnabled);
 
 	DWORD GetCurrentPID();
@@ -259,10 +250,10 @@ private:
 	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, int foundDLL = -1);
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
-	bool wSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwKeep,DWORD dwSize,BYTE& bOrgByte);
+	bool wSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,BYTE& bOrgByte);
 	bool dSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,BYTE btOrgByte);
-	bool wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwKeep);
-	bool dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize);
+	bool wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD typeFlag,DWORD *savedProtection);
+	bool dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize, DWORD oldProtection);
 	bool wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
 	bool dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot);
 	bool InitBP();

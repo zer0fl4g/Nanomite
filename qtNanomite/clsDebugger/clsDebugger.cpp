@@ -335,13 +335,13 @@ void clsDebugger::DebuggingLoop()
 				else
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
-				AddBreakpointToList(SOFTWARE_BP,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,BP_DONOTKEEP);
+				AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,BP_DONOTKEEP);
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
 					DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
 					if(tlsCallback > 0)
-						AddBreakpointToList(SOFTWARE_BP,2,-1,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,BP_DONOTKEEP);
+						AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,BP_DONOTKEEP);
 				}
 				
 				InitBP();
@@ -542,12 +542,12 @@ void clsDebugger::DebuggingLoop()
 											if(!bIsEP)
 												bStepOver = true;
 											
-											RemoveBPFromList(SoftwareBPs[i].dwOffset,0);
+											RemoveBPFromList(SoftwareBPs[i].dwOffset,SOFTWARE_BP);
 											break;
 										case BP_TRACETO: // Trace End BP
 											_bSingleStepFlag = false;
 
-											RemoveBPFromList(SoftwareBPs[i].dwOffset,0);
+											RemoveBPFromList(SoftwareBPs[i].dwOffset,SOFTWARE_BP);
 											break;
 
 										default:	
@@ -618,15 +618,15 @@ void clsDebugger::DebuggingLoop()
 							{
 								for(size_t i = 0;i < SoftwareBPs.size(); i++)
 								{
-									if(SoftwareBPs[i].dwHandle == BP_KEEP && 
-										SoftwareBPs[i].bRestoreBP && 
+									if(SoftwareBPs[i].bRestoreBP && 
+										SoftwareBPs[i].dwHandle == BP_KEEP && 
 										(SoftwareBPs[i].dwPID == debug_event.dwProcessId || SoftwareBPs[i].dwPID == -1))
 									{
-										wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwHandle,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+										wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
 										SoftwareBPs[i].bRestoreBP = false;
-									}
 
-									break;
+										break;
+									}									
 								}
 
 								PIDs[iPid].bTrapFlag = false;
@@ -639,10 +639,12 @@ void clsDebugger::DebuggingLoop()
 									if(MemoryBPs[i].bRestoreBP &&
 										MemoryBPs[i].dwHandle == BP_KEEP &&
 										(MemoryBPs[i].dwPID == debug_event.dwProcessId || MemoryBPs[i].dwPID == -1))
-										wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwHandle);
-									
-									MemoryBPs[i].bRestoreBP = false;
-									break;
+									{
+										wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwTypeFlag,&MemoryBPs[i].dwOldProtection);
+										MemoryBPs[i].bRestoreBP = false;
+
+										break;
+									}									
 								}
 
 								PIDs[iPid].bTrapFlag = false;
@@ -699,9 +701,10 @@ void clsDebugger::DebuggingLoop()
 
 						break;
 					}
+				case EXCEPTION_ACCESS_VIOLATION:
 				case EXCEPTION_GUARD_PAGE:
 					{
-						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,EXCEPTION_GUARD_PAGE,debug_event.dwProcessId,true);
+						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
 						if(bIsBP)
 						{
 							bool directBP = false;
@@ -724,6 +727,12 @@ void clsDebugger::DebuggingLoop()
 									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Memory BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)MemoryBPs[i].dwOffset);
 #endif
 									PBLogInfo();
+
+									if(exInfo.ExceptionRecord.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+									{
+										DWORD currentProtection = NULL;
+										VirtualProtectEx(PIDs[i].hProc, (LPVOID)exInfo.ExceptionRecord.ExceptionAddress, MemoryBPs[i].dwSize, MemoryBPs[i].dwOldProtection, &currentProtection);
+									}
 
 									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 									break;
@@ -754,16 +763,18 @@ void clsDebugger::DebuggingLoop()
 									if(MemoryBPs[i].dwOffset <= (pageBase + pageSize) && MemoryBPs[i].dwOffset >= pageBase)
 									{
 										MemoryBPs[i].bRestoreBP = true;
+
+										if(exInfo.ExceptionRecord.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+										{
+											DWORD currentProtection = NULL;
+											VirtualProtectEx(PIDs[i].hProc, (LPVOID)exInfo.ExceptionRecord.ExceptionAddress, MemoryBPs[i].dwSize, MemoryBPs[i].dwOldProtection, &currentProtection);
+										}
+
 										break;
 									}
 								}
 							}
 						}
-						else
-						{
-							dwContinueStatus = CallBreakDebugger(&debug_event,0);
-						}
-
 						break;
 					}
 				}
@@ -939,7 +950,7 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 			if(dwExceptionOffset == SoftwareBPs[i].dwOffset && (SoftwareBPs[i].dwPID == dwPID || SoftwareBPs[i].dwPID == -1))
 				return true;		
 	}
-	else if(dwExceptionType == EXCEPTION_GUARD_PAGE)
+	else if(dwExceptionType == EXCEPTION_GUARD_PAGE || dwExceptionType == EXCEPTION_ACCESS_VIOLATION)
 	{
 		DWORD64 pageBase = NULL,
 				pageSize = NULL;

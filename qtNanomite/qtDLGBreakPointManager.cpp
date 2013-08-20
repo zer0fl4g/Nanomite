@@ -78,13 +78,13 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 		switch(breakpointType)
 		{
 		case 0:
-			TempString = "Software BP - int3";
+			TempString = "Software BP";
 			break;
 		case 1:
-			TempString = "Memory BP - Page Guard";
+			TempString = "Memory BP";
 			break;
 		case 2:
-			TempString = "Hardware BP - Dr[0-3]";
+			TempString = "Hardware BP";
 			break;
 		}
 		tblBPs->setItem(tblBPs->rowCount() - 1,2,new QTableWidgetItem(TempString));
@@ -93,14 +93,17 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 
 		switch(newBP.dwTypeFlag)
 		{
-		case DR_EXECUTE:
+		case BP_EXEC:
 			TempString = "Execute";
 			break;
-		case DR_READ:
+		case BP_READ:
 			TempString = "Read";
 			break;
-		case DR_WRITE:
+		case BP_WRITE:
 			TempString = "Write";
+			break;
+		case BP_ACCESS:
+			TempString = "Access";
 			break;
 		}
 		tblBPs->setItem(tblBPs->rowCount() - 1,4,new QTableWidgetItem(TempString));
@@ -167,11 +170,11 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	if(iUpdateLine != -1)
 	{
 		DWORD dwType = 0;
-		if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Software BP - int3") == 0)
+		if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Software BP") == 0)
 			dwType = SOFTWARE_BP;
-		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Hardware BP - Dr[0-3]") == 0)
+		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Hardware BP") == 0)
 			dwType = HARDWARE_BP;
-		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Memory BP - Page Guard") == 0)
+		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Memory BP") == 0)
 			dwType = MEMORY_BP;
 
 		myMainWindow->coreDebugger->RemoveBPFromList(tblBPs->item(iUpdateLine,1)->text().toULongLong(0,16),dwType);
@@ -181,24 +184,26 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	DWORD dwType = 0,
 		dwBreakOn = 0;
 
-	if(cbType->currentText().compare("Software BP - int3") == 0)
+	if(cbType->currentText().compare("Software BP") == 0)
 		dwType = SOFTWARE_BP;
-	else if(cbType->currentText().compare("Hardware BP - Dr[0-3]") == 0)
+	else if(cbType->currentText().compare("Hardware BP") == 0)
 		dwType = HARDWARE_BP;
-	else if(cbType->currentText().compare("Memory BP - Page Guard") == 0)
+	else if(cbType->currentText().compare("Memory BP") == 0)
 		dwType = MEMORY_BP;
 
 	if(cbBreakOn->currentText().compare("Execute") == 0)
-		dwBreakOn = DR_EXECUTE;
+		dwBreakOn = BP_EXEC;
 	else if(cbBreakOn->currentText().compare("Read") == 0)
-		dwBreakOn = DR_READ;
+		dwBreakOn = BP_READ;
 	else if(cbBreakOn->currentText().compare("Write") == 0)
-		dwBreakOn = DR_WRITE;
+		dwBreakOn = BP_WRITE;
+	else if(cbBreakOn->currentText().compare("Access") == 0)
+		dwBreakOn = BP_ACCESS;
 
 	if(lePID->text().toInt() == -1)
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,0,BP_KEEP);
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,NULL,BP_KEEP);
 	else
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,0,BP_KEEP);
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,NULL,BP_KEEP);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
@@ -207,19 +212,58 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 	leOffset->setText(tblBPs->item(iRow,1)->text());
 	leSize->setText(tblBPs->item(iRow,3)->text());
 
-	if(QString().compare(tblBPs->item(iRow,2)->text(),"Software BP - int3") == 0)
+	DWORD selectedBreakType = NULL;
+	if(QString().compare(tblBPs->item(iRow,4)->text(),"Execute") == 0)
+		selectedBreakType = BP_EXEC;
+	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Read") == 0)
+		selectedBreakType = BP_READ;
+	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Write") == 0)
+		selectedBreakType = BP_WRITE;
+	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Access") == 0)
+		selectedBreakType = BP_ACCESS;
+
+	if(QString().compare(tblBPs->item(iRow,2)->text(),"Software BP") == 0)
+	{
+		cbBreakOn->clear();
+		cbBreakOn->addItem("Execute");
+		cbBreakOn->setEnabled(false);
+
 		cbType->setCurrentIndex(0);
-	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Hardware BP - Dr[0-3]") == 0)
+	}
+	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Hardware BP") == 0)
+	{
+		cbBreakOn->clear();
+		cbBreakOn->addItem("Execute");
+		cbBreakOn->addItem("Read");
+		cbBreakOn->addItem("Write");
+		cbBreakOn->setEnabled(true);
+
 		cbType->setCurrentIndex(1);
-	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Memory BP - Page Guard") == 0)
+
+		switch(selectedBreakType)
+		{
+		case BP_EXEC: cbBreakOn->setCurrentIndex(0); break;
+		case BP_READ: cbBreakOn->setCurrentIndex(1); break;
+		case BP_WRITE: cbBreakOn->setCurrentIndex(2); break;
+		}		
+	}
+	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Memory BP") == 0)
+	{
+		cbBreakOn->clear();
+		cbBreakOn->addItem("Access");
+		cbBreakOn->addItem("Execute");
+		cbBreakOn->addItem("Write");
+		cbBreakOn->setEnabled(true);
+
 		cbType->setCurrentIndex(2);
 
-	if(QString().compare(tblBPs->item(iRow,4)->text(),"Execute") == 0)
-		cbBreakOn->setCurrentIndex(0);
-	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Read") == 0)
-		cbBreakOn->setCurrentIndex(2);
-	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Write") == 0)
-		cbBreakOn->setCurrentIndex(1);
+		switch(selectedBreakType)
+		{
+		case BP_ACCESS: cbBreakOn->setCurrentIndex(0); break;
+		case BP_EXEC: cbBreakOn->setCurrentIndex(1); break;
+		case BP_WRITE: cbBreakOn->setCurrentIndex(2); break;
+		}	
+	}
 }
 
 void qtDLGBreakPointManager::OnBPRemove()
@@ -231,12 +275,12 @@ void qtDLGBreakPointManager::OnBPRemove()
 	{
 		if(tblBPs->item(i,0)->isSelected())
 		{
-			if(QString().compare(tblBPs->item(i,2)->text(),"Software BP - int3") == 0)
-				dwType = 0;
-			else if(QString().compare(tblBPs->item(i,2)->text(),"Hardware BP - Dr[0-3]") == 0)
-				dwType = 2;
-			else if(QString().compare(tblBPs->item(i,2)->text(),"Memory BP - Page Guard") == 0)
-				dwType = 1;
+			if(QString().compare(tblBPs->item(i,2)->text(),"Software BP") == 0)
+				dwType = SOFTWARE_BP;
+			else if(QString().compare(tblBPs->item(i,2)->text(),"Hardware BP") == 0)
+				dwType = HARDWARE_BP;
+			else if(QString().compare(tblBPs->item(i,2)->text(),"Memory BP") == 0)
+				dwType = MEMORY_BP;
 
 			myMainWindow->coreDebugger->RemoveBPFromList(tblBPs->item(i,1)->text().toULongLong(0,16),dwType);
 			tblBPs->removeRow(i);
@@ -292,16 +336,26 @@ void qtDLGBreakPointManager::OnSendToDisassembler(QTableWidgetItem *pItem)
 
 void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedItemText)
 {
-	if(selectedItemText.compare("Software BP - int3") == 0)
+	if(selectedItemText.compare("Software BP") == 0)
 	{
+		cbBreakOn->clear();
+		cbBreakOn->addItem("Execute");
 		cbBreakOn->setEnabled(false);
 	}
-	else if(selectedItemText.compare("Hardware BP - Dr[0-3]") == 0)
+	else if(selectedItemText.compare("Hardware BP") == 0)
 	{
+		cbBreakOn->clear();
+		cbBreakOn->addItem("Execute");
+		cbBreakOn->addItem("Read");
+		cbBreakOn->addItem("Write");
 		cbBreakOn->setEnabled(true);
 	}
-	else if(selectedItemText.compare("Memory BP - Page Guard") == 0)
+	else if(selectedItemText.compare("Memory BP") == 0)
 	{
-		cbBreakOn->setEnabled(false);
+		cbBreakOn->clear();
+		cbBreakOn->addItem("Access");
+		cbBreakOn->addItem("Execute");
+		cbBreakOn->addItem("Write");
+		cbBreakOn->setEnabled(true);
 	}
 }

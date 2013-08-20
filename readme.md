@@ -102,6 +102,7 @@
 + added possibility to create a full process dump in detailview - process tab - context menu
 + added possibility to open function view for selected modules on detail view
 + added support for saving patches in dlls
++ added "on execution" and "on write" memory breakpoint types
 + updated function view algorithm
 + updated winapi messagebox to qt
 

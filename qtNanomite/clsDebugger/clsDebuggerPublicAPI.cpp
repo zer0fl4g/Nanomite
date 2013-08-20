@@ -147,7 +147,8 @@ bool clsDebugger::IsTargetSet()
 
 bool clsDebugger::StepOver(quint64 dwNewOffset)
 {
-	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it) {
+	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it)
+	{
 		if(it->dwHandle != BP_KEEP)
 		{
 			dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
@@ -155,32 +156,17 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 
 			SoftwareBPs.erase(it);
 			it = SoftwareBPs.begin();
+
+			if(it == SoftwareBPs.end())
+				break;
 		}
-
-		if(SoftwareBPs.size() <= 0)
-			break;
 	}
 
-	BPStruct newBP;
-	newBP.dwOffset = dwNewOffset;
-	newBP.dwHandle = BP_STEPOVER;
-	newBP.bRestoreBP = false;
-	newBP.dwSize = 0x1;
-	newBP.bOrgByte = NULL;
-	newBP.dwPID = _dwCurPID;
-	newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	if(!AddBreakpointToList(SOFTWARE_BP,NULL,_dwCurPID,dwNewOffset,NULL,BP_STEPOVER))
+		return false;
 
-	wSoftwareBP(newBP.dwPID,newBP.dwOffset,newBP.dwHandle,newBP.dwSize,newBP.bOrgByte);
-
-	if(newBP.bOrgByte != 0xCC)
-	{
-		SoftwareBPs.push_back(newBP);
-		PulseEvent(_hDbgEvent);
-		return true;
-	}
-
-	clsMemManager::CFree(newBP.moduleName);
-	return false;
+	PulseEvent(_hDbgEvent);
+	return true;
 }
 
 bool clsDebugger::StepIn()

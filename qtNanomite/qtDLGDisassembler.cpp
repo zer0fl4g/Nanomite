@@ -368,7 +368,7 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 	if(currentSelectedItems.count() <= 0) return;
 
 	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
-	if(coreDebugger->AddBreakpointToList(SOFTWARE_BP,DR_EXECUTE,-1,dwSelectedVA,NULL,BP_KEEP))
+	if(coreDebugger->AddBreakpointToList(SOFTWARE_BP,BP_EXEC,-1,dwSelectedVA,NULL,BP_KEEP))
 		currentSelectedItems.value(0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 	else
 	{// exists
