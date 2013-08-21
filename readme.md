@@ -99,11 +99,15 @@
 + added save file dialog to memory dump and patch manager
 + added the correct offsets for module imports in the peeditor
 + added double click handler in trace view and bp manager to send a offset to disassembler window
-+ added possibility to create a full process dump in detailview - process tab - context menu
-+ added possibility to open function view for selected modules on detail view
++ added possibility to create a full process dump
++ added possibility to open function view for selected modules
 + added support for saving patches in dlls
 + added "on execution" and "on write" memory breakpoint types
 + updated function view algorithm
 + updated winapi messagebox to qt
+
+####Notes:
+	- The full process dump can be done in detail view -> process tab -> context menu
+	- The function view can now be showed also in detail view -> modules tab -> context menu
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

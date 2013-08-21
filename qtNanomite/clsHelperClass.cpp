@@ -243,7 +243,7 @@ quint64 clsHelperClass::CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWO
 
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 		memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
-		GetMappedFileName(hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH * sizeof(TCHAR));
+		GetMappedFileName(hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH);
 
 		iModLen = wcslen(sTemp2);
 		if(iModLen > 0)

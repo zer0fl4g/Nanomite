@@ -129,42 +129,18 @@ void clsDebugger::CleanWorkSpace()
 
 }
 
-PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile) 
+PTCHAR clsDebugger::GetFileNameFromModuleBase(HANDLE processHandle, LPVOID imageBase) 
 {
-	HANDLE hFileMap;
-	DWORD dwFileSizeHi = 0,
-		dwFileSizeLo = GetFileSize(hFile, &dwFileSizeHi); 
-
-	if(dwFileSizeLo == 0 && dwFileSizeHi == 0)
-		return false;
-
-	hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,0,1,NULL);
-	if (hFileMap == INVALID_HANDLE_VALUE) 
-		return NULL;
-
-	LPVOID pMem = MapViewOfFile(hFileMap, FILE_MAP_READ, 0, 0, 1);
-	if (pMem == NULL) 
-	{
-		CloseHandle(hFileMap);
-		return NULL;
-	}
-
 	PTCHAR tcFilename = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-	if (!GetMappedFileName(GetCurrentProcess(),pMem,tcFilename,MAX_PATH)) 
+	if (!GetMappedFileName(processHandle, imageBase, tcFilename, MAX_PATH)) 
 	{
-		UnmapViewOfFile(pMem);
-		CloseHandle(hFileMap);
 		clsMemManager::CFree(tcFilename);
 		return NULL;
 	}
 
 	PTCHAR tcTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-	tcTemp[0] = '\0';
-
-	if (!GetLogicalDriveStrings(255-1, tcTemp)) 
+	if (!GetLogicalDriveStrings(MAX_PATH - 1, tcTemp)) 
 	{
-		UnmapViewOfFile(pMem);
-		CloseHandle(hFileMap);
 		clsMemManager::CFree(tcFilename);
 		clsMemManager::CFree(tcTemp);
 		return NULL;
@@ -180,24 +156,23 @@ PTCHAR clsDebugger::GetFileNameFromHandle(HANDLE hFile)
 	{
 		*tcDrive = *p;
 
-		if (QueryDosDevice(tcDrive,tcName,MAX_PATH))
+		if(QueryDosDevice(tcDrive, tcName, MAX_PATH))
 		{
 			size_t uNameLen = wcslen(tcName);
-			if (uNameLen < MAX_PATH) 
+			if(uNameLen < MAX_PATH) 
 			{
-				bFound = _wcsnicmp(tcFilename,tcName,uNameLen) == 0;
-				if (bFound)
-					swprintf_s(tcFile,255,L"%s%s",tcDrive,(tcFilename + uNameLen));
+				bFound = _wcsnicmp(tcFilename, tcName, uNameLen) == 0;
+				if(bFound)
+					swprintf_s(tcFile, MAX_PATH, L"%s%s", tcDrive, (tcFilename + uNameLen));
 			}
 		}
+
 		while (*p++);
 	} while (!bFound && *p);
 
 	clsMemManager::CFree(tcName);
 	clsMemManager::CFree(tcTemp);
 	clsMemManager::CFree(tcFilename);
-	UnmapViewOfFile(pMem);
-	CloseHandle(hFileMap);
 
 	return tcFile;
 }
@@ -311,7 +286,7 @@ void clsDebugger::DebuggingLoop()
 					m_dbgPI.dwThreadId = debug_event.dwThreadId;
 				}
 
-				PTCHAR tcDllFilepath = GetFileNameFromHandle(debug_event.u.CreateProcessInfo.hFile);
+				PTCHAR tcDllFilepath = GetFileNameFromModuleBase(hProc, debug_event.u.CreateProcessInfo.lpBaseOfImage);
 				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,hProc);
 
 				emit OnNewPID((wstring)tcDllFilepath,debug_event.dwProcessId);
@@ -335,19 +310,19 @@ void clsDebugger::DebuggingLoop()
 				else
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
-				AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,NULL,BP_DONOTKEEP);
+				AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,BP_DONOTKEEP);
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
 					DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
 					if(tlsCallback > 0)
-						AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,NULL,BP_DONOTKEEP);
+						AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,BP_DONOTKEEP);
 				}
 				
 				InitBP();
 
 				// Insert Main Thread to List
-				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateThread.lpStartAddress,false,0,true);
+				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
 				
 				if(dbgSettings.bBreakOnNewPID)
 					dwContinueStatus = CallBreakDebugger(&debug_event,0);
@@ -400,9 +375,6 @@ void clsDebugger::DebuggingLoop()
 
 		case LOAD_DLL_DEBUG_EVENT:
 			{
-				PTCHAR sDLLFileName = GetFileNameFromHandle(debug_event.u.LoadDll.hFile); 
-				PBDLLInfo(sDLLFileName,debug_event.dwProcessId,(quint64)debug_event.u.LoadDll.lpBaseOfDll,true);
-
 				HANDLE hProc = 0;
 				size_t iPid = 0;
 
@@ -411,6 +383,9 @@ void clsDebugger::DebuggingLoop()
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
 						hProc = PIDs[i].hProc;iPid = i;
 				}
+
+				PTCHAR sDLLFileName = GetFileNameFromModuleBase(hProc, debug_event.u.LoadDll.lpBaseOfDll); 
+				PBDLLInfo(sDLLFileName,debug_event.dwProcessId,(quint64)debug_event.u.LoadDll.lpBaseOfDll,true);
 
 				if(PIDs[iPid].bSymLoad && dbgSettings.bAutoLoadSymbols)
 					SymLoadModuleExW(hProc,NULL,sDLLFileName,0,(quint64)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);

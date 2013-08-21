@@ -162,7 +162,7 @@ bool clsDebugger::StepOver(quint64 dwNewOffset)
 		}
 	}
 
-	if(!AddBreakpointToList(SOFTWARE_BP,NULL,_dwCurPID,dwNewOffset,NULL,BP_STEPOVER))
+	if(!AddBreakpointToList(SOFTWARE_BP,NULL,_dwCurPID,dwNewOffset,BP_STEPOVER))
 		return false;
 
 	PulseEvent(_hDbgEvent);

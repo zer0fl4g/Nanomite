@@ -169,4 +169,5 @@ void qtDLGRegEdit::OnSaveAndExit()
 	emit OnUpdateRegView();
 
 	MessageBoxW(NULL,L"Registers got saved!",L"Nanomite",MB_OK);
+	close();
 }

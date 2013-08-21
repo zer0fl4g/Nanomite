@@ -167,9 +167,9 @@ public:
 	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
-	bool RemoveBPFromList(quint64 dwOffset,DWORD dwType); //,DWORD dwPID);
+	bool RemoveBPFromList(quint64 breakpointOffset, DWORD breakpointType); //,DWORD dwPID);
 	bool RemoveBPs();
-	bool AddBreakpointToList(DWORD dwBPType,DWORD dwTypeFlag,DWORD dwPID,quint64 dwOffset,DWORD dwSlot,DWORD dwHandle);
+	bool AddBreakpointToList(DWORD breakpointType, DWORD typeFlag, DWORD processID, quint64 breakpointOffset, DWORD breakpointHandleType);
 	bool SetTraceFlagForPID(DWORD dwPID, bool bIsEnabled);
 
 	DWORD GetCurrentPID();
@@ -250,12 +250,12 @@ private:
 	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, int foundDLL = -1);
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
-	bool wSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,BYTE& bOrgByte);
-	bool dSoftwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,BYTE btOrgByte);
-	bool wMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD typeFlag,DWORD *savedProtection);
-	bool dMemoryBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize, DWORD oldProtection);
-	bool wHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSize,DWORD dwSlot,DWORD dwTypeFlag);
-	bool dHardwareBP(DWORD dwPID,quint64 dwOffset,DWORD dwSlot);
+	bool wSoftwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, BYTE &dataBackup);
+	bool dSoftwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, BYTE orgBreakpointData);
+	bool wMemoryBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD typeFlag, DWORD *savedProtection);
+	bool dMemoryBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD oldProtection);
+	bool wHardwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD breakpointSlot, DWORD typeFlag);
+	bool dHardwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSlot);
 	bool InitBP();
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag, bool isExceptionRelevant = true);
@@ -269,7 +269,7 @@ private:
 	DWORD GetMainProcessID();
 	DWORD GetMainThreadID();
 
-	PTCHAR GetFileNameFromHandle(HANDLE hFile);
+	PTCHAR GetFileNameFromModuleBase(HANDLE processHandle, LPVOID imageBase);
 
 	typedef DWORD (__stdcall *CustomHandler)(DEBUG_EVENT *debug_event);
 

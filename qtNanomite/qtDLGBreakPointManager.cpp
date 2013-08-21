@@ -201,9 +201,9 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		dwBreakOn = BP_ACCESS;
 
 	if(lePID->text().toInt() == -1)
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,NULL,BP_KEEP);
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,BP_KEEP);
 	else
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,NULL,BP_KEEP);
+		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,BP_KEEP);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
