@@ -119,7 +119,7 @@ void qtDLGAttach::FillProcessList()
 						}
 
 						tblProcList->setItem(tblProcList->rowCount() - 1,3,
-							new QTableWidgetItem(processPath));
+							new QTableWidgetItem(processPath.replace("/","\\")));
 					}
 					else
 						tblProcList->removeRow(tblProcList->rowCount() - 1);

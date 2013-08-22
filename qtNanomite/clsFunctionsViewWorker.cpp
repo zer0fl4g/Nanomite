@@ -46,8 +46,6 @@ void clsFunctionsViewWorker::run()
 	}
 
 	qSort(functionList.begin(),functionList.end(),OffsetLessThan);
-
-	return;
 }
 
 void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc)

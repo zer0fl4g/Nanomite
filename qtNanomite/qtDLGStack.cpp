@@ -168,8 +168,7 @@ void qtDLGStack::OnContextMenu(QPoint qPoint)
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Offset",this));
-	submenu->addAction(new QAction("OpCodes",this));
-	submenu->addAction(new QAction("Mnemonic",this));
+	submenu->addAction(new QAction("Data",this));
 	submenu->addAction(new QAction("Comment",this));
 
 	menu.addMenu(submenu);
@@ -180,7 +179,11 @@ void qtDLGStack::OnContextMenu(QPoint qPoint)
 
 void qtDLGStack::MenuCallback(QAction* pAction)
 {
-	if(QString().compare(pAction->text(),"Line") == 0)
+	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
+	{
+		qtDLGNanomite::GetInstance()->DisAsGUI->OnDisplayDisassembly(tblStack->item(m_selectedRow,1)->text().toULongLong(0,16));
+	}
+	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4")
@@ -194,20 +197,15 @@ void qtDLGStack::MenuCallback(QAction* pAction)
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblStack->item(m_selectedRow,0)->text());
 	}
-	else if(QString().compare(pAction->text(),"OpCodes") == 0)
+	else if(QString().compare(pAction->text(),"Data") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblStack->item(m_selectedRow,1)->text());
 	}
-	else if(QString().compare(pAction->text(),"Mnemonics") == 0)
-	{
-		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(m_selectedRow,2)->text());
-	}
 	else if(QString().compare(pAction->text(),"Comment") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(m_selectedRow,3)->text());
+		clipboard->setText(tblStack->item(m_selectedRow,2)->text());
 	}
 }
 

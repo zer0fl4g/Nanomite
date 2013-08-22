@@ -56,6 +56,6 @@ void qtDLGOpenNewFile::fileSelected(const QString & filePath)
 
 void qtDLGOpenNewFile::GetFilePathAndCommandLine(QString &filePath, QString &commandLine)
 {
-	filePath = m_filePath;
+	filePath = m_filePath.replace("/","\\");
 	commandLine = m_commandLine;
 }

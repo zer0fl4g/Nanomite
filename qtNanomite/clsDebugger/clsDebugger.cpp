@@ -100,16 +100,17 @@ void clsDebugger::CleanWorkSpace()
 		clsMemManager::CFree(i->sPath);
 	}
 	
-	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it)
+	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end(); ++it)
 	{
 		if(it->dwHandle != BP_KEEP)
 		{
 			clsMemManager::CFree(it->moduleName);
 			SoftwareBPs.erase(it);
 			it = SoftwareBPs.begin();
+
+			if(it == SoftwareBPs.end())
+				break;
 		}
-		if(SoftwareBPs.size() <= 0)
-			break;
 	}
 
 	PIDs.clear();
@@ -126,7 +127,6 @@ void clsDebugger::CleanWorkSpace()
 	}
 	
 	ZeroMemory(&m_dbgPI, sizeof(m_dbgPI));
-
 }
 
 PTCHAR clsDebugger::GetFileNameFromModuleBase(HANDLE processHandle, LPVOID imageBase) 
@@ -350,7 +350,7 @@ void clsDebugger::DebuggingLoop()
 		case EXIT_PROCESS_DEBUG_EVENT:
 			{
 				PBProcInfo(debug_event.dwProcessId,L"",NULL,debug_event.u.ExitProcess.dwExitCode,NULL);
-				SymCleanup(debug_event.u.CreateProcessInfo.hProcess);
+				SymCleanup(GetCurrentProcessHandle(debug_event.dwProcessId));
 
 				emit DeletePEManagerObject(L"",debug_event.dwProcessId);
 				clsDBManager::CloseFile(debug_event.dwProcessId);
@@ -449,14 +449,22 @@ void clsDebugger::DebuggingLoop()
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
 						iPid = i;
 
-				if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,false))
-					PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+				//if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,false))
+				//	PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
 
 				switch (exInfo.ExceptionRecord.ExceptionCode)
 				{
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
 					if(PIDs[iPid].bKernelBP && !PIDs[iPid].bWOW64KernelBP)
 					{
+						memset(tcLogString,0x00,LOGBUFFER);
+#ifdef _AMD64_
+						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
+#else
+						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+#endif
+						PBLogInfo();
+							
 						if(dbgSettings.bBreakOnSystemEP)
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
 						else
@@ -472,6 +480,14 @@ void clsDebugger::DebuggingLoop()
 
 						if(!PIDs[iPid].bKernelBP)
 						{
+							memset(tcLogString,0x00,LOGBUFFER);
+	#ifdef _AMD64_
+							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
+	#else
+							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+	#endif
+							PBLogInfo();
+								
 							if(dbgSettings.bBreakOnSystemEP)
 								dwContinueStatus = CallBreakDebugger(&debug_event,0);
 							else
@@ -671,7 +687,7 @@ void clsDebugger::DebuggingLoop()
 								}
 							}
 							else
-								dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
+								bIsBP = false;
 						}
 
 						break;
@@ -758,6 +774,9 @@ void clsDebugger::DebuggingLoop()
 
 				if(!bIsEP && !bIsKernelBP && !bIsBP)
 				{
+					if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,false))
+						PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+
 					for (size_t i = 0; i < ExceptionHandler.size();i++)
 					{
 						if(debug_event.u.Exception.ExceptionRecord.ExceptionCode == ExceptionHandler[i].dwExceptionType)

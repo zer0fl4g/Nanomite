@@ -95,6 +95,7 @@
 + fixed a bug which caused a break when continue was used after a trace
 + fixed a bug which returned wrong offset when adding a breakpoint to a wow64 process
 + fixed a bug which did not clean up properly if using the "recent file" menu to debug new process
++ fixed a bug which did not clean up properly if a process terminates in a multiprocess session
 + fixed a bug which did not replace memory breakpoints correctly
 + added save file dialog to memory dump and patch manager
 + added the correct offsets for module imports in the peeditor
