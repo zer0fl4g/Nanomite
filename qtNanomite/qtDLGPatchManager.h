@@ -50,6 +50,7 @@ public:
 	static bool RemovePatch(int PID, quint64 Offset);
 	static bool DeletePatch(int PID, quint64 Offset);
 	static void ClearAllPatches();
+	static void ResetPatches();
 
 signals:
 	void OnReloadDebugger();

@@ -548,3 +548,16 @@ void qtDLGPatchManager::OnPatchRemove()
 
 	UpdatePatchTable();	
 }
+
+void qtDLGPatchManager::ResetPatches()
+{
+	if(pThis == NULL) return;
+
+	for(QList<PatchData>::iterator i = pThis->m_patches.begin(); i != pThis->m_patches.end(); ++i)
+	{
+		i->bSaved = false;
+		i->bWritten = false;
+	}
+
+	pThis->UpdatePatchTable();
+}

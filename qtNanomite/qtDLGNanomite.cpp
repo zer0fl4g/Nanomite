@@ -340,6 +340,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	CleanGUI(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1]"));
 	qtDLGTrace::disableStatusBarTimer();
+	qtDLGPatchManager::ResetPatches();
 	UpdateStateBar(STATE_TERMINATE);
 	LoadRecentFileMenu();
 

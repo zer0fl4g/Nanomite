@@ -20,6 +20,7 @@
 #include "clsMemManager.h"
 
 #include <QFile>
+#include <QProcess>
 
 qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
 	HANDLE processHandle,quint64 instructionOffset,clsDisassembler *pCurrentDisassembler,bool is64Bit)
@@ -35,6 +36,8 @@ qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
 
 	connect(new QShortcut(QKeySequence(Qt::Key_Escape),this),SIGNAL(activated()),this,SLOT(close()));
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(InsertNewInstructions()));
+
+	this->setWindowTitle(QString("Assemble at %1h").arg(instructionOffset));
 }
 
 qtDLGAssembler::~qtDLGAssembler()
@@ -66,12 +69,13 @@ void qtDLGAssembler::InsertNewInstructions()
 	QTextStream out(&tempOutput);
 
 	if(m_is64Bit)
-		out << "BITS 64\r\n";
+		out << "BITS 64\n";
 	else
-		out << "BITS 32\r\n";
+		out << "BITS 32\n";
+
+	out << "org 0x" << i.value().Offset << "\r\n";
 	out << lineEdit->text();
 	tempOutput.close();
-
 
 	STARTUPINFO si;
     PROCESS_INFORMATION pi;

@@ -86,7 +86,8 @@ private:
 
 	QStringList m_searchedOffsetList;
 
-	int m_iSelectedRow;
+	int m_iSelectedRow,
+		m_maxRows;
 
 	quint64 m_lastEIP;
 

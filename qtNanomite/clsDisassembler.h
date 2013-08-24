@@ -51,7 +51,8 @@ private:
 	HANDLE	m_processHandle;
 	quint64 m_searchedOffset,
 			m_startOffset,
-			m_endOffset;
+			m_endOffset,
+			m_startPage;
 
 	bool m_isWorking;
 

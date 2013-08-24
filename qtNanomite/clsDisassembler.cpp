@@ -26,7 +26,7 @@
 
 clsDisassembler::clsDisassembler()
 {
-	m_startOffset = 0;m_endOffset = 0;
+	m_startOffset = 0;m_endOffset = 0;m_startPage = 0;
 	m_isWorking = false;
 
 	connect(this,SIGNAL(finished()),this,SLOT(OnThreadFinished()),Qt::QueuedConnection);
@@ -83,12 +83,18 @@ bool clsDisassembler::IsNewInsertPossible()
 				PageEndBelow = NULL;
 
 		if(GetPageRangeForOffset(m_searchedOffset - 300, PageBaseBelow, PageEndBelow))
+		{
 			m_startOffset = m_searchedOffset - 300;
+			m_startPage = PageBaseBelow;
+		}
 		else
-			m_startOffset = PageBase;
+			m_startPage = m_startOffset = PageBase;
 	}
 	else
+	{
 		m_startOffset = m_searchedOffset - 300;
+		m_startPage = PageBase;
+	}
 
 	if((m_searchedOffset + 300) >= PageEnd)
 	{
@@ -108,14 +114,14 @@ bool clsDisassembler::IsNewInsertPossible()
 
 void clsDisassembler::run()
 {
-	if(m_startOffset == 0 || m_endOffset == 0)
+	if(m_startOffset == 0 || m_endOffset == 0 || m_startPage == 0)
 		return;
 
-	quint64 dwSize = m_endOffset - m_startOffset;
+	quint64 dwSize = m_endOffset - m_startPage;
 	LPVOID pBuffer = malloc(dwSize);
 	clsSymbolAndSyntax DataVisualizer(m_processHandle);
 
-	if(ReadProcessMemory(m_processHandle,(LPVOID)m_startOffset,pBuffer,dwSize,NULL))
+	if(ReadProcessMemory(m_processHandle,(LPVOID)m_startPage,pBuffer,dwSize,NULL))
 	{
 		DISASM newDisAss;
 		bool bContinueDisAs = true;
@@ -126,7 +132,7 @@ void clsDisassembler::run()
 		memset(&newDisAss, 0, sizeof(DISASM));
 
 		newDisAss.EIP = (quint64)pBuffer;
-		newDisAss.VirtualAddr = m_startOffset;
+		newDisAss.VirtualAddr = m_startPage;
 #ifdef _AMD64_
 		newDisAss.Archi = 64;
 #else
@@ -143,7 +149,7 @@ void clsDisassembler::run()
 				bContinueDisAs = false;
 			else if(iLen == UNKNOWN_OPCODE)
 				iLen = 1;
-			else
+			else if(newDisAss.VirtualAddr >= m_startOffset && newDisAss.VirtualAddr <= m_endOffset)
 			{	
 				// OpCodez
 				if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
@@ -161,10 +167,7 @@ void clsDisassembler::run()
 					newRow.OpCodes = QString::fromWCharArray(sTemp);
 
 					// Instruction
-					if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
-						wsprintf(sTemp, L"%s", L"db 00");
-					else
-						wsprintf(sTemp, L"%S", newDisAss.CompleteInstr);	
+					wsprintf(sTemp, L"%S", newDisAss.CompleteInstr);	
 					newRow.ASM = QString::fromWCharArray(sTemp);
 				
 					// Comment/Symbol && itemStyle		
@@ -197,9 +200,13 @@ void clsDisassembler::run()
 	{
 		QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
 		m_endOffset = iEnd.key().toULongLong(0,16);
+		m_startOffset = SectionDisAs.begin().value().Offset.toULongLong(0,16);
 	}
 	else
+	{
 		m_endOffset = 0;
+		m_startOffset = 0;
+	}
 
 	emit DisAsFinished(m_searchedOffset);
 }

@@ -55,6 +55,8 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	tblDisAs->horizontalHeader()->resizeSection(2,310);
 	tblDisAs->horizontalHeader()->resizeSection(3,310);
 	tblDisAs->horizontalHeader()->setFixedHeight(21);
+
+	m_maxRows = ((tblDisAs->verticalHeader()->height()) / 11) - 1;
 }
 
 qtDLGDisassembler::~qtDLGDisassembler()
@@ -72,7 +74,7 @@ void qtDLGDisassembler::OnDisAsScroll(int iValue)
 		OnDisplayDisassembly(tblDisAs->item(0,0)->text().toULongLong(0,16));
 	else
 	{
-		if(tblDisAs->rowCount() <= 25)
+		if(tblDisAs->rowCount() < m_maxRows)
 		{
 			scrollDisAs->setValue(5);
 			return;
@@ -117,7 +119,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		tblDisAs->setRowCount(0);
 
 		quint64 itemStyle;
-		while(iLines <= ((tblDisAs->verticalHeader()->height()) / 11) - 1)
+		while(iLines <= m_maxRows)
 		{
 			itemStyle = i.value().itemStyle;
 			tblDisAs->insertRow(tblDisAs->rowCount());
@@ -148,19 +150,21 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 
 			tblDisAs->setItem(tblDisAs->rowCount() - 1, 3,new QTableWidgetItem(i.value().Comment));
 
+			++iLines;++i;
 			if(i == iEnd)
 			{
-				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(4,0)->text().toULongLong(0,16),true);
+				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(5,0)->text().toULongLong(0,16),true);
 				return;
 			}
-
-			++iLines;++i;
 		}
 
 		// Update Window Title
 		wstring ModName,FuncName;
 		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
-		qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(QString().fromStdWString(FuncName)));
+		if(ModName.length() > 0 && FuncName.length() > 0)
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(QString().fromStdWString(FuncName)));
+		else if(ModName.length() > 0 && FuncName.length() <= 0)
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(dwEIP,16,16,QChar('0')));
 	}
 	else
 	{
@@ -380,6 +384,8 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 
 void qtDLGDisassembler::resizeEvent(QResizeEvent *event)
 {
+	m_maxRows = ((tblDisAs->verticalHeader()->height()) / 11) - 1;
+
 	if(coreDebugger->GetDebuggingState())
 		OnDisplayDisassembly(m_lastEIP);
 }
