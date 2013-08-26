@@ -42,12 +42,15 @@ bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClea
 	if(hProc == INVALID_HANDLE_VALUE || hProc == NULL|| dwEIP == NULL || m_isWorking)
 		return false;
 
-	m_isWorking = true;
-	m_searchedOffset = dwEIP;
-	m_processHandle = hProc;
+	if(m_searchedOffset == dwEIP && !bClear)
+		return false;
 
 	if(bClear) 
 		SectionDisAs.clear();
+
+	m_isWorking = true;
+	m_searchedOffset = dwEIP;
+	m_processHandle = hProc;
 
 	if(IsNewInsertNeeded())
 	{
@@ -121,8 +124,12 @@ void clsDisassembler::run()
 	LPVOID pBuffer = malloc(dwSize);
 	clsSymbolAndSyntax DataVisualizer(m_processHandle);
 
+	clsDebugger::RemoveSBPFromMemory(true, GetProcessId(m_processHandle));
+
 	if(ReadProcessMemory(m_processHandle,(LPVOID)m_startPage,pBuffer,dwSize,NULL))
 	{
+		clsDebugger::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
+
 		DISASM newDisAss;
 		bool bContinueDisAs = true;
 		int iLen = 0;
@@ -189,11 +196,12 @@ void clsDisassembler::run()
 	}
 	else
 	{
+		clsDebugger::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
 		free(pBuffer);
 		MessageBox(NULL,L"Access Denied! Can not disassemble this buffer :(",L"Nanomite",MB_OK);
 		return;
 	}
-
+	
 	free(pBuffer);
 
 	if(SectionDisAs.count() > 0)

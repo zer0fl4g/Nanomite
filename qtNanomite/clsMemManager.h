@@ -25,7 +25,6 @@
 // and increase ram usage a lot!
 //#define MEMLEAKTRACE 
 #ifdef MEMLEAKTRACE   
-#define MAX_STACKFRAME 6
 #include <dbghelp.h> 
 #include <string> 
   

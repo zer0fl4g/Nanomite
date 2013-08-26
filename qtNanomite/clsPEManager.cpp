@@ -82,7 +82,11 @@ bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
 	if(bLoaded)
 		PEFiles.push_back(newPEFile);
 	else
+	{
+		delete newPEFile.PEFile;
 		return false;
+	}
+
 	return true;
 }
 

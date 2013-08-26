@@ -149,6 +149,7 @@ public:
 	static bool IsOffsetAnBP(quint64 Offset);
 	static bool IsOffsetEIP(quint64 Offset);
 
+	static void RemoveSBPFromMemory(bool isDisable, DWORD processID);
 	static void SetNewThreadContext(bool isWow64, CONTEXT newProcessContext, WOW64_CONTEXT newWowProcessContext);
 
 	static HANDLE GetProcessHandleByPID(DWORD PID);

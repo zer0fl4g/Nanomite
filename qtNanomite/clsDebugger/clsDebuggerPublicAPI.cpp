@@ -416,3 +416,23 @@ DWORD clsDebugger::GetMainThreadID()
 {
 	return m_dbgPI.dwThreadId;
 }
+
+void clsDebugger::RemoveSBPFromMemory(bool isDisable, DWORD processID)
+{
+	if(isDisable)
+	{
+		for (vector<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
+		{
+			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false && it->dwHandle == BP_KEEP)
+				pThis->dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
+		}
+	}
+	else
+	{
+		for (vector<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
+		{
+			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false && it->dwHandle == BP_KEEP)
+				pThis->wSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
+		}
+	}
+}

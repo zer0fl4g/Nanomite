@@ -57,8 +57,9 @@ private:
 	QList<FunctionProcessingData> m_processingData;
 
 	void GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc);
-	void ParseMemoryRangeForFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
-	void InsertSymbolsIntoLists(HANDLE hProc,WORD PID);
+	void ParseMemoryRangeForCallFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
+	void ParseMemoryRangeForJumpFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
+	void InsertSymbolsIntoLists(HANDLE hProc);
 	
 	DWORD GetFunctionSizeFromCallPoint(HANDLE processHandle, quint64 functionOffset, quint64 pageEnd);
 

@@ -147,9 +147,7 @@ void* clsMemManager::CAlloc(size_t ulSize)
 	stackFr.AddrFrame.Offset = context.Ebp; 
 	stackFr.AddrStack.Offset = context.Esp;  
 #endif  
-
-	int stackFrameCounter = 0;
-
+	
 	do
     { 
         bSuccess = StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0); 
@@ -188,9 +186,8 @@ void* clsMemManager::CAlloc(size_t ulSize)
 		}
 
         newAlloc.callstackTrace.append(newCallstack); 
-	
-		stackFrameCounter++;
-	}while(stackFr.AddrReturn.Offset != 0 || stackFrameCounter <= MAX_STACKFRAME); 
+
+	}while(stackFr.AddrReturn.Offset != 0); 
   
     free(pSymbol); 
     CloseHandle(hThread); 

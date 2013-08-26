@@ -54,7 +54,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	}
 
 	QMap<QString,DisAsDataRow>::const_iterator i = m_pCurrentDisassembler->SectionDisAs.constFind(QString("%1").arg(m_instructionOffset,16,16,QChar('0')).toUpper());
-	if((QMapData::Node *)i == (QMapData::Node *)m_pCurrentDisassembler->SectionDisAs.constEnd()) 
+	if(i == m_pCurrentDisassembler->SectionDisAs.constEnd()) 
 	{
 		close();
 		return;
@@ -77,29 +77,36 @@ void qtDLGAssembler::InsertNewInstructions()
 	out << lineEdit->text();
 	tempOutput.close();
 
-	STARTUPINFO si;
-    PROCESS_INFORMATION pi;
-    ZeroMemory(&si,sizeof(si));
-    si.cb = sizeof(si);
-    ZeroMemory(&pi,sizeof(pi));
-	TCHAR szCommandLine[] = L"nasm.exe -o nanomite.bin nanomite.asm";
-
-	if(!CreateProcess(NULL,szCommandLine,NULL,NULL,FALSE,CREATE_NO_WINDOW,NULL,NULL,&si,&pi)) 
-    {
-		QMessageBox::critical(this,"Nanomite","unable to launch assembler!",QMessageBox::Ok,QMessageBox::Ok);
+	QProcess nasm;
+	nasm.setReadChannel(QProcess::StandardOutput);
+    nasm.setProcessChannelMode(QProcess::MergedChannels);
+    nasm.start("nasm.exe -o nanomite.bin nanomite.asm");
+    if (!nasm.waitForStarted())
+	{
+		QMessageBox::critical(this, "Nanomite", "Unable to launch assembler!", QMessageBox::Ok, QMessageBox::Ok);
 		close();
 		return;
-    }
+	}
 
-    WaitForSingleObject(pi.hProcess,INFINITE);
-	CloseHandle(pi.hProcess);
-    CloseHandle(pi.hThread);
+	while(nasm.state() != QProcess::NotRunning)
+	{
+        nasm.waitForReadyRead();
+		QString errorMessage = nasm.readAll();
+
+		if(errorMessage.contains("nanomite.asm:3:"))
+		{
+			errorMessage.replace("nanomite.asm:3:","");
+			QMessageBox::critical(this, "Nanomite", errorMessage, QMessageBox::Ok, QMessageBox::Ok);
+			lineEdit->clear();
+			return;
+		}
+    }
 	DeleteFile(L"nanomite.asm");
 
 	HANDLE hFile = CreateFileW(L"nanomite.bin",GENERIC_READ,FILE_SHARE_READ,NULL,OPEN_EXISTING,NULL,NULL);
 	if(hFile == INVALID_HANDLE_VALUE)
 	{
-		close();
+		lineEdit->clear();
 		return;
 	}
 
@@ -112,7 +119,7 @@ void qtDLGAssembler::InsertNewInstructions()
 		DeleteFile(L"nanomite.bin");
 		clsMemManager::CFree(pFileBuffer);
 		QMessageBox::critical(this,"Nanomite","no valid opcodes found!",QMessageBox::Ok,QMessageBox::Ok);
-		close();
+		lineEdit->clear();
 		return;
 	}
 	CloseHandle(hFile);
@@ -123,7 +130,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	{
 		clsMemManager::CFree(pFileBuffer);
 		QMessageBox::critical(this,"Nanomite","no valid opcodes found!",QMessageBox::Ok,QMessageBox::Ok);
-		close();
+		lineEdit->clear();
 		return;
 	}
 
@@ -135,7 +142,7 @@ void qtDLGAssembler::InsertNewInstructions()
 		while(newOpcodeLen < BytesRead)
 		{
 			++i;
-			if((QMapData::Node *)i == (QMapData::Node *)m_pCurrentDisassembler->SectionDisAs.constEnd()) return;
+			if(i == m_pCurrentDisassembler->SectionDisAs.constEnd()) return;
 			oldOpcodes = i.value().OpCodes;
 			newOpcodeLen += oldOpcodes.replace(" ", "").length() / 2;
 		}
@@ -150,7 +157,6 @@ void qtDLGAssembler::InsertNewInstructions()
 	clsMemManager::CFree(pBuffer);
 	clsMemManager::CFree(pFileBuffer);
 
-	m_pCurrentDisassembler->SectionDisAs.clear();
 	lineEdit->clear();
 	close();
 }

@@ -38,6 +38,8 @@ qtDLGPatchManager::qtDLGPatchManager(QWidget *parent, Qt::WFlags flags)
 	connect(tblPatches,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenuRequested(QPoint)));
 	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnPatchRemove()));
+	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnReturnPressed()));
+	connect(tblPatches,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
 
 	//Init List
 	tblPatches->horizontalHeader()->resizeSection(0,75);
@@ -418,13 +420,9 @@ void qtDLGPatchManager::SavePatch(quint64 Offset, bool saveAll)
 
 			if(fileMap == fileMapping.end())
 			{		
-				bool isExeFile = false;
 				isNewFile = true;
 
 				if(currentFilePath.contains(".exe"))
-					isExeFile = true;
-
-				if(isExeFile)
 				{
 					QString tempPath = currentFilePath;
 					patchFilePath = QFileDialog::getSaveFileName(this,
@@ -560,4 +558,17 @@ void qtDLGPatchManager::ResetPatches()
 	}
 
 	pThis->UpdatePatchTable();
+}
+
+void qtDLGPatchManager::OnSendToDisassembler(QTableWidgetItem *pSelectedRow)
+{
+	qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),
+		tblPatches->item(pSelectedRow->row(),1)->text().toULongLong(0,16));
+}
+
+void qtDLGPatchManager::OnReturnPressed()
+{
+	if(tblPatches->selectedItems().count() <= 0) return;
+
+	OnSendToDisassembler(tblPatches->selectedItems()[0]);
 }

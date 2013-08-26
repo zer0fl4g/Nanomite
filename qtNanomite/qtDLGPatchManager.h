@@ -74,6 +74,8 @@ private slots:
 	void UpdateOffsetPatch(HANDLE newOffset, int newPID);
 	void OnCustomContextMenuRequested(QPoint qPoint);
 	void OnPatchRemove();
+	void OnSendToDisassembler(QTableWidgetItem *pSelectedRow);
+	void OnReturnPressed();
 };
 
 #endif

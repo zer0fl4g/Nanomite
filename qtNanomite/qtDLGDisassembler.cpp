@@ -103,8 +103,8 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		}
 		else if(i == coreDisAs->SectionDisAs.constBegin())
 		{
-			coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16));
-			return;
+			if(coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16)))
+				return;
 		}
 		else
 		{

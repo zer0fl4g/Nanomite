@@ -69,6 +69,7 @@
 	+ Break			= Suspend debugging
 - Attach Dialog
 	+ Return		= Attach to selected process
+	+ Double Click	= Attach to selected process
 - Breakpoint Manager
 	+ Del			= Remove selected breakpoint
 	+ Double Click	= Send offset to disassembler
@@ -83,11 +84,13 @@
 - Options
 	+ Del			= Remove selected custom exception
 - Patch Manager
-	+ Del			= Remove selected patch
+	+ Del			= Remove selec ted patch
+	+ Return		= Send selected offset to disassembler
+	+ Double Click	= Send selected offset to disassembler
 - Register Window
 	+ Double Click	= Opens reg edit window
 - Trace Window
-	+ Double Click	= Send offset to disassembler
+	+ Double Click	= Send selected offset to disassembler
 
 ## Changelog
 ###Version 0.1 beta 15
@@ -97,10 +100,11 @@
 + fixed a bug which did not clean up properly if using the "recent file" menu to debug new process
 + fixed a bug which did not clean up properly if a process terminates in a multiprocess session
 + fixed a bug which could cause problems when scrolling up in disassembler view
++ fixed a bug which could lead to a memory leak when a invalid file was loaded
 + fixed a bug which did not replace memory breakpoints correctly
 + added save file dialog to memory dump and patch manager
 + added the correct offsets for module imports in the peeditor
-+ added double click handler in trace view and bp manager to send a offset to disassembler window
++ added double click handler in trace view, bp manager and patch manager to send a offset to disassembler window
 + added possibility to create a full process dump
 + added possibility to open function view for selected modules
 + added support for saving patches in dlls
