@@ -56,8 +56,7 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags fla
 	{
 		FunctionProcessingData newData;
 		newData.currentModule = (PTCHAR)myMainWindow->coreDebugger->PIDs[i].sFileName;
-		newData.PID = myMainWindow->coreDebugger->PIDs[i].dwPID;
-		newData.hProc = myMainWindow->coreDebugger->PIDs[i].hProc;
+		newData.processHandle = myMainWindow->coreDebugger->PIDs[i].hProc;
 		dataForProcessing.append(newData);
 	}
 	
@@ -94,8 +93,7 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QString modulePath, QWidget *pa
 	QList<FunctionProcessingData> dataForProcessing;
 	FunctionProcessingData newData;
 	newData.currentModule = m_modulePath;
-	newData.PID = processID;
-	newData.hProc = clsDebugger::GetProcessHandleByPID(processID);
+	newData.processHandle = clsDebugger::GetProcessHandleByPID(processID);
 	dataForProcessing.append(newData);
 
 	
@@ -173,7 +171,7 @@ void qtDLGFunctions::InsertDataFrom(int position)
 			tblFunctions->insertRow(tblFunctions->rowCount());
 			// PID
 			tblFunctions->setItem(tblFunctions->rowCount() - 1,0,
-				new QTableWidgetItem(QString("%1").arg(i->PID,8,16,QChar('0'))));
+				new QTableWidgetItem(QString("%1").arg(i->processID,8,16,QChar('0'))));
 
 			// Func Name
 			tblFunctions->setItem(tblFunctions->rowCount() - 1,1,

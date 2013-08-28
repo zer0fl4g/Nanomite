@@ -41,6 +41,10 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 			m_currentFile = FileName;
 		else
 			m_currentFile = m_pEManager->getFilenameFromPID(m_processID);
+
+		if(m_processID == -1)
+			m_pEManager->OpenFile(m_currentFile);
+
 		if(m_currentFile.length() <= 0) 
 		{
 			QMessageBox::critical(this,"Nanomite","Could not load File!",QMessageBox::Ok,QMessageBox::Ok);
@@ -65,7 +69,6 @@ qtDLGPEEditor::~qtDLGPEEditor()
 {
 	if(m_processID == -1)
 		m_pEManager->CloseFile(m_currentFile,-1);
-	m_pEManager = NULL;
 }
 
 void qtDLGPEEditor::InitList()
@@ -116,7 +119,10 @@ void qtDLGPEEditor::InsertImports()
 		
 		QTreeWidgetItem* childElement = new QTreeWidgetItem(moduleElement);
 		childElement->setText(0,currentElement[1]);
-		childElement->setText(1,QString("%1").arg(clsHelperClass::RemoteGetProcAddr(currentElement[1],dwOffset,m_processID),16,16,QChar('0')));
+		if(dwOffset == 0)
+			childElement->setText(1,QString("%1").arg(0,16,16,QChar('0')));
+		else
+			childElement->setText(1,QString("%1").arg(clsHelperClass::RemoteGetProcAddr(currentElement[1],dwOffset,m_processID),16,16,QChar('0')));
 	}
 }
 

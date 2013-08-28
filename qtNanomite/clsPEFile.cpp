@@ -325,7 +325,6 @@ QList<APIData> clsPEFile::loadImports64()
 bool clsPEFile::isValidPEFile()
 {
 	return m_isLoaded;
-
 }
 
 bool clsPEFile::is64Bit()

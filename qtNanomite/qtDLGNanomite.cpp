@@ -109,9 +109,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
 
-	// Callbacks from DetailInfo to PEManager
-	connect(dlgDetInfo,SIGNAL(OpenFileInPEManager(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)));
-
 	// Actions for the MainMenu and Toolbar
 	connect(actionFile_OpenNew, SIGNAL(triggered()), this, SLOT(action_FileOpenNewFile()));
 	connect(actionFile_AttachTo, SIGNAL(triggered()), this, SLOT(action_FileAttachTo()));

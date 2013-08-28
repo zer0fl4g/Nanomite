@@ -389,5 +389,9 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, q
 		}
 	}
 
+	delete [] ExportFunctionTable;
+	delete [] ExportNameTable;
+	delete [] ExportOrdinalTable;
+
 	return 0;
 }

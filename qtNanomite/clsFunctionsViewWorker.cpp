@@ -41,14 +41,14 @@ void clsFunctionsViewWorker::run()
 {
 	for(QList<FunctionProcessingData>::ConstIterator i = m_processingData.constBegin(); i != m_processingData.constEnd(); ++i)
 	{
-		GetValidMemoryParts((PTCHAR)i->currentModule,i->hProc);
-		InsertSymbolsIntoLists(i->hProc);
+		GetValidMemoryParts((PTCHAR)i->currentModule,i->processHandle);
+		InsertSymbolsIntoLists(i->processHandle);
 	}
 
 	qSort(functionList.begin(),functionList.end(),OffsetLessThan);
 }
 
-void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc)
+void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE processHandle)
 {
 	DWORD64 CurAddress = NULL;
 	PTCHAR	lpFileName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH *sizeof(TCHAR)),
@@ -56,9 +56,9 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 			lpCurrentFileName = NULL;
 
 	MEMORY_BASIC_INFORMATION mbi;
-	while(VirtualQueryEx(hProc,(LPVOID)CurAddress,&mbi,sizeof(mbi)))
+	while(VirtualQueryEx(processHandle,(LPVOID)CurAddress,&mbi,sizeof(mbi)))
 	{
-		if(GetMappedFileName(hProc,(LPVOID)CurAddress,lpFileName,MAX_PATH) > 0)
+		if(GetMappedFileName(processHandle,(LPVOID)CurAddress,lpFileName,MAX_PATH) > 0)
 		{
 			lpCurrentFileName = clsHelperClass::reverseStrip(lpFileName,'\\');
 			if(lpCurrentFileName != NULL && wcslen(lpCurrentFileName) > 0)
@@ -66,8 +66,22 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 				if(wcscmp(lpCurrentFileName,lpCurrentNameTemp) == 0 &&
 					((mbi.Protect & PAGE_EXECUTE) || (mbi.Protect & PAGE_EXECUTE_READ) || (mbi.Protect & PAGE_EXECUTE_READWRITE) || (mbi.Protect & PAGE_EXECUTE_WRITECOPY)))
 				{
-					ParseMemoryRangeForCallFunctions(hProc,(quint64)mbi.BaseAddress,mbi.RegionSize);
-					ParseMemoryRangeForJumpFunctions(hProc,(quint64)mbi.BaseAddress,mbi.RegionSize);
+					LPVOID lpBuffer = malloc(mbi.RegionSize);
+					if(lpBuffer == NULL) continue;
+
+					if(!ReadProcessMemory(processHandle, (LPVOID)mbi.BaseAddress, lpBuffer, mbi.RegionSize, NULL))
+					{
+						free(lpBuffer);
+						continue;
+					}
+
+					int processID = GetProcessId(processHandle);
+
+					ParseMemoryRangeForCallFunctions((quint64)lpBuffer, (quint64)mbi.BaseAddress, mbi.RegionSize, processID);
+					qSort(functionList.begin(),functionList.end(),OffsetLessThan); // sort for faster double find in next Parse function
+					ParseMemoryRangeForFunctions((quint64)lpBuffer, (quint64)mbi.BaseAddress, mbi.RegionSize, processID);
+
+					free(lpBuffer);
 				}				
 				
 				clsMemManager::CFree(lpCurrentFileName);
@@ -80,28 +94,18 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hPr
 	clsMemManager::CFree(lpFileName);
 }
 
-void clsFunctionsViewWorker::ParseMemoryRangeForCallFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size)
+void clsFunctionsViewWorker::ParseMemoryRangeForCallFunctions(quint64 sectionBuffer, quint64 BaseAddress, quint64 Size, int processID)
 {
-	LPVOID lpBuffer = malloc(Size);
-	if(lpBuffer == NULL) return;
-
-	if(!ReadProcessMemory(hProc,(LPVOID)BaseAddress,lpBuffer,Size,NULL))
-	{
-		free(lpBuffer);
-		return;
-	}
-
 	DISASM newDisAss;
+	memset(&newDisAss, 0, sizeof(DISASM));
+	
 	FunctionData newFunction;
 	quint64 endOffset = BaseAddress + Size;
-	int processID = GetProcessId(hProc);
 	bool bContinueDisAs = true,
 		isContained = false;
-	int iLen = 0;
+	int iLen = 0;	
 
-	memset(&newDisAss, 0, sizeof(DISASM));
-
-	newDisAss.EIP = (quint64)lpBuffer;
+	newDisAss.EIP = sectionBuffer;
 	newDisAss.VirtualAddr = BaseAddress;
 #ifdef _AMD64_
 	newDisAss.Archi = 64;
@@ -130,7 +134,7 @@ void clsFunctionsViewWorker::ParseMemoryRangeForCallFunctions(HANDLE hProc,quint
 			{
 				for(QList<FunctionData>::const_iterator functionIT = functionList.constBegin(); functionIT != functionList.constEnd(); ++functionIT)
 				{
-					if(functionIT->FunctionOffset == newDisAss.Instruction.AddrValue)
+					if(newDisAss.Instruction.AddrValue >= functionIT->FunctionOffset && newDisAss.Instruction.AddrValue <= (functionIT->FunctionOffset + functionIT->FunctionSize))
 					{
 						isContained = true;
 						break;
@@ -139,10 +143,16 @@ void clsFunctionsViewWorker::ParseMemoryRangeForCallFunctions(HANDLE hProc,quint
 
 				if(!isContained)
 				{
+					quint64 memPtr = NULL;
+					if(newDisAss.Instruction.AddrValue > newDisAss.VirtualAddr)
+						memPtr = newDisAss.EIP + (newDisAss.Instruction.AddrValue - newDisAss.VirtualAddr);
+					else
+						memPtr = newDisAss.EIP - (newDisAss.VirtualAddr - newDisAss.Instruction.AddrValue);
+
 					newFunction.FunctionOffset = newDisAss.Instruction.AddrValue;
-					newFunction.FunctionSize = GetFunctionSizeFromCallPoint(hProc, newDisAss.Instruction.AddrValue, endOffset);
+					newFunction.FunctionSize = GetFunctionSizeFromCallPoint(memPtr, newDisAss.Instruction.AddrValue, endOffset);
 					newFunction.functionSymbol = "";
-					newFunction.PID = processID;
+					newFunction.processID = processID;
 					functionList.append(newFunction);
 				}
 
@@ -157,32 +167,20 @@ void clsFunctionsViewWorker::ParseMemoryRangeForCallFunctions(HANDLE hProc,quint
 		if (newDisAss.VirtualAddr >= endOffset)
 			bContinueDisAs = false;
 	}
-
-	free(lpBuffer);
 }
 
-void clsFunctionsViewWorker::ParseMemoryRangeForJumpFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size)
+void clsFunctionsViewWorker::ParseMemoryRangeForFunctions(quint64 sectionBuffer, quint64 BaseAddress, quint64 Size, int processID)
 {
-	LPVOID lpBuffer = malloc(Size);
-	if(lpBuffer == NULL) return;
-
-	if(!ReadProcessMemory(hProc,(LPVOID)BaseAddress,lpBuffer,Size,NULL))
-	{
-		free(lpBuffer);
-		return;
-	}
-
 	DISASM newDisAss;
+	memset(&newDisAss, 0, sizeof(DISASM));
+	
 	FunctionData newFunction;
 	quint64 endOffset = BaseAddress + Size;
-	int processID = GetProcessId(hProc);
 	bool bContinueDisAs = true,
 		isContained = false;
 	int iLen = 0;
 
-	memset(&newDisAss, 0, sizeof(DISASM));
-
-	newDisAss.EIP = (quint64)lpBuffer;
+	newDisAss.EIP = sectionBuffer;
 	newDisAss.VirtualAddr = BaseAddress;
 #ifdef _AMD64_
 	newDisAss.Archi = 64;
@@ -199,60 +197,49 @@ void clsFunctionsViewWorker::ParseMemoryRangeForJumpFunctions(HANDLE hProc,quint
 			bContinueDisAs = false;
 		else if(iLen == UNKNOWN_OPCODE)
 			iLen = 1;
-		else
-		{	
-			if(newDisAss.Instruction.Opcode == 0x00 && iLen == 2)
-				iLen = 1;
-
-			if(iLen > 0 &&
-				newDisAss.Instruction.BranchType == JmpType &&
-				newDisAss.Instruction.AddrValue >= BaseAddress &&
-				newDisAss.Instruction.AddrValue <= endOffset) 
+		else if(newDisAss.Instruction.Opcode != 0x00 && newDisAss.Instruction.Opcode != 0x90 && newDisAss.Instruction.Opcode != 0xCC)
+		{
+			for(QList<FunctionData>::const_iterator functionIT = functionList.constBegin(); functionIT != functionList.constEnd(); ++functionIT)
 			{
-				for(QList<FunctionData>::const_iterator functionIT = functionList.constBegin(); functionIT != functionList.constEnd(); ++functionIT)
+				if(newDisAss.Instruction.BranchType == JmpType)
 				{
-					if(newDisAss.Instruction.AddrValue >= functionIT->FunctionOffset && newDisAss.Instruction.AddrValue <= (functionIT->FunctionOffset + functionIT->FunctionSize))
+					if(newDisAss.VirtualAddr >= functionIT->FunctionOffset &&
+						newDisAss.VirtualAddr < (functionIT->FunctionOffset + functionIT->FunctionSize))
 					{
 						isContained = true;
 						break;
 					}
 				}
-
-				if(!isContained)
+				else if(newDisAss.VirtualAddr >= functionIT->FunctionOffset &&
+					newDisAss.VirtualAddr <= (functionIT->FunctionOffset + functionIT->FunctionSize))
 				{
-					newFunction.FunctionOffset = newDisAss.Instruction.AddrValue;
-					newFunction.FunctionSize = GetFunctionSizeFromCallPoint(hProc, newDisAss.Instruction.AddrValue, endOffset);
-					newFunction.functionSymbol = "";
-					newFunction.PID = processID;
-					functionList.append(newFunction);
+					isContained = true;
+					break;
 				}
-
-				isContained = false;
 			}
+
+			if(!isContained)
+			{
+				newFunction.FunctionOffset = newDisAss.VirtualAddr;
+				newFunction.FunctionSize = GetFunctionSizeFromCallPoint(newDisAss.EIP, newDisAss.VirtualAddr, endOffset);
+				newFunction.functionSymbol = "";
+				newFunction.processID = processID;
+				functionList.append(newFunction);
+			}
+
+			isContained = false;
 		}
 
 		newDisAss.EIP += iLen;
 		newDisAss.VirtualAddr += iLen;
-			
 
-		if (newDisAss.VirtualAddr >= endOffset)
+		if(newDisAss.VirtualAddr >= endOffset)
 			bContinueDisAs = false;
 	}
-
-	free(lpBuffer);
 }
 
-DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle, quint64 functionOffset, quint64 pageEnd)
+DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(quint64 sectionBuffer, quint64 functionOffset, quint64 pageEnd)
 {
-	LPVOID lpBuffer = malloc(pageEnd - functionOffset);
-	if(lpBuffer == NULL) return 0;
-
-	if(!ReadProcessMemory(processHandle, (LPVOID)functionOffset, lpBuffer, pageEnd - functionOffset, NULL))
-	{
-		free(lpBuffer);
-		return 0;
-	}
-
 	QList<JumpData> jumpsInFunction;
 	DISASM newDisAss;
 	JumpData newJump;
@@ -264,7 +251,7 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 
 	memset(&newDisAss, 0, sizeof(DISASM));
 
-	newDisAss.EIP = (quint64)lpBuffer;
+	newDisAss.EIP = sectionBuffer;
 	newDisAss.VirtualAddr = functionOffset;
 #ifdef _AMD64_
 	newDisAss.Archi = 64;
@@ -299,7 +286,6 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 
 					if(trashCounter >= 4)
 					{
-						free(lpBuffer);
 						return (newDisAss.VirtualAddr - functionOffset - trashCounter);
 					}
 				} 
@@ -307,14 +293,21 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 				{
 					for(QList<JumpData>::iterator jumpIT = jumpsInFunction.begin(); jumpIT != jumpsInFunction.end(); ++jumpIT)
 					{
-						if(jumpIT->jumpTarget < functionOffset)
+						if(jumpIT->jumpTarget < functionOffset && jumpIT->jumpType == JmpType)
 						{
 							// a jump above our function entry
 							// A
 							// |
 							// |
-							free(lpBuffer);
 							return jumpIT->jumpOffset - functionOffset + iLen;
+						}
+						else if(jumpIT->jumpTarget < functionOffset && jumpIT->jumpType != JmpType)
+						{
+							// a jump above our function entry
+							// A
+							// |
+							// |
+							isNotFunctionEnd = true;
 						}
 						else if(jumpIT->jumpTarget > newDisAss.VirtualAddr)
 						{
@@ -335,7 +328,6 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 
 					if(!isNotFunctionEnd)
 					{
-						free(lpBuffer);
 						return newDisAss.VirtualAddr - functionOffset + iLen;
 					}
 					else
@@ -349,9 +341,8 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 					(newDisAss.Instruction.BranchType <= -1 && newDisAss.Instruction.BranchType >= -8) ||
 					(newDisAss.Instruction.BranchType >= 1 && newDisAss.Instruction.BranchType <= 8))
 				{
-					if(instructionCounter == 1)
+					if(instructionCounter == 1 && newDisAss.Instruction.BranchType == JmpType)
 					{
-						free(lpBuffer);
 						return newDisAss.VirtualAddr - functionOffset + iLen;
 					}
 
@@ -359,6 +350,7 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 					{
 						newJump.jumpOffset = newDisAss.VirtualAddr;
 						newJump.jumpTarget = newDisAss.Instruction.AddrValue;
+						newJump.jumpType = newDisAss.Instruction.BranchType;
 
 						trashCounter = NULL;
 						jumpsInFunction.append(newJump);
@@ -374,11 +366,10 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(HANDLE processHandle,
 			bContinueDisAs = false;
 	}
 
-	free(lpBuffer);
 	return 0;
 }
 
-void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE hProc)
+void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE processHandle)
 {
 	wstring sModName,sFuncName;
 
@@ -388,7 +379,7 @@ void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE hProc)
 		{
 			if(functionList[i].functionSymbol.isEmpty())
 			{
-				clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,functionList[i].FunctionOffset,hProc);
+				clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,functionList[i].FunctionOffset,processHandle);
 				if(sFuncName.length() > 0)
 					functionList[i].functionSymbol = QString().fromStdWString(sFuncName);
 				else

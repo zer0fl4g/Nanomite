@@ -303,7 +303,6 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
 	{
 		std::wstring temp = tblModules->item(m_selectedRow,3)->text().toStdWString();
-		emit OpenFileInPEManager(temp,-1);
 		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
 		dlgPEEditor->show();
 	}

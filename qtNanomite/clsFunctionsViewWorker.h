@@ -26,21 +26,21 @@ struct FunctionData
 {
 	quint64 FunctionOffset;
 	quint64 FunctionSize;
-	int PID;
+	int processID;
 	QString functionSymbol;
 };
 
 struct FunctionProcessingData
 {
 	PTCHAR currentModule;
-	HANDLE hProc;
-	int PID;
+	HANDLE processHandle;
 };
 
 struct JumpData
 {
 	quint64 jumpOffset;
 	quint64 jumpTarget;
+	int	jumpType;
 };
 
 class clsFunctionsViewWorker : public QThread
@@ -56,12 +56,12 @@ public:
 private:
 	QList<FunctionProcessingData> m_processingData;
 
-	void GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE hProc);
-	void ParseMemoryRangeForCallFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
-	void ParseMemoryRangeForJumpFunctions(HANDLE hProc,quint64 BaseAddress,quint64 Size);
-	void InsertSymbolsIntoLists(HANDLE hProc);
+	void GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE processHandle);
+	void ParseMemoryRangeForCallFunctions(quint64 sectionBuffer, quint64 BaseAddress, quint64 Size, int processID);
+	void ParseMemoryRangeForFunctions(quint64 sectionBuffer, quint64 BaseAddress, quint64 Size, int processID);
+	void InsertSymbolsIntoLists(HANDLE processHandle);
 	
-	DWORD GetFunctionSizeFromCallPoint(HANDLE processHandle, quint64 functionOffset, quint64 pageEnd);
+	DWORD GetFunctionSizeFromCallPoint(quint64 sectionBuffer, quint64 functionOffset, quint64 pageEnd);
 
 protected:
 	void run();
