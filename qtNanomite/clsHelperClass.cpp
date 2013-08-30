@@ -198,7 +198,7 @@ wstring clsHelperClass::replaceAll(wstring orgString, wchar_t oldString, wchar_t
 DWORD clsHelperClass::GetMainThread(DWORD ProcessID)
 {
 	DWORD ThreadID = NULL;
-    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,0);
+    HANDLE hSnap = CreateToolhelp32Snapshot(TH32CS_SNAPTHREAD,ProcessID);
     if(hSnap == INVALID_HANDLE_VALUE) return ThreadID;
  
     THREADENTRY32 threadEntry;

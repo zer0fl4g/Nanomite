@@ -69,7 +69,7 @@ qtDLGDisassembler::~qtDLGDisassembler()
 
 void qtDLGDisassembler::OnDisAsScroll(int iValue)
 {
-	if(iValue == 5 || tblDisAs->rowCount() <= 10) return;
+	if(iValue == 5 || tblDisAs->rowCount() < 10) return;
 	else if(iValue < 5)
 		OnDisplayDisassembly(tblDisAs->item(0,0)->text().toULongLong(0,16));
 	else
@@ -82,6 +82,7 @@ void qtDLGDisassembler::OnDisAsScroll(int iValue)
 
 		OnDisplayDisassembly(tblDisAs->item(10,0)->text().toULongLong(0,16));
 	}
+
 	scrollDisAs->setValue(5);
 }
 
@@ -91,67 +92,76 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 	{
 		m_lastEIP = dwEIP;
 		bool IsAlreadyEIPSet = false;
-		int iLines = 0;
+		int lineCount = 0;
 
-		QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
-		QMap<QString,DisAsDataRow>::const_iterator iEnd = coreDisAs->SectionDisAs.constEnd();--iEnd;
+		QMap<QString,DisAsDataRow>::const_iterator disassemblyDataCurrent = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
+		QMap<QString,DisAsDataRow>::const_iterator disassemblyDataEnd = coreDisAs->SectionDisAs.constEnd(); --disassemblyDataEnd;
 
-		if(i == coreDisAs->SectionDisAs.constEnd())
+		if(disassemblyDataCurrent == coreDisAs->SectionDisAs.constEnd())
 		{
 			coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
 			return;
 		}
-		else if(i == coreDisAs->SectionDisAs.constBegin())
+		else if(disassemblyDataCurrent == coreDisAs->SectionDisAs.constBegin())
 		{
-			if(coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),i.value().Offset.toULongLong(0,16)))
+			if(coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
 				return;
 		}
 		else
 		{
 			for(int iBack = 0; iBack < 5; iBack++)
 			{
-				if(i == coreDisAs->SectionDisAs.constBegin())
+				if(disassemblyDataCurrent == coreDisAs->SectionDisAs.constBegin())
 					break;
-				--i;
+				--disassemblyDataCurrent;
 			}
 		}
 
-		tblDisAs->setRowCount(0);
+		
+		if((tblDisAs->rowCount() - 1) != m_maxRows)
+		{
+			tblDisAs->setRowCount(0);
+			while(lineCount <= m_maxRows)
+			{
+				tblDisAs->insertRow(0);
+				lineCount++;
+			}
+			lineCount = 0;
+		}
 
 		quint64 itemStyle;
-		while(iLines <= m_maxRows)
+		while(lineCount <= m_maxRows)
 		{
-			itemStyle = i.value().itemStyle;
-			tblDisAs->insertRow(tblDisAs->rowCount());
+			itemStyle = disassemblyDataCurrent.value().itemStyle;
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 0,new QTableWidgetItem(i.value().Offset));
-			if(clsDebugger::IsOffsetAnBP(i.value().Offset.toULongLong(0,16)))
-				tblDisAs->item(tblDisAs->rowCount() - 1,0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
+			tblDisAs->setItem(lineCount, 0,new QTableWidgetItem(disassemblyDataCurrent.value().Offset));
+			if(clsDebugger::IsOffsetAnBP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
+				tblDisAs->item(lineCount,0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 
-			if(!IsAlreadyEIPSet && clsDebugger::IsOffsetEIP(i.value().Offset.toULongLong(0,16)))
+			if(!IsAlreadyEIPSet && clsDebugger::IsOffsetEIP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
 			{
-				tblDisAs->item(tblDisAs->rowCount() - 1,0)->setBackground(QColor("Magenta"));
+				tblDisAs->item(lineCount,0)->setBackground(QColor("Magenta"));
 				IsAlreadyEIPSet = true;
 			}
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 1,new QTableWidgetItem(i.value().OpCodes));
+			tblDisAs->setItem(lineCount, 1,new QTableWidgetItem(disassemblyDataCurrent.value().OpCodes));
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 2,new QTableWidgetItem(i.value().ASM));
+			tblDisAs->setItem(lineCount, 2,new QTableWidgetItem(disassemblyDataCurrent.value().ASM));
 			if(itemStyle & COLOR_CALLS)
-				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorCall));
+				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorCall));
 			else if(itemStyle & COLOR_JUMP)
-				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorJump));
+				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorJump));
 			else if(itemStyle & COLOR_MOVE)
-				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMove));
+				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMove));
 			else if(itemStyle & COLOR_STACK)
-				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorStack));
+				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorStack));
 			else if(itemStyle & COLOR_MATH)
-				tblDisAs->item(tblDisAs->rowCount() - 1,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMath));
+				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMath));
 
-			tblDisAs->setItem(tblDisAs->rowCount() - 1, 3,new QTableWidgetItem(i.value().Comment));
+			tblDisAs->setItem(lineCount, 3,new QTableWidgetItem(disassemblyDataCurrent.value().Comment));
 
-			++iLines;++i;
-			if(i == iEnd)
+			++lineCount;++disassemblyDataCurrent;
+			if(disassemblyDataCurrent == disassemblyDataEnd)
 			{
 				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(5,0)->text().toULongLong(0,16),true);
 				return;
@@ -220,13 +230,37 @@ void qtDLGDisassembler::OnDisAsReturn()
 
 bool qtDLGDisassembler::eventFilter(QObject *pObject, QEvent *event)
 {	
-	if(event->type() == QEvent::Wheel && pObject == tblDisAs)
+	if(pObject == tblDisAs)
 	{
-		QWheelEvent *pWheel = (QWheelEvent*)event;
+		if(event->type() == QEvent::Wheel)
+		{
+			QWheelEvent *pWheel = (QWheelEvent*)event;
 		
-		OnDisAsScroll(pWheel->delta() * -1);
-		return true;
+			OnDisAsScroll(pWheel->delta() * -1);
+			return true;
+		}
+		else if(event->type() == QEvent::KeyPress)
+		{
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            if(keyEvent->key() == Qt::Key_Up)
+            {
+				return OnMoveUpOrDown(true);
+            }
+            else if(keyEvent->key() == Qt::Key_Down)
+            {
+				return OnMoveUpOrDown(false);
+            }
+			else if(keyEvent->key() == Qt::Key_PageUp)
+			{
+				return OnMoveUpOrDown(true,true);
+			}
+			else if(keyEvent->key() == Qt::Key_PageDown)
+			{
+				return OnMoveUpOrDown(false,true);
+			}
+		}
 	}
+
 	return false;
 }
 
@@ -384,8 +418,54 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 
 void qtDLGDisassembler::resizeEvent(QResizeEvent *event)
 {
-	m_maxRows = ((tblDisAs->verticalHeader()->height()) / 11) - 1;
+	m_maxRows = (tblDisAs->verticalHeader()->height() / 11) - 1;
 
 	if(coreDebugger->GetDebuggingState())
 		OnDisplayDisassembly(m_lastEIP);
+}
+
+bool qtDLGDisassembler::OnMoveUpOrDown(bool isUp, bool isPage)
+{
+	if(tblDisAs->selectedItems().count() <= 0) return false;
+
+	QString selectedOffset = tblDisAs->selectedItems()[0]->text();
+
+	if(isUp)
+	{
+		if(tblDisAs->item(0,0)->text().compare(selectedOffset) == 0)
+		{
+			if(isPage)
+			{
+				OnDisplayDisassembly(tblDisAs->item(0,0)->text().toULongLong(0,16));
+			}
+			else
+			{
+				OnDisplayDisassembly(tblDisAs->item(4,0)->text().toULongLong(0,16));
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if(tblDisAs->item(m_maxRows, 0)->text().compare(selectedOffset) == 0)
+		{
+			if(isPage)
+			{
+				OnDisplayDisassembly(tblDisAs->item(10,0)->text().toULongLong(0,16));
+			}
+			else
+			{
+				OnDisplayDisassembly(tblDisAs->item(6,0)->text().toULongLong(0,16));
+			}
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return true;
 }

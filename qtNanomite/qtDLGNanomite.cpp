@@ -141,13 +141,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionDebug_Trace_Show, SIGNAL(triggered()), this, SLOT(action_DebugTraceShow()));
 	connect(actionWindow_Show_PEEditor, SIGNAL(triggered()), this, SLOT(action_WindowShowPEEditor()));
 
-	// Actions on Window Events
-	connect(callstackView,SIGNAL(DisplaySource(QString,int)),DisAsGUI->dlgSourceViewer,SLOT(OnDisplaySource(QString,int)));
-
 	// Callbacks to display disassembly
 	connect(dlgTraceWindow,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 	connect(cpuRegView,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
-	connect(dlgPatchManager,SIGNAL(OnShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 	connect(dlgBPManager,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));

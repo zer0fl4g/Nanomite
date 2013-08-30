@@ -21,6 +21,8 @@
 
 #include "qtDLGNanomite.h"
 
+#include "clsAppSettings.h"
+
 class qtDLGOption : public QDialog, public Ui_qtDLGOptionClass
 {
 	Q_OBJECT
@@ -43,7 +45,12 @@ public:
 private:
 	int m_selectedRow;
 
-	QString m_originalJIT;
+	qtDLGNanomite *m_pMainWindow;
+
+	clsAppSettings *m_pSettings;
+
+	QString m_originalJIT,
+			m_originalJITWOW64;
 	
 	void OnLoad();
 

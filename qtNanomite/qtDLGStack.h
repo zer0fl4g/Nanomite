@@ -69,6 +69,7 @@ public slots:
 
 private:
 	int m_selectedRow; /* contains the row which the user clicked to open the context menu */
+
 	clsDebugger *m_pCoreDebugger; /* pointer to the main debugger instance */
 
 	/**
@@ -79,6 +80,14 @@ private:
 	* @return no
 	*/
 	void resizeEvent(QResizeEvent *event);
+
+	/**
+	* @brief This is triggered when the user pressed Up/Down
+	* @param isUp Indicates if the user wants to scroll up or down
+	*
+	* @return bool If the event got handled it returns true, else false
+	*/
+	bool OnMoveUpOrDown(bool isUp);
 
 private slots:
 	/**

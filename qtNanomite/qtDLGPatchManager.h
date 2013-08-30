@@ -54,7 +54,6 @@ public:
 
 signals:
 	void OnReloadDebugger();
-	void OnShowInDisassembler(quint64 Offset);
 
 private:
 	int m_iSelectedRow;

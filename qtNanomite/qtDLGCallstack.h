@@ -93,14 +93,6 @@ signals:
 	* @return no
 	*/
 	void OnDisplayDisassembly(quint64 selectedOffset);
-	/**
-	* @brief A Qt signal which is send when the user wants to show the sourcecode
-	* @param sourceFilePath The path to the sourcefile
-	* @param sourceLineNumber The current line number in the sourcefile
-	*
-	* @return no
-	*/
-	void DisplaySource(QString sourceFilePath, int sourceLineNumber);
 
 private:
 	int m_selectedRow; /* contains the selected row when the users opens a context menu*/

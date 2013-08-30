@@ -118,7 +118,7 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	{
 		ClearAllPatches();
 		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
-		emit pThis->OnReloadDebugger();
+		emit OnReloadDebugger();
 		UpdatePatchTable();
 	}
 	else if(QString().compare(pAction->text(),"Save Patch to File") == 0)
@@ -133,7 +133,9 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
 	{
-		emit OnShowInDisassembler(tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16));
+		qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),
+			tblPatches->item(m_iSelectedRow,1)->text().toULongLong(0,16),
+			true);
 	}
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{

@@ -52,14 +52,14 @@ qtDLGStack::~qtDLGStack()
 
 void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 {
-	bool bCheckVar = false;
 	wstring sFuncName,sModName;
-	HANDLE hProcess = m_pCoreDebugger->GetCurrentProcessHandle();
-	DWORD	dwRowCount = (tblStack->verticalHeader()->height() / 11),
-			dwSize = dwRowCount * stackAlign;
-	LPBYTE bBuffer = (LPBYTE)clsMemManager::CAlloc(dwSize);
-	PTCHAR sTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-	quint64	dwStartOffset = stackBaseOffset - stackAlign;
+	HANDLE	hProcess		= m_pCoreDebugger->GetCurrentProcessHandle();
+	int		maxRows			= (tblStack->verticalHeader()->height() / 11) - 1;
+	DWORD	dwSize			= (maxRows + 1) * stackAlign;
+	int		lineCount		= NULL;
+	LPBYTE	bBuffer			= (LPBYTE)clsMemManager::CAlloc(dwSize);
+	PTCHAR	sTemp			= (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	quint64	dwStartOffset	= stackBaseOffset - stackAlign;
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 	{
@@ -75,28 +75,37 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 		return;
 	}
 
-	tblStack->setRowCount(0);
-	for(size_t i = 0; i < dwRowCount; i++)
+	if((tblStack->rowCount() - 1) != maxRows)
 	{
-		tblStack->insertRow(tblStack->rowCount());
-		int itemIndex = tblStack->rowCount();
+		tblStack->setRowCount(0);
+		while(lineCount <= maxRows)
+		{
+			tblStack->insertRow(0);
+			lineCount++;
+		}
+		lineCount = 0;
+	}
 
+	while(lineCount <= maxRows)
+	{
 		// Current Offset
-		tblStack->setItem(itemIndex - 1,0,new QTableWidgetItem(QString("%1").arg((dwStartOffset + i * stackAlign),16,16,QChar('0'))));
+		tblStack->setItem(lineCount, 0, new QTableWidgetItem(QString("%1").arg((dwStartOffset + lineCount * stackAlign),16,16,QChar('0'))));
 
 		// Value
 		memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 		for(int id = stackAlign - 1;id != -1;id--)
-			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (i * stackAlign + id)));
-		tblStack->setItem(itemIndex - 1,1,new QTableWidgetItem(QString::fromWCharArray(sTemp)));
+			wsprintf(sTemp,L"%s%02X",sTemp,*(bBuffer + (lineCount * stackAlign + id)));
+		tblStack->setItem(lineCount, 1, new QTableWidgetItem(QString::fromWCharArray(sTemp)));
 
 		// Comment
 		clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,QString::fromWCharArray(sTemp).toULongLong(0,16),hProcess);
 		if(sFuncName.length() > 0 && sModName.length() > 0)
-			tblStack->setItem(itemIndex - 1,2,
+			tblStack->setItem(lineCount, 2,
 			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
 		else
-			tblStack->setItem(itemIndex- 1,2,new QTableWidgetItem(""));
+			tblStack->setItem(lineCount, 2, new QTableWidgetItem(""));
+
+		lineCount++;
 	}
 	
 	clsMemManager::CFree(bBuffer);
@@ -147,13 +156,29 @@ void qtDLGStack::OnStackScroll(int iValue)
 
 bool qtDLGStack::eventFilter(QObject *pObject, QEvent *event)
 {	
-	if(event->type() == QEvent::Wheel && pObject == tblStack)
+	if(pObject == tblStack)
 	{
-		QWheelEvent *pWheel = (QWheelEvent*)event;
-
-		OnStackScroll(pWheel->delta() * -1);
-		return true;
+		if(event->type() == QEvent::Wheel)
+		{
+			QWheelEvent *pWheel = (QWheelEvent*)event;
+		
+			OnStackScroll(pWheel->delta() * -1);
+			return true;
+		}
+		else if(event->type() == QEvent::KeyPress)
+		{
+			QKeyEvent* keyEvent = static_cast<QKeyEvent*>(event);
+            if(keyEvent->key() == Qt::Key_Up)
+            {
+				return OnMoveUpOrDown(true);
+            }
+            else if(keyEvent->key() == Qt::Key_Down)
+            {
+				return OnMoveUpOrDown(false);
+            }
+		}
 	}
+
 	return false;
 }
 
@@ -214,7 +239,6 @@ void qtDLGStack::resizeEvent(QResizeEvent *event)
 	if(!m_pCoreDebugger->GetDebuggingState())
 		return;
 
-	quint64 dwEIP = NULL;
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
 	if(clsAPIImport::pIsWow64Process)
@@ -222,16 +246,45 @@ void qtDLGStack::resizeEvent(QResizeEvent *event)
 
 	if(bIsWOW64)
 	{
-		dwEIP = m_pCoreDebugger->wowProcessContext.Eip;
 		LoadStackView(m_pCoreDebugger->wowProcessContext.Esp,4);
 	}
 	else
 	{
-		dwEIP = m_pCoreDebugger->ProcessContext.Rip;
 		LoadStackView(m_pCoreDebugger->ProcessContext.Rsp,8);
 	}
 #else
-	dwEIP = m_pCoreDebugger->ProcessContext.Eip;
 	LoadStackView(m_pCoreDebugger->ProcessContext.Esp,4);
 #endif
+}
+
+bool qtDLGStack::OnMoveUpOrDown(bool isUp)
+{
+	if(tblStack->selectedItems().count() <= 0) return false;
+
+	QString selectedOffset = tblStack->selectedItems()[0]->text();
+
+	if(isUp)
+	{
+		if(tblStack->item(0,0)->text().compare(selectedOffset) == 0)
+		{
+			OnStackScroll(4);
+		}
+		else
+		{
+			return false;
+		}
+	}
+	else
+	{
+		if(tblStack->item(tblStack->rowCount() - 1, 0)->text().compare(selectedOffset) == 0)
+		{
+			OnStackScroll(6);
+		}
+		else
+		{
+			return false;
+		}
+	}
+
+	return true;
 }

@@ -36,10 +36,10 @@ public:
 
 	void SaveDebuggerSettings(clsDebugger *pDebugger);
 	void SaveDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor);
-	void SaveDefaultJITDebugger(QString savedJIT);
+	void SaveDefaultJITDebugger(QString savedJIT, QString savedJITWOW64);
 	void LoadDebuggerSettings(clsDebugger *pDebugger);
 	void LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor);
-	void LoadDefaultJITDebugger(QString& savedJIT);
+	void LoadDefaultJITDebugger(QString& savedJIT, QString& savedJITWOW64);
 	void WriteDefaultSettings();
 	void CheckIfFirstRun();
 	void SaveRecentDebuggedFiles(QStringList recentDebuggedFiles);

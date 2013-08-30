@@ -135,13 +135,22 @@ void qtDLGCallstack::MenuCallback(QAction* pAction)
 void qtDLGCallstack::OnDisplaySource(QTableWidgetItem *pItem)
 {
 	QString sourcePath = tblCallstack->item(pItem->row(),6)->text();
-	int LineNumber = tblCallstack->item(pItem->row(),5)->text().toInt();
+	int lineNumber = tblCallstack->item(pItem->row(),5)->text().toInt();
 
-	if(LineNumber <= 0 && sourcePath.isEmpty()) return;
+	if(lineNumber <= 0 || sourcePath.isEmpty()) return;
 
-	emit DisplaySource(sourcePath,LineNumber);
+	qtDLGSourceViewer *pSourceView = qtDLGNanomite::GetInstance()->DisAsGUI->dlgSourceViewer;
+	pSourceView->OnDisplaySource(sourcePath, lineNumber);
+	
+	if(pSourceView->IsSourceAvailable)
+	{
+		pSourceView->show();
+	}
+	else
+	{
+		QMessageBox::critical(this, "Nanomite", "Unable to open source file!", QMessageBox::Ok, QMessageBox::Ok);
+	}
 
-	qtDLGNanomite::GetInstance()->DisAsGUI->dlgSourceViewer->show();
 	return;
 }
 

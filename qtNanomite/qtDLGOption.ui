@@ -1101,7 +1101,7 @@
      <property name="geometry">
       <rect>
        <x>160</x>
-       <y>110</y>
+       <y>160</y>
        <width>181</width>
        <height>23</height>
       </rect>
@@ -1114,7 +1114,7 @@
      <property name="geometry">
       <rect>
        <x>6</x>
-       <y>110</y>
+       <y>160</y>
        <width>151</width>
        <height>23</height>
       </rect>
@@ -1129,7 +1129,7 @@
        <x>10</x>
        <y>10</y>
        <width>331</width>
-       <height>41</height>
+       <height>70</height>
       </rect>
      </property>
      <property name="title">
@@ -1138,11 +1138,47 @@
      <widget class="QLineEdit" name="lineCurrent">
       <property name="geometry">
        <rect>
-        <x>5</x>
-        <y>15</y>
-        <width>321</width>
+        <x>30</x>
+        <y>18</y>
+        <width>290</width>
         <height>20</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineCurrentWOW64">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>44</y>
+        <width>290</width>
+        <height>20</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblCurrentJIT">
+      <property name="geometry">
+       <rect>
+        <x>7</x>
+        <y>19</y>
+        <width>20</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblCurrentJITWOW64">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>45</y>
+        <width>20</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>
@@ -1150,9 +1186,9 @@
      <property name="geometry">
       <rect>
        <x>10</x>
-       <y>60</y>
+       <y>80</y>
        <width>331</width>
-       <height>41</height>
+       <height>71</height>
       </rect>
      </property>
      <property name="title">
@@ -1161,11 +1197,47 @@
      <widget class="QLineEdit" name="lineOrg">
       <property name="geometry">
        <rect>
-        <x>6</x>
+        <x>30</x>
         <y>16</y>
-        <width>320</width>
+        <width>290</width>
         <height>21</height>
        </rect>
+      </property>
+     </widget>
+     <widget class="QLineEdit" name="lineOrgWOW64">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>43</y>
+        <width>290</width>
+        <height>21</height>
+       </rect>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblDefaultJIT">
+      <property name="geometry">
+       <rect>
+        <x>9</x>
+        <y>19</y>
+        <width>20</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
+      </property>
+     </widget>
+     <widget class="QLabel" name="lblDefaultJITWOW64">
+      <property name="geometry">
+       <rect>
+        <x>8</x>
+        <y>44</y>
+        <width>20</width>
+        <height>20</height>
+       </rect>
+      </property>
+      <property name="text">
+       <string/>
       </property>
      </widget>
     </widget>

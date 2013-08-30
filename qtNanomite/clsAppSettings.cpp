@@ -125,11 +125,12 @@ void clsAppSettings::SaveDisassemblerColor(qtNanomiteDisAsColorSettings *pDisass
 	readWriteMutex->unlockInline();
 }
 
-void clsAppSettings::SaveDefaultJITDebugger(QString savedJIT)
+void clsAppSettings::SaveDefaultJITDebugger(QString savedJIT, QString savedJITWOW64)
 {
 	readWriteMutex->lockInline();
 
 	userSettings->setValue("defaultJIT", savedJIT);
+	userSettings->setValue("defaultJITWOW64", savedJITWOW64);
 
 	userSettings->sync();
 	readWriteMutex->unlockInline();
@@ -185,12 +186,13 @@ void clsAppSettings::LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisass
 	readWriteMutex->unlockInline();
 }
 
-void clsAppSettings::LoadDefaultJITDebugger(QString& savedJIT)
+void clsAppSettings::LoadDefaultJITDebugger(QString& savedJIT, QString& savedJITWOW64)
 {
 	readWriteMutex->lockInline();
 
 	userSettings->sync();
 	savedJIT = userSettings->value("defaultJIT").toString();
+	savedJITWOW64 = userSettings->value("defaultJITWOW64").toString();
 
 	readWriteMutex->unlockInline();
 }

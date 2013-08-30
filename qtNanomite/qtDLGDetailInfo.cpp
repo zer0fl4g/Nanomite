@@ -38,7 +38,7 @@ qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 {
 	setupUi(this);
 	this->setLayout(verticalLayout);
-	
+
 	// List DetInfo  Processes
 	tblPIDs->horizontalHeader()->resizeSection(0,135);
 	tblPIDs->horizontalHeader()->resizeSection(1,135);

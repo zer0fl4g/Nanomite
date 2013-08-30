@@ -18,16 +18,32 @@
 #include "qtDLGExceptionEdit.h"
 
 #include "clsMemManager.h"
-#include "clsHelperClass.h"
-#include "clsAppSettings.h"
 
 qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
 {
 	setupUi(this);
 	this->setFixedSize(this->width(),this->height());
-	this->setStyleSheet(clsHelperClass::LoadStyleSheet());
 	tblCustomExceptions->horizontalHeader()->setFixedHeight(21);
+
+	m_pMainWindow = qtDLGNanomite::GetInstance();
+	m_pSettings = clsAppSettings::SharedInstance();
+
+#ifdef _AMD64_
+	lblCurrentJIT->setText("x64");
+	lblCurrentJITWOW64->setText("x86");
+	lblDefaultJIT->setText("x64");
+	lblDefaultJITWOW64->setText("x86");
+
+#else
+	lblCurrentJIT->setText("x86");
+	lblCurrentJITWOW64->setText("x86");
+	lblDefaultJIT->setText("x86");
+	lblDefaultJITWOW64->setText("x86");
+
+	lineCurrentWOW64->setEnabled(false);
+	lineOrgWOW64->setEnabled(false);
+#endif
 
 	OnLoad();
 
@@ -77,106 +93,115 @@ void qtDLGOption::OnClose()
 
 void qtDLGOption::OnReload()
 {
-	clsAppSettings::SharedInstance()->WriteDefaultSettings();
+	m_pSettings->WriteDefaultSettings();
+	m_pSettings->LoadDebuggerSettings(m_pMainWindow->coreDebugger);
+	m_pSettings->LoadDisassemblerColor(m_pMainWindow->qtNanomiteDisAsColor);
+	m_pSettings->LoadDefaultJITDebugger(m_originalJIT,m_originalJITWOW64);
 
 	OnLoad();
 }
 
 void qtDLGOption::OnSave()
 {
-	QSettings newJIT("HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug",QSettings::NativeFormat);
+	QSettings newJIT("HKEY_LOCAL_MACHINE\\Software\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug", QSettings::NativeFormat);
 	newJIT.setValue("Debugger",lineCurrent->text());
 	newJIT.setValue("Auto","0");
 	newJIT.sync();
+
+#ifdef _AMD64_
+	QSettings newJITWOW64("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug", QSettings::NativeFormat);
+	newJITWOW64.setValue("Debugger",lineCurrentWOW64->text());
+	newJITWOW64.setValue("Auto","0");
+	newJITWOW64.sync();
+#endif
+
 //	if(newJIT.status() != QSettings::NoError)
 //		MessageBoxW(NULL,L"ERROR, could not write the default jit!\r\nDo you have Admin rights?",L"Nanomite",MB_OK);
 	
-	qtDLGNanomite* myMainWindow = qtDLGNanomite::GetInstance();
-
 	if(cbExceptionAssist->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist = false;
 
 	if(cbModuleEP->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP = false;
 
 	if(cbSystemEP->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP = false;
 
 	if(cbTLS->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnTLS = false;
 
 	if(cbLoadSym->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = false;
 
 	if(cbDebugChild->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bDebugChilds = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bDebugChilds = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bDebugChilds = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bDebugChilds = false;
 
 	if(cbSuspendThread->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 1;
+		m_pMainWindow->coreDebugger->dbgSettings.dwSuspendType = 1;
 	else
-		myMainWindow->coreDebugger->dbgSettings.dwSuspendType = 0;
+		m_pMainWindow->coreDebugger->dbgSettings.dwSuspendType = 0;
 
 	if(cbIgEx->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 1;
+		m_pMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 1;
 	else
-		myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0;
+		m_pMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode = 0;
 
 	if(cbBreakOnNewDLL->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL = false;
 
 	if(cbBreakOnNewTID->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = true;	
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = true;	
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID = false;
 
 	if(cbBreakOnNewPID->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID = false;
 
 	if(cbBreakOnExDLL->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL = false;
 
 	if(cbBreakOnExTID->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = true;	
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = true;	
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExTID = false;
 
 	if(cbBreakOnExPID->isChecked())
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = true;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = true;
 	else
-		myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = false;
+		m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExPID = false;
 
-	myMainWindow->coreDebugger->CustomExceptionRemoveAll();
+	m_pMainWindow->coreDebugger->CustomExceptionRemoveAll();
 	for(int i = 0; i < tblCustomExceptions->rowCount(); i++)
 	{	
 		if(tblCustomExceptions->item(i,0)->text().length() > 0 && tblCustomExceptions->item(i,1)->text().length() > 0)
 		{
 			bool bExists = false;
-			for(int iCheck = 0; iCheck < myMainWindow->coreDebugger->ExceptionHandler.size(); iCheck++)
+			for(int iCheck = 0; iCheck < m_pMainWindow->coreDebugger->ExceptionHandler.size(); iCheck++)
 			{
-				if(myMainWindow->coreDebugger->ExceptionHandler[iCheck].dwExceptionType == tblCustomExceptions->item(i,0)->text().toULong())
+				if(m_pMainWindow->coreDebugger->ExceptionHandler[iCheck].dwExceptionType == tblCustomExceptions->item(i,0)->text().toULong())
 					bExists = true;
 			}
 
 			if(!bExists)
-				myMainWindow->coreDebugger->CustomExceptionAdd(tblCustomExceptions->item(i,0)->text().toULong(0,16),
+				m_pMainWindow->coreDebugger->CustomExceptionAdd(tblCustomExceptions->item(i,0)->text().toULong(0,16),
 				tblCustomExceptions->item(i,1)->text().toInt(),NULL);
 			else
 				MessageBox(NULL,QString("The exception : %1 does already exists!").arg(tblCustomExceptions->item(i,0)->text().toULong(0,16)).toStdWString().c_str(),
@@ -184,125 +209,123 @@ void qtDLGOption::OnSave()
 		}
 	}
 
-	myMainWindow->qtNanomiteDisAsColor->colorBP = comboBP->currentText();
-	myMainWindow->qtNanomiteDisAsColor->colorCall = comboCall->currentText();
-	myMainWindow->qtNanomiteDisAsColor->colorStack = comboStack->currentText();
-	myMainWindow->qtNanomiteDisAsColor->colorJump = comboJump->currentText();
-	myMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
-	myMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
+	m_pMainWindow->qtNanomiteDisAsColor->colorBP = comboBP->currentText();
+	m_pMainWindow->qtNanomiteDisAsColor->colorCall = comboCall->currentText();
+	m_pMainWindow->qtNanomiteDisAsColor->colorStack = comboStack->currentText();
+	m_pMainWindow->qtNanomiteDisAsColor->colorJump = comboJump->currentText();
+	m_pMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
+	m_pMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
 
-	clsAppSettings *pSettings = clsAppSettings::SharedInstance();
-	pSettings->SaveDebuggerSettings(myMainWindow->coreDebugger);
-	pSettings->SaveDisassemblerColor(myMainWindow->qtNanomiteDisAsColor);
-	pSettings->SaveDefaultJITDebugger(m_originalJIT);
-	MessageBox(NULL,L"Your settings have been saved!",L"Nanomite - Option",MB_OK);
+	m_pSettings->SaveDebuggerSettings(m_pMainWindow->coreDebugger);
+	m_pSettings->SaveDisassemblerColor(m_pMainWindow->qtNanomiteDisAsColor);
+	m_pSettings->SaveDefaultJITDebugger(m_originalJIT,m_originalJITWOW64);
+
+	QMessageBox::information(this, "Nanomite", "Your settings have been saved!", QMessageBox::Ok, QMessageBox::Ok);
 }
 
 void qtDLGOption::OnLoad()
 {
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
-	clsAppSettings *pSettings = clsAppSettings::SharedInstance();
-	pSettings->LoadDefaultJITDebugger(m_originalJIT);
+	m_pSettings->LoadDefaultJITDebugger(m_originalJIT, m_originalJITWOW64);
 	
-	if(myMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
 		cbLoadSym->setChecked(true);
 	else
 		cbLoadSym->setChecked(false);
 
-	if(myMainWindow->coreDebugger->dbgSettings.bDebugChilds)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bDebugChilds)
 		cbDebugChild->setChecked(true);
 	else
 		cbDebugChild->setChecked(false);
 
-	if(myMainWindow->coreDebugger->dbgSettings.dwSuspendType)
+	if(m_pMainWindow->coreDebugger->dbgSettings.dwSuspendType)
 		cbSuspendThread->setChecked(true);
 	else
 		cbSuspendThread->setChecked(false);
 		
-	if(myMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode)
+	if(m_pMainWindow->coreDebugger->dbgSettings.dwDefaultExceptionMode)
 		cbIgEx->setChecked(true);
 	else
 		cbIgEx->setChecked(false);
 	
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewDLL)
 		cbBreakOnNewDLL->setChecked(true);
 	else
 		cbBreakOnNewDLL->setChecked(false);
 		
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewTID)
 		cbBreakOnNewTID->setChecked(true);
 	else
 		cbBreakOnNewTID->setChecked(false);
 
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnNewPID)
 		cbBreakOnNewPID->setChecked(true);
 	else
 		cbBreakOnNewPID->setChecked(false);
 	
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExDLL)
 		cbBreakOnExDLL->setChecked(true);
 	else
 		cbBreakOnExDLL->setChecked(false);
 		
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExTID)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExTID)
 		cbBreakOnExTID->setChecked(true);
 	else
 		cbBreakOnExTID->setChecked(false);
 	
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnExPID)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnExPID)
 		cbBreakOnExPID->setChecked(true);
 	else
 		cbBreakOnExPID->setChecked(false);
 	
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnModuleEP)
 		cbModuleEP->setChecked(true);
 	else
 		cbModuleEP->setChecked(false);
 	
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnSystemEP)
 		cbSystemEP->setChecked(true);
 	else
 		cbSystemEP->setChecked(false);
 		
-	if(myMainWindow->coreDebugger->dbgSettings.bBreakOnTLS)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bBreakOnTLS)
 		cbTLS->setChecked(true);
 	else
 		cbTLS->setChecked(false);
 
-	if(myMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist)
+	if(m_pMainWindow->coreDebugger->dbgSettings.bUseExceptionAssist)
 		cbExceptionAssist->setChecked(true);
 	else
 		cbExceptionAssist->setChecked(false);
 
 	tblCustomExceptions->setRowCount(0);
-	for(size_t i = 0;i < myMainWindow->coreDebugger->ExceptionHandler.size();i++)
+	for(size_t i = 0;i < m_pMainWindow->coreDebugger->ExceptionHandler.size();i++)
 	{
 		tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 
 		tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,
-			new QTableWidgetItem(QString("%1").arg(myMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType,8,16,QChar('0'))));
+			new QTableWidgetItem(QString("%1").arg(m_pMainWindow->coreDebugger->ExceptionHandler[i].dwExceptionType,8,16,QChar('0'))));
 
 		tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,
-			new QTableWidgetItem(QString().sprintf("%d",myMainWindow->coreDebugger->ExceptionHandler[i].dwAction)));
+			new QTableWidgetItem(QString().sprintf("%d",m_pMainWindow->coreDebugger->ExceptionHandler[i].dwAction)));
 	}
 
 	int itemIndex = NULL;
-	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
 		comboBP->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
 		comboCall->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
 		comboStack->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
 		comboJump->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
 		comboMove->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(myMainWindow->qtNanomiteDisAsColor->colorMath)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorMath)) != -1)
 		comboMath->setCurrentIndex(itemIndex);
 
 	// Read JIT Settings
@@ -320,6 +343,23 @@ void qtDLGOption::OnLoad()
 		lineOrg->setText(m_originalJIT);
 		lineCurrent->setText(JITString);
 	}
+
+#ifdef _AMD64_
+	QSettings JITWOW64("HKEY_LOCAL_MACHINE\\SOFTWARE\\Wow6432Node\\Microsoft\\Windows NT\\CurrentVersion\\AeDebug", QSettings::NativeFormat);
+	QString WOW64JITString = JITWOW64.value("Debugger",0).toString();
+	if(!WOW64JITString.contains("Nanomite.exe"))
+	{
+		lineOrgWOW64->setText(WOW64JITString);
+		lineCurrentWOW64->setText(WOW64JITString);
+		m_originalJITWOW64 = WOW64JITString;
+		// save org jit to settings
+	}
+	else
+	{
+		lineOrgWOW64->setText(m_originalJITWOW64);
+		lineCurrentWOW64->setText(WOW64JITString);
+	}
+#endif
 }
 
 int qtDLGOption::getIndex(QString itemColor)
@@ -362,11 +402,17 @@ int qtDLGOption::getIndex(QString itemColor)
 void qtDLGOption::OnSetNanomiteDefault()
 {
 	lineCurrent->setText(QString("\"%1\" %2").arg(QCoreApplication::applicationFilePath()).arg("-p %ld"));
+#ifdef _AMD64_
+	lineCurrentWOW64->setText(QString("\"%1\" %2").arg(QCoreApplication::applicationFilePath()).arg("-p %ld"));
+#endif
 }
 
 void qtDLGOption::OnRestoreOrg()
 {
 	lineCurrent->setText(lineOrg->text());
+#ifdef _AMD64_
+	lineCurrentWOW64->setText(lineOrgWOW64->text());
+#endif
 }
 
 void qtDLGOption::OnExceptionRemove()

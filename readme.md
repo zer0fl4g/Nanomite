@@ -77,14 +77,14 @@
 	+ F2			= Set software breakpoint to selected line
 	+ Return		= Follow selected jump, call
 	+ Backspace		= Go back after goto/follow
-	+ Escape		= Close window
+	+ Escape		= Close window 
 - Function Window
 	+ Double Click	= Show selected function in diassembler
 	+ Return		= Show selected function in diassembler
 - Options
 	+ Del			= Remove selected custom exception
 - Patch Manager
-	+ Del			= Remove selec ted patch
+	+ Del			= Remove selected patch
 	+ Return		= Send selected offset to disassembler
 	+ Double Click	= Send selected offset to disassembler
 - Register Window
@@ -105,6 +105,8 @@
 + added save file dialog to memory dump and patch manager
 + added the correct offsets for loaded modules imports in the peeditor
 + added double click handler in trace view, bp manager and patch manager to send a offset to disassembler window
++ added possibility to set nanomite also as wow64 jit debugger
++ added possibility to use Up/Down arrows and PageUp/Down to navigate in disassembler
 + added possibility to create a full process dump
 + added possibility to open function view for selected modules
 + added support for saving patches in dlls

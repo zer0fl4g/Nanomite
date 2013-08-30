@@ -22,6 +22,7 @@
 #include "clsHelperClass.h"
 
 qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID, std::wstring FileName)
+	: QWidget(parent,flags)
 {
 	setupUi(this);
 	

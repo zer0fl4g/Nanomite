@@ -93,6 +93,8 @@ private:
 
 	void resizeEvent(QResizeEvent *event);
 
+	bool OnMoveUpOrDown(bool isUp, bool isPage = false);
+
 protected:
 	bool eventFilter(QObject *pOpject,QEvent *event);
 };
