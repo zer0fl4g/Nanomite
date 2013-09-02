@@ -351,15 +351,24 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 						return;
 				}
 			}
+			else
+			{
+				if(!m_searchedOffsetList.contains(searchedOffset))
+					m_searchedOffsetList.append(searchedOffset);
+			}
 
-			m_offsetWalkHistory.append(searchedOffset.toULongLong(0,16));
-			m_searchedOffsetList.append(searchedOffset);
+			m_offsetWalkHistory.append(tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16));
 			if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),searchedOffset.toULongLong(0,16)))
 				OnDisplayDisassembly(searchedOffset.toULongLong(0,16));	
 		}
 	}
 	else if(QString().compare(pAction->text(),"Show Source") == 0)
 	{
+		wstring fileName = L"";
+		int lineNumber = NULL;
+		clsHelperClass::LoadSourceForAddr(fileName, lineNumber, tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16), coreDebugger->GetCurrentProcessHandle());
+
+		dlgSourceViewer->OnDisplaySource(QString::fromStdWString(fileName), lineNumber);
 		if(dlgSourceViewer->IsSourceAvailable)
 			dlgSourceViewer->show();
 		else
