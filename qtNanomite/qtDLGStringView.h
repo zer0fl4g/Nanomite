@@ -52,7 +52,8 @@ private:
 	size_t				m_processID,
 						m_forEntry,
 						m_forEnd;
-	int					m_selectedRow;
+	int					m_selectedRow,
+						m_maxRows;
 
 	qtDLGNanomite		*m_pMainWindow;
 

@@ -22,7 +22,7 @@
 
 using namespace std;
 
-clsStringViewWorker::clsStringViewWorker(QMap<int,PTCHAR> dataForProcessing)
+clsStringViewWorker::clsStringViewWorker(QList<StringProcessingData> dataForProcessing)
 {
 	m_processingData = dataForProcessing;
 	this->start();
@@ -37,14 +37,14 @@ void clsStringViewWorker::run()
 {
 	stringList.clear();
 
-	for(QMap<int,PTCHAR>::const_iterator i = m_processingData.constBegin(); i != m_processingData.constEnd(); ++i)
+	for(QList<StringProcessingData>::const_iterator i = m_processingData.constBegin(); i != m_processingData.constEnd(); ++i)
 	{
 		ifstream inputFile;
 	
-		inputFile.open(i.value(),ifstream::binary);
+		inputFile.open(i->filePath,ifstream::binary);
 		if(!inputFile.is_open())
 		{
-			MessageBox(NULL,i.value(),L"Error opening File!",MB_OKCANCEL);
+			MessageBox(NULL, i->filePath, L"Error opening File!", MB_OKCANCEL);
 			return;
 		}
 
@@ -74,10 +74,10 @@ void clsStringViewWorker::run()
 			{
 				StringData newStringData;
 				newStringData.DataString = asciiChar;
-				newStringData.PID = i.key();
+				newStringData.PID = i->processID;
 				newStringData.StringOffset = inputFile.tellg();
 
-				stringList.insert(inputFile.tellg(),newStringData);
+				stringList.append(newStringData);
 			}
 		}
 		inputFile.close();

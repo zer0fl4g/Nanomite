@@ -71,7 +71,8 @@ signals:
 
 private:
 	int m_processID,	/* contains the process id from which the functions will be extracted */
-		m_selectedRow;	/* contains the selected row if the user opens the context menu */
+		m_selectedRow, 	/* contains the selected row if the user opens the context menu */
+		m_maxRows; /* contains the maximal amount of rows in the view */
 
 	PTCHAR m_modulePath; /* stores the module path for the function view called from DetailView */
 

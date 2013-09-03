@@ -21,8 +21,6 @@
 #include <QMenu>
 #include <QClipboard>
 
-using namespace std;
-
 qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 processID)
 	: QWidget(parent, flags),
 	m_processID(processID),
@@ -40,6 +38,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 proce
 
 	// Display
 	m_pMainWindow = qtDLGNanomite::GetInstance();
+	m_maxRows = (tblStringView->verticalHeader()->height() / 15) - 1;
 
 	m_forEntry = 0;
 	m_forEnd = m_pMainWindow->coreDebugger->PIDs.size();
@@ -65,11 +64,15 @@ qtDLGStringView::~qtDLGStringView()
 
 void qtDLGStringView::DataProcessing()
 {
-	QMap<int,PTCHAR> dataForProcessing;
+	QList<StringProcessingData> dataForProcessing;
+	StringProcessingData newData;
+	
 	for(size_t i = m_forEntry; i < m_forEnd; i++)
 	{
-		dataForProcessing.insert(m_pMainWindow->coreDebugger->PIDs[m_forEntry].dwPID,
-			m_pMainWindow->coreDebugger->PIDs[m_forEntry].sFileName);
+		newData.filePath = m_pMainWindow->coreDebugger->PIDs[m_forEntry].sFileName;
+		newData.processID = m_pMainWindow->coreDebugger->PIDs[m_forEntry].dwPID;
+
+		dataForProcessing.append(newData);
 	}
 
 	if(m_pStringProcessor != NULL)
@@ -80,6 +83,8 @@ void qtDLGStringView::DataProcessing()
 
 void qtDLGStringView::DisplayStrings()
 {
+	m_maxRows = (tblStringView->verticalHeader()->height() / 15) - 1;
+
 	stringScroll->setValue(0);
 	stringScroll->setMaximum(m_pStringProcessor->stringList.count() - (tblStringView->verticalHeader()->height() / 15) + 1);
 
@@ -88,50 +93,45 @@ void qtDLGStringView::DisplayStrings()
 
 void qtDLGStringView::InsertDataFrom(int position)
 {
-	tblStringView->setRowCount(0);
-	int numberOfLines = 0,
-		possibleRowCount = (tblStringView->verticalHeader()->height() / 15) - 1,
-		count = 0;
-	QMap<DWORD64,StringData>::const_iterator i = m_pStringProcessor->stringList.constBegin();
-
-	if(position != 0)
+	if((tblStringView->rowCount() - 1) != m_maxRows)
 	{
-		while(count < stringScroll->value()) // && count <= (stringScroll->value() - ((tblStringView->verticalHeader()->height() + 4) / 15)))
+		int count = 0;
+		tblStringView->setRowCount(0);
+		
+		while(count <= m_maxRows)
 		{
-			count++;++i;
+			tblStringView->insertRow(0);
+			count++;
 		}
 	}
-	else
-	{
-		i = m_pStringProcessor->stringList.begin();
-		stringScroll->setValue(0);
-	}
 
-	while(numberOfLines <= possibleRowCount)
+	int numberOfLines = 0;
+	StringData currentStringData = m_pStringProcessor->stringList.at(position);
+	while(numberOfLines <= m_maxRows)
 	{
-		if(i == m_pStringProcessor->stringList.constEnd())
+		if(position >= m_pStringProcessor->stringList.count())
 			break;
 		else
 		{
-			tblStringView->insertRow(tblStringView->rowCount());
+			currentStringData = m_pStringProcessor->stringList.at(position);
 
 			// PID
-			tblStringView->setItem(tblStringView->rowCount() - 1,0,
-				new QTableWidgetItem(QString().sprintf("%08X",i->PID)));
+			tblStringView->setItem(numberOfLines,0,
+				new QTableWidgetItem(QString().sprintf("%08X",currentStringData.PID)));
 
 			// Offset
-			if(i->StringOffset > 0)
-				tblStringView->setItem(tblStringView->rowCount() - 1,1,
-				new QTableWidgetItem(QString("%1").arg(i->StringOffset,8,16,QChar('0'))));
+			if(currentStringData.StringOffset > 0)
+				tblStringView->setItem(numberOfLines,1,
+				new QTableWidgetItem(QString("%1").arg(currentStringData.StringOffset,8,16,QChar('0'))));
 			else 
-				tblStringView->setItem(tblStringView->rowCount() - 1,1,
+				tblStringView->setItem(numberOfLines,1,
 				new QTableWidgetItem(""));
 
 			// String
-			tblStringView->setItem(tblStringView->rowCount() - 1,2,
-				new QTableWidgetItem(i->DataString));
+			tblStringView->setItem(numberOfLines,2,
+				new QTableWidgetItem(currentStringData.DataString));
 
-			++i;numberOfLines++;
+			position++;numberOfLines++;
 		}
 	}
 }
@@ -178,6 +178,9 @@ void qtDLGStringView::OnCustomContextMenuRequested(QPoint qPoint)
 
 void qtDLGStringView::resizeEvent(QResizeEvent *event)
 {
+	m_maxRows = (tblStringView->verticalHeader()->height() / 15) - 1;
+	stringScroll->setMaximum(m_pStringProcessor->stringList.count() - (tblStringView->verticalHeader()->height() / 15));
+
 	InsertDataFrom(stringScroll->value());
 }
 
@@ -188,11 +191,11 @@ void qtDLGStringView::wheelEvent(QWheelEvent *event)
 	if(pWheel->delta() > 0)
 	{
 		stringScroll->setValue(stringScroll->value() - 1);
-		InsertDataFrom(-1);
 	}
 	else
 	{
 		stringScroll->setValue(stringScroll->value() + 1);
-		InsertDataFrom(1);
 	}
+
+	InsertDataFrom(stringScroll->value());
 }

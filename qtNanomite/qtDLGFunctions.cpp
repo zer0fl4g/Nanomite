@@ -30,6 +30,7 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags fla
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(horizontalLayout);
 	tblFunctions->setRowCount(0);
+	m_maxRows = (tblFunctions->verticalHeader()->height() / 11) - 1;
 
 	connect(tblFunctions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 	connect(tblFunctions,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
@@ -76,6 +77,7 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QString modulePath, QWidget *pa
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(horizontalLayout);
 	tblFunctions->setRowCount(0);
+	m_maxRows = (tblFunctions->verticalHeader()->height() / 11) - 1;
 
 	connect(tblFunctions,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomContextMenu(QPoint)));
 	connect(tblFunctions,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
@@ -115,7 +117,9 @@ qtDLGFunctions::~qtDLGFunctions()
 void qtDLGFunctions::DisplayFunctionLists()
 {
 	functionScroll->setValue(0);
-	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - (tblFunctions->verticalHeader()->height() / 11) + 1);
+	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - (tblFunctions->verticalHeader()->height() / 11));
+	
+	m_maxRows = (tblFunctions->verticalHeader()->height() / 11) - 1;
 
 	InsertDataFrom(0);
 }
@@ -143,55 +147,53 @@ void qtDLGFunctions::MenuCallback(QAction* pAction)
 
 void qtDLGFunctions::InsertDataFrom(int position)
 {
-	tblFunctions->setRowCount(0);
-	int numberOfLines = 0,
-		possibleRowCount = (tblFunctions->verticalHeader()->height() / 11) - 1,
-		count = 0;
-	QList<FunctionData>::ConstIterator i = m_pFunctionWorker->functionList.constBegin();
-
-	if(position != 0)
+	if((tblFunctions->rowCount() - 1) != m_maxRows)
 	{
-		while(count < functionScroll->value())
+		int count = 0;
+		tblFunctions->setRowCount(0);
+		while(count <= m_maxRows)
 		{
-			count++;++i;
+			tblFunctions->insertRow(0);
+			count++;
 		}
 	}
-	else
-	{
-		i = m_pFunctionWorker->functionList.begin();
-		functionScroll->setValue(0);
-	}
 
-	while(numberOfLines <= possibleRowCount)
+	int numberOfLines = 0;
+	FunctionData currentFunctionData = m_pFunctionWorker->functionList.at(position);
+	while(numberOfLines <= m_maxRows)
 	{
-		if(i == m_pFunctionWorker->functionList.constEnd())
+		if(position >= m_pFunctionWorker->functionList.count())
 			break;
 		else
 		{
-			tblFunctions->insertRow(tblFunctions->rowCount());
+			currentFunctionData = m_pFunctionWorker->functionList.at(position);
+
 			// PID
-			tblFunctions->setItem(tblFunctions->rowCount() - 1,0,
-				new QTableWidgetItem(QString("%1").arg(i->processID,8,16,QChar('0'))));
+			tblFunctions->setItem(numberOfLines,0,
+				new QTableWidgetItem(QString("%1").arg(currentFunctionData.processID,8,16,QChar('0'))));
 
 			// Func Name
-			tblFunctions->setItem(tblFunctions->rowCount() - 1,1,
-				new QTableWidgetItem(i->functionSymbol));
+			tblFunctions->setItem(numberOfLines,1,
+				new QTableWidgetItem(currentFunctionData.functionSymbol));
 
 			// Func Offset
-			tblFunctions->setItem(tblFunctions->rowCount() - 1,2,
-				new QTableWidgetItem(QString("%1").arg(i->FunctionOffset,16,16,QChar('0'))));
+			tblFunctions->setItem(numberOfLines,2,
+				new QTableWidgetItem(QString("%1").arg(currentFunctionData.FunctionOffset,16,16,QChar('0'))));
 
 			// Func Size
-			tblFunctions->setItem(tblFunctions->rowCount() - 1,3,
-				new QTableWidgetItem(QString("%1").arg(i->FunctionSize,6,10,QChar('0'))));
+			tblFunctions->setItem(numberOfLines,3,
+				new QTableWidgetItem(QString("%1").arg(currentFunctionData.FunctionSize,6,10,QChar('0'))));
 
-			++i;numberOfLines++;
+			position++;numberOfLines++;
 		}
 	}
 }
 
 void qtDLGFunctions::resizeEvent(QResizeEvent *event)
 {
+	m_maxRows = (tblFunctions->verticalHeader()->height() / 11) - 1;
+	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - (tblFunctions->verticalHeader()->height() / 11));
+
 	InsertDataFrom(functionScroll->value());
 }
 
@@ -201,14 +203,14 @@ void qtDLGFunctions::wheelEvent(QWheelEvent *event)
 
 	if(pWheel->delta() > 0)
 	{
-		functionScroll->setValue(functionScroll->value() - 1);
-		InsertDataFrom(-1);
+		functionScroll->setValue(functionScroll->value() - 1);		
 	}
 	else
 	{
 		functionScroll->setValue(functionScroll->value() + 1);
-		InsertDataFrom(1);
 	}
+
+	InsertDataFrom(functionScroll->value());
 }
 
 void qtDLGFunctions::OnSendToDisassembler(QTableWidgetItem *pSelectedRow)

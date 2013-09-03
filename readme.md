@@ -94,16 +94,17 @@
 
 ## Changelog
 ###Version 0.1 beta 15
-+ fixed a bug which did not reload the gui when deleting a patch from patchmanager using hotkey
++ fixed a bug which lead to a memory leak when a invalid file was loaded
 + fixed a bug which caused a break when continue was used after a trace
++ fixed a bug which caused problems when scrolling up in disassembler view
 + fixed a bug which returned wrong offset when adding a breakpoint to a wow64 process
 + fixed a bug which did not clean up properly if using the "recent file" menu to debug new process
 + fixed a bug which did not clean up properly if a process terminates in a multiprocess session
-+ fixed a bug which could cause problems when scrolling up in disassembler view
-+ fixed a bug which could lead to a memory leak when a invalid file was loaded
 + fixed a bug which did not replace memory breakpoints correctly
++ fixed a bug which did not display the correct source code under certain conditions
++ fixed a bug which did not reload the gui when deleting a patch from patchmanager using hotkey
 + added save file dialog to memory dump and patch manager
-+ added the correct offsets for loaded modules imports in the peeditor
++ added the correct offsets for loaded module imports in the peeditor
 + added double click handler in trace view, bp manager and patch manager to send a offset to disassembler window
 + added possibility to set nanomite also as wow64 jit debugger
 + added possibility to use Up/Down arrows and PageUp/Down to navigate in disassembler

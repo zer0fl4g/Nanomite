@@ -20,7 +20,13 @@
 #include <Windows.h>
 
 #include <QThread>
-#include <QMap>
+#include <QList>
+
+struct StringProcessingData
+{
+	PTCHAR filePath;
+	int processID;
+};
 
 struct StringData
 {
@@ -34,13 +40,13 @@ class clsStringViewWorker : public QThread
 	Q_OBJECT
 
 public:
-	QMap<DWORD64,StringData> stringList;
+	QList<StringData> stringList;
 	
-	clsStringViewWorker(QMap<int,PTCHAR> dataForProcessing);
+	clsStringViewWorker(QList<StringProcessingData> dataForProcessing);
 	~clsStringViewWorker();
 
 private:
-	QMap<int,PTCHAR> m_processingData;
+	QList<StringProcessingData> m_processingData;
 
 protected:
 	void run();
