@@ -31,7 +31,6 @@ struct TraceInfoRow
 	DWORD	PID;
 	DWORD	TID;
 	QString debugSymbols;
-	//QString cpuReg;
 };
 
 class qtDLGTrace : public QWidget, public Ui_qtDLGTraceClass
@@ -55,7 +54,8 @@ signals:
 private:
 	static qtDLGTrace *pThis;
 	QList<TraceInfoRow> m_traceData;
-	int m_iSelectedRow;
+	int m_iSelectedRow,
+		m_maxRows;
 
 	QTimer *m_statusBarTimer;
 	quint64 m_stepsDoneInSecond,

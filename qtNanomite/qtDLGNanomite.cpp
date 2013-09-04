@@ -328,11 +328,12 @@ void qtDLGNanomite::OnDebuggerTerminated()
 {
 	coreDisAs->SectionDisAs.clear();
 	dlgBPManager->DeleteCompleterContent();
+	qtDLGTrace::disableStatusBarTimer();
 	qtDLGTrace::clearTraceData();
 	actionDebug_Trace_Start->setEnabled(true);
+	actionDebug_Trace_Stop->setEnabled(false);
 	CleanGUI(true);
 	this->setWindowTitle(QString("[Nanomite v 0.1]"));
-	qtDLGTrace::disableStatusBarTimer();
 	qtDLGPatchManager::ResetPatches();
 	UpdateStateBar(STATE_TERMINATE);
 	LoadRecentFileMenu();
