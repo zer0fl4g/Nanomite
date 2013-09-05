@@ -42,7 +42,7 @@ bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClea
 	if(hProc == INVALID_HANDLE_VALUE || hProc == NULL|| dwEIP == NULL || m_isWorking)
 		return false;
 
-	if(m_searchedOffset == dwEIP && !bClear)
+	if(m_searchedOffset == dwEIP && !bClear && SectionDisAs.count() > 0)
 		return false;
 
 	if(bClear) 
@@ -58,7 +58,6 @@ bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClea
 		this->start();
 		return true;
 	}
-	
 	
 	m_isWorking = false;
 	return false;

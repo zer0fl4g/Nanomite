@@ -75,7 +75,17 @@ int main(int argc, char *argv[])
 
     if (!IsUserAdmin())
     {
-        MessageBoxW(NULL,L"You did not start the debugger with admin rights!\r\nThis could cause problems with some features!",L"Nanomite",MB_OK);
+        if(MessageBoxW(NULL,L"Nanomite was started without Admin rights!\r\nThis could cause problems with some features!\r\n\r\nDo you want to restart it now with Admin rights?",L"Nanomite", MB_YESNO) == IDYES)
+		{
+			TCHAR fileName[MAX_PATH];
+			if(GetModuleFileNameW(NULL,fileName, MAX_PATH) > 0)
+			{
+				if((int)ShellExecute(NULL,L"runas", fileName, NULL, NULL, SW_SHOW) > 32)
+				{
+					TerminateProcess(GetCurrentProcess(),0);
+				}
+			}
+		}
     }
 
 	if(!EnableDebugFlag())

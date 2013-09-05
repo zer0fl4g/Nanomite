@@ -85,6 +85,8 @@ void qtDLGTrace::clearTraceData()
 
 void qtDLGTrace::showEvent(QShowEvent * event)
 {
+	if(m_traceData.count() <= 0) return;
+
 	m_maxRows = (tblTraceLog->verticalHeader()->height() / 12) - 1;
 
 	scrollTrace->setValue(0);
@@ -94,7 +96,7 @@ void qtDLGTrace::showEvent(QShowEvent * event)
 
 void qtDLGTrace::OnShow(int delta)
 {
-	if(m_traceData.count() <= 0) return;
+	if(delta < 0) return;
 
 	if((tblTraceLog->rowCount() - 1) != m_maxRows)
 	{
@@ -111,7 +113,7 @@ void qtDLGTrace::OnShow(int delta)
 
 	int printLine = NULL;
 	std::wstring FuncName,ModName;
-	TraceInfoRow currentTraceData = m_traceData.at(delta);
+	TraceInfoRow currentTraceData;
 	while(printLine <= m_maxRows)
 	{
 		if(delta >= m_traceData.count())

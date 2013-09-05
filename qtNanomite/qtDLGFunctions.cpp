@@ -116,6 +116,8 @@ qtDLGFunctions::~qtDLGFunctions()
 
 void qtDLGFunctions::DisplayFunctionLists()
 {
+	if(m_pFunctionWorker->functionList.count() <= 0) return;
+
 	functionScroll->setValue(0);
 	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - (tblFunctions->verticalHeader()->height() / 11));
 	
@@ -147,6 +149,8 @@ void qtDLGFunctions::MenuCallback(QAction* pAction)
 
 void qtDLGFunctions::InsertDataFrom(int position)
 {
+	if(position < 0) return;
+
 	if((tblFunctions->rowCount() - 1) != m_maxRows)
 	{
 		int count = 0;
@@ -159,7 +163,7 @@ void qtDLGFunctions::InsertDataFrom(int position)
 	}
 
 	int numberOfLines = 0;
-	FunctionData currentFunctionData = m_pFunctionWorker->functionList.at(position);
+	FunctionData currentFunctionData;
 	while(numberOfLines <= m_maxRows)
 	{
 		if(position >= m_pFunctionWorker->functionList.count())

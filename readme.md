@@ -111,6 +111,7 @@
 + added possibility to use Up/Down arrows and PageUp/Down to navigate in disassembler
 + added possibility to create a full process dump
 + added possibility to open function view for selected modules
++ added possibility to restart debugger with admin rights
 + added support for saving patches in dlls
 + added "on execution" and "on write" memory breakpoint types
 + updated function view algorithm

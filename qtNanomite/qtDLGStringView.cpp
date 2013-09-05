@@ -83,6 +83,8 @@ void qtDLGStringView::DataProcessing()
 
 void qtDLGStringView::DisplayStrings()
 {
+	if(m_pStringProcessor->stringList.count() <= 0) return;
+
 	m_maxRows = (tblStringView->verticalHeader()->height() / 15) - 1;
 
 	stringScroll->setValue(0);
@@ -93,6 +95,8 @@ void qtDLGStringView::DisplayStrings()
 
 void qtDLGStringView::InsertDataFrom(int position)
 {
+	if(position < 0) return;
+
 	if((tblStringView->rowCount() - 1) != m_maxRows)
 	{
 		int count = 0;
@@ -106,7 +110,7 @@ void qtDLGStringView::InsertDataFrom(int position)
 	}
 
 	int numberOfLines = 0;
-	StringData currentStringData = m_pStringProcessor->stringList.at(position);
+	StringData currentStringData;
 	while(numberOfLines <= m_maxRows)
 	{
 		if(position >= m_pStringProcessor->stringList.count())

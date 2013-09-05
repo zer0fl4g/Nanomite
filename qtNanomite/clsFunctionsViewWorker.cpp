@@ -220,11 +220,15 @@ void clsFunctionsViewWorker::ParseMemoryRangeForFunctions(quint64 sectionBuffer,
 
 			if(!isContained)
 			{
+				int functionSize = GetFunctionSizeFromCallPoint(newDisAss.EIP, newDisAss.VirtualAddr, endOffset);
+				
 				newFunction.FunctionOffset = newDisAss.VirtualAddr;
-				newFunction.FunctionSize = GetFunctionSizeFromCallPoint(newDisAss.EIP, newDisAss.VirtualAddr, endOffset);
+				newFunction.FunctionSize = functionSize;
 				newFunction.functionSymbol = "";
 				newFunction.processID = processID;
 				functionList.append(newFunction);
+
+				iLen = functionSize;
 			}
 
 			isContained = false;
