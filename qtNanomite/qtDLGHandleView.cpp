@@ -48,7 +48,11 @@ qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 proces
 	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
-			m_processCountEntry = i; m_processCountEnd = i + 1;
+		{
+			m_processCountEntry = i;
+			m_processCountEnd = i + 1;
+			break;
+		}
 	}
 
 	OnDisplayHandles();

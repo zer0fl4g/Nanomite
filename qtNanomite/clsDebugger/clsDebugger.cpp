@@ -297,7 +297,10 @@ void clsDebugger::DebuggingLoop()
 				for(size_t i = 0;i < PIDs.size();i++)
 				{
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
+					{
 						iPid = i;
+						break;
+					}
 				}
 
 				PIDs[iPid].bSymLoad = SymInitialize(hProc,NULL,false);
@@ -381,7 +384,11 @@ void clsDebugger::DebuggingLoop()
 				for(size_t i = 0;i < PIDs.size();i++)
 				{
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
-						hProc = PIDs[i].hProc;iPid = i;
+					{
+						hProc = PIDs[i].hProc;
+						iPid = i;
+						break;
+					}
 				}
 
 				PTCHAR sDLLFileName = GetFileNameFromModuleBase(hProc, debug_event.u.LoadDll.lpBaseOfDll); 
@@ -446,11 +453,13 @@ void clsDebugger::DebuggingLoop()
 
 				size_t iPid = 0;
 				for(size_t i = 0;i < PIDs.size(); i++)
+				{
 					if(PIDs[i].dwPID == debug_event.dwProcessId)
+					{
 						iPid = i;
-
-				//if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,false))
-				//	PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+						break;
+					}
+				}
 
 				switch (exInfo.ExceptionRecord.ExceptionCode)
 				{
@@ -738,7 +747,7 @@ void clsDebugger::DebuggingLoop()
 								quint64 pageBase = NULL,
 										pageSize = NULL;
 
-								HANDLE processHandle = GetProcessHandleByPID(debug_event.dwProcessId);
+								HANDLE processHandle = PIDs[iPid].hProc;
 
 								if(VirtualQueryEx(processHandle,(LPVOID)exInfo.ExceptionRecord.ExceptionAddress,&mbi,sizeof(mbi)))
 								{

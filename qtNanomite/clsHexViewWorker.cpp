@@ -17,10 +17,9 @@
 #include "clsHexViewWorker.h"
 #include "clsMemManager.h"
 
-clsHexViewWorker::clsHexViewWorker(int PID, HANDLE hProc, DWORD64 startOffset, DWORD64 dataLength)
+clsHexViewWorker::clsHexViewWorker(HANDLE processHandle, DWORD64 startOffset, DWORD64 dataLength)
 {
-	m_hProc = hProc;
-	m_PID = PID;
+	m_hProc = processHandle;
 	m_startOffset = startOffset;
 	m_dataLength = dataLength;
 
@@ -66,7 +65,6 @@ void clsHexViewWorker::run()
 			break;
 
 		HexData newHexData;
-		newHexData.PID = m_PID;
 		newHexData.hexOffset = m_startOffset;
 
 		// Hexiss
@@ -99,7 +97,7 @@ void clsHexViewWorker::run()
 		}
 		newHexData.asciiData = QString::fromWCharArray(tcTempBuffer);
 
-		dataList.insert(m_startOffset,newHexData);
+		dataList.append(newHexData);
 
 		m_startOffset += dwStepSize;
 		dwCounter += dwStepSize;

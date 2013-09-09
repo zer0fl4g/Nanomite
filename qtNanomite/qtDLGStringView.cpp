@@ -24,6 +24,7 @@
 qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 processID)
 	: QWidget(parent, flags),
 	m_processID(processID),
+	m_isFinished(false),
 	m_pStringProcessor(NULL)
 {
 	setupUi(this);
@@ -46,7 +47,11 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 proce
 	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
-			m_forEntry = i; m_forEnd = i + 1;
+		{
+			m_forEntry = i;
+			m_forEnd = i + 1;
+			break;
+		}
 	}
 	
 	connect(stringScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
@@ -85,6 +90,8 @@ void qtDLGStringView::DisplayStrings()
 {
 	if(m_pStringProcessor->stringList.count() <= 0) return;
 
+	m_isFinished = true;
+
 	m_maxRows = (tblStringView->verticalHeader()->height() / 15) - 1;
 
 	stringScroll->setValue(0);
@@ -95,7 +102,7 @@ void qtDLGStringView::DisplayStrings()
 
 void qtDLGStringView::InsertDataFrom(int position)
 {
-	if(position < 0) return;
+	if(position < 0 || !m_isFinished) return;
 
 	if((tblStringView->rowCount() - 1) != m_maxRows)
 	{

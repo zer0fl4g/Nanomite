@@ -53,6 +53,10 @@ public:
 private:
 	clsHexViewWorker *m_pHexDataWorker; /* holds a pointer to the worker thread */
 
+	int m_maxRows; /* contains the maximal amount of rows which can be displayed */
+
+	bool m_isFinished; /* contains the state of the worker thread */
+
 private slots:
 	/**
 	* @brief A Qt slot which is called when the worked thread has finished

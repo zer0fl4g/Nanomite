@@ -47,7 +47,11 @@ qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags, 
 	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
-			m_processLoopEntry = i; m_processLoopEnd = i + 1;
+		{
+			m_processLoopEntry = i;
+			m_processLoopEnd = i + 1;
+			break;
+		}
 	}
 
 	DisplayPrivileges();

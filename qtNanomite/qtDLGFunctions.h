@@ -76,7 +76,8 @@ private:
 
 	PTCHAR m_modulePath; /* stores the module path for the function view called from DetailView */
 
-	bool isDetailView;
+	bool isDetailView,
+		m_isFinished;  /* contains the state of the worker thread */
 
 	clsFunctionsViewWorker *m_pFunctionWorker; /* a pointer to the data background worker */
 

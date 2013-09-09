@@ -20,14 +20,13 @@
 #include <Windows.h>
 
 #include <QThread>
-#include <QMap>
+#include <QList>
 
 struct HexData
 {
 	QString hexString;
 	QString asciiData;
 	DWORD64 hexOffset;
-	int PID;
 };
 
 class clsHexViewWorker : public QThread
@@ -35,16 +34,15 @@ class clsHexViewWorker : public QThread
 	Q_OBJECT
 
 public:
-	QMap<DWORD64,HexData> dataList;
+	QList<HexData> dataList;
 	
-	clsHexViewWorker(int PID, HANDLE hProc, DWORD64 startOffset, DWORD64 dataLength);
+	clsHexViewWorker(HANDLE processHandle, DWORD64 startOffset, DWORD64 dataLength);
 	~clsHexViewWorker();
 
 private:
 	DWORD64 m_startOffset,
 			m_dataLength;
 	HANDLE	m_hProc;
-	int		m_PID;
 
 protected:
 	void run();

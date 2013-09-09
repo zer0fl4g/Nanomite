@@ -51,7 +51,11 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 proces
 	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
-			m_processCountEntry = i; m_processCountEnd = i +1;
+		{
+			m_processCountEntry = i;
+			m_processCountEnd = i + 1;
+			break;
+		}
 	}
 	
 	DisplayMemory();

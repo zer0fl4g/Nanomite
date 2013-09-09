@@ -55,6 +55,8 @@ private:
 	int					m_selectedRow,
 						m_maxRows;
 
+	bool				m_isFinished;  /* contains the state of the worker thread */
+
 	qtDLGNanomite		*m_pMainWindow;
 
 	clsStringViewWorker	*m_pStringProcessor;

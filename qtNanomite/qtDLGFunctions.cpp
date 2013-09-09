@@ -24,7 +24,8 @@ using namespace std;
 qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags),
 	m_processID(processID),
-	isDetailView(false)
+	isDetailView(false),
+	m_isFinished(false)
 {
 	this->setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
@@ -49,7 +50,11 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags fla
 	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
-			iForEntry = i; iForEnd = i + 1;
+		{
+			iForEntry = i;
+			iForEnd = i + 1;
+			break;
+		}
 	}
 
 	QList<FunctionProcessingData> dataForProcessing;
@@ -118,6 +123,8 @@ void qtDLGFunctions::DisplayFunctionLists()
 {
 	if(m_pFunctionWorker->functionList.count() <= 0) return;
 
+	m_isFinished = true;
+
 	functionScroll->setValue(0);
 	functionScroll->setMaximum(m_pFunctionWorker->functionList.count() - (tblFunctions->verticalHeader()->height() / 11));
 	
@@ -149,7 +156,7 @@ void qtDLGFunctions::MenuCallback(QAction* pAction)
 
 void qtDLGFunctions::InsertDataFrom(int position)
 {
-	if(position < 0) return;
+	if(position < 0 || !m_isFinished) return;
 
 	if((tblFunctions->rowCount() - 1) != m_maxRows)
 	{

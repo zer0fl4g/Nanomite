@@ -22,13 +22,16 @@
 #include <Windows.h>
 
 qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID, unsigned long long StartOffset,unsigned long long Size)
-	: QWidget(parent, flags)
+	: QWidget(parent, flags),
+	m_isFinished(false)
 {
 	setupUi(this);
 	this->setAttribute(Qt::WA_DeleteOnClose,true);
 	this->setLayout(horizontalLayout);
-	this->setWindowTitle(QString("[ Nanomite ] - Show Memory - PID - %1 - From: %2 - To: %3").arg(dwPID,8,16,QChar('0')).arg(StartOffset,8,16,QChar('0')).arg(StartOffset + Size,8,16,QChar('0')));
-
+	this->setWindowTitle(QString("[ Nanomite ] - Show Memory - PID - %1 - From: %2 - To: %3").arg(dwPID, 8, 16, QChar('0')).arg(StartOffset, 8, 16, QChar('0')).arg(StartOffset + Size, 8, 16, QChar('0')));
+	
+	m_maxRows = (tblHexView->verticalHeader()->height() / 11);
+	
 	tblHexView->horizontalHeader()->resizeSection(0,135);
 	tblHexView->horizontalHeader()->resizeSection(1,375);
 	tblHexView->horizontalHeader()->resizeSection(2,230);
@@ -42,13 +45,16 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	for(size_t i = 0;i < MyMainWindow->coreDebugger->PIDs.size();i++)
 	{
 		if(dwPID == MyMainWindow->coreDebugger->PIDs[i].dwPID)
+		{
 			hProcess = MyMainWindow->coreDebugger->PIDs[i].hProc;
+			break;
+		}
 	}
 
-	m_pHexDataWorker = new clsHexViewWorker(dwPID,hProcess,StartOffset,Size);
-	connect(m_pHexDataWorker,SIGNAL(finished()),this,SLOT(DisplayData()),Qt::QueuedConnection);
-	connect(memoryScroll,SIGNAL(valueChanged(int)),this,SLOT(InsertDataFrom(int)));
-	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
+	m_pHexDataWorker = new clsHexViewWorker(hProcess, StartOffset, Size);
+	connect(m_pHexDataWorker, SIGNAL(finished()), this, SLOT(DisplayData()), Qt::QueuedConnection);
+	connect(memoryScroll, SIGNAL(valueChanged(int)), this, SLOT(InsertDataFrom(int)));
+	connect(new QShortcut(Qt::Key_Escape, this), SIGNAL(activated()), this, SLOT(close()));
 }
 
 qtDLGHexView::~qtDLGHexView()
@@ -58,57 +64,61 @@ qtDLGHexView::~qtDLGHexView()
 
 void qtDLGHexView::DisplayData()
 {
+	m_maxRows = (tblHexView->verticalHeader()->height() / 11);
+
+	m_isFinished = true;
+
 	memoryScroll->setValue(0);
-	memoryScroll->setMaximum(m_pHexDataWorker->dataList.count() - (tblHexView->verticalHeader()->height() / 11) + 1);
+	memoryScroll->setMaximum(m_pHexDataWorker->dataList.count() - m_maxRows - 1);
 
 	InsertDataFrom(0);
 }
 
 void qtDLGHexView::InsertDataFrom(int position)
 {
-	tblHexView->setRowCount(0);
-	int numberOfLines = 0,
-		possibleRowCount = (tblHexView->verticalHeader()->height() / 11) - 1,
-		count = 0;
-	QMap<DWORD64,HexData>::const_iterator i = m_pHexDataWorker->dataList.constBegin();
+	if(position < 0 || !m_isFinished) return; 
 
-	if(position != 0)
+	if((tblHexView->rowCount() - 1) != m_maxRows)
 	{
-		while(count < memoryScroll->value()) // && count <= (memoryScroll->value() - ((tblHexView->verticalHeader()->height() + 4) / 11)))
+		tblHexView->setRowCount(0);
+		
+		int count = 0;
+		while(tblHexView->rowCount() <= m_maxRows)
 		{
-			count++;++i;
+			count++;
+			tblHexView->insertRow(0);
 		}
-	}
-	else
+	}	
+	
+	HexData currentHexData;
+	int numberOfLines = 0;
+	while(numberOfLines <= m_maxRows)
 	{
-		i = m_pHexDataWorker->dataList.begin();
-		memoryScroll->setValue(0);
-	}
-
-	while(numberOfLines <= possibleRowCount)
-	{
-		if(i == m_pHexDataWorker->dataList.constEnd())
+		if(position >= m_pHexDataWorker->dataList.count())
 			break;
 		else
-		{
-			tblHexView->insertRow(tblHexView->rowCount());
-			
-			tblHexView->setItem(tblHexView->rowCount() - 1,0,
-				new QTableWidgetItem(QString("%1").arg(i->hexOffset,16,16,QChar('0'))));
+		{			
+			currentHexData = m_pHexDataWorker->dataList.at(position);
 
-			tblHexView->setItem(tblHexView->rowCount() - 1,1,
-				new QTableWidgetItem(i->hexString));
+			tblHexView->setItem(numberOfLines, 0,
+				new QTableWidgetItem(QString("%1").arg(currentHexData.hexOffset,16,16,QChar('0'))));
 
-			tblHexView->setItem(tblHexView->rowCount() - 1,2,
-				new QTableWidgetItem(i->asciiData));
+			tblHexView->setItem(numberOfLines, 1,
+				new QTableWidgetItem(currentHexData.hexString));
 
-			++i;numberOfLines++;
+			tblHexView->setItem(numberOfLines, 2,
+				new QTableWidgetItem(currentHexData.asciiData));
+
+			position++;numberOfLines++;
 		}
 	}	
 }
 
 void qtDLGHexView::resizeEvent(QResizeEvent *event)
 {
+	m_maxRows = (tblHexView->verticalHeader()->height() / 11);
+	memoryScroll->setMaximum(m_pHexDataWorker->dataList.count() - m_maxRows - 1);
+
 	InsertDataFrom(memoryScroll->value());
 }
 
@@ -119,11 +129,11 @@ void qtDLGHexView::wheelEvent(QWheelEvent *event)
 	if(pWheel->delta() > 0)
 	{
 		memoryScroll->setValue(memoryScroll->value() - 1);
-		InsertDataFrom(-1);
 	}
 	else
 	{
 		memoryScroll->setValue(memoryScroll->value() + 1);
-		InsertDataFrom(1);
 	}
+
+	InsertDataFrom(memoryScroll->value());
 }
