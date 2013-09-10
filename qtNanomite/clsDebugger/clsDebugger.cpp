@@ -317,9 +317,14 @@ void clsDebugger::DebuggingLoop()
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
-					DWORD64 tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
-					if(tlsCallback > 0)
-						AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback,BP_DONOTKEEP);
+					QList<quint64> tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
+					if(tlsCallback.length() > 0)
+					{
+						for(int i = 0; i < tlsCallback.count(); i++)
+						{
+							AddBreakpointToList(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i),BP_DONOTKEEP);
+						}
+					}						
 				}
 				
 				InitBP();

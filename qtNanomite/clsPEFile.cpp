@@ -91,6 +91,10 @@ bool clsPEFile::LoadFile(wstring FileName)
 		}
 	}
 
+	fileSections = loadSections();
+
+	fileExports = loadExports();
+
 	if(m_is64Bit)
 	{
 		fileImports = loadImports64();
@@ -101,11 +105,6 @@ bool clsPEFile::LoadFile(wstring FileName)
 		fileImports = loadImports32();
 		m_tlsOffset = loadTLSCallbackOffset32();
 	}
-
-	fileExports = loadExports();
-
-	fileSections = loadSections();
-
 
 	UnmapViewOfFile(m_fileBuffer);
 	CloseHandle(hFile);
@@ -123,7 +122,7 @@ QList<APIData> clsPEFile::getExports()
 	return fileExports;
 }
 
-DWORD64 clsPEFile::getTLSCallbackOffset()
+QList<DWORD64> clsPEFile::getTLSCallbackOffset()
 {
 	return m_tlsOffset;
 }
@@ -178,32 +177,64 @@ QList<IMAGE_SECTION_HEADER> clsPEFile::loadSections()
 	return sectionsOfFile;
 }
 
-DWORD64 clsPEFile::loadTLSCallbackOffset64()
+QList<DWORD64> clsPEFile::loadTLSCallbackOffset64()
 {
+	QList<DWORD64> tlsCallbacks;
+
 	DWORD64 vaOfTLSDir = dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_TLS,&m_INH64,&m_IDH,(PBYTE)m_fileBuffer);
-	if(vaOfTLSDir == NULL) return 0;
+	if(vaOfTLSDir == NULL) return tlsCallbacks;
 
 	PIMAGE_TLS_DIRECTORY64 pTLS = (PIMAGE_TLS_DIRECTORY64)((DWORD64)vaOfTLSDir);
-
-	if(pTLS->AddressOfCallBacks == NULL) return 0;
+	if(pTLS->AddressOfCallBacks == NULL) return tlsCallbacks;
 
 	DWORD64 rvaTLS = VAtoRaw(pTLS->AddressOfCallBacks - m_INH64.OptionalHeader.ImageBase);
-	DWORD64 callbackOffset = (DWORD64)*(PDWORD64)((DWORD64)m_fileBuffer + rvaTLS);
-	return callbackOffset - m_INH64.OptionalHeader.ImageBase;
+	DWORD64 callbackOffset = NULL;
+
+	for(int tlsCounter = 0; tlsCounter <= 99; tlsCounter++)
+	{
+		callbackOffset = (DWORD64)*(PDWORD64)((DWORD64)m_fileBuffer + rvaTLS + (tlsCounter * sizeof(DWORD64)));
+		
+		if(callbackOffset != 0)
+		{
+			tlsCallbacks.append(callbackOffset - m_INH64.OptionalHeader.ImageBase);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return tlsCallbacks;
 }
 
-DWORD clsPEFile::loadTLSCallbackOffset32()
+QList<DWORD64> clsPEFile::loadTLSCallbackOffset32()
 {
+	QList<DWORD64> tlsCallbacks;
+
 	DWORD vaOfTLSDir = dwCalculateTableOffset32(IMAGE_DIRECTORY_ENTRY_TLS,&m_INH32,&m_IDH,(PBYTE)m_fileBuffer);
-	if(vaOfTLSDir == NULL) return 0;
+	if(vaOfTLSDir == NULL) return tlsCallbacks;
 
 	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD)vaOfTLSDir);
-
-	if(pTLS->AddressOfCallBacks == NULL) return 0;
+	if(pTLS->AddressOfCallBacks == NULL) return tlsCallbacks;
 
 	DWORD rvaTLS = VAtoRaw(pTLS->AddressOfCallBacks - m_INH32.OptionalHeader.ImageBase);
-	DWORD callbackOffset = (DWORD)*(PDWORD)((DWORD)m_fileBuffer + rvaTLS);
-	return callbackOffset - m_INH32.OptionalHeader.ImageBase;
+	DWORD callbackOffset = NULL;
+
+	for(int tlsCounter = 0; tlsCounter <= 99; tlsCounter++)
+	{
+		callbackOffset = (DWORD)*(PDWORD)((DWORD)m_fileBuffer + rvaTLS + (tlsCounter * sizeof(DWORD)));
+		
+		if(callbackOffset != 0)
+		{
+			tlsCallbacks.append(callbackOffset - m_INH32.OptionalHeader.ImageBase);
+		}
+		else
+		{
+			break;
+		}
+	}
+
+	return tlsCallbacks;
 }
 
 QList<APIData> clsPEFile::loadExports()

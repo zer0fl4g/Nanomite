@@ -104,6 +104,7 @@
 + fixed a bug which did not display the correct source code under certain conditions
 + fixed a bug which did not reload the gui when deleting a patch from patchmanager using hotkey
 + fixed a bug which did not disable trace_stop button when the debuggee terminates while tracing
++ fixed a bug which may calculated wrong tls callback offsets
 + added save file dialog to memory dump and patch manager
 + added the correct offsets for loaded module imports in the peeditor
 + added double click handler in trace view, bp manager and patch manager to send a offset to disassembler window
@@ -113,6 +114,7 @@
 + added possibility to open function view for selected modules
 + added possibility to restart debugger with admin rights
 + added support for saving patches in dlls
++ added support of multiple tls callbacks
 + added "on execution" and "on write" memory breakpoint types
 + updated function view algorithm
 + updated winapi messagebox to qt

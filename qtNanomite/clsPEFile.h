@@ -36,7 +36,7 @@ public:
 
 	bool isValidPEFile();
 	
-	DWORD64 getTLSCallbackOffset();
+	QList<DWORD64> getTLSCallbackOffset();
 	DWORD64 VAtoRaw(quint64 Offset);
 
 	QList<APIData> getImports();
@@ -58,7 +58,7 @@ private:
 	bool	m_is64Bit,
 			m_isLoaded;
 
-	DWORD64 m_tlsOffset;
+	QList<DWORD64> m_tlsOffset;
 
 	IMAGE_DOS_HEADER m_IDH;
 	IMAGE_FILE_HEADER m_IFH;
@@ -81,8 +81,8 @@ private:
 	DWORD dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
 	DWORD64 dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS64 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
 
-	DWORD64 loadTLSCallbackOffset64();
-	DWORD loadTLSCallbackOffset32();
+	QList<DWORD64> loadTLSCallbackOffset64();
+	QList<DWORD64> loadTLSCallbackOffset32();
 };
 
 #endif

@@ -242,7 +242,7 @@ DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
 	return NULL;
 }
 
-DWORD64 clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
+QList<DWORD64> clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
 {
 	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
 
@@ -253,5 +253,6 @@ DWORD64 clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
 			return pThis->PEFiles[i].PEFile->getTLSCallbackOffset();
 		}
 	}
-	return NULL;
+
+	return QList<DWORD64>();
 }

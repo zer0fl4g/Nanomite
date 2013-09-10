@@ -29,7 +29,7 @@ public:
 
 	static clsPEManager* GetInstance();
 
-	static DWORD64 getTLSCallbackOffset(std::wstring FileName,int PID);
+	static QList<DWORD64> getTLSCallbackOffset(std::wstring FileName,int PID);
 
 	clsPEManager();
 	~clsPEManager();
