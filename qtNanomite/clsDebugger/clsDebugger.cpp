@@ -555,7 +555,8 @@ void clsDebugger::DebuggingLoop()
 											RemoveBPFromList(SoftwareBPs[i].dwOffset,SOFTWARE_BP);
 											break;
 
-										default:	
+										default:
+											SoftwareBPs[i].bRestoreBP = true;
 											break;
 										}
 

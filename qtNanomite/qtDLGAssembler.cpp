@@ -37,7 +37,7 @@ qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
 	connect(new QShortcut(QKeySequence(Qt::Key_Escape),this),SIGNAL(activated()),this,SLOT(close()));
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(InsertNewInstructions()));
 
-	this->setWindowTitle(QString("Assemble at %1h").arg(instructionOffset));
+	this->setWindowTitle(QString("Assemble at %1").arg(instructionOffset,16,16,QChar('0')));
 }
 
 qtDLGAssembler::~qtDLGAssembler()

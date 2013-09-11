@@ -52,14 +52,12 @@ bool clsDebugger::wSoftwareBP(DWORD processID, quint64 breakpointOffset, DWORD b
 	if(VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection) &&
 		ReadProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)&breakpointDataBackup, breakpointSize, &bytesRead))
 	{
-		if(breakpointDataBackup != 0xCC)
-		{
+		if(dataBackup == NULL)
 			dataBackup = breakpointDataBackup;
 
-			if(WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)&breakpointData, breakpointSize, &bytesWritten))
-				returnValue = true;
-		}
-
+		if(WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)&breakpointData, breakpointSize, &bytesWritten))
+			returnValue = true;
+		
 		VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &newProtection);
 	}
 	

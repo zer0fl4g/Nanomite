@@ -423,7 +423,7 @@ void clsDebugger::RemoveSBPFromMemory(bool isDisable, DWORD processID)
 	{
 		for (vector<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
 		{
-			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false && it->dwHandle == BP_KEEP)
+			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
 				pThis->dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
 		}
 	}
@@ -431,7 +431,7 @@ void clsDebugger::RemoveSBPFromMemory(bool isDisable, DWORD processID)
 	{
 		for (vector<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
 		{
-			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false && it->dwHandle == BP_KEEP)
+			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
 				pThis->wSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
 		}
 	}
