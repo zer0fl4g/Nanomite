@@ -257,7 +257,7 @@ private:
 	bool dMemoryBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD oldProtection);
 	bool wHardwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD breakpointSlot, DWORD typeFlag);
 	bool dHardwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSlot);
-	bool InitBP();
+	bool InitBP(DWORD processID, bool isThread = false);
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag, bool isExceptionRelevant = true);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);

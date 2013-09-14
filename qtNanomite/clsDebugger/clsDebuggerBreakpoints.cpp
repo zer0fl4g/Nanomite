@@ -367,16 +367,35 @@ bool clsDebugger::dMemoryBP(DWORD processID, quint64 breakpointOffset, DWORD bre
 	return true;
 }
 
-bool clsDebugger::InitBP()
+bool clsDebugger::InitBP(DWORD newProcessID, bool isThread)
 {
-	for(size_t i = 0;i < SoftwareBPs.size(); i++)
-		wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+	if(!isThread)
+	{
+		for(size_t i = 0;i < SoftwareBPs.size(); i++)
+		{
+			if(SoftwareBPs[i].dwPID == -1)
+				wSoftwareBP(newProcessID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+			else if(SoftwareBPs[i].dwPID == newProcessID)
+				wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+		}
 
-	for(size_t i = 0;i < MemoryBPs.size(); i++)
-		wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwTypeFlag,&MemoryBPs[i].dwOldProtection);
+		for(size_t i = 0;i < MemoryBPs.size(); i++)
+		{
+			if(MemoryBPs[i].dwPID == -1)
+				wMemoryBP(newProcessID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwTypeFlag,&MemoryBPs[i].dwOldProtection);
+			else if(MemoryBPs[i].dwPID == newProcessID)
+				wMemoryBP(MemoryBPs[i].dwPID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwTypeFlag,&MemoryBPs[i].dwOldProtection);
+		}
+	}
 
 	for(size_t i = 0;i < HardwareBPs.size(); i++)
-		wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot,HardwareBPs[i].dwTypeFlag);
+	{
+		if(HardwareBPs[i].dwPID == -1)
+			wHardwareBP(newProcessID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot,HardwareBPs[i].dwTypeFlag);
+		else if(HardwareBPs[i].dwPID == newProcessID)
+			wHardwareBP(HardwareBPs[i].dwPID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot,HardwareBPs[i].dwTypeFlag);
+	}
+
 	return true;
 }
 
@@ -401,7 +420,7 @@ bool clsDebugger::RemoveBPFromList(quint64 breakpointOffset, DWORD breakpointTyp
 { 
 	switch(breakpointType)
 	{
-	case 0:
+	case SOFTWARE_BP:
 		for (vector<BPStruct>::iterator it = SoftwareBPs.begin();it != SoftwareBPs.end(); ++it)
 		{
 			if(it->dwOffset == breakpointOffset /* && it->dwPID == dwPID */)
@@ -418,7 +437,7 @@ bool clsDebugger::RemoveBPFromList(quint64 breakpointOffset, DWORD breakpointTyp
 		}
 		break;
 
-	case 1:
+	case MEMORY_BP:
 		for (vector<BPStruct>::iterator it = MemoryBPs.begin();it != MemoryBPs.end(); ++it)
 		{
 			if(it->dwOffset == breakpointOffset /* && it->dwPID == dwPID */)
@@ -435,7 +454,7 @@ bool clsDebugger::RemoveBPFromList(quint64 breakpointOffset, DWORD breakpointTyp
 		}
 		break;
 
-	case 2:
+	case HARDWARE_BP:
 		for (vector<BPStruct>::iterator it = HardwareBPs.begin();it != HardwareBPs.end(); ++it)
 		{
 			if(it->dwOffset == breakpointOffset /* && it->dwPID == dwPID */)
@@ -632,7 +651,7 @@ void clsDebugger::UpdateOffsetsBPs()
 			}
 			
 			SoftwareBPs[i].dwHandle = BP_OFFSETUPDATE;
-			emit OnNewBreakpointAdded(SoftwareBPs[i],0);
+			emit OnNewBreakpointAdded(SoftwareBPs[i], SOFTWARE_BP);
 			SoftwareBPs[i].dwHandle = BP_KEEP;
 		}
 	}
@@ -659,7 +678,7 @@ void clsDebugger::UpdateOffsetsBPs()
 			}
 
 			MemoryBPs[i].dwHandle = BP_OFFSETUPDATE;
-			emit OnNewBreakpointAdded(MemoryBPs[i],1);
+			emit OnNewBreakpointAdded(MemoryBPs[i], MEMORY_BP);
 			MemoryBPs[i].dwHandle = BP_KEEP;
 		}
 	}
@@ -686,7 +705,7 @@ void clsDebugger::UpdateOffsetsBPs()
 			}
 
 			HardwareBPs[i].dwHandle = BP_OFFSETUPDATE;
-			emit OnNewBreakpointAdded(HardwareBPs[i],1);
+			emit OnNewBreakpointAdded(HardwareBPs[i], HARDWARE_BP);
 			HardwareBPs[i].dwHandle = BP_KEEP;
 		}
 	}

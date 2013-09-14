@@ -327,7 +327,7 @@ void clsDebugger::DebuggingLoop()
 					}						
 				}
 				
-				InitBP();
+				InitBP(debug_event.dwProcessId);
 
 				// Insert Main Thread to List
 				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
@@ -340,7 +340,7 @@ void clsDebugger::DebuggingLoop()
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
 			PBThreadInfo(debug_event.dwProcessId,debug_event.dwThreadId,(quint64)debug_event.u.CreateThread.lpStartAddress,false,0,true);
-			InitBP();
+			InitBP(debug_event.dwProcessId, true);
 
 			if(dbgSettings.bBreakOnNewTID)
 				dwContinueStatus = CallBreakDebugger(&debug_event,0);
@@ -519,7 +519,7 @@ void clsDebugger::DebuggingLoop()
 								UpdateOffsetsBPs();
 								emit UpdateOffsetsPatches(PIDs[iPid].hProc,PIDs[iPid].dwPID);
 
-								InitBP();
+								InitBP(debug_event.dwProcessId);
 							}
 
 							bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,EXCEPTION_BREAKPOINT,debug_event.dwProcessId,true);
