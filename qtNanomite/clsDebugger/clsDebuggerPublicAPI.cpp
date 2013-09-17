@@ -30,7 +30,7 @@ bool clsDebugger::DetachFromProcess()
 	//_isDebugging = false;
 	_bStopDebugging = true;
 
-	RemoveBPs();
+	m_pBreakpointManager->BreakpointClear();
 
 	for(size_t d = 0;d < PIDs.size();d++)
 	{
@@ -147,22 +147,7 @@ bool clsDebugger::IsTargetSet()
 
 bool clsDebugger::StepOver(quint64 dwNewOffset)
 {
-	for (vector<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end();++it)
-	{
-		if(it->dwHandle != BP_KEEP)
-		{
-			dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
-			clsMemManager::CFree(it->moduleName);
-
-			SoftwareBPs.erase(it);
-			it = SoftwareBPs.begin();
-
-			if(it == SoftwareBPs.end())
-				break;
-		}
-	}
-
-	if(!AddBreakpointToList(SOFTWARE_BP,NULL,_dwCurPID,dwNewOffset,BP_STEPOVER))
+	if(!m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP,NULL,_dwCurPID,dwNewOffset,BP_STEPOVER))
 		return false;
 
 	PulseEvent(_hDbgEvent);
@@ -338,18 +323,18 @@ void clsDebugger::SetTarget(wstring sTarget)
 
 DWORD clsDebugger::GetCurrentPID()
 {
-	if(IsDebuggerSuspended())
-		return _dwCurPID;
+	if(pThis->IsDebuggerSuspended())
+		return pThis->_dwCurPID;
 	else
-		return GetMainProcessID();
+		return pThis->GetMainProcessID();
 }
 
 DWORD clsDebugger::GetCurrentTID()
 {
-	if(IsDebuggerSuspended())
-		return _dwCurTID;
+	if(pThis->IsDebuggerSuspended())
+		return pThis->_dwCurTID;
 	else
-		return GetMainThreadID();
+		return pThis->GetMainThreadID();
 }
 
 void clsDebugger::SetCommandLine(std::wstring CommandLine)
@@ -415,24 +400,4 @@ DWORD clsDebugger::GetMainProcessID()
 DWORD clsDebugger::GetMainThreadID()
 {
 	return m_dbgPI.dwThreadId;
-}
-
-void clsDebugger::RemoveSBPFromMemory(bool isDisable, DWORD processID)
-{
-	if(isDisable)
-	{
-		for (vector<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
-		{
-			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
-				pThis->dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
-		}
-	}
-	else
-	{
-		for (vector<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
-		{
-			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
-				pThis->wSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
-		}
-	}
 }

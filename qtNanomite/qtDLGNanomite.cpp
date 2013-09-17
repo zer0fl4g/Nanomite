@@ -55,7 +55,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	clsAPIImport::LoadFunctions();
 
-	coreDebugger = new clsDebugger;
+	coreBPManager = new clsBreakpointManager;
+	coreDebugger = new clsDebugger(coreBPManager);
 	coreDisAs = new clsDisassembler;
 	PEManager = new clsPEManager;
 	DBManager = new clsDBManager;
@@ -99,10 +100,11 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(AskForException(DWORD)),this,SLOT(AskForException(DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnNewBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgPatchManager,SLOT(UpdateOffsetPatch(HANDLE,int)),Qt::QueuedConnection);
+
+	connect(coreBPManager,SIGNAL(OnBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
+	connect(coreBPManager,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 
 	// Callbacks from Debugger to PEManager
 	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)),Qt::QueuedConnection);
@@ -168,6 +170,7 @@ qtDLGNanomite::~qtDLGNanomite()
 	settings->SaveDisassemblerColor(qtNanomiteDisAsColor);
 	settings->SaveRecentDebuggedFiles(m_recentDebuggedFiles);
 
+	delete coreBPManager;
 	delete coreDebugger;
 	delete coreDisAs;
 	delete PEManager;
@@ -499,7 +502,7 @@ void qtDLGNanomite::DebugRecentFile(QAction *qAction)
 {
 	if(!coreDebugger->GetDebuggingState())
 	{
-		coreDebugger->RemoveBPs();
+		coreBPManager->BreakpointClear();
 		coreDebugger->ClearTarget();
 		coreDebugger->ClearCommandLine();
 		coreDebugger->SetTarget(qAction->text().toStdWString());

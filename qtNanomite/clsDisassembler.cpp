@@ -123,11 +123,11 @@ void clsDisassembler::run()
 	LPVOID pBuffer = malloc(dwSize);
 	clsSymbolAndSyntax DataVisualizer(m_processHandle);
 
-	clsDebugger::RemoveSBPFromMemory(true, GetProcessId(m_processHandle));
+	clsBreakpointManager::RemoveSBPFromMemory(true, GetProcessId(m_processHandle));
 
 	if(ReadProcessMemory(m_processHandle,(LPVOID)m_startPage,pBuffer,dwSize,NULL))
 	{
-		clsDebugger::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
+		clsBreakpointManager::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
 
 		DISASM newDisAss;
 		bool bContinueDisAs = true;
@@ -195,7 +195,7 @@ void clsDisassembler::run()
 	}
 	else
 	{
-		clsDebugger::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
+		clsBreakpointManager::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
 		free(pBuffer);
 		MessageBox(NULL,L"Access Denied! Can not disassemble this buffer :(",L"Nanomite",MB_OK);
 		return;

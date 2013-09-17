@@ -149,9 +149,6 @@
     <ClCompile Include="clsMemPool.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="clsDebugger\clsDebuggerBreakpoints.cpp">
-      <Filter>Source Dateien</Filter>
-    </ClCompile>
     <ClCompile Include="clsDebugger\clsDebuggerCallbacks.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
@@ -512,6 +509,24 @@
     <ClCompile Include="clsProcessDump.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
+    <ClCompile Include="clsBreakpointSoftware.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsBreakpointMemory.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsBreakpointHardware.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="clsBreakpointManager.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsBreakpointManager.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsBreakpointManager.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -763,6 +778,9 @@
     <CustomBuild Include="clsMemDump.h">
       <Filter>Header Dateien</Filter>
     </CustomBuild>
+    <CustomBuild Include="clsBreakpointManager.h">
+      <Filter>Header Dateien</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NativeHeaders.h">
@@ -913,6 +931,15 @@
       <Filter>Generierte Dateien</Filter>
     </ClInclude>
     <ClInclude Include="clsProcessDump.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsBreakpointSoftware.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsBreakpointMemory.h">
+      <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="clsBreakpointHardware.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
   </ItemGroup>

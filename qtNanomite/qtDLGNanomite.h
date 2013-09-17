@@ -35,6 +35,7 @@
 #include "clsPEManager.h"
 #include "clsDBManager.h"
 #include "clsAppSettings.h"
+#include "clsBreakpointManager.h"
 
 #include "ui_qtDLGNanomite.h"
 
@@ -68,6 +69,7 @@ public:
 	clsPEManager *PEManager;
 	clsDBManager *DBManager;
 	clsAppSettings *settings;
+	clsBreakpointManager *coreBPManager;
 
 	qtDLGDetailInfo *dlgDetInfo;
 	qtDLGDebugStrings *dlgDbgStr;

@@ -23,6 +23,8 @@
 #include <time.h>
 #include <QtCore>
 
+#include "../clsBreakpointManager.h"
+
 #define LOGBUFFER (512 * sizeof(TCHAR))
 #define LOGBUFFERCHAR (512)
 #define THREAD_GETSET_CONTEXT	(0x0018) 
@@ -78,22 +80,6 @@ struct PIDStruct
 	bool bTraceFlag;
 };
 
-struct BPStruct
-{
-	DWORD dwSize;
-	DWORD dwSlot;
-	DWORD dwTypeFlag;	/* see BP_BREAKON		*/
-	DWORD dwHandle;		/* see BREAKPOINT_TYPE	*/
-	DWORD dwOldProtection;
-	quint64 dwOffset;
-	quint64 dwBaseOffset;
-	quint64 dwOldOffset;
-	int dwPID;
-	BYTE bOrgByte;
-	bool bRestoreBP;
-	PTCHAR moduleName;
-};
-
 struct customException
 {
 	DWORD dwAction;
@@ -125,6 +111,14 @@ enum BP_BREAKON
 	BP_READ		= 0x11	
 };
 
+enum RESTORE_BP
+{
+	RESTORE_NON			= 0,
+	RESTORE_BP_SOFTWARE	= 1,
+	RESTORE_BP_MEMORY	= 2,
+	RESTORE_BP_HARDWARE	= 3
+};
+
 class clsDebugger : public QThread
 {
 	Q_OBJECT
@@ -133,9 +127,6 @@ public:
 	std::vector<DLLStruct> DLLs;
 	std::vector<ThreadStruct> TIDs;
 	std::vector<PIDStruct> PIDs;
-	std::vector<BPStruct> SoftwareBPs;
-	std::vector<BPStruct> MemoryBPs;
-	std::vector<BPStruct> HardwareBPs;
 	std::vector<customException> ExceptionHandler;
 
 	CONTEXT ProcessContext;
@@ -143,13 +134,12 @@ public:
 
 	clsDebuggerSettings dbgSettings;
 
-	clsDebugger();
+	clsDebugger(clsBreakpointManager *pBPManager);
 	~clsDebugger();
 
 	static bool IsOffsetAnBP(quint64 Offset);
 	static bool IsOffsetEIP(quint64 Offset);
 
-	static void RemoveSBPFromMemory(bool isDisable, DWORD processID);
 	static void SetNewThreadContext(bool isWow64, CONTEXT newProcessContext, WOW64_CONTEXT newWowProcessContext);
 
 	static HANDLE GetProcessHandleByPID(DWORD PID);
@@ -168,13 +158,10 @@ public:
 	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
-	bool RemoveBPFromList(quint64 breakpointOffset, DWORD breakpointType); //,DWORD dwPID);
-	bool RemoveBPs();
-	bool AddBreakpointToList(DWORD breakpointType, DWORD typeFlag, DWORD processID, quint64 breakpointOffset, DWORD breakpointHandleType);
 	bool SetTraceFlagForPID(DWORD dwPID, bool bIsEnabled);
 
-	DWORD GetCurrentPID();
-	DWORD GetCurrentTID();
+	static DWORD GetCurrentPID();
+	static DWORD GetCurrentTID();
 		
 	void ClearTarget();
 	void ClearCommandLine();
@@ -206,8 +193,6 @@ signals:
 		quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
 		quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
 		std::wstring sSourceFilePath,int iSourceLineNum);
-	void OnNewBreakpointAdded(BPStruct newBP,int iType);
-	void OnBreakpointDeleted(quint64 bpOffset);
 	void OnNewPID(std::wstring,int);
 	void DeletePEManagerObject(std::wstring,int);
 	void CleanPEManager();
@@ -215,6 +200,8 @@ signals:
 
 private:
 	static clsDebugger *pThis;
+
+	clsBreakpointManager *m_pBreakpointManager;
 
 	PTCHAR tcLogString;
 	std::wstring _sTarget;
@@ -241,7 +228,6 @@ private:
 	void AttachedDebugging(LPVOID pDebProc);
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
-	void UpdateOffsetsBPs();
 
 	static unsigned __stdcall DebuggingEntry(LPVOID pThis);
 
@@ -251,13 +237,6 @@ private:
 	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, int foundDLL = -1);
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
-	bool wSoftwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, BYTE &dataBackup);
-	bool dSoftwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, BYTE orgBreakpointData);
-	bool wMemoryBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD typeFlag, DWORD *savedProtection);
-	bool dMemoryBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD oldProtection);
-	bool wHardwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSize, DWORD breakpointSlot, DWORD typeFlag);
-	bool dHardwareBP(DWORD processID, quint64 breakpointOffset, DWORD breakpointSlot);
-	bool InitBP(DWORD processID, bool isThread = false);
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag, bool isExceptionRelevant = true);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);

@@ -22,6 +22,7 @@
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
 #include "clsSymbolAndSyntax.h"
+#include "clsBreakpointManager.h"
 
 #include <string>
 
@@ -135,7 +136,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			itemStyle = disassemblyDataCurrent.value().itemStyle;
 
 			tblDisAs->setItem(lineCount, 0,new QTableWidgetItem(disassemblyDataCurrent.value().Offset));
-			if(clsDebugger::IsOffsetAnBP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
+			if(clsBreakpointManager::IsOffsetAnBP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
 				tblDisAs->item(lineCount,0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 
 			if(!IsAlreadyEIPSet && clsDebugger::IsOffsetEIP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
@@ -172,9 +173,9 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		wstring ModName,FuncName;
 		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
 		if(ModName.length() > 0 && FuncName.length() > 0)
-			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(QString().fromStdWString(FuncName)));
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(QString().fromStdWString(FuncName)));
 		else if(ModName.length() > 0 && FuncName.length() <= 0)
-			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(coreDebugger->GetCurrentPID(),6,16,QChar('0')).arg(coreDebugger->GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(dwEIP,16,16,QChar('0')));
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(dwEIP,16,16,QChar('0')));
 	}
 	else
 	{
@@ -316,7 +317,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		int processID = coreDebugger->GetCurrentPID();
 		qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 
-		coreDebugger->AddBreakpointToList(SOFTWARE_BP,BP_TRACETO,processID,tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),BP_TRACETO);
+		pMainWindow->coreBPManager->BreakpointAdd(SOFTWARE_BP,BP_TRACETO,processID,tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),BP_TRACETO);
 		qtDLGTrace::clearTraceData();
 		pMainWindow->actionDebug_Trace_Stop->setEnabled(true);
 		pMainWindow->actionDebug_Trace_Start->setEnabled(false);
@@ -342,8 +343,8 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 
 				if(SplitAPIList.count() >= 2)
 				{
-					quint64 dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,coreDebugger->GetCurrentPID());
-					dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[1],dwOffset,coreDebugger->GetCurrentPID());
+					quint64 dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)SplitAPIList[0].toLower().toStdWString().c_str(),NULL,clsDebugger::GetCurrentPID());
+					dwOffset = clsHelperClass::RemoteGetProcAddr(SplitAPIList[1],dwOffset,clsDebugger::GetCurrentPID());
 
 					if(dwOffset > 0)
 						searchedOffset = QString("%1").arg(dwOffset,16,16,QChar('0'));
@@ -415,11 +416,11 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 	if(currentSelectedItems.count() <= 0) return;
 
 	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
-	if(coreDebugger->AddBreakpointToList(SOFTWARE_BP,BP_EXEC,-1,dwSelectedVA,BP_KEEP))
+	if(clsBreakpointManager::BreakpointInsert(SOFTWARE_BP,BP_EXEC,-1,dwSelectedVA,BP_KEEP))
 		currentSelectedItems.value(0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 	else
 	{// exists
-		coreDebugger->RemoveBPFromList(dwSelectedVA,SOFTWARE_BP);
+		clsBreakpointManager::BreakpointDelete(dwSelectedVA,SOFTWARE_BP);
 		currentSelectedItems.value(0)->setForeground(QColor("Black"));
 	}	
 	return;

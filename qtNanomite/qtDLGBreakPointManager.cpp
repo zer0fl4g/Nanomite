@@ -127,7 +127,6 @@ void qtDLGBreakPointManager::OnAddUpdate()
 {
 	int iUpdateLine = -1;
 	quint64 dwOffset = NULL;
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
 	if(leOffset->text().contains("::"))
 	{
@@ -177,7 +176,7 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Memory BP") == 0)
 			dwType = MEMORY_BP;
 
-		myMainWindow->coreDebugger->RemoveBPFromList(tblBPs->item(iUpdateLine,1)->text().toULongLong(0,16),dwType);
+		clsBreakpointManager::BreakpointDelete(tblBPs->item(iUpdateLine,1)->text().toULongLong(0,16),dwType);
 		tblBPs->removeRow(iUpdateLine);
 	}
 
@@ -201,9 +200,9 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		dwBreakOn = BP_ACCESS;
 
 	if(lePID->text().toInt() == -1)
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,BP_KEEP);
+		clsBreakpointManager::BreakpointInsert(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,BP_KEEP);
 	else
-		myMainWindow->coreDebugger->AddBreakpointToList(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,BP_KEEP);
+		clsBreakpointManager::BreakpointInsert(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,BP_KEEP);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
@@ -268,7 +267,6 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 
 void qtDLGBreakPointManager::OnBPRemove()
 {
-	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 	DWORD dwType = 0;
 
 	for(int i = 0; i < tblBPs->rowCount(); i++)
@@ -282,7 +280,7 @@ void qtDLGBreakPointManager::OnBPRemove()
 			else if(QString().compare(tblBPs->item(i,2)->text(),"Memory BP") == 0)
 				dwType = MEMORY_BP;
 
-			myMainWindow->coreDebugger->RemoveBPFromList(tblBPs->item(i,1)->text().toULongLong(0,16),dwType);
+			clsBreakpointManager::BreakpointDelete(tblBPs->item(i,1)->text().toULongLong(0,16),dwType);
 			tblBPs->removeRow(i);
 			i = 0;
 		}

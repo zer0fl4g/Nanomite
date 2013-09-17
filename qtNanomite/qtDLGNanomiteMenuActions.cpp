@@ -55,13 +55,13 @@ void qtDLGNanomite::action_FileOpenNewFile()
 	{
 		m_IsRestart = true;
 		action_DebugStop();
-		coreDebugger->RemoveBPs();
+		coreBPManager->BreakpointClear();
 		coreDebugger->ClearTarget();
 		coreDebugger->ClearCommandLine();
 	}
 	else
 	{
-		coreDebugger->RemoveBPs();
+		coreBPManager->BreakpointClear();
 		coreDebugger->ClearTarget();
 		coreDebugger->ClearCommandLine();
 		action_DebugStart();
