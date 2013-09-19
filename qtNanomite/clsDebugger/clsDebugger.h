@@ -149,12 +149,9 @@ public:
 	bool SuspendDebuggingAll();
 	bool SuspendDebugging(DWORD dwPID);
 	bool ResumeDebugging();
-	bool RestartDebugging();
-	bool StartDebugging();
 	bool GetDebuggingState();
 	bool StepOver(quint64 dwNewOffset);
 	bool StepIn();
-	bool ShowCallStack();
 	bool DetachFromProcess();
 	bool AttachToProcess(DWORD dwPID);
 	bool IsTargetSet();
@@ -189,10 +186,6 @@ signals:
 	void OnDbgString(std::wstring sMessage,DWORD dwPID);
 	void OnLog(std::wstring sLog);
 	void OnDll(std::wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
-	void OnCallStack(quint64 dwStackAddr,
-		quint64 dwReturnTo,std::wstring sReturnToFunc,std::wstring sModuleName,
-		quint64 dwEIP,std::wstring sFuncName,std::wstring sFuncModule,
-		std::wstring sSourceFilePath,int iSourceLineNum);
 	void OnNewPID(std::wstring,int);
 	void DeletePEManagerObject(std::wstring,int);
 	void CleanPEManager();
@@ -228,9 +221,7 @@ private:
 	void AttachedDebugging(LPVOID pDebProc);
 	void NormalDebugging(LPVOID pDebProc);
 	void CleanWorkSpace();
-
-	static unsigned __stdcall DebuggingEntry(LPVOID pThis);
-
+	
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
 	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwExitCode,HANDLE hProc);
 	bool PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);

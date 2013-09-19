@@ -95,8 +95,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 		dlgDetInfo,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),
 		logView,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),
-		callstackView,SLOT(OnCallStack(quint64,quint64,std::wstring,std::wstring,quint64,std::wstring,std::wstring,std::wstring,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(AskForException(DWORD)),this,SLOT(AskForException(DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
@@ -230,8 +228,7 @@ void qtDLGNanomite::OnDebuggerBreak()
 		qtDLGTrace::disableStatusBarTimer();
 
 		// display callstack
-		callstackView->tblCallstack->setRowCount(0);
-		coreDebugger->ShowCallStack();
+		callstackView->ShowCallStack();
 
 		// display Reg
 		cpuRegView->LoadRegView(coreDebugger);

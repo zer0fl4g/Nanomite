@@ -17,10 +17,10 @@
 #ifndef QTDLGCALLSTACK_H
 #define QTDLGCALLSTACK_H
 
-#include <string>
 #include <Windows.h>
 
 #include <QDockWidget>
+#include <QString>
 
 #include "ui_qtDLGCallstack.h"
 
@@ -47,6 +47,30 @@ public:
 	*/
 	~qtDLGCallstack();
 
+	/**
+	* brief Does get the call when the debugger breaks and enums the callstack
+	*/
+	void ShowCallStack();
+
+	/**
+	* @brief Get called from "ShowCallStack" and prints a line each time
+	* @param stackAddress The stack address
+	* @param returnOffset The address the function will return after executing
+	* @param returnFunctionName A string containing the function name which will be returned to
+	* @param returnModuleName A string containing the module name which contains the return to function
+	* @param currentOffset Contains the offset where the process is currently located
+	* @param currentFunctionName A string containing the current function name
+	* @param currentModuleName A string containing the module name where the current function is located
+	* @param sourceFilePath A string containing the sourcefile path
+	* @param sourceLineNumber Contains the line number
+	*
+	* @return no 
+	*/
+	void OnCallStack(	quint64 stackAddress,
+						quint64 returnOffset, QString returnFunctionName, QString returnModuleName,
+						quint64 currentOffset, QString currentFunctionName, QString currentModuleName,
+						QString sourceFilePath, int sourceLineNumber);
+
 public slots:
 	/**
 	* @brief A Qt slot which is called when the user wants to display the source code
@@ -69,21 +93,6 @@ public slots:
 	* @return no
 	*/
 	void MenuCallback(QAction* pAction);
-	/**
-	* @brief A Qt slot which is called when the Debugger breaks
-	* @param stackAddress The stack address
-	* @param returnOffset The address the function will return after executing
-	* @param returnFunctionName A string containing the function name which will be returned to
-	* @param returnModuleName A string containing the module name which contains the return to function
-	* @param currentOffset Contains the offset where the process is currently located
-	* @param currentFunctionName A string containing the current function name
-	* @param currentModuleName A string containing the module name where the current function is located
-	* @param sourceFilePath A string containing the sourcefile path
-	* @param sourceLineNumber Contains the line number
-	*
-	* @return no 
-	*/
-	void OnCallStack(quint64 stackAddress, quint64 returnOffset, std::wstring returnFunctionName, std::wstring returnModuleName, quint64 currentOffset, std::wstring currentFunctionName, std::wstring currentModuleName, std::wstring sourceFilePath, int sourceLineNumber);
 
 signals:
 	/**

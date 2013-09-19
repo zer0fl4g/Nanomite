@@ -18,11 +18,11 @@
 #include "qtDLGNanomite.h"
 
 #include "clsMemManager.h"
+#include "clsAPIImport.h"
+#include "dbghelp.h"
 
 #include <QClipboard>
 #include <QMenu>
-
-using namespace std;
 
 qtDLGCallstack::qtDLGCallstack(QWidget *parent)
 	: QDockWidget(parent)
@@ -155,9 +155,9 @@ void qtDLGCallstack::OnDisplaySource(QTableWidgetItem *pItem)
 }
 
 void qtDLGCallstack::OnCallStack(quint64 stackAddress,
-						 quint64 returnOffset, wstring returnFunctionName, wstring returnModuleName,
-						 quint64 currentOffset, wstring currentFunctionName, wstring currentModuleName,
-						 wstring sourceFilePath, int sourceLineNumber)
+						 quint64 returnOffset, QString returnFunctionName, QString returnModuleName,
+						 quint64 currentOffset, QString currentFunctionName, QString currentModuleName,
+						 QString sourceFilePath, int sourceLineNumber)
 {
 	tblCallstack->insertRow(tblCallstack->rowCount());
 
@@ -171,29 +171,41 @@ void qtDLGCallstack::OnCallStack(quint64 stackAddress,
 
 	// <mod.func>
 	if(currentModuleName.length() > 0 && currentFunctionName.length() > 0)
+	{
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(currentModuleName).append(".").append(QString::fromStdWString(currentFunctionName))));
+			new QTableWidgetItem(currentModuleName.append(".").append(currentFunctionName)));
+	}
 	else if(currentModuleName.length() > 0 && currentFunctionName.length() <= 0)
+	{
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
-			new QTableWidgetItem(QString::fromStdWString(currentModuleName).append(".").append(QString("%1").arg(currentOffset,16,16,QChar('0')))));
+			new QTableWidgetItem(currentModuleName.append(".").append(QString("%1").arg(currentOffset,16,16,QChar('0')))));
+	}
 	else
+	{
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,2,
 			new QTableWidgetItem(""));
+	}
 
 	// Return To
 	tblCallstack->setItem(tblCallstack->rowCount() - 1,3,
 		new QTableWidgetItem(QString("%1").arg(returnOffset,16,16,QChar('0'))));
 
 	// Return To <mod.func>
-	if(currentFunctionName.length() > 0 && returnModuleName.length() > 0)
+	if(returnFunctionName.length() > 0 && returnModuleName.length() > 0)
+	{	
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(returnModuleName).append(".").append(QString::fromStdWString(returnFunctionName))));
-	else if(currentFunctionName.length() <= 0 && returnModuleName.length() > 0)
+			new QTableWidgetItem(returnModuleName.append(".").append(returnFunctionName)));
+	}
+	else if(returnFunctionName.length() <= 0 && returnModuleName.length() > 0)
+	{
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
-			new QTableWidgetItem(QString::fromStdWString(returnModuleName).append(".").append(QString("%1").arg(returnOffset,16,16,QChar('0')))));
+			new QTableWidgetItem(returnModuleName.append(".").append(QString("%1").arg(returnOffset,16,16,QChar('0')))));
+	}
 	else
+	{
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,4,
 			new QTableWidgetItem(""));
+	}
 
 	if(sourceLineNumber > 0 && sourceFilePath.length() > 0)
 	{
@@ -203,16 +215,141 @@ void qtDLGCallstack::OnCallStack(quint64 stackAddress,
 
 		// Source File
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
-			new QTableWidgetItem(QString::fromStdWString(sourceFilePath)));
+			new QTableWidgetItem(sourceFilePath));
 	}
 	else
 	{
 		// Source Line
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,5,
-		new QTableWidgetItem(""));
+			new QTableWidgetItem(""));
 
 		// Source File
 		tblCallstack->setItem(tblCallstack->rowCount() - 1,6,
 			new QTableWidgetItem(""));
 	}
+}
+
+void qtDLGCallstack::ShowCallStack()
+{
+	clsDebugger *pDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
+	
+	HANDLE	hProc = pDebugger->GetCurrentProcessHandle(),
+			hThread = OpenThread(THREAD_GETSET_CONTEXT,false,pDebugger->GetCurrentTID());
+	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
+	DWORD dwMaschineMode = NULL;
+	LPVOID pContext;
+	STACKFRAME64 stackFr = {0};
+	stackFr.AddrPC.Mode = AddrModeFlat;
+	stackFr.AddrFrame.Mode = AddrModeFlat;
+	stackFr.AddrStack.Mode = AddrModeFlat;
+
+	QString sFuncName,
+		sFuncMod,
+		sReturnToFunc,
+		sReturnToMod;
+	quint64 dwStackAddr,
+		dwReturnTo,
+		dwEIP,
+		dwDisplacement;
+	IMAGEHLP_LINEW64 imgSource = {0};
+	IMAGEHLP_MODULEW64 imgMod = {0};
+	BOOL bSuccess;
+
+#ifdef _AMD64_
+	BOOL bIsWOW64 = false;
+
+	if(clsAPIImport::pIsWow64Process)
+		clsAPIImport::pIsWow64Process(hProc,&bIsWOW64);
+
+	if(bIsWOW64)
+	{
+		dwMaschineMode = IMAGE_FILE_MACHINE_I386;
+		WOW64_CONTEXT cTT;
+		cTT = pDebugger->wowProcessContext;
+		pContext = &cTT;
+
+		stackFr.AddrPC.Offset = cTT.Eip;
+		stackFr.AddrFrame.Offset = cTT.Ebp;
+		stackFr.AddrStack.Offset = cTT.Esp;	
+	}
+	else
+	{
+		dwMaschineMode = IMAGE_FILE_MACHINE_AMD64;
+		CONTEXT cTT;
+		cTT = pDebugger->ProcessContext;
+		pContext = &cTT;
+
+		stackFr.AddrPC.Offset = cTT.Rip;
+		stackFr.AddrFrame.Offset = cTT.Rbp;
+		stackFr.AddrStack.Offset = cTT.Rsp;	
+	}
+#else
+	dwMaschineMode = IMAGE_FILE_MACHINE_I386;
+	CONTEXT cTT;
+	cTT = pDebugger->ProcessContext;
+	pContext = &cTT;
+
+	stackFr.AddrPC.Offset = cTT.Eip;
+	stackFr.AddrFrame.Offset = cTT.Ebp;
+	stackFr.AddrStack.Offset = cTT.Esp;	
+
+#endif
+
+	tblCallstack->setRowCount(0);
+
+	do
+	{
+		bSuccess = StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0);
+
+		if(!bSuccess)        
+			break;
+
+		memset(&imgSource,0,sizeof(IMAGEHLP_LINEW64));
+		imgSource.SizeOfStruct = sizeof(IMAGEHLP_LINEW64);
+
+		dwStackAddr = stackFr.AddrStack.Offset;
+		dwEIP = stackFr.AddrPC.Offset;
+		dwReturnTo = stackFr.AddrReturn.Offset;
+
+
+		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
+		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
+		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
+		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
+		pSymbol->MaxNameLen = MAX_PATH;
+
+		bSuccess = SymGetModuleInfoW64(hProc,dwEIP,&imgMod);
+		bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
+		sFuncName = QString::fromWCharArray(pSymbol->Name);
+		sFuncMod = QString::fromWCharArray(imgMod.ModuleName);
+
+
+		memset(&imgMod,0,sizeof(IMAGEHLP_MODULEW64));
+		imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
+		memset(pSymbol,0,sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
+		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
+		pSymbol->MaxNameLen = MAX_PATH;
+
+		bSuccess = SymGetModuleInfoW64(hProc,dwReturnTo,&imgMod);
+		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
+		sReturnToMod = QString::fromWCharArray(imgMod.ModuleName);
+		sReturnToFunc = QString::fromWCharArray(pSymbol->Name);
+
+		bSuccess = SymGetLineFromAddrW64(hProc,dwEIP,(PDWORD)&dwDisplacement,&imgSource);
+
+		if(bSuccess)
+			OnCallStack(dwStackAddr,
+				dwReturnTo,sReturnToFunc,sReturnToMod,
+				dwEIP,sFuncName,sFuncMod,
+				QString::fromWCharArray(imgSource.FileName),imgSource.LineNumber);
+		else
+			OnCallStack(dwStackAddr,
+				dwReturnTo,sReturnToFunc,sReturnToMod,
+				dwEIP,sFuncName,sFuncMod,
+				QString(""),0);
+
+	}while(stackFr.AddrReturn.Offset != 0);
+
+	free(pSymbol);
+	CloseHandle(hThread);
 }

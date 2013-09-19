@@ -157,41 +157,26 @@ PTCHAR clsDebugger::GetFileNameFromModuleBase(HANDLE processHandle, LPVOID image
 
 void clsDebugger::run()
 {
-	StartDebugging();
-}
-
-bool clsDebugger::StartDebugging()
-{
 	_bStopDebugging = false;
 	if(_dwPidToAttach != 0 && !_NormalDebugging)
 	{
 		CleanWorkSpace();
 		_isDebugging = true;
 		_bSingleStepFlag = false;
-		_beginthreadex(NULL,NULL,clsDebugger::DebuggingEntry,this,NULL,NULL);
+
+		AttachedDebugging((LPVOID)this);
 	}	
 	else
 	{
 		if(_sTarget.length() <= 0 || _isDebugging)
-			return false;
+			return;
 
 		CleanWorkSpace();
 		_isDebugging = true;
 		_bSingleStepFlag = false;
-		_beginthreadex(NULL,NULL,clsDebugger::DebuggingEntry,this,NULL,NULL);
+		
+		NormalDebugging((LPVOID)this);
 	}
-	return true;
-}
-
-unsigned __stdcall clsDebugger::DebuggingEntry(LPVOID pThis)
-{
-	clsDebugger* pThat = (clsDebugger*)pThis;
-
-	if(pThat->_NormalDebugging)
-		pThat->NormalDebugging(pThis);
-	else
-		pThat->AttachedDebugging(pThis);
-	return 0;
 }
 
 void clsDebugger::AttachedDebugging(LPVOID pDebProc)
