@@ -481,7 +481,7 @@ void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypoi
 		.arg(entrypointOffset,16,16,QChar('0'));
 
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
-	pMainWindow->UpdateStateBar(1);
+	pMainWindow->UpdateStateBar(STATE_RUN);
 	pMainWindow->logView->OnLog(logMessage);
 }
 
@@ -523,7 +523,7 @@ void qtDLGDetailInfo::OnPID(DWORD processID,wstring sFile,DWORD exitCode,quint64
 
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 	pMainWindow->logView->OnLog(logMessage);
-	pMainWindow->UpdateStateBar(1);
+	pMainWindow->UpdateStateBar(STATE_RUN);
 }
 
 void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quint64 exceptionOffset, quint64 exceptionCode, DWORD processID, DWORD threadID)
@@ -565,7 +565,7 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 		.arg(exceptionOffset,16,16,QChar('0'));
 
 	pMainWindow->logView->OnLog(logMessage);
-	pMainWindow->UpdateStateBar(1);
+	pMainWindow->UpdateStateBar(STATE_RUN);
 }
 
 void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypointOffset, bool bLoaded)
@@ -608,7 +608,7 @@ void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypoin
 
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 	pMainWindow->logView->OnLog(logMessage);
-	pMainWindow->UpdateStateBar(1);
+	pMainWindow->UpdateStateBar(STATE_RUN);
 }
 
 bool qtDLGDetailInfo::SetThreadPriorityByTid(DWORD threadID, int threadPrio)

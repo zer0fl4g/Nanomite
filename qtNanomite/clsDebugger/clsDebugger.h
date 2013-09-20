@@ -225,7 +225,7 @@ private:
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
 	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwExitCode,HANDLE hProc);
 	bool PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, int foundDLL = -1);
+	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, DLLStruct *pFoundDLL = NULL);
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
@@ -241,6 +241,8 @@ private:
 	DWORD GetMainThreadID();
 
 	PTCHAR GetFileNameFromModuleBase(HANDLE processHandle, LPVOID imageBase);
+
+	PIDStruct* GetCurrentPIDDataPointer(DWORD processID);
 
 	typedef DWORD (__stdcall *CustomHandler)(DEBUG_EVENT *debug_event);
 

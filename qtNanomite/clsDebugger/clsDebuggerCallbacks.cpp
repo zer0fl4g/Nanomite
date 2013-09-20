@@ -68,25 +68,20 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 	if(!bFound)
 	{
 		PIDStruct newPID;
+		ZeroMemory(&newPID, sizeof(PIDStruct));
+
 		newPID.dwPID = dwPID;
 		newPID.dwEP = dwEP;
 		newPID.sFileName = sFileName;
 		newPID.dwExitCode = dwExitCode;
 		newPID.hProc = hProc;
+		newPID.bRunning = true;
 		if(!_NormalDebugging)
 		{
 			_NormalDebugging = true;
 			newPID.bKernelBP = true;
 		}
-		else
-			newPID.bKernelBP = false;
 
-		newPID.bWOW64KernelBP = false;
-		newPID.bSymLoad = false;
-		newPID.bRunning = true;
-		newPID.bTrapFlag = false;
-		newPID.bTraceFlag = false;
-		newPID.dwBPRestoreFlag = NULL;
 		PIDs.push_back(newPID);
 	}
 
@@ -106,25 +101,25 @@ bool clsDebugger::PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionC
 	return true;
 }
 
-bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, int foundDLL)
+bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, DLLStruct *pFoundDLL)
 {
-	if(sDLLPath == NULL) return false;
-
-	if(!bLoaded && foundDLL != -1)
+	if(!bLoaded && pFoundDLL != NULL)
 	{
-		DLLs[foundDLL].bLoaded = false;
-		emit OnDll(DLLs[foundDLL].sPath,DLLs[foundDLL].dwPID,DLLs[foundDLL].dwBaseAdr,DLLs[foundDLL].bLoaded);
+		pFoundDLL->bLoaded = false;
+		emit OnDll(pFoundDLL->sPath, pFoundDLL->dwPID, pFoundDLL->dwBaseAdr, false);
 	}
 	else
 	{
+		if(sDLLPath == NULL) return false;
+		
 		DLLStruct newDLL;
-		newDLL.bLoaded = bLoaded;
+		newDLL.bLoaded = true;
 		newDLL.dwBaseAdr = dwEP;
 		newDLL.sPath = sDLLPath;
 		newDLL.dwPID = dwPID;
 
 		DLLs.push_back(newDLL);
-		emit OnDll(newDLL.sPath,newDLL.dwPID,newDLL.dwBaseAdr,newDLL.bLoaded);
+		emit OnDll(newDLL.sPath, newDLL.dwPID, newDLL.dwBaseAdr, true);
 	}	
 
 	return true;

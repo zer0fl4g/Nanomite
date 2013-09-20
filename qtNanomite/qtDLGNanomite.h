@@ -48,11 +48,6 @@ Q_DECLARE_METATYPE (std::wstring)
 Q_DECLARE_METATYPE (BPStruct)
 Q_DECLARE_METATYPE (HANDLE)
 
-class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
-{
-	Q_OBJECT
-
-public:
 	enum UPDATE_STATE
 	{
 		STATE_RUN		= 1,
@@ -61,6 +56,11 @@ public:
 		STATE_TRACE		= 4
 	};
 
+class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
+{
+	Q_OBJECT
+
+public:
 	static qtDLGNanomite* GetInstance();
 
 	long lExceptionCount;
