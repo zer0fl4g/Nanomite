@@ -40,11 +40,12 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	coreDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
 	PEManager = qtDLGNanomite::GetInstance()->PEManager;
 
-	connect(new QShortcut(QKeySequence("F2"),this),SIGNAL(activated()),this,SLOT(OnF2BreakPointPlace()));
-	connect(new QShortcut(QKeySequence::InsertParagraphSeparator,this),SIGNAL(activated()),this,SLOT(OnDisAsReturnPressed()));
-	connect(new QShortcut(QKeySequence("Backspace"),this),SIGNAL(activated()),this,SLOT(OnDisAsReturn()));
-	connect(tblDisAs,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnCustomDisassemblerContextMenu(QPoint)));
-	connect(scrollDisAs,SIGNAL(valueChanged(int)),this,SLOT(OnDisAsScroll(int)));
+	connect(new QShortcut(QKeySequence("F2"), this), SIGNAL(activated()), this, SLOT(OnF2BreakPointPlace()));
+	connect(new QShortcut(QKeySequence::InsertParagraphSeparator, this), SIGNAL(activated()), this, SLOT(OnDisAsReturnPressed()));
+	connect(new QShortcut(QKeySequence("Backspace"), this), SIGNAL(activated()),this, SLOT(OnDisAsReturn()));
+	connect(new QShortcut(QKeySequence("space"), this), SIGNAL(activated()), this, SLOT(OnEditInstruction()));
+	connect(tblDisAs, SIGNAL(customContextMenuRequested(QPoint)), this, SLOT(OnCustomDisassemblerContextMenu(QPoint)));
+	connect(scrollDisAs, SIGNAL(valueChanged(int)), this, SLOT(OnDisAsScroll(int)));
 	
 	// eventFilter for mouse scroll
 	tblDisAs->installEventFilter(this);
@@ -325,8 +326,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
 	{
-		qtDLGAssembler *dlgAssembler = new qtDLGAssembler(this,Qt::Window,coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),coreDisAs,PEManager->is64BitFile(L"\\\\",coreDebugger->GetCurrentPID()));
-		dlgAssembler->show();
+		OnEditInstruction();
 	}
 	else if(QString().compare(pAction->text(),"Goto Offset / Function") == 0)
 	{
@@ -478,4 +478,20 @@ bool qtDLGDisassembler::OnMoveUpOrDown(bool isUp, bool isPage)
 	}
 
 	return true;
+}
+
+void qtDLGDisassembler::OnEditInstruction()
+{
+	if(tblDisAs->selectedItems().count() <= 0) return;
+
+	QTableWidgetItem *selectedItem = tblDisAs->selectedItems()[0];
+
+	qtDLGAssembler *dlgAssembler = new qtDLGAssembler(	this, 
+														Qt::Window,
+														coreDebugger->GetCurrentProcessHandle(),
+														tblDisAs->item(selectedItem->row(),0)->text().toULongLong(0,16),
+														tblDisAs->item(selectedItem->row(),2)->text(),
+														coreDisAs,PEManager->is64BitFile(L"",coreDebugger->GetCurrentPID()));
+
+	dlgAssembler->show();
 }

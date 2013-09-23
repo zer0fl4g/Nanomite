@@ -22,8 +22,7 @@
 #include <QFile>
 #include <QProcess>
 
-qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
-	HANDLE processHandle,quint64 instructionOffset,clsDisassembler *pCurrentDisassembler,bool is64Bit)
+qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags, HANDLE processHandle, quint64 instructionOffset, QString currentInstruction, clsDisassembler *pCurrentDisassembler, bool is64Bit)
 	: QWidget(parent, flags),
 	m_processHandle(processHandle),
 	m_instructionOffset(instructionOffset),
@@ -38,6 +37,8 @@ qtDLGAssembler::qtDLGAssembler(QWidget *parent, Qt::WFlags flags,
 	connect(lineEdit,SIGNAL(returnPressed()),this,SLOT(InsertNewInstructions()));
 
 	this->setWindowTitle(QString("Assemble at %1").arg(instructionOffset,16,16,QChar('0')));
+
+	lineEdit->setText(currentInstruction);
 }
 
 qtDLGAssembler::~qtDLGAssembler()

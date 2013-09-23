@@ -38,12 +38,13 @@ public:
 	* @param flags A value of the Qt::WFlags enum which defines how the Dialog is shown
 	* @param processHandle Takes the handle of the process which will be patched
 	* @param instructionOffset The offset of the instruction which will be modified
+	* @param currentInstruction The current instruction which will be modified
 	* @param pCurrentDisassembler A pointer to the current disassembler interface
 	* @param is64Bit A bool which is true if the process to be patched is x64
 	*
 	* @return no
 	*/
-	qtDLGAssembler(QWidget *parent, Qt::WFlags flags, HANDLE processHandle, quint64 instructionOffset, clsDisassembler *pCurrentDisassembler, bool is64Bit);
+	qtDLGAssembler(QWidget *parent, Qt::WFlags flags, HANDLE processHandle, quint64 instructionOffset, QString currentInstruction, clsDisassembler *pCurrentDisassembler, bool is64Bit);
 
 	/**
 	* @brief Does not need to do something at the current stage

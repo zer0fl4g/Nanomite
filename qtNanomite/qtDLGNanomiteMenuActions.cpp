@@ -120,7 +120,12 @@ void qtDLGNanomite::action_DebugStart()
 		}
 
 		if(!PEManager->OpenFile(coreDebugger->GetTarget()) || 
+#ifdef _AMD64_
 			!PEManager->isValidPEFile(coreDebugger->GetTarget()))
+#else
+			!PEManager->isValidPEFile(coreDebugger->GetTarget()) ||
+			PEManager->is64BitFile(coreDebugger->GetTarget()))
+#endif
 		{
 			QMessageBox::critical(this,"Nanomite","This is a invalid File! Please select another one!",QMessageBox::Ok,QMessageBox::Ok);
 

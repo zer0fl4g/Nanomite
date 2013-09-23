@@ -75,6 +75,7 @@ private slots:
 	void CustomDisassemblerMenuCallback(QAction*);
 	void OnDisAsScroll(int iValue);
 	void OnF2BreakPointPlace();
+	void OnEditInstruction();
 
 private:
 	clsDebugger		*coreDebugger;

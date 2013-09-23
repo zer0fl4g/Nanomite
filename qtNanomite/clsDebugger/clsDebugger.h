@@ -229,9 +229,9 @@ private:
 	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
-	bool CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag, bool isExceptionRelevant = true);
+	bool CheckIfExceptionIsBP(PIDStruct *pCurrentPID, quint64 dwExceptionOffset, quint64 dwExceptionType, bool bClearTrapFlag, bool isExceptionRelevant = true);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
-	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, DWORD dwPID);
+	bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, PIDStruct *pCurrentPID);
 	bool IsDebuggerSuspended();
 
 	HANDLE GetCurrentProcessHandle(DWORD dwPID);

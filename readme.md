@@ -78,6 +78,7 @@
 	+ Return		= Follow selected jump, call
 	+ Backspace		= Go back after goto/follow
 	+ Escape		= Close window 
+	+ Space			= Edit selected Instruction
 - Function Window
 	+ Double Click	= Show selected function in diassembler
 	+ Return		= Show selected function in diassembler
@@ -96,5 +97,7 @@
 ###Version 0.1 beta 16
 + fixed a bug which can lead to a access violation in the debugge when using step over while debugge was running
 + fixed a bug which can lead to a crash when using more than one memory breakpoint
++ added space shortcut in disassembly view to edit instruction
++ added error message if x86 build wants to load x64 binarys
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

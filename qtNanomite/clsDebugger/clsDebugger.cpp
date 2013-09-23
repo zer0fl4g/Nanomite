@@ -21,7 +21,6 @@
 #include "clsPEManager.h"
 #include "clsMemManager.h"
 #include "clsDBManager.h"
-#include "clsBreakpointManager.h"
 
 #include <process.h>
 #include <Psapi.h>
@@ -402,21 +401,22 @@ void clsDebugger::DebuggingLoop()
 			}
 		case EXCEPTION_DEBUG_EVENT:
 			{
-				EXCEPTION_DEBUG_INFO exInfo = debug_event.u.Exception;
-				bool bIsEP = false,bIsBP = false,bIsKernelBP = false;
-
+				EXCEPTION_RECORD exInfo = debug_event.u.Exception.ExceptionRecord;
+				bool	bIsEP			= false,
+						bIsBP			= false,
+						bIsKernelBP		= false;
 				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
 
-				switch (exInfo.ExceptionRecord.ExceptionCode)
+				switch (exInfo.ExceptionCode)
 				{
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
 					if(pCurrentPID->bKernelBP && !pCurrentPID->bWOW64KernelBP)
 					{
 						memset(tcLogString,0x00,LOGBUFFER);
 #ifdef _AMD64_
-						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
+						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
 #else
-						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
 #endif
 						PBLogInfo();
 							
@@ -437,9 +437,9 @@ void clsDebugger::DebuggingLoop()
 						{
 							memset(tcLogString,0x00,LOGBUFFER);
 	#ifdef _AMD64_
-							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
+							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
 	#else
-							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
 	#endif
 							PBLogInfo();
 								
@@ -453,7 +453,7 @@ void clsDebugger::DebuggingLoop()
 						}
 						else if(pCurrentPID->bKernelBP)
 						{
-							if((quint64)exInfo.ExceptionRecord.ExceptionAddress == pCurrentPID->dwEP)
+							if((quint64)exInfo.ExceptionAddress == pCurrentPID->dwEP)
 							{
 								bIsEP = true;
 								
@@ -463,17 +463,16 @@ void clsDebugger::DebuggingLoop()
 								m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId);
 							}
 
-							bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,EXCEPTION_BREAKPOINT,debug_event.dwProcessId,true);
+							bIsBP = CheckIfExceptionIsBP(pCurrentPID, (quint64)exInfo.ExceptionAddress, EXCEPTION_BREAKPOINT, true);
 							if(bIsBP)
 							{
-								HANDLE hProc = pCurrentPID->hProc;
 								bool bpNeedsReplace = false;
-
 								BPStruct *pCurrentBP;
-								if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionRecord.ExceptionAddress, SOFTWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
+
+								if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionAddress, SOFTWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
 								{
-									bool b = WriteProcessMemory(hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)&pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL);
-									bool c = FlushInstructionCache(hProc, (LPVOID)pCurrentBP->dwOffset, pCurrentBP->dwSize);
+									bool b = WriteProcessMemory(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)&pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL);
+									bool c = FlushInstructionCache(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, pCurrentBP->dwSize);
 
 									switch(pCurrentBP->dwHandle)
 									{
@@ -502,12 +501,12 @@ void clsDebugger::DebuggingLoop()
 								
 								if(bpNeedsReplace || bStepOver)
 								{
-									SetThreadContextHelper(true,true,debug_event.dwThreadId,debug_event.dwProcessId);
+									SetThreadContextHelper(true, true, debug_event.dwThreadId, pCurrentPID);
 									pCurrentPID->bTrapFlag = true;
 									pCurrentPID->dwBPRestoreFlag = RESTORE_BP_SOFTWARE;
 								}
 								else
-									SetThreadContextHelper(true,false,debug_event.dwThreadId,debug_event.dwProcessId);
+									SetThreadContextHelper(true, false, debug_event.dwThreadId, pCurrentPID);
 
 								if(bIsEP && !dbgSettings.bBreakOnModuleEP)
 									dwContinueStatus = CallBreakDebugger(&debug_event,2);
@@ -518,13 +517,13 @@ void clsDebugger::DebuggingLoop()
 										memset(tcLogString,0x00,LOGBUFFER);
 										if(bIsEP)
 #ifdef _AMD64_
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
 										else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
 #else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
 										else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionRecord.ExceptionAddress);
+											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
 #endif
 										PBLogInfo();
 									}
@@ -540,8 +539,8 @@ void clsDebugger::DebuggingLoop()
 						if(pCurrentPID->bTraceFlag && _bSingleStepFlag)
 						{
 							bIsBP = true;
-							SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
-							qtDLGTrace::addTraceData((quint64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress,debug_event.dwProcessId,debug_event.dwThreadId);
+							SetThreadContextHelper(false, true, debug_event.dwThreadId, pCurrentPID);
+							qtDLGTrace::addTraceData((quint64)exInfo.ExceptionAddress, debug_event.dwProcessId, debug_event.dwThreadId);
 							break;
 						}
 						else if(_bSingleStepFlag)
@@ -553,19 +552,24 @@ void clsDebugger::DebuggingLoop()
 							break;
 						}
 
-						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,EXCEPTION_SINGLE_STEP,debug_event.dwProcessId,true,false);
+						bIsBP = CheckIfExceptionIsBP(pCurrentPID, (quint64)exInfo.ExceptionAddress, EXCEPTION_SINGLE_STEP, true, false);
 						if(bIsBP)
 						{
 							if(pCurrentPID->dwBPRestoreFlag == RESTORE_BP_SOFTWARE) // Restore SoftwareBP
 							{
-								for(int i = 0;i < m_pBreakpointManager->SoftwareBPs.size(); i++)
+								BPStruct *pCurrentBP = NULL;
+								int countSoftwareBP = m_pBreakpointManager->SoftwareBPs.size();
+
+								for(int i = 0; i < countSoftwareBP; i++)
 								{
-									if(m_pBreakpointManager->SoftwareBPs[i].bRestoreBP && 
-										m_pBreakpointManager->SoftwareBPs[i].dwHandle == BP_KEEP && 
-										(m_pBreakpointManager->SoftwareBPs[i].dwPID == debug_event.dwProcessId || m_pBreakpointManager->SoftwareBPs[i].dwPID == -1))
+									pCurrentBP = &m_pBreakpointManager->SoftwareBPs[i];
+
+									if(pCurrentBP->bRestoreBP &&
+										pCurrentBP->dwHandle == BP_KEEP &&
+										(pCurrentBP->dwPID == debug_event.dwProcessId || pCurrentBP->dwPID == -1))
 									{
-										clsBreakpointSoftware::wSoftwareBP(m_pBreakpointManager->SoftwareBPs[i].dwPID,m_pBreakpointManager->SoftwareBPs[i].dwOffset,m_pBreakpointManager->SoftwareBPs[i].dwSize,m_pBreakpointManager->SoftwareBPs[i].bOrgByte);
-										m_pBreakpointManager->SoftwareBPs[i].bRestoreBP = false;
+										clsBreakpointSoftware::wSoftwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, pCurrentBP->bOrgByte);
+										pCurrentBP->bRestoreBP = false;
 
 										break;
 									}									
@@ -576,14 +580,19 @@ void clsDebugger::DebuggingLoop()
 							}
 							else if(pCurrentPID->dwBPRestoreFlag == RESTORE_BP_MEMORY) // Restore MemBP
 							{
-								for(int i = 0;i < m_pBreakpointManager->MemoryBPs.size(); i++)
+								BPStruct *pCurrentBP = NULL;
+								int countMemoryBP = m_pBreakpointManager->MemoryBPs.size();
+
+								for(int i = 0; i < countMemoryBP; i++)
 								{
-									if(m_pBreakpointManager->MemoryBPs[i].bRestoreBP &&
-										m_pBreakpointManager->MemoryBPs[i].dwHandle == BP_KEEP &&
-										(m_pBreakpointManager->MemoryBPs[i].dwPID == debug_event.dwProcessId || m_pBreakpointManager->MemoryBPs[i].dwPID == -1))
+									pCurrentBP = &m_pBreakpointManager->MemoryBPs[i];
+
+									if(pCurrentBP->bRestoreBP &&
+										pCurrentBP->dwHandle == BP_KEEP &&
+										(pCurrentBP->dwPID == debug_event.dwProcessId || pCurrentBP->dwPID == -1))
 									{
-										clsBreakpointMemory::wMemoryBP(m_pBreakpointManager->MemoryBPs[i].dwPID,m_pBreakpointManager->MemoryBPs[i].dwOffset,m_pBreakpointManager->MemoryBPs[i].dwSize,m_pBreakpointManager->MemoryBPs[i].dwTypeFlag,&m_pBreakpointManager->MemoryBPs[i].dwOldProtection);
-										m_pBreakpointManager->MemoryBPs[i].bRestoreBP = false;
+										clsBreakpointMemory::wMemoryBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, pCurrentBP->dwTypeFlag, &pCurrentBP->dwOldProtection);
+										pCurrentBP->bRestoreBP = false;
 
 										break;
 									}									
@@ -594,14 +603,19 @@ void clsDebugger::DebuggingLoop()
 							}
 							else if(pCurrentPID->dwBPRestoreFlag == RESTORE_BP_HARDWARE) // Restore HwBp
 							{
-								for(int i = 0;i < m_pBreakpointManager->HardwareBPs.size();i++)
+								BPStruct *pCurrentBP = NULL;
+								int countHardwareBP = m_pBreakpointManager->HardwareBPs.size();
+
+								for(int i = 0; i < countHardwareBP; i++)
 								{
-									if(m_pBreakpointManager->HardwareBPs[i].bRestoreBP &&
-										m_pBreakpointManager->HardwareBPs[i].dwHandle == BP_KEEP &&
-										(m_pBreakpointManager->HardwareBPs[i].dwPID == debug_event.dwProcessId || m_pBreakpointManager->HardwareBPs[i].dwPID == -1))
+									pCurrentBP = &m_pBreakpointManager->HardwareBPs[i];
+
+									if(pCurrentBP->bRestoreBP &&
+										pCurrentBP->dwHandle == BP_KEEP &&
+										(pCurrentBP->dwPID == debug_event.dwProcessId || pCurrentBP->dwPID == -1))
 									{
-										clsBreakpointHardware::wHardwareBP(debug_event.dwProcessId,m_pBreakpointManager->HardwareBPs[i].dwOffset,m_pBreakpointManager->HardwareBPs[i].dwSize,m_pBreakpointManager->HardwareBPs[i].dwSlot,m_pBreakpointManager->HardwareBPs[i].dwTypeFlag);
-										m_pBreakpointManager->HardwareBPs[i].bRestoreBP = false;
+										clsBreakpointHardware::wHardwareBP(debug_event.dwProcessId, pCurrentBP->dwOffset, pCurrentBP->dwSize, pCurrentBP->dwSlot, pCurrentBP->dwTypeFlag);
+										pCurrentBP->bRestoreBP = false;
 
 										break;
 									}
@@ -613,7 +627,7 @@ void clsDebugger::DebuggingLoop()
 							else if(pCurrentPID->dwBPRestoreFlag == RESTORE_NON) // First time hit HwBP
 							{
 								BPStruct *pCurrentBP;
-								if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionRecord.ExceptionAddress, HARDWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
+								if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionAddress, HARDWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
 								{
 									clsBreakpointHardware::dHardwareBP(debug_event.dwProcessId, pCurrentBP->dwOffset, pCurrentBP->dwSlot);
 
@@ -631,7 +645,7 @@ void clsDebugger::DebuggingLoop()
 									pCurrentPID->dwBPRestoreFlag = RESTORE_BP_HARDWARE;
 									pCurrentPID->bTrapFlag = true;
 
-									SetThreadContextHelper(false, true, debug_event.dwThreadId, debug_event.dwProcessId);
+									SetThreadContextHelper(false, true, debug_event.dwThreadId, pCurrentPID);
 								}
 							}
 							else
@@ -643,15 +657,15 @@ void clsDebugger::DebuggingLoop()
 				case EXCEPTION_ACCESS_VIOLATION:
 				case EXCEPTION_GUARD_PAGE:
 					{
-						bIsBP = CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,true);
+						bIsBP = CheckIfExceptionIsBP(pCurrentPID, (quint64)exInfo.ExceptionAddress, exInfo.ExceptionCode, true);
 						if(bIsBP)
 						{
-							SetThreadContextHelper(false,true,debug_event.dwThreadId,debug_event.dwProcessId);
+							SetThreadContextHelper(false, true, debug_event.dwThreadId, pCurrentPID);
 							pCurrentPID->dwBPRestoreFlag = RESTORE_BP_MEMORY;
 							pCurrentPID->bTrapFlag = true;
 
 							BPStruct *pCurrentBP;
-							if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionRecord.ExceptionAddress, MEMORY_BP, debug_event.dwProcessId, true, &pCurrentBP))
+							if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionAddress, MEMORY_BP, debug_event.dwProcessId, true, &pCurrentBP))
 							{
 								pCurrentBP->bRestoreBP = true;
 
@@ -663,10 +677,10 @@ void clsDebugger::DebuggingLoop()
 #endif
 								PBLogInfo();
 
-								if(exInfo.ExceptionRecord.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+								if(exInfo.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
 								{
 									DWORD currentProtection = NULL;
-									VirtualProtectEx(pCurrentPID->hProc, (LPVOID)exInfo.ExceptionRecord.ExceptionAddress, pCurrentBP->dwSize, pCurrentBP->dwOldProtection, &currentProtection);
+									VirtualProtectEx(pCurrentPID->hProc, (LPVOID)exInfo.ExceptionAddress, pCurrentBP->dwSize, pCurrentBP->dwOldProtection, &currentProtection);
 								}
 
 								dwContinueStatus = CallBreakDebugger(&debug_event,0);
@@ -681,9 +695,9 @@ void clsDebugger::DebuggingLoop()
 
 								HANDLE processHandle = pCurrentPID->hProc;
 
-								if(VirtualQueryEx(processHandle,(LPVOID)exInfo.ExceptionRecord.ExceptionAddress,&mbi,sizeof(mbi)))
+								if(VirtualQueryEx(processHandle,(LPVOID)exInfo.ExceptionAddress,&mbi,sizeof(mbi)))
 								{
-									if((DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress >= (DWORD64)mbi.BaseAddress && (DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
+									if((DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress >= (DWORD64)mbi.BaseAddress && (DWORD64)exInfo.ExceptionAddress <= ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
 									{
 										pageSize = mbi.RegionSize; 
 										pageBase = (DWORD64)mbi.BaseAddress;
@@ -696,10 +710,10 @@ void clsDebugger::DebuggingLoop()
 									{
 										m_pBreakpointManager->MemoryBPs[i].bRestoreBP = true;
 
-										if(exInfo.ExceptionRecord.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
+										if(exInfo.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
 										{
 											DWORD currentProtection = NULL;
-											VirtualProtectEx(pCurrentPID->hProc, (LPVOID)exInfo.ExceptionRecord.ExceptionAddress, m_pBreakpointManager->MemoryBPs[i].dwSize, m_pBreakpointManager->MemoryBPs[i].dwOldProtection, &currentProtection);
+											VirtualProtectEx(pCurrentPID->hProc, (LPVOID)exInfo.ExceptionAddress, m_pBreakpointManager->MemoryBPs[i].dwSize, m_pBreakpointManager->MemoryBPs[i].dwOldProtection, &currentProtection);
 										}
 
 										break;
@@ -711,58 +725,63 @@ void clsDebugger::DebuggingLoop()
 					}
 				}
 
-				bool bExceptionHandler = false;
-
 				if(!bIsEP && !bIsKernelBP && !bIsBP)
 				{
-					if(!CheckIfExceptionIsBP((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,false))
-						PBExceptionInfo((quint64)exInfo.ExceptionRecord.ExceptionAddress,exInfo.ExceptionRecord.ExceptionCode,debug_event.dwProcessId,debug_event.dwThreadId);
+					bool bExceptionHandler = false;
+
+					PBExceptionInfo((quint64)exInfo.ExceptionAddress, exInfo.ExceptionCode, debug_event.dwProcessId, debug_event.dwThreadId);
 
 					for (size_t i = 0; i < ExceptionHandler.size();i++)
 					{
-						if(debug_event.u.Exception.ExceptionRecord.ExceptionCode == ExceptionHandler[i].dwExceptionType)
+						if(exInfo.ExceptionCode == ExceptionHandler[i].dwExceptionType)
 						{
 							bExceptionHandler = true;
+
 							if(ExceptionHandler[i].dwHandler != NULL)
 							{
 								CustomHandler pCustomHandler = (CustomHandler)ExceptionHandler[i].dwHandler;
 								dwContinueStatus = pCustomHandler(&debug_event);
+
 								if(ExceptionHandler[i].dwAction == 0)
-									CallBreakDebugger(&debug_event,ExceptionHandler[i].dwAction);
+									dwContinueStatus = CallBreakDebugger(&debug_event, 0);
 							}
 							else
 								dwContinueStatus = CallBreakDebugger(&debug_event,ExceptionHandler[i].dwAction);
+
+							break;
 						}
 					}
-				}
 
-				if(!bExceptionHandler && !bIsBP && !bIsEP && !bIsKernelBP)
-				{
-					if(dbgSettings.dwDefaultExceptionMode == 1)
-						dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
-					else if(dbgSettings.bUseExceptionAssist)
+					if(!bExceptionHandler)
 					{
-						m_continueWithException = 0;
-						emit AskForException((DWORD)exInfo.ExceptionRecord.ExceptionCode);
-						WaitForSingleObject(m_waitForGUI,INFINITE);
-
-						if(m_continueWithException >= 10)
+						if(dbgSettings.dwDefaultExceptionMode == 1)
+							dwContinueStatus = DBG_EXCEPTION_NOT_HANDLED;
+						else if(dbgSettings.bUseExceptionAssist)
 						{
-							m_continueWithException -= 10;
-							CustomExceptionAdd((DWORD)exInfo.ExceptionRecord.ExceptionCode,m_continueWithException,NULL);
-						}
+							m_continueWithException = 0;
+							emit AskForException((DWORD)exInfo.ExceptionCode);
+							WaitForSingleObject(m_waitForGUI,INFINITE);
 
-						dwContinueStatus = CallBreakDebugger(&debug_event,m_continueWithException);
+							if(m_continueWithException >= 10)
+							{
+								m_continueWithException -= 10;
+								CustomExceptionAdd((DWORD)exInfo.ExceptionCode, m_continueWithException, NULL);
+							}
+
+							dwContinueStatus = CallBreakDebugger(&debug_event,m_continueWithException);
+						}
+						else
+							dwContinueStatus = CallBreakDebugger(&debug_event,0);
 					}
-					else
-						dwContinueStatus = CallBreakDebugger(&debug_event,0);
 				}
 			}			
 			break;
 		}
+
 		ContinueDebugEvent(debug_event.dwProcessId,debug_event.dwThreadId,dwContinueStatus);
 		dwContinueStatus = DBG_CONTINUE;
 	}
+
 	_isDebugging = false;
 
 	memset(tcLogString,0x00,LOGBUFFER);
@@ -865,22 +884,12 @@ bool clsDebugger::CheckProcessState(DWORD dwPID)
 	return false;
 }
 
-bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExceptionType,DWORD dwPID,bool bClearTrapFlag, bool isExceptionRelevant)
+bool clsDebugger::CheckIfExceptionIsBP(PIDStruct *pCurrentPID, quint64 dwExceptionOffset,quint64 dwExceptionType, bool bClearTrapFlag, bool isExceptionRelevant)
 {
-	size_t iPID = NULL;
-	for(size_t i = 0;i < PIDs.size();i++)
-	{
-		if(PIDs[i].dwPID == dwPID)
-		{
-			iPID = i;
-			break;
-		}
-	}
-
-	if(PIDs[iPID].bTrapFlag)
+	if(pCurrentPID->bTrapFlag)
 	{
 		if(bClearTrapFlag)
-			PIDs[iPID].bTrapFlag = false;
+			pCurrentPID->bTrapFlag = false;
 		return true;
 	}
 	else if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && _bSingleStepFlag)
@@ -890,7 +899,7 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 	else if(dwExceptionType == EXCEPTION_BREAKPOINT	|| dwExceptionType == 0x4000001f)
 	{
 		for(int i = 0;i < m_pBreakpointManager->SoftwareBPs.size();i++)
-			if(dwExceptionOffset == m_pBreakpointManager->SoftwareBPs[i].dwOffset && (m_pBreakpointManager->SoftwareBPs[i].dwPID == dwPID || m_pBreakpointManager->SoftwareBPs[i].dwPID == -1))
+			if(dwExceptionOffset == m_pBreakpointManager->SoftwareBPs[i].dwOffset && (m_pBreakpointManager->SoftwareBPs[i].dwPID == pCurrentPID->dwPID || m_pBreakpointManager->SoftwareBPs[i].dwPID == -1))
 				return true;		
 	}
 	else if(dwExceptionType == EXCEPTION_GUARD_PAGE || dwExceptionType == EXCEPTION_ACCESS_VIOLATION)
@@ -900,7 +909,7 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 
 		MEMORY_BASIC_INFORMATION mbi;
 
-		if(VirtualQueryEx(PIDs[iPID].hProc,(LPVOID)dwExceptionOffset,&mbi,sizeof(mbi)))
+		if(VirtualQueryEx(pCurrentPID->hProc,(LPVOID)dwExceptionOffset,&mbi,sizeof(mbi)))
 		{
 			if(dwExceptionOffset >= (DWORD64)mbi.BaseAddress && dwExceptionOffset <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
 			{
@@ -918,7 +927,7 @@ bool clsDebugger::CheckIfExceptionIsBP(quint64 dwExceptionOffset,quint64 dwExcep
 	else if(dwExceptionType == 0x4000001E || dwExceptionType == EXCEPTION_SINGLE_STEP)
 	{
 		for(int i = 0;i < m_pBreakpointManager->HardwareBPs.size();i++)
-			if(dwExceptionOffset == m_pBreakpointManager->HardwareBPs[i].dwOffset && (m_pBreakpointManager->HardwareBPs[i].dwPID == dwPID || m_pBreakpointManager->HardwareBPs[i].dwPID == -1))
+			if(dwExceptionOffset == m_pBreakpointManager->HardwareBPs[i].dwOffset && (m_pBreakpointManager->HardwareBPs[i].dwPID == pCurrentPID->dwPID || m_pBreakpointManager->HardwareBPs[i].dwPID == -1))
 				return true;
 	}
 
@@ -991,9 +1000,9 @@ void clsDebugger::CustomExceptionRemoveAll()
 	ExceptionHandler.clear();
 }
 
-bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dwThreadID, DWORD dwPID)
+bool clsDebugger::SetThreadContextHelper(bool bDecIP, bool bSetTrapFlag, DWORD dwThreadID, PIDStruct *pCurrentPID)
 {
-	HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,dwThreadID);
+	HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT, false, dwThreadID);
 	if(hThread == INVALID_HANDLE_VALUE) 
 		return false;
 
@@ -1001,13 +1010,13 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 	BOOL bIsWOW64 = false;
 
 	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(GetProcessHandleByPID(dwPID),&bIsWOW64);
+		clsAPIImport::pIsWow64Process(pCurrentPID->hProc, &bIsWOW64);
 
 	if(bIsWOW64)
 	{
 		WOW64_CONTEXT wowcTT;
 		wowcTT.ContextFlags = WOW64_CONTEXT_ALL;
-		clsAPIImport::pWow64GetThreadContext(hThread,&wowcTT);
+		clsAPIImport::pWow64GetThreadContext(hThread, &wowcTT);
 
 		if(bDecIP)
 			wowcTT.Eip--;
@@ -1017,13 +1026,13 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 		else
 			wowcTT.EFlags &= ~0x100;
 
-		clsAPIImport::pWow64SetThreadContext(hThread,&wowcTT);
+		clsAPIImport::pWow64SetThreadContext(hThread, &wowcTT);
 	}
 	else
 	{
 		CONTEXT cTT;
 		cTT.ContextFlags = CONTEXT_ALL;
-		GetThreadContext(hThread,&cTT);
+		GetThreadContext(hThread, &cTT);
 
 		if(bDecIP)
 			cTT.Rip--;
@@ -1033,21 +1042,23 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag, DWORD dw
 		else
 			cTT.EFlags &= ~0x100;
 
-		SetThreadContext(hThread,&cTT);
+		SetThreadContext(hThread, &cTT);
 	}
 
 #else
 	CONTEXT cTT;
 	cTT.ContextFlags = CONTEXT_ALL;
-	GetThreadContext(hThread,&cTT);
+	GetThreadContext(hThread, &cTT);
 
 	if(bDecIP)
 		cTT.Eip--;
 
 	if(bSetTrapFlag)
 		cTT.EFlags |= 0x100;
+	else
+		cTT.EFlags &= ~0x100;
 
-	SetThreadContext(hThread,&cTT);
+	SetThreadContext(hThread, &cTT);
 #endif
 
 	CloseHandle(hThread);
@@ -1122,7 +1133,6 @@ PIDStruct* clsDebugger::GetCurrentPIDDataPointer(DWORD processID)
 		if(pCurrentPID->dwPID == processID)
 		{
 			return pCurrentPID;
-			break;
 		}
 	}
 
