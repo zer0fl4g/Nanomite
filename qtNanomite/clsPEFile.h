@@ -50,6 +50,8 @@ public:
 
 	bool is64Bit();
 
+	float getEntropie();
+
 private:
 	std::wstring _FileName;
 
@@ -70,6 +72,8 @@ private:
 
 	QList<IMAGE_SECTION_HEADER> fileSections;
 
+	float fileEntropie;
+
 	QList<APIData> loadImports32();
 	QList<APIData> loadImports64();
 	QList<APIData> loadExports();
@@ -83,6 +87,8 @@ private:
 
 	QList<DWORD64> loadTLSCallbackOffset64();
 	QList<DWORD64> loadTLSCallbackOffset32();
+
+	float loadEntropie(DWORD fileSize);
 };
 
 #endif

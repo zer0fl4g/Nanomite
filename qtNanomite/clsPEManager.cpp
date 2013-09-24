@@ -61,7 +61,7 @@ void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 	OpenFile(newFileName,PID);
 }
 
-bool clsPEManager::OpenFile(std::wstring FileName,int PID,bool is64Bit)
+bool clsPEManager::OpenFile(std::wstring FileName,int PID)
 {
 	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
 
@@ -255,4 +255,19 @@ QList<DWORD64> clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
 	}
 
 	return QList<DWORD64>();
+}
+
+float clsPEManager::getEntropie(std::wstring FileName, int PID)
+{
+	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+
+	for(size_t i = 0; i < pThis->PEFiles.size(); i++)
+	{
+		if(pThis->PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		{
+			return pThis->PEFiles[i].PEFile->getEntropie();
+		}
+	}
+
+	return 0.0;
 }

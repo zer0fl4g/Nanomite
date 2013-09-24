@@ -99,5 +99,6 @@
 + fixed a bug which can lead to a crash when using more than one memory breakpoint
 + added space shortcut in disassembly view to edit instruction
 + added error message if x86 build wants to load x64 binarys
++ added entropy check to display a warning if a (may) packed or crypted file will be started
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

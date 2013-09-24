@@ -163,7 +163,7 @@ void clsDebugger::run()
 		_isDebugging = true;
 		_bSingleStepFlag = false;
 
-		AttachedDebugging((LPVOID)this);
+		AttachedDebugging();
 	}	
 	else
 	{
@@ -174,11 +174,11 @@ void clsDebugger::run()
 		_isDebugging = true;
 		_bSingleStepFlag = false;
 		
-		NormalDebugging((LPVOID)this);
+		NormalDebugging();
 	}
 }
 
-void clsDebugger::AttachedDebugging(LPVOID pDebProc)
+void clsDebugger::AttachedDebugging()
 {
 	if(CheckProcessState(_dwPidToAttach) && DebugActiveProcess(_dwPidToAttach))
 	{
@@ -194,10 +194,8 @@ void clsDebugger::AttachedDebugging(LPVOID pDebProc)
 	emit OnDebuggerTerminated();
 }
 
-void clsDebugger::NormalDebugging(LPVOID pDebProc)
+void clsDebugger::NormalDebugging()
 {
-	clsDebugger *pThis = (clsDebugger*)pDebProc;
-
 	DWORD dwCreationFlag = 0x2;
 
 	if(dbgSettings.bDebugChilds == true)

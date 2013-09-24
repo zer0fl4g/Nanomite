@@ -34,7 +34,7 @@ public:
 	clsPEManager();
 	~clsPEManager();
 
-	bool OpenFile(std::wstring FileName,int PID = -1,bool is64Bit = false);
+	bool OpenFile(std::wstring FileName,int PID = -1);
 	bool isValidPEFile(std::wstring FileName,int PID = 0);
 	bool is64BitFile(std::wstring FileName,int PID = 0);
 
@@ -48,6 +48,8 @@ public:
 	IMAGE_DOS_HEADER getDosHeader(std::wstring FileName,int PID = -1);
 	IMAGE_NT_HEADERS32 getNTHeader32(std::wstring FileName,int PID = -1);
 	IMAGE_NT_HEADERS64 getNTHeader64(std::wstring FileName,int PID = -1);
+
+	float getEntropie(std::wstring FileName, int PID = -1);
 
 	std::wstring getFilenameFromPID(int PID);
 

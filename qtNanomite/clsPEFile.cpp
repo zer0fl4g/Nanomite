@@ -91,6 +91,8 @@ bool clsPEFile::LoadFile(wstring FileName)
 		}
 	}
 
+	fileEntropie = loadEntropie(GetFileSize(hFile, NULL));
+
 	fileSections = loadSections();
 
 	fileExports = loadExports();
@@ -410,4 +412,33 @@ DWORD clsPEFile::dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 
 		pSectionHeader++;
 	}
 	return 0;
+}
+
+float clsPEFile::loadEntropie(DWORD fileSize)
+{
+	DWORD64 countBytes[256] = { 0 };
+	long double result = 0.0, temp = 0.0;
+
+	for(int i = 0; i < fileSize; i++)
+	{
+		countBytes[((PBYTE)m_fileBuffer)[i]]++;
+	}
+
+	for(int i = 0; i < 256; i++)
+	{
+		if(countBytes[i] == 0) continue;
+
+		temp = (long double)countBytes[i] / (long double)fileSize;
+		result -= temp * log(temp);
+	}
+
+	result /= log((long double)256);
+	result *= 8;
+
+	return result;
+}
+
+float clsPEFile::getEntropie()
+{
+	return fileEntropie;
 }

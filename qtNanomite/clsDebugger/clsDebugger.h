@@ -218,8 +218,8 @@ private:
 	int m_continueWithException;
 
 	void DebuggingLoop();
-	void AttachedDebugging(LPVOID pDebProc);
-	void NormalDebugging(LPVOID pDebProc);
+	void AttachedDebugging();
+	void NormalDebugging();
 	void CleanWorkSpace();
 	
 	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
