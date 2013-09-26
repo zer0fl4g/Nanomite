@@ -27,6 +27,10 @@
 #include <algorithm>
 #include <QtCore>
 #include <string>
+#include <ObjIdl.h>
+#include <Shobjidl.h>
+#include <atlbase.h>
+#include <shlguid.h>
 
 using namespace std;
 
@@ -394,4 +398,32 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, q
 	delete [] ExportOrdinalTable;
 
 	return 0;
+}
+
+QString clsHelperClass::ResolveShortcut(QString shortcutFile)
+{
+	HRESULT resultCode = E_FAIL;
+	CComPtr<IShellLink> shellLink;
+	TCHAR resolvedFilePath[MAX_PATH];  
+	WIN32_FIND_DATA findDataStruct;    
+	
+	resultCode = CoCreateInstance(CLSID_ShellLink, NULL, CLSCTX_INPROC_SERVER, IID_IShellLink, (void**)&shellLink); 
+	if (resultCode >= NULL) 
+	{ 
+		CComQIPtr<IPersistFile> persistFile(shellLink);
+		
+		resultCode = persistFile->Load(shortcutFile.toStdWString().c_str(), STGM_READ); 
+		if (resultCode >= NULL) 
+		{
+			resultCode = shellLink->Resolve(NULL, SLR_UPDATE); 
+			if (resultCode >= NULL) 
+			{
+				resultCode = shellLink->GetPath(resolvedFilePath, MAX_PATH, &findDataStruct, SLGP_RAWPATH); 
+				if (resultCode < NULL)
+					return "";
+			} 
+		} 
+	} 
+
+	return QString::fromWCharArray(resolvedFilePath);
 }

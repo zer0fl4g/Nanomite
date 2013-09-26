@@ -139,8 +139,7 @@ void qtDLGNanomite::action_DebugStart()
 		{
 			QMessageBox::information(this, "Nanomite", "It seems that this file is packed or encrypted!\nThis can lead to wrong display (or none) of disassembly!", QMessageBox::Ok, QMessageBox::Ok);
 		}
-
-
+		
 		InsertRecentDebuggedFile(QString::fromStdWString(coreDebugger->GetTarget()));
 		coreDebugger->start();
 
@@ -176,8 +175,7 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 		{
 			QMessageBox::information(this, "Nanomite", "It seems that this file is packed or encrypted!\nThis can lead to wrong display (or none) of disassembly!", QMessageBox::Ok, QMessageBox::Ok);
 		}
-
-
+		
 		qtDLGPatchManager::ClearAllPatches();
 
 		InsertRecentDebuggedFile(FilePath);

@@ -18,37 +18,39 @@
 #include "clsBreakpointSoftware.h"
 #include "clsDebugger\clsDebugger.h"
 
-bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE &dataBackup)
+bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE **dataBackup)
 {
-	if(breakpointOffset == 0 || breakpointSize <= 0)
-		return false;
-
 	SIZE_T	bytesWritten			= NULL,
 			bytesRead				= NULL;
-	BYTE	breakpointData			= 0xCC,
-			breakpointDataBackup	= NULL;
+	BYTE	*breakpointData			= (PBYTE)clsMemManager::CAlloc(breakpointSize),
+			*breakpointDataBackup	= (PBYTE)clsMemManager::CAlloc(breakpointSize);
 	DWORD	oldProtection			= NULL,
 			newProtection			= PAGE_READWRITE;
 	HANDLE	processHandle			= clsDebugger::GetProcessHandleByPID(processID);
 	bool	returnValue				= false;
 
+	memset(breakpointData, 0xCC, breakpointSize);
+	memset(breakpointDataBackup, NULL, breakpointSize);
 
 	if(VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection) &&
-		ReadProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)&breakpointDataBackup, breakpointSize, &bytesRead))
+		ReadProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)breakpointDataBackup, breakpointSize, &bytesRead))
 	{
-		if(dataBackup == NULL)
-			dataBackup = breakpointDataBackup;
+		if(*dataBackup == NULL)
+			*dataBackup = breakpointDataBackup;
+		else
+			clsMemManager::CFree(breakpointDataBackup);
 
-		if(WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)&breakpointData, breakpointSize, &bytesWritten))
+		if(WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)breakpointData, breakpointSize, &bytesWritten))
 			returnValue = true;
 		
 		VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &newProtection);
 	}
 	
+	clsMemManager::CFree(breakpointData);
 	return returnValue;
 }
 
-bool clsBreakpointSoftware::dSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE orgBreakpointData)
+bool clsBreakpointSoftware::dSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE *orgBreakpointData)
 {
 	if(breakpointOffset == 0 || orgBreakpointData == NULL)
 		return false;
@@ -59,7 +61,7 @@ bool clsBreakpointSoftware::dSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 			newProtection	= PAGE_READWRITE;
 
 	if(VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection) &&
-		WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)&orgBreakpointData, breakpointSize, &bytesWritten))
+		WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)orgBreakpointData, breakpointSize, &bytesWritten))
 	{
 		return VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &newProtection);
 	}

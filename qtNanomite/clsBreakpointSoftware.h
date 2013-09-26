@@ -22,8 +22,8 @@
 class clsBreakpointSoftware
 {
 public:
-	static bool wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE &dataBackup);
-	static bool dSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE orgBreakpointData);
+	static bool wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE **dataBackup);
+	static bool dSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE *orgBreakpointData);
 };
 
 #endif

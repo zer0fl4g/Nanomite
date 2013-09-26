@@ -139,7 +139,7 @@ bool clsDebugger::IsTargetSet()
 
 bool clsDebugger::StepOver(quint64 dwNewOffset)
 {
-	if(!m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP,NULL,_dwCurPID,dwNewOffset,BP_STEPOVER))
+	if(!m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, _dwCurPID, dwNewOffset, 1, BP_STEPOVER))
 		return false;
 
 	PulseEvent(_hDbgEvent);

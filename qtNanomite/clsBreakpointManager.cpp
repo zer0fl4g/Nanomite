@@ -28,7 +28,10 @@ clsBreakpointManager::clsBreakpointManager()
 clsBreakpointManager::~clsBreakpointManager()
 {
 	for(int i = 0; i < SoftwareBPs.size(); i++)
+	{
 		clsMemManager::CFree(SoftwareBPs[i].moduleName);
+		clsMemManager::CFree(SoftwareBPs[i].bOrgByte);
+	}
 
 	for(int i = 0; i < MemoryBPs.size(); i++)
 		clsMemManager::CFree(MemoryBPs[i].moduleName);
@@ -50,9 +53,9 @@ bool clsBreakpointManager::BreakpointInit(DWORD newProcessID, bool isThread)
 		for(int i = 0;i < SoftwareBPs.size(); i++)
 		{
 			if(SoftwareBPs[i].dwPID == -1)
-				clsBreakpointSoftware::wSoftwareBP(newProcessID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+				clsBreakpointSoftware::wSoftwareBP(newProcessID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize, &SoftwareBPs[i].bOrgByte);
 			else if(SoftwareBPs[i].dwPID == newProcessID)
-				clsBreakpointSoftware::wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize,SoftwareBPs[i].bOrgByte);
+				clsBreakpointSoftware::wSoftwareBP(SoftwareBPs[i].dwPID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize, &SoftwareBPs[i].bOrgByte);
 		}
 
 		for(int i = 0;i < MemoryBPs.size(); i++)
@@ -104,6 +107,7 @@ bool clsBreakpointManager::BreakpointRemove(DWORD64 breakpointOffset, DWORD brea
 			{
 				clsBreakpointSoftware::dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
 				clsMemManager::CFree(it->moduleName);
+				clsMemManager::CFree(it->bOrgByte);
 
 				SoftwareBPs.erase(it);
 				it = SoftwareBPs.begin();
@@ -154,7 +158,7 @@ bool clsBreakpointManager::BreakpointRemove(DWORD64 breakpointOffset, DWORD brea
 	return true;
 }
 
-bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, DWORD breakpointHandleType)
+bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType)
 {
 	bool	bExists		= false,
 			bRetValue	= false;
@@ -186,8 +190,6 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 
 	if(!bExists)
 	{
-		DWORD dwSize = 1;
-
 		switch(breakpointType)
 		{
 		case SOFTWARE_BP:
@@ -195,12 +197,12 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 				BPStruct newBP;
 				ZeroMemory(&newBP,sizeof(BPStruct));
 
-				if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, dwSize, newBP.bOrgByte))
+				if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, breakpointSize, &newBP.bOrgByte))
 					break;
 
 				newBP.dwOffset = breakpointOffset;
 				newBP.dwHandle = breakpointHandleType;
-				newBP.dwSize = dwSize;
+				newBP.dwSize = breakpointSize;
 				newBP.dwPID = processID;
 				newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
@@ -219,7 +221,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 			{
 				DWORD oldProtection = NULL;
 
-				if(!clsBreakpointMemory::wMemoryBP(processID, breakpointOffset, dwSize, typeFlag, &oldProtection))
+				if(!clsBreakpointMemory::wMemoryBP(processID, breakpointOffset, breakpointSize, typeFlag, &oldProtection))
 					break;
 
 				BPStruct newBP;
@@ -227,7 +229,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 
 				newBP.dwOffset = breakpointOffset;
 				newBP.dwHandle = breakpointHandleType;
-				newBP.dwSize = dwSize;
+				newBP.dwSize = breakpointSize;
 				newBP.dwPID = processID;
 				newBP.dwTypeFlag = typeFlag;
 				newBP.dwOldProtection = oldProtection;
@@ -235,7 +237,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
 				
 				if(breakpointHandleType == BP_KEEP)
-					newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
+					newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName, newBP.dwOffset, newBP.dwPID);
 				
 				MemoryBPs.append(newBP);
 				emit OnBreakpointAdded(newBP,MEMORY_BP);
@@ -253,14 +255,14 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 
 				newBP.dwOffset = breakpointOffset;
 				newBP.dwHandle = breakpointHandleType;
-				newBP.dwSize = dwSize;
+				newBP.dwSize = breakpointSize;
 				newBP.dwPID = processID;
 				newBP.dwTypeFlag = typeFlag;
 				newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
 			
 				if(breakpointHandleType == BP_KEEP)
-					newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName,newBP.dwOffset,newBP.dwPID);
+					newBP.dwBaseOffset = clsHelperClass::CalcOffsetForModule(newBP.moduleName, newBP.dwOffset, newBP.dwPID);
 
 				bool bSlot1 = false,bSlot2 = false,bSlot3 = false,bSlot4 = false;
 				for(int i = 0;i < HardwareBPs.size();i++)
@@ -286,7 +288,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 				else if(!bSlot2) newBP.dwSlot = 1;
 				else if(!bSlot1) newBP.dwSlot = 0;
 
-				if(!clsBreakpointHardware::wHardwareBP(processID, breakpointOffset, dwSize, newBP.dwSlot, typeFlag))
+				if(!clsBreakpointHardware::wHardwareBP(processID, breakpointOffset, breakpointSize, newBP.dwSlot, typeFlag))
 				{
 					clsMemManager::CFree(newBP.moduleName);
 					break;
@@ -411,7 +413,7 @@ void clsBreakpointManager::RemoveSBPFromMemory(bool isDisable, DWORD processID)
 		for (QList<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
 		{
 			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
-				clsBreakpointSoftware::dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
+				clsBreakpointSoftware::dSoftwareBP(it->dwPID, it->dwOffset, it->dwSize, it->bOrgByte);
 		}
 	}
 	else
@@ -419,14 +421,14 @@ void clsBreakpointManager::RemoveSBPFromMemory(bool isDisable, DWORD processID)
 		for (QList<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
 		{
 			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
-				clsBreakpointSoftware::wSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
+				clsBreakpointSoftware::wSoftwareBP(it->dwPID, it->dwOffset, it->dwSize, &it->bOrgByte);
 		}
 	}
 }
 
-bool clsBreakpointManager::BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, DWORD breakpointHandleType)
+bool clsBreakpointManager::BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType)
 {
-	return pThis->BreakpointAdd(breakpointType, typeFlag, processID, breakpointOffset, breakpointHandleType);
+	return pThis->BreakpointAdd(breakpointType, typeFlag, processID, breakpointOffset, breakpointSize, breakpointHandleType);
 }
 
 bool clsBreakpointManager::BreakpointDelete(DWORD64 breakpointOffset, DWORD breakpointType)
@@ -441,6 +443,8 @@ void clsBreakpointManager::BreakpointCleanup()
 		if(it->dwHandle != BP_KEEP)
 		{
 			clsMemManager::CFree(it->moduleName);
+			clsMemManager::CFree(it->bOrgByte);
+
 			SoftwareBPs.erase(it);
 			it = SoftwareBPs.begin();
 

@@ -33,6 +33,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	pThis = this;
 
 	cbBreakOn->setEnabled(false);
+	cbSize->setEnabled(true);
 
 	// List BP Manager
 	tblBPs->horizontalHeader()->resizeSection(0,75);
@@ -200,18 +201,19 @@ void qtDLGBreakPointManager::OnAddUpdate()
 		dwBreakOn = BP_ACCESS;
 
 	if(lePID->text().toInt() == -1)
-		clsBreakpointManager::BreakpointInsert(dwType,dwBreakOn,lePID->text().toInt(),dwOffset,BP_KEEP);
+		clsBreakpointManager::BreakpointInsert(dwType, dwBreakOn, lePID->text().toInt(), dwOffset, cbSize->currentText().toInt(), BP_KEEP);
 	else
-		clsBreakpointManager::BreakpointInsert(dwType,dwBreakOn,lePID->text().toInt(0,16),dwOffset,BP_KEEP);
+		clsBreakpointManager::BreakpointInsert(dwType, dwBreakOn, lePID->text().toInt(0,16), dwOffset, cbSize->currentText().toInt(), BP_KEEP);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 {
 	lePID->setText(tblBPs->item(iRow,0)->text());
 	leOffset->setText(tblBPs->item(iRow,1)->text());
-	leSize->setText(tblBPs->item(iRow,3)->text());
 
-	DWORD selectedBreakType = NULL;
+	DWORD	selectedBreakType	= NULL,
+			selectedBPSize		= tblBPs->item(iRow,3)->text().toInt();
+
 	if(QString().compare(tblBPs->item(iRow,4)->text(),"Execute") == 0)
 		selectedBreakType = BP_EXEC;
 	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Read") == 0)
@@ -228,6 +230,19 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		cbBreakOn->setEnabled(false);
 
 		cbType->setCurrentIndex(0);
+
+		cbSize->clear();
+		cbSize->addItem("1");
+		cbSize->addItem("2");
+		cbSize->addItem("4");
+		cbSize->setEnabled(true);
+
+		switch(selectedBPSize)
+		{
+		case 1: cbSize->setCurrentIndex(0); break;
+		case 2: cbSize->setCurrentIndex(1); break;
+		case 4: cbSize->setCurrentIndex(2); break;
+		}
 	}
 	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Hardware BP") == 0)
 	{
@@ -244,7 +259,20 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		case BP_EXEC: cbBreakOn->setCurrentIndex(0); break;
 		case BP_READ: cbBreakOn->setCurrentIndex(1); break;
 		case BP_WRITE: cbBreakOn->setCurrentIndex(2); break;
-		}		
+		}
+
+		cbSize->clear();
+		cbSize->addItem("1");
+		cbSize->addItem("2");
+		cbSize->addItem("4");
+		cbSize->setEnabled(true);
+
+		switch(selectedBPSize)
+		{
+		case 1: cbSize->setCurrentIndex(0); break;
+		case 2: cbSize->setCurrentIndex(1); break;
+		case 4: cbSize->setCurrentIndex(2); break;
+		}
 	}
 	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Memory BP") == 0)
 	{
@@ -255,6 +283,10 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		cbBreakOn->setEnabled(true);
 
 		cbType->setCurrentIndex(2);
+
+		cbSize->clear();
+		cbSize->addItem("0");
+		cbSize->setEnabled(false);
 
 		switch(selectedBreakType)
 		{
@@ -339,6 +371,12 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbBreakOn->clear();
 		cbBreakOn->addItem("Execute");
 		cbBreakOn->setEnabled(false);
+
+		cbSize->clear();
+		cbSize->addItem("1");
+		cbSize->addItem("2");
+		cbSize->addItem("4");
+		cbSize->setEnabled(true);
 	}
 	else if(selectedItemText.compare("Hardware BP") == 0)
 	{
@@ -347,6 +385,12 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbBreakOn->addItem("Read");
 		cbBreakOn->addItem("Write");
 		cbBreakOn->setEnabled(true);
+
+		cbSize->clear();
+		cbSize->addItem("1");
+		cbSize->addItem("2");
+		cbSize->addItem("4");
+		cbSize->setEnabled(true);
 	}
 	else if(selectedItemText.compare("Memory BP") == 0)
 	{
@@ -355,5 +399,9 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbBreakOn->addItem("Execute");
 		cbBreakOn->addItem("Write");
 		cbBreakOn->setEnabled(true);
+		
+		cbSize->clear();
+		cbSize->addItem("0");
+		cbSize->setEnabled(false);
 	}
 }

@@ -20,9 +20,6 @@
 
 bool clsBreakpointMemory::wMemoryBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, DWORD typeFlag, DWORD *savedProtection)
 {
-	if(breakpointOffset == NULL || breakpointSize == NULL)
-		return false;
-
 	MEMORY_BASIC_INFORMATION MBI;
 	DWORD	oldProtection	= NULL,
 			newProtection	= NULL;
@@ -50,7 +47,7 @@ bool clsBreakpointMemory::wMemoryBP(DWORD processID, DWORD64 breakpointOffset, D
 		break;
 	}
 	
-	if(!VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection))
+	if(!VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, 1, newProtection, &oldProtection))
 		return false;
 	
 	*savedProtection = MBI.Protect;
@@ -59,7 +56,7 @@ bool clsBreakpointMemory::wMemoryBP(DWORD processID, DWORD64 breakpointOffset, D
 
 bool clsBreakpointMemory::dMemoryBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, DWORD oldProtection)
 {
-	if(breakpointOffset == NULL || breakpointSize == NULL)
+	if(breakpointOffset == NULL)
 		return false;
 
 	MEMORY_BASIC_INFORMATION MBI;
@@ -69,7 +66,7 @@ bool clsBreakpointMemory::dMemoryBP(DWORD processID, DWORD64 breakpointOffset, D
 	if(VirtualQueryEx(processHandle, (LPVOID)breakpointOffset, &MBI, sizeof(MBI)) <= 0)
 		return false;
 
-	if(!VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &tmpOldProtection))
+	if(!VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, 1, oldProtection, &tmpOldProtection))
 		return false;
 
 	return true;

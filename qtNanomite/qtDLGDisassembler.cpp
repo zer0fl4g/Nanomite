@@ -318,7 +318,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		int processID = coreDebugger->GetCurrentPID();
 		qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 
-		pMainWindow->coreBPManager->BreakpointAdd(SOFTWARE_BP,BP_TRACETO,processID,tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16),BP_TRACETO);
+		pMainWindow->coreBPManager->BreakpointAdd(SOFTWARE_BP, BP_TRACETO, processID, tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16), 1, BP_TRACETO);
 		qtDLGTrace::clearTraceData();
 		pMainWindow->actionDebug_Trace_Stop->setEnabled(true);
 		pMainWindow->actionDebug_Trace_Start->setEnabled(false);
@@ -416,7 +416,7 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 	if(currentSelectedItems.count() <= 0) return;
 
 	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
-	if(clsBreakpointManager::BreakpointInsert(SOFTWARE_BP,BP_EXEC,-1,dwSelectedVA,BP_KEEP))
+	if(clsBreakpointManager::BreakpointInsert(SOFTWARE_BP, BP_EXEC, -1, dwSelectedVA, 1, BP_KEEP))
 		currentSelectedItems.value(0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 	else
 	{// exists

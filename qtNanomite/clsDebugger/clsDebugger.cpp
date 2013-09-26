@@ -265,7 +265,7 @@ void clsDebugger::DebuggingLoop()
 				else
 					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
-				m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,BP_DONOTKEEP);
+				m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpStartAddress, 1, BP_DONOTKEEP);
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
@@ -274,7 +274,7 @@ void clsDebugger::DebuggingLoop()
 					{
 						for(int i = 0; i < tlsCallback.count(); i++)
 						{
-							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP,NULL,debug_event.dwProcessId,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i),BP_DONOTKEEP);
+							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i), 1, BP_DONOTKEEP);
 						}
 					}						
 				}
@@ -469,7 +469,7 @@ void clsDebugger::DebuggingLoop()
 
 								if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionAddress, SOFTWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
 								{
-									bool b = WriteProcessMemory(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)&pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL);
+									bool b = WriteProcessMemory(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL);
 									bool c = FlushInstructionCache(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, pCurrentBP->dwSize);
 
 									switch(pCurrentBP->dwHandle)
@@ -566,7 +566,7 @@ void clsDebugger::DebuggingLoop()
 										pCurrentBP->dwHandle == BP_KEEP &&
 										(pCurrentBP->dwPID == debug_event.dwProcessId || pCurrentBP->dwPID == -1))
 									{
-										clsBreakpointSoftware::wSoftwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, pCurrentBP->bOrgByte);
+										clsBreakpointSoftware::wSoftwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, &pCurrentBP->bOrgByte);
 										pCurrentBP->bRestoreBP = false;
 
 										break;

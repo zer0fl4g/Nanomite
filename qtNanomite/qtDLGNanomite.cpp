@@ -392,7 +392,8 @@ void qtDLGNanomite::GenerateMenu(bool isAllEnabled)
 
 void qtDLGNanomite::dragEnterEvent(QDragEnterEvent* pEvent)
 {
-	if(pEvent->mimeData()->hasUrls()) {
+	if(pEvent->mimeData()->hasUrls())
+	{
         pEvent->acceptProposedAction();
     }
 }
@@ -401,8 +402,25 @@ void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
 { 
 	if(pEvent->mimeData()->hasUrls())
     {
-		coreDebugger->SetTarget(QString(pEvent->mimeData()->data("FileName")).toStdWString());
-		action_DebugStart();
+		QString droppedFile = QString(pEvent->mimeData()->data("FileName"));
+
+		if(droppedFile.contains(".lnk", Qt::CaseInsensitive))
+		{
+			QString resolvedPath = clsHelperClass::ResolveShortcut(droppedFile);
+
+			coreDebugger->SetTarget(resolvedPath.toStdWString());
+			action_DebugStart();
+		}
+		else if(droppedFile.contains(".exe", Qt::CaseInsensitive))
+		{
+			coreDebugger->SetTarget(droppedFile.toStdWString());
+			action_DebugStart();
+		}
+		else
+		{
+			QMessageBox::critical(this, "Nanomite", "This seems to be an invalid file!", QMessageBox::Ok, QMessageBox::Ok);
+		}
+
 		pEvent->acceptProposedAction();
     }
 }

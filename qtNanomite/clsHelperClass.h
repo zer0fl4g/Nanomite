@@ -41,6 +41,7 @@ public:
 	static std::wstring convertSTRtoWSTR(std::string FileName);
 	static std::wstring replaceAll(std::wstring orgString,wchar_t oldString,wchar_t newString);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
+	static QString ResolveShortcut(QString shortcutFile);
 	static QString LoadStyleSheet();
 	static quint64 CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWORD PID);
 	//static quint64 GetImageBaseFromModuleName(QString moduleName,bool is64Bit);
