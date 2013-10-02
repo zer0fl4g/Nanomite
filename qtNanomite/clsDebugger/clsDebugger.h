@@ -195,7 +195,6 @@ private:
 
 	clsBreakpointManager *m_pBreakpointManager;
 
-	PTCHAR tcLogString;
 	QString _sTarget;
 	QString _sCommandLine;
 
@@ -225,13 +224,12 @@ private:
 	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwExitCode,HANDLE hProc);
 	bool PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
 	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, DLLStruct *pFoundDLL = NULL);
-	bool PBLogInfo();
 	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(PIDStruct *pCurrentPID, quint64 dwExceptionOffset, quint64 dwExceptionType, bool bClearTrapFlag, bool isExceptionRelevant = true);
 	bool SuspendProcess(DWORD dwPID,bool bSuspend);
-	inline bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, PIDStruct *pCurrentPID);
 	bool IsDebuggerSuspended();
+	inline bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, PIDStruct *pCurrentPID);
 
 	HANDLE GetCurrentProcessHandle(DWORD dwPID);
 

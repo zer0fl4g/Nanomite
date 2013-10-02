@@ -57,7 +57,6 @@ clsDebugger::clsDebugger(clsBreakpointManager *pBPManager) :
 	
 	pThis = this;
 
-	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
 	_sCommandLine = "";
 
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
@@ -69,9 +68,7 @@ clsDebugger::clsDebugger(clsBreakpointManager *pBPManager) :
 clsDebugger::~clsDebugger()
 {
 	CleanWorkSpace();
-
-	clsMemManager::CFree(tcLogString);
-
+	
 	CloseHandle(m_waitForGUI);
 	CloseHandle(_hDbgEvent);
 }
@@ -183,9 +180,8 @@ void clsDebugger::AttachedDebugging()
 {
 	if(CheckProcessState(_dwPidToAttach) && DebugActiveProcess(_dwPidToAttach))
 	{
-		memset(tcLogString,0x00,LOGBUFFER);
-		swprintf_s(tcLogString,LOGBUFFERCHAR,L"[+] Attached to Process");
-		PBLogInfo();
+		emit OnLog("[+] Attached to Process");
+
 		DebuggingLoop();
 		_NormalDebugging = true;
 		return;
@@ -257,14 +253,14 @@ void clsDebugger::DebuggingLoop()
 								
 				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
 				pCurrentPID->bSymLoad = SymInitialize(processHandle,NULL,false);
-				if(!pCurrentPID->bSymLoad)
+				if(pCurrentPID->bSymLoad)
 				{
-					memset(tcLogString,0x00,LOGBUFFER);
-					swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Could not load symbols for Process(%X)",debug_event.dwProcessId);
-					PBLogInfo();
+					SymLoadModuleExW(processHandle,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 				}
 				else
-					SymLoadModuleExW(processHandle,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
+				{
+					emit OnLog(QString("[!] Could not load symbols for Process(%1)").arg(debug_event.dwProcessId, 6, 16, QChar('0')));
+				}
 
 				m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId);
 				m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpStartAddress, 1, BP_DONOTKEEP);
@@ -335,12 +331,12 @@ void clsDebugger::DebuggingLoop()
 				PBDLLInfo(sDLLFileName,debug_event.dwProcessId,(quint64)debug_event.u.LoadDll.lpBaseOfDll,true);
 
 				if(pCurrentPID->bSymLoad && dbgSettings.bAutoLoadSymbols)
+				{
 					SymLoadModuleExW(pCurrentPID->hProc,NULL,sDLLFileName,0,(quint64)debug_event.u.LoadDll.lpBaseOfDll,0,0,0);
+				}
 				else
 				{
-					memset(tcLogString,0x00,LOGBUFFER);
-					swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Could not load symbols for DLL: %s",sDLLFileName);
-					PBLogInfo();
+					emit OnLog(QString("[!] Could not load symbols for DLL: ").append(QString::fromWCharArray(sDLLFileName)));
 				}
 
 				if(dbgSettings.bBreakOnNewDLL)
@@ -378,7 +374,9 @@ void clsDebugger::DebuggingLoop()
 				HANDLE hProcess = GetCurrentProcessHandle(debug_event.dwProcessId);
 
 				if(debug_event.u.DebugString.fUnicode)
+				{
 					ReadProcessMemory(hProcess,debug_event.u.DebugString.lpDebugStringData,wMsg,debug_event.u.DebugString.nDebugStringLength,NULL);
+				}
 				else
 				{
 					size_t countConverted = NULL;
@@ -388,8 +386,9 @@ void clsDebugger::DebuggingLoop()
 					mbstowcs_s(&countConverted,wMsg,debug_event.u.DebugString.nDebugStringLength,Msg,debug_event.u.DebugString.nDebugStringLength);
 					clsMemManager::CFree(Msg);
 				}
+
 				PBDbgString(wMsg,debug_event.dwProcessId);
-				//clsMemManager::CFree(wMsg);
+
 				break;
 			}
 		case EXCEPTION_DEBUG_EVENT:
@@ -405,13 +404,13 @@ void clsDebugger::DebuggingLoop()
 				case 0x4000001f: // Breakpoint in x86 Process which got executed in a x64 environment
 					if(pCurrentPID->bKernelBP && !pCurrentPID->bWOW64KernelBP)
 					{
-						memset(tcLogString,0x00,LOGBUFFER);
+						emit OnLog(QString("[!] WOW64 Kernel EP - PID %1 - %2")
+							.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
 #ifdef _AMD64_
-						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
+							.arg((DWORD64)exInfo.ExceptionAddress, 16, 16, QChar('0')));
 #else
-						swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] WOW64 Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
+							.arg((DWORD)exInfo.ExceptionAddress, 8, 16, QChar('0')));
 #endif
-						PBLogInfo();
 							
 						if(dbgSettings.bBreakOnSystemEP)
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
@@ -428,13 +427,13 @@ void clsDebugger::DebuggingLoop()
 
 						if(!pCurrentPID->bKernelBP)
 						{
-							memset(tcLogString,0x00,LOGBUFFER);
-	#ifdef _AMD64_
-							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
-	#else
-							swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Kernel EP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
-	#endif
-							PBLogInfo();
+							emit OnLog(QString("[!] Kernel EP - PID %1 - %2")
+								.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
+#ifdef _AMD64_
+								.arg((DWORD64)exInfo.ExceptionAddress, 16, 16, QChar('0')));
+#else
+								.arg((DWORD)exInfo.ExceptionAddress, 8, 16, QChar('0')));
+#endif
 								
 							if(dbgSettings.bBreakOnSystemEP)
 								dwContinueStatus = CallBreakDebugger(&debug_event,0);
@@ -507,19 +506,28 @@ void clsDebugger::DebuggingLoop()
 								{
 									if(!bStepOver)
 									{
-										memset(tcLogString,0x00,LOGBUFFER);
 										if(bIsEP)
+										{
+											emit OnLog(QString("[!] Break on - Entrypoint - PID %1 - %2")
+												.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
 #ifdef _AMD64_
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
-										else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %016I64X", debug_event.dwProcessId, (quint64)exInfo.ExceptionAddress);
+												.arg((DWORD64)exInfo.ExceptionAddress, 16, 16, QChar('0')));
 #else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Entrypoint - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
-										else
-											swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Software BP - PID %06X - %08X", debug_event.dwProcessId, (DWORD)exInfo.ExceptionAddress);
+												.arg((DWORD)exInfo.ExceptionAddress, 8, 16, QChar('0')));
 #endif
-										PBLogInfo();
+										}
+										else
+										{
+											emit OnLog(QString("[!] Break on - Software BP - PID %1 - %2")
+												.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
+#ifdef _AMD64_
+												.arg((DWORD64)exInfo.ExceptionAddress, 16, 16, QChar('0')));
+#else
+												.arg((DWORD)exInfo.ExceptionAddress, 8, 16, QChar('0')));
+#endif
+										}
 									}
+
 									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 								}
 							}
@@ -624,13 +632,13 @@ void clsDebugger::DebuggingLoop()
 								{
 									clsBreakpointHardware::dHardwareBP(debug_event.dwProcessId, pCurrentBP->dwOffset, pCurrentBP->dwSlot);
 
-									memset(tcLogString,0x00,LOGBUFFER);
+									emit OnLog(QString("[!] Break on - Hardware BP - PID %1 - %2")
+										.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
 #ifdef _AMD64_
-									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Hardware BP - PID: %06X - %016I64X", debug_event.dwProcessId, pCurrentBP->dwOffset);
+										.arg((DWORD64)pCurrentBP->dwOffset, 16, 16, QChar('0')));
 #else
-									swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Hardware BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)pCurrentBP->dwOffset);
+										.arg((DWORD)pCurrentBP->dwOffset, 8, 16, QChar('0')));
 #endif
-									PBLogInfo();
 
 									pCurrentBP->bRestoreBP = true;
 									pCurrentPID->dwBPRestoreFlag = RESTORE_BP_HARDWARE;
@@ -662,13 +670,13 @@ void clsDebugger::DebuggingLoop()
 							{
 								pCurrentBP->bRestoreBP = true;
 
-								memset(tcLogString,0x00,LOGBUFFER);
+								emit OnLog(QString("[!] Break on - Memory BP - PID %1 - %2")
+									.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
 #ifdef _AMD64_
-								swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Memory BP - PID: %06X - %016I64X", debug_event.dwProcessId, pCurrentBP->dwOffset);
+									.arg((DWORD64)pCurrentBP->dwOffset, 16, 16, QChar('0')));
 #else
-								swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] Break on - Memory BP - PID: %06X - %08X", debug_event.dwProcessId, (DWORD)pCurrentBP->dwOffset);
+									.arg((DWORD)pCurrentBP->dwOffset, 8, 16, QChar('0')));
 #endif
-								PBLogInfo();
 
 								if(exInfo.ExceptionCode == EXCEPTION_ACCESS_VIOLATION)
 								{
@@ -774,9 +782,7 @@ void clsDebugger::DebuggingLoop()
 
 	_isDebugging = false;
 
-	memset(tcLogString,0x00,LOGBUFFER);
-	swprintf_s(tcLogString,LOGBUFFERCHAR,L"[-] Debugging finished!");
-	PBLogInfo();
+	emit OnLog("[-] Debugging finished!");
 
 	CleanWorkSpace();
 	

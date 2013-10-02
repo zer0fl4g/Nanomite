@@ -130,9 +130,3 @@ bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
 	clsMemManager::CFree(sMessage);
 	return true;
 }
-
-bool clsDebugger::PBLogInfo()
-{
-	emit OnLog(QString::fromWCharArray(tcLogString));
-	return true;
-}

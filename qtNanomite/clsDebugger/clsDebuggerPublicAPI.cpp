@@ -75,9 +75,8 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 
 			if(DebugBreakProcess(hProcess))
 			{
-				memset(tcLogString,0x00,LOGBUFFER);
-				swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %X Debugging suspended!",dwPID);
-				PBLogInfo();
+				emit OnLog(QString("[!] %1 Debugging suspended!").arg(dwPID, 6, 16, QChar('0')));
+
 				return true;
 			}
 		}
@@ -85,9 +84,8 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 		{
 			if(SuspendProcess(dwPID,true))
 			{
-				memset(tcLogString,0x00,LOGBUFFER);
-				swprintf_s(tcLogString,LOGBUFFERCHAR,L"[!] %X Debugging suspended!",dwPID);
-				PBLogInfo();
+				emit OnLog(QString("[!] %1 Debugging suspended!").arg(dwPID, 6, 16, QChar('0')));
+
 				return true;
 			}
 		}

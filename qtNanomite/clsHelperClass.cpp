@@ -29,7 +29,6 @@
 #include <Shobjidl.h>
 #include <atlbase.h>
 #include <shlguid.h>
-#include <string>
 
 clsHelperClass::clsHelperClass()
 {
@@ -288,7 +287,7 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, q
 		return 0;
 	}
 
-	std::string functioName;
+	QString functioName;
 	bool isFullString = false;
 	CHAR oneCharOfFunction = '\0';
 
@@ -308,13 +307,13 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, q
 				return 0;
 			}
  
-			functioName.push_back(oneCharOfFunction);
+			functioName.append(oneCharOfFunction);
 
 			if(oneCharOfFunction == (CHAR)'\0')
 				isFullString = true;
 		}
  
-		if(functioName.find(apiName.toStdString()) != std::string::npos)
+		if(functioName.contains(apiName))
 		{		
 			DWORD64 returnValue = moduleBase + ExportFunctionTable[ExportOrdinalTable[i]];
 
