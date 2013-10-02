@@ -16,7 +16,6 @@
  */
 #include "clsDebugger.h"
 #include "clsMemManager.h"
-#include "clsDBManager.h"
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
 

@@ -20,7 +20,6 @@
 #include "clsHelperClass.h"
 #include "clsPEManager.h"
 #include "clsMemManager.h"
-#include "clsDBManager.h"
 
 #include <process.h>
 #include <Psapi.h>
@@ -236,26 +235,26 @@ void clsDebugger::DebuggingLoop()
 		{
 		case CREATE_PROCESS_DEBUG_EVENT:
 			{
-				HANDLE hProc = debug_event.u.CreateProcessInfo.hProcess;
+				CloseHandle(debug_event.u.CreateProcessInfo.hFile);
 
+				HANDLE processHandle = debug_event.u.CreateProcessInfo.hProcess;
+				
 				if(m_dbgPI.hProcess == NULL)
 				{
-					m_dbgPI.hProcess = debug_event.u.CreateProcessInfo.hProcess;
+					m_dbgPI.hProcess = processHandle;
 					m_dbgPI.hThread = debug_event.u.CreateProcessInfo.hThread;
 					m_dbgPI.dwProcessId = debug_event.dwProcessId;
 					m_dbgPI.dwThreadId = debug_event.dwThreadId;
 				}
 
-				PTCHAR tcDllFilepath = GetFileNameFromModuleBase(hProc, debug_event.u.CreateProcessInfo.lpBaseOfImage);
-				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,hProc);
+				PTCHAR tcDllFilepath = GetFileNameFromModuleBase(processHandle, debug_event.u.CreateProcessInfo.lpBaseOfImage);
+				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,processHandle);
+				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
 
 				emit OnNewPID((wstring)tcDllFilepath,debug_event.dwProcessId);
-
-				//clsDBManager::OpenNewFile(debug_event.dwProcessId,(wstring)tcDllFilepath);
-
+								
 				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
-
-				pCurrentPID->bSymLoad = SymInitialize(hProc,NULL,false);
+				pCurrentPID->bSymLoad = SymInitialize(processHandle,NULL,false);
 				if(!pCurrentPID->bSymLoad)
 				{
 					memset(tcLogString,0x00,LOGBUFFER);
@@ -263,8 +262,9 @@ void clsDebugger::DebuggingLoop()
 					PBLogInfo();
 				}
 				else
-					SymLoadModuleExW(hProc,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
+					SymLoadModuleExW(processHandle,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);
 
+				m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId);
 				m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpStartAddress, 1, BP_DONOTKEEP);
 				
 				if(dbgSettings.bBreakOnTLS)
@@ -277,17 +277,11 @@ void clsDebugger::DebuggingLoop()
 							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i), 1, BP_DONOTKEEP);
 						}
 					}						
-				}
-				
-				m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId);
-
-				// Insert Main Thread to List
-				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
+				}			
 				
 				if(dbgSettings.bBreakOnNewPID)
 					dwContinueStatus = CallBreakDebugger(&debug_event,0);
-
-				CloseHandle(debug_event.u.CreateProcessInfo.hFile);
+							
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
@@ -313,7 +307,6 @@ void clsDebugger::DebuggingLoop()
 				SymCleanup(GetCurrentProcessHandle(debug_event.dwProcessId));
 
 				emit DeletePEManagerObject(L"",debug_event.dwProcessId);
-				clsDBManager::CloseFile(debug_event.dwProcessId);
 
 				bool bStillOneRunning = false;
 				for(size_t i = 0;i < PIDs.size();i++)
@@ -638,10 +631,10 @@ void clsDebugger::DebuggingLoop()
 									PBLogInfo();
 
 									pCurrentBP->bRestoreBP = true;
-									dwContinueStatus = CallBreakDebugger(&debug_event,0);
-
 									pCurrentPID->dwBPRestoreFlag = RESTORE_BP_HARDWARE;
 									pCurrentPID->bTrapFlag = true;
+									
+									dwContinueStatus = CallBreakDebugger(&debug_event,0);
 
 									SetThreadContextHelper(false, true, debug_event.dwThreadId, pCurrentPID);
 								}
@@ -695,11 +688,8 @@ void clsDebugger::DebuggingLoop()
 
 								if(VirtualQueryEx(processHandle,(LPVOID)exInfo.ExceptionAddress,&mbi,sizeof(mbi)))
 								{
-									if((DWORD64)debug_event.u.Exception.ExceptionRecord.ExceptionAddress >= (DWORD64)mbi.BaseAddress && (DWORD64)exInfo.ExceptionAddress <= ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
-									{
-										pageSize = mbi.RegionSize; 
-										pageBase = (DWORD64)mbi.BaseAddress;
-									}
+									pageSize = mbi.RegionSize; 
+									pageBase = (DWORD64)mbi.BaseAddress;
 								}
 
 								for(int i = 0;i < m_pBreakpointManager->MemoryBPs.size(); i++)
@@ -909,11 +899,8 @@ bool clsDebugger::CheckIfExceptionIsBP(PIDStruct *pCurrentPID, quint64 dwExcepti
 
 		if(VirtualQueryEx(pCurrentPID->hProc,(LPVOID)dwExceptionOffset,&mbi,sizeof(mbi)))
 		{
-			if(dwExceptionOffset >= (DWORD64)mbi.BaseAddress && dwExceptionOffset <=  ((DWORD64)mbi.BaseAddress + mbi.RegionSize))
-			{
-				pageSize = mbi.RegionSize; 
-				pageBase = (DWORD64)mbi.BaseAddress;
-			}
+			pageSize = mbi.RegionSize; 
+			pageBase = (DWORD64)mbi.BaseAddress;
 		}
 
 		for(int i = 0;i < m_pBreakpointManager->MemoryBPs.size(); i++)

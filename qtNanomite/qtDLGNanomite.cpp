@@ -26,7 +26,6 @@
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
-#include "clsDBInterface.h"
 #include "clsMemManager.h"
 
 #include <Psapi.h>
@@ -59,7 +58,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	coreDebugger = new clsDebugger(coreBPManager);
 	coreDisAs = new clsDisassembler;
 	PEManager = new clsPEManager;
-	DBManager = new clsDBManager;
 	dlgDetInfo = new qtDLGDetailInfo(this,Qt::Window);
 	dlgDbgStr = new qtDLGDebugStrings(this,Qt::Window);
 	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
@@ -172,7 +170,6 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete coreDebugger;
 	delete coreDisAs;
 	delete PEManager;
-	delete DBManager;
 	delete settings;
 	delete dlgDetInfo;
 	delete dlgDbgStr;

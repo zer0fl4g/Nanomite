@@ -239,7 +239,6 @@
     <ClCompile Include="clsBreakpointMemory.cpp" />
     <ClCompile Include="clsBreakpointSoftware.cpp" />
     <ClCompile Include="clsCrashHandler.cpp" />
-    <ClCompile Include="clsDBManager.cpp" />
     <ClCompile Include="clsDebugger\clsdebugger.cpp" />
     <ClCompile Include="clsDebugger\clsDebuggerCallbacks.cpp" />
     <ClCompile Include="clsDebugger\clsDebuggerPublicAPI.cpp" />
@@ -255,7 +254,6 @@
     <ClCompile Include="clsProcessDump.cpp" />
     <ClCompile Include="clsStringViewWorker.cpp" />
     <ClCompile Include="clsSymbolAndSyntax.cpp" />
-    <ClCompile Include="db_sqlite\sqlite3.c" />
     <ClCompile Include="main.cpp" />
     <ClCompile Include="qtDLGAbout.cpp" />
     <ClCompile Include="qtDLGAssembler.cpp" />
@@ -1291,38 +1289,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -D_AMD64_ -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB  "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I.\TempOutput\GeneratedFiles\$(ConfigurationName)\." "-I.\TempOutput\GeneratedFiles"</Command>
     </CustomBuild>
-    <CustomBuild Include="clsDBInterface.h">
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
-      </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
-      </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </Command>
-      <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">%(AdditionalInputs)</AdditionalInputs>
-      <Message Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Message>
-      <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Outputs>
-      <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </Command>
-    </CustomBuild>
     <ClInclude Include="clsCrashHandler.h" />
-    <ClInclude Include="clsDBManager.h" />
     <CustomBuild Include="clsMemDump.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">%(AdditionalInputs)</AdditionalInputs>
       <Message Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -1375,8 +1342,6 @@
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -D_AMD64_ -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB  "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I.\TempOutput\GeneratedFiles\$(ConfigurationName)\." "-I.\TempOutput\GeneratedFiles"</Command>
     </CustomBuild>
     <ClInclude Include="clsSymbolAndSyntax.h" />
-    <ClInclude Include="db_sqlite\sqlite3.h" />
-    <ClInclude Include="db_sqlite\sqlite3ext.h" />
     <ClInclude Include="NativeHeaders.h" />
     <CustomBuild Include="qtDLGHexView.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath);%(AdditionalInputs)</AdditionalInputs>
@@ -2164,7 +2129,6 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\TempOutput\GeneratedFiles\ui_%(Filename).h;%(Outputs)</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\uic.exe" -o ".\TempOutput\GeneratedFiles\ui_%(Filename).h" "%(FullPath)"</Command>
     </CustomBuild>
-    <ClCompile Include="clsDBInterface.cpp" />
     <CustomBuild Include="qtDLGPEEditor.ui">
       <FileType>Document</FileType>
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\uic.exe;%(AdditionalInputs)</AdditionalInputs>

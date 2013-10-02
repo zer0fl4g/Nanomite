@@ -17,7 +17,6 @@
 #include "qtDLGNanomite.h"
 
 #include "clsHelperClass.h"
-#include "clsDBManager.h"
 #include "clsMemManager.h"
 
 #include "dbghelp.h"
@@ -63,11 +62,6 @@ vector<wstring> clsHelperClass::split(const wstring& s,const wstring& f ){
 bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quint64 dwOffset,HANDLE hProc)
 {
 	bool bTest = false;
-	//DWORD PID  = GetProcessId(hProc);
-
-	//if(clsDBManager::DBAPI_getSymbolsFromPID(PID,dwOffset,sFuncName,sModName))
-	//	return true;
-
 	IMAGEHLP_MODULEW64 imgMod = {0};
 	imgMod.SizeOfStruct = sizeof(IMAGEHLP_MODULEW64);
 	PSYMBOL_INFOW pSymbol = (PSYMBOL_INFOW)malloc(sizeof(SYMBOL_INFOW) + MAX_PATH * 2);
@@ -85,7 +79,6 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 	free(pSymbol);
 
 	return true;
-	//return clsDBManager::DBAPI_insertSymbolsFromPID(PID,dwOffset,sModName,sFuncName);
 }
 
 void clsHelperClass::LoadSourceForAddr(wstring &FileName,int &LineNumber,quint64 dwOffset,HANDLE hProc)

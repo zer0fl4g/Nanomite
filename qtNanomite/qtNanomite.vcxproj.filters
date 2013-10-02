@@ -39,12 +39,6 @@
     <Filter Include="Source Dateien\Dialogs">
       <UniqueIdentifier>{408a367d-e40b-4080-8390-4e1c586c5a73}</UniqueIdentifier>
     </Filter>
-    <Filter Include="Header Dateien\SQLite">
-      <UniqueIdentifier>{09c1a5bc-4036-4114-bc49-99312e891209}</UniqueIdentifier>
-    </Filter>
-    <Filter Include="Source Dateien\SQLite">
-      <UniqueIdentifier>{6f74e63e-5989-40f4-8b3d-047c24413a90}</UniqueIdentifier>
-    </Filter>
     <Filter Include="Header Dateien\Updater">
       <UniqueIdentifier>{7843b617-f56c-4b09-96fd-095c24b42940}</UniqueIdentifier>
     </Filter>
@@ -116,12 +110,6 @@
     <ClCompile Include="clsSymbolAndSyntax.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
-    <ClCompile Include="clsDBInterface.cpp">
-      <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="db_sqlite\sqlite3.c">
-      <Filter>Source Dateien\SQLite</Filter>
-    </ClCompile>
     <ClCompile Include="clsPEFile.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
@@ -141,9 +129,6 @@
       <Filter>Source Dateien\Dialogs</Filter>
     </ClCompile>
     <ClCompile Include="clsMemManager.cpp">
-      <Filter>Source Dateien</Filter>
-    </ClCompile>
-    <ClCompile Include="clsDBManager.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
     <ClCompile Include="clsMemPool.cpp">
@@ -628,9 +613,6 @@
     <CustomBuild Include="qtDLGWindowView.ui">
       <Filter>Form Dateien</Filter>
     </CustomBuild>
-    <CustomBuild Include="clsDBInterface.h">
-      <Filter>Header Dateien</Filter>
-    </CustomBuild>
     <CustomBuild Include="clsPEManager.h">
       <Filter>Header Dateien</Filter>
     </CustomBuild>
@@ -795,19 +777,10 @@
     <ClInclude Include="clsPEFile.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="db_sqlite\sqlite3.h">
-      <Filter>Header Dateien\SQLite</Filter>
-    </ClInclude>
     <ClInclude Include="clsCrashHandler.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
-    <ClInclude Include="db_sqlite\sqlite3ext.h">
-      <Filter>Header Dateien\SQLite</Filter>
-    </ClInclude>
     <ClInclude Include="clsMemManager.h">
-      <Filter>Header Dateien</Filter>
-    </ClInclude>
-    <ClInclude Include="clsDBManager.h">
       <Filter>Header Dateien</Filter>
     </ClInclude>
     <ClInclude Include="clsMemPool.h">

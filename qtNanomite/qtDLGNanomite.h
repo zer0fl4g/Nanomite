@@ -33,7 +33,6 @@
 #include "clsDisassembler.h"
 #include "clsDebugger/clsDebugger.h"
 #include "clsPEManager.h"
-#include "clsDBManager.h"
 #include "clsAppSettings.h"
 #include "clsBreakpointManager.h"
 
@@ -48,13 +47,13 @@ Q_DECLARE_METATYPE (std::wstring)
 Q_DECLARE_METATYPE (BPStruct)
 Q_DECLARE_METATYPE (HANDLE)
 
-	enum UPDATE_STATE
-	{
-		STATE_RUN		= 1,
-		STATE_SUSPEND	= 2,
-		STATE_TERMINATE = 3,
-		STATE_TRACE		= 4
-	};
+enum UPDATE_STATE
+{
+	STATE_RUN		= 1,
+	STATE_SUSPEND	= 2,
+	STATE_TERMINATE = 3,
+	STATE_TRACE		= 4
+};
 
 class qtDLGNanomite : public QMainWindow, public Ui_qtDLGNanomiteClass
 {
@@ -67,7 +66,6 @@ public:
 	clsDebugger *coreDebugger;
 	clsDisassembler *coreDisAs;
 	clsPEManager *PEManager;
-	clsDBManager *DBManager;
 	clsAppSettings *settings;
 	clsBreakpointManager *coreBPManager;
 
