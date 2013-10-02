@@ -14,6 +14,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "../clsDebugger/clsDebugger.h"
+
 #include "clsMemManager.h"
 #include "clsBreakpointManager.h"
 #include "clsHelperClass.h"

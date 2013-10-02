@@ -40,8 +40,8 @@ public:
 	*
 	* @return no
 	*/
-	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int processID = 0, std::wstring FileName = L"");
-		/**
+	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int processID = 0, QString FileName = "");
+	/**
 	* @brief Deconstructs qtDLGPEEditor()
 	*
 	* @return no
@@ -54,7 +54,7 @@ private:
 
 	quint64 m_selectedOffset;
 
-	std::wstring m_currentFile;
+	QString m_currentFile;
 
 	clsPEManager* m_pEManager;
 

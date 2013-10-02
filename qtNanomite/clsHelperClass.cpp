@@ -25,13 +25,11 @@
 #include <TlHelp32.h>
 #include <algorithm>
 #include <QtCore>
-#include <string>
 #include <ObjIdl.h>
 #include <Shobjidl.h>
 #include <atlbase.h>
 #include <shlguid.h>
-
-using namespace std;
+#include <string>
 
 clsHelperClass::clsHelperClass()
 {
@@ -41,25 +39,7 @@ clsHelperClass::~clsHelperClass()
 {
 }
 
-vector<wstring> clsHelperClass::split(const wstring& s,const wstring& f ){
-	vector<wstring> temp;
-	if ( f.empty() ) {
-		temp.push_back( s );
-		return temp;
-	}
-	typedef wstring::const_iterator iter;
-	const iter::difference_type f_size( distance( f.begin(), f.end() ) );
-	iter i( s.begin() );
-	for ( iter pos; ( pos = search( i , s.end(), f.begin(), f.end() ) ) != s.end(); ) {
-		temp.push_back( wstring( i, pos ) );
-		advance( pos, f_size );
-		i = pos;
-	}
-	temp.push_back( wstring( i, s.end() ) );
-	return temp;
-}
-
-bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quint64 dwOffset,HANDLE hProc)
+bool clsHelperClass::LoadSymbolForAddr(QString &functionName, QString &moduleName, quint64 symbolOffset, HANDLE processHandle)
 {
 	bool bTest = false;
 	IMAGEHLP_MODULEW64 imgMod = {0};
@@ -70,58 +50,32 @@ bool clsHelperClass::LoadSymbolForAddr(wstring& sFuncName,wstring& sModName,quin
 	pSymbol->MaxNameLen = MAX_PATH;
 	quint64 dwDisplacement;
 
-	bTest = SymGetModuleInfoW64(hProc,dwOffset,&imgMod);
-	bTest = SymFromAddrW(hProc,dwOffset,&dwDisplacement,pSymbol);
+	SymGetModuleInfoW64(processHandle, symbolOffset, &imgMod);
+	SymFromAddrW(processHandle, symbolOffset, &dwDisplacement, pSymbol);
 
-	sFuncName = pSymbol->Name;
-	sModName = imgMod.ModuleName;
+	functionName = QString::fromWCharArray(pSymbol->Name);
+	moduleName = QString::fromWCharArray(imgMod.ModuleName);
 
 	free(pSymbol);
 
 	return true;
 }
 
-void clsHelperClass::LoadSourceForAddr(wstring &FileName,int &LineNumber,quint64 dwOffset,HANDLE hProc)
+bool clsHelperClass::LoadSourceForAddr(QString &fileName, int &lineNumber, quint64 sourceOffset, HANDLE processHandle)
 {
 	DWORD dwDisplacement = NULL;
-
 	IMAGEHLP_LINEW64 imgSource;
 	imgSource.SizeOfStruct = sizeof(imgSource);
 	
-	if(SymGetLineFromAddrW64(hProc,dwOffset,(PDWORD)&dwDisplacement,&imgSource))
+	if(SymGetLineFromAddrW64(processHandle,sourceOffset,(PDWORD)&dwDisplacement,&imgSource))
 	{
-		FileName = imgSource.FileName;
-		LineNumber = imgSource.LineNumber;
+		fileName = QString::fromWCharArray(imgSource.FileName);
+		lineNumber = imgSource.LineNumber;
+
+		return true;
 	}
-	return;
-}
 
-string clsHelperClass::convertWSTRtoSTR(wstring FileName)
-{
-	size_t newSize = NULL;
-	wcstombs_s(&newSize,NULL, NULL, FileName.c_str(), 0);
-
-	newSize += 2;
-	char* newStr = (char*)clsMemManager::CAlloc(newSize);
-
-	wcstombs_s(NULL, newStr, newSize, FileName.c_str(), newSize);
-	string str = newStr;
-	clsMemManager::CFree(newStr);
-	return str;
-}
-
-wstring clsHelperClass::convertSTRtoWSTR(string FileName)
-{
-	size_t newSize = NULL;
-	mbstowcs_s(&newSize, NULL, NULL, FileName.c_str(), 0);
-
-	newSize += 2;
-	wchar_t* newStr = (wchar_t*)clsMemManager::CAlloc(newSize);
-
-	mbstowcs_s(NULL, newStr, newSize, FileName.c_str(), newSize);
-	wstring str = newStr;
-	clsMemManager::CFree(newStr);
-	return str;
+	return false;
 }
 
 PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
@@ -176,20 +130,6 @@ bool clsHelperClass::IsWindowsXP()
 	if (versionInfo.dwMinorVersion == 1  &&  versionInfo.dwMajorVersion == 5)
 		return true;
 	return false;
-}
-
-wstring clsHelperClass::replaceAll(wstring orgString, wchar_t oldString, wchar_t newString)
-{
-	if(orgString.find(oldString) == std::string::npos)
-		return orgString;
-
-	for(int i = 0; i < orgString.length(); i++)
-	{
-		if(orgString.c_str()[i] == oldString)
-			orgString._Myptr()[i] = newString;
-	}
-
-	return orgString;
 }
 
 DWORD clsHelperClass::GetMainThread(DWORD ProcessID)
@@ -348,7 +288,7 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, q
 		return 0;
 	}
 
-	string functioName;
+	std::string functioName;
 	bool isFullString = false;
 	CHAR oneCharOfFunction = '\0';
 
@@ -374,7 +314,7 @@ DWORD64 clsHelperClass::RemoteGetProcAddr(QString apiName, quint64 moduleBase, q
 				isFullString = true;
 		}
  
-		if(functioName.find(apiName.toStdString()) != string::npos)
+		if(functioName.find(apiName.toStdString()) != std::string::npos)
 		{		
 			DWORD64 returnValue = moduleBase + ExportFunctionTable[ExportOrdinalTable[i]];
 

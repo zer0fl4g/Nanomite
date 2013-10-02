@@ -30,8 +30,6 @@
 
 #include <Psapi.h>
 
-using namespace std;
-
 qtDLGNanomite* qtDLGNanomite::qtDLGMyWindow = NULL;
 
 qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
@@ -48,7 +46,6 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	qRegisterMetaType<DWORD>("DWORD");
 	qRegisterMetaType<quint64>("quint64");
-	qRegisterMetaType<wstring>("wstring");
 	qRegisterMetaType<BPStruct>("BPStruct");
 	qRegisterMetaType<HANDLE>("HANDLE");
 
@@ -83,28 +80,28 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	// Callbacks from Debugger Thread to GUI
 	connect(coreDebugger,SIGNAL(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),
 		dlgDetInfo,SLOT(OnThread(DWORD,DWORD,quint64,bool,DWORD,bool)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnPID(DWORD,std::wstring,DWORD,quint64,bool)),
-		dlgDetInfo,SLOT(OnPID(DWORD,std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),
-		dlgDetInfo,SLOT(OnException(std::wstring,std::wstring,quint64,quint64,DWORD,DWORD)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnDbgString(std::wstring,DWORD)),
-		dlgDbgStr,SLOT(OnDbgString(std::wstring,DWORD)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnDll(std::wstring,DWORD,quint64,bool)),
-		dlgDetInfo,SLOT(OnDll(std::wstring,DWORD,quint64,bool)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnLog(std::wstring)),
-		logView,SLOT(OnLog(std::wstring)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnPID(DWORD,QString,DWORD,quint64,bool)),
+		dlgDetInfo,SLOT(OnPID(DWORD,QString,DWORD,quint64,bool)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnException(QString,QString,quint64,quint64,DWORD,DWORD)),
+		dlgDetInfo,SLOT(OnException(QString,QString,quint64,quint64,DWORD,DWORD)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnDbgString(QString,DWORD)),
+		dlgDbgStr,SLOT(OnDbgString(QString,DWORD)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnDll(QString,DWORD,quint64,bool)),
+		dlgDetInfo,SLOT(OnDll(QString,DWORD,quint64,bool)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnLog(QString)),
+		logView,SLOT(OnLog(QString)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(AskForException(DWORD)),this,SLOT(AskForException(DWORD)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),dlgBPManager,SLOT(UpdateCompleter(std::wstring,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),dlgBPManager,SLOT(UpdateCompleter(QString,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgPatchManager,SLOT(UpdateOffsetPatch(HANDLE,int)),Qt::QueuedConnection);
 
 	connect(coreBPManager,SIGNAL(OnBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
 	connect(coreBPManager,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 
 	// Callbacks from Debugger to PEManager
-	connect(coreDebugger,SIGNAL(OnNewPID(std::wstring,int)),PEManager,SLOT(InsertPIDForFile(std::wstring,int)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(DeletePEManagerObject(std::wstring,int)),PEManager,SLOT(CloseFile(std::wstring,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),PEManager,SLOT(InsertPIDForFile(QString,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(DeletePEManagerObject(QString,int)),PEManager,SLOT(CloseFile(QString,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
 
 	// Actions for the MainMenu and Toolbar
@@ -251,12 +248,12 @@ void qtDLGNanomite::OnDebuggerBreak()
 		stackView->LoadStackView(coreDebugger->ProcessContext.Esp,4);
 #endif
 		// Load SourceFile to Dlg
-		wstring FilePath; 
+		QString FilePath; 
 		int LineNumber = NULL;
 
 		clsHelperClass::LoadSourceForAddr(FilePath,LineNumber,dwEIP,coreDebugger->GetCurrentProcessHandle());
 		if(FilePath.length() > 0 && LineNumber > 0)
-			DisAsGUI->dlgSourceViewer->OnDisplaySource(QString::fromStdWString(FilePath),LineNumber);	
+			DisAsGUI->dlgSourceViewer->OnDisplaySource(FilePath, LineNumber);	
 
 		// Update Disassembler
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
@@ -405,12 +402,12 @@ void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
 		{
 			QString resolvedPath = clsHelperClass::ResolveShortcut(droppedFile);
 
-			coreDebugger->SetTarget(resolvedPath.toStdWString());
+			coreDebugger->SetTarget(resolvedPath);
 			action_DebugStart();
 		}
 		else if(droppedFile.contains(".exe", Qt::CaseInsensitive))
 		{
-			coreDebugger->SetTarget(droppedFile.toStdWString());
+			coreDebugger->SetTarget(droppedFile);
 			action_DebugStart();
 		}
 		else
@@ -464,7 +461,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 			i++;
 			if(i == splittedCommandLine.constEnd()) return;
 
-			coreDebugger->SetTarget(i->toStdWString());
+			coreDebugger->SetTarget(*i);
 
 			for(QStringList::const_iterator commandLineSearch = splittedCommandLine.constBegin(); commandLineSearch != splittedCommandLine.constEnd(); ++commandLineSearch)
 			{
@@ -473,7 +470,7 @@ void qtDLGNanomite::ParseCommandLineArgs()
 					commandLineSearch++;
 					if(commandLineSearch == splittedCommandLine.constEnd()) break;
 
-					coreDebugger->SetCommandLine(commandLineSearch->toStdWString());
+					coreDebugger->SetCommandLine(*commandLineSearch);
 				}
 			}
 
@@ -517,7 +514,7 @@ void qtDLGNanomite::DebugRecentFile(QAction *qAction)
 		coreBPManager->BreakpointClear();
 		coreDebugger->ClearTarget();
 		coreDebugger->ClearCommandLine();
-		coreDebugger->SetTarget(qAction->text().toStdWString());
+		coreDebugger->SetTarget(qAction->text());
 		action_DebugStart();
 	}
 	else

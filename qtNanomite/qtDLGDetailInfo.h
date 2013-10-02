@@ -20,7 +20,6 @@
 #include "ui_qtDLGDetailInfo.h"
 
 #include <Windows.h>
-#include <string>
 
 /**
 * @file qtDLGDetailInfo.h
@@ -61,7 +60,7 @@ signals:
 	*
 	* @return no
 	*/
-	void OpenFileInPEManager(std::wstring FileName,int processID);
+	void OpenFileInPEManager(QString FileName,int processID);
 
 public slots:
 	/**
@@ -86,7 +85,7 @@ public slots:
 	*
 	* @return no
 	*/
-	void OnPID(DWORD processID, std::wstring sFile, DWORD exitCode, quint64 entrypointOffset, bool bFound);
+	void OnPID(DWORD processID, QString sFile, DWORD exitCode, quint64 entrypointOffset, bool bFound);
 	/**
 	* @brief A Qt slot which is called when the clsDebugger instance catched exception
 	* @param functionName A string containing the function name which created the exception
@@ -98,7 +97,7 @@ public slots:
 	*
 	* @return no
 	*/
-	void OnException(std::wstring functionName, std::wstring moduleName, quint64 exceptionOffset, quint64 exceptionCode, DWORD processID, DWORD threadID);
+	void OnException(QString functionName, QString moduleName, quint64 exceptionOffset, quint64 exceptionCode, DWORD processID, DWORD threadID);
 	/**
 	* @brief A Qt slot which is called when the clsDebugger instance catched load/unload dll event
 	* @param sDLLPath The path of the dll
@@ -108,7 +107,7 @@ public slots:
 	*
 	* @return no
 	*/
-	void OnDll(std::wstring sDLLPath, DWORD processID, quint64 entrypointOffset, bool bLoaded);
+	void OnDll(QString sDLLPath, DWORD processID, quint64 entrypointOffset, bool bLoaded);
 
 private:
 	int m_selectedRow; /* contains the selected row when user opens the context menu */

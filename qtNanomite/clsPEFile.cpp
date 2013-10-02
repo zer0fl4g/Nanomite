@@ -18,12 +18,11 @@
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
-using namespace std;
 
-clsPEFile::clsPEFile(wstring FileName,bool *bLoaded)
-	: _FileName(FileName)
+clsPEFile::clsPEFile(QString FileName,bool *bLoaded)
+	: m_fileName(FileName)
 {
-	*bLoaded = m_isLoaded = LoadFile(_FileName);
+	*bLoaded = m_isLoaded = LoadFile(m_fileName);
 }
 
 clsPEFile::~clsPEFile()
@@ -31,9 +30,9 @@ clsPEFile::~clsPEFile()
 
 }
 
-bool clsPEFile::LoadFile(wstring FileName)
+bool clsPEFile::LoadFile(QString FileName)
 {
-	HANDLE hFile = CreateFileW(FileName.c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
+	HANDLE hFile = CreateFileW(FileName.toStdWString().c_str(),GENERIC_READ,FILE_SHARE_READ | FILE_SHARE_WRITE,NULL,OPEN_EXISTING,NULL,NULL);
 	if(hFile == INVALID_HANDLE_VALUE) return false;
 		
 	HANDLE hFileMap = CreateFileMapping(hFile,NULL,PAGE_READONLY,NULL,NULL,NULL);
@@ -419,7 +418,7 @@ float clsPEFile::loadEntropie(DWORD fileSize)
 	DWORD64 countBytes[256] = { 0 };
 	long double result = 0.0, temp = 0.0;
 
-	for(int i = 0; i < fileSize; i++)
+	for(DWORD i = 0; i < fileSize; i++)
 	{
 		countBytes[((PBYTE)m_fileBuffer)[i]]++;
 	}

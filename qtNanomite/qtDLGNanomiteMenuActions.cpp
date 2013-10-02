@@ -105,12 +105,12 @@ void qtDLGNanomite::action_DebugStart()
 
 			if(fileName.length() > 0 && commandLine.length() > 0)
 			{
-				coreDebugger->SetTarget(fileName.toStdWString());
-				coreDebugger->SetCommandLine(commandLine.toStdWString());
+				coreDebugger->SetTarget(fileName);
+				coreDebugger->SetCommandLine(commandLine);
 			}
 			else if(fileName.length() > 0 && commandLine.length() <= 0)
 			{
-				coreDebugger->SetTarget(fileName.toStdWString());
+				coreDebugger->SetTarget(fileName);
 				coreDebugger->ClearCommandLine();		
 			}
 			else
@@ -140,7 +140,7 @@ void qtDLGNanomite::action_DebugStart()
 			QMessageBox::information(this, "Nanomite", "It seems that this file is packed or encrypted!\nThis can lead to wrong display (or none) of disassembly!", QMessageBox::Ok, QMessageBox::Ok);
 		}
 		
-		InsertRecentDebuggedFile(QString::fromStdWString(coreDebugger->GetTarget()));
+		InsertRecentDebuggedFile(coreDebugger->GetTarget());
 		coreDebugger->start();
 
 		UpdateStateBar(STATE_RUN);
@@ -159,18 +159,16 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 	{
 		CleanGUI();
 
-		wstring filePath = FilePath.toStdWString();
-
-		PEManager->OpenFile(filePath);
-		if(!PEManager->isValidPEFile(filePath))
+		PEManager->OpenFile(FilePath);
+		if(!PEManager->isValidPEFile(FilePath))
 		{
 			QMessageBox::critical(this,"Nanomite","This is a invalid File! Please select another one!",QMessageBox::Ok,QMessageBox::Ok);
 
-			PEManager->CloseFile(coreDebugger->GetTarget(),0);
+			PEManager->CloseFile(FilePath,0);
 			return;
 		}
 
-		float fileEntropie = PEManager->getEntropie(coreDebugger->GetTarget());
+		float fileEntropie = PEManager->getEntropie(FilePath);
 		if(fileEntropie >= 6.4) // TODO: more research for the value
 		{
 			QMessageBox::information(this, "Nanomite", "It seems that this file is packed or encrypted!\nThis can lead to wrong display (or none) of disassembly!", QMessageBox::Ok, QMessageBox::Ok);
@@ -179,7 +177,7 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 		qtDLGPatchManager::ClearAllPatches();
 
 		InsertRecentDebuggedFile(FilePath);
-		coreDebugger->SetTarget(filePath);
+		coreDebugger->SetTarget(FilePath);
 		coreDebugger->AttachToProcess(iPID);
 		coreDebugger->start();
 

@@ -20,8 +20,6 @@
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
-using namespace std;
-
 qtDLGBreakPointManager *qtDLGBreakPointManager::pThis = NULL;
 
 qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags)
@@ -319,7 +317,7 @@ void qtDLGBreakPointManager::OnBPRemove()
 	}
 }
 
-void qtDLGBreakPointManager::UpdateCompleter(wstring FilePath,int processID)
+void qtDLGBreakPointManager::UpdateCompleter(QString FilePath,int processID)
 {
 	QList<APIData> newImports = clsPEManager::getImportsFromFile(FilePath);
 

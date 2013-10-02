@@ -109,22 +109,7 @@ void qtDLGLogView::OnLog(QString logString)
 	time(&tTime);
 	localtime_s(&timeInfo,&tTime);
 
-	//tblLogBox->insertRow(tblLogBox->rowCount());
-	//
-	//tblLogBox->setItem(tblLogBox->rowCount() - 1,0,
-	//	new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec)));
-	//
-	//tblLogBox->setItem(tblLogBox->rowCount() - 1,1,
-	//	new QTableWidgetItem(logString));
-	//
-	//tblLogBox->scrollToBottom();
-
 	tblLogBox->insertRow(0);
 	tblLogBox->setItem(0, 0, new QTableWidgetItem(QString().sprintf("[%i:%i:%i]",timeInfo.tm_hour,timeInfo.tm_min,timeInfo.tm_sec)));
 	tblLogBox->setItem(0, 1, new QTableWidgetItem(logString));
-}
-
-void qtDLGLogView::OnLog(std::wstring logString)
-{
-	OnLog(QString::fromStdWString(logString));
 }

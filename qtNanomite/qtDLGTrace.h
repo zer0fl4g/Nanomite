@@ -20,7 +20,6 @@
 #include "ui_qtDLGTrace.h"
 
 #include <Windows.h>
-#include <string>
 
 #include <QList>
 #include <QTimer>

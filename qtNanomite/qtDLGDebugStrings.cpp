@@ -22,8 +22,6 @@
 #include <QShortcut>
 #include <QMenu>
 
-using namespace std;
-
 qtDLGDebugStrings::qtDLGDebugStrings(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
@@ -77,7 +75,7 @@ void qtDLGDebugStrings::MenuCallback(QAction* pAction)
 	}
 }
 
-void qtDLGDebugStrings::OnDbgString(wstring debugString, DWORD processID)
+void qtDLGDebugStrings::OnDbgString(QString debugString, DWORD processID)
 {
 	tblDebugStrings->insertRow(tblDebugStrings->rowCount());
 
@@ -85,7 +83,7 @@ void qtDLGDebugStrings::OnDbgString(wstring debugString, DWORD processID)
 		new QTableWidgetItem(QString().sprintf("%08X",processID)));
 
 	tblDebugStrings->setItem(tblDebugStrings->rowCount() - 1,1,
-		new QTableWidgetItem(QString::fromStdWString(debugString)));
+		new QTableWidgetItem(debugString));
 
 	tblDebugStrings->scrollToBottom();
 }

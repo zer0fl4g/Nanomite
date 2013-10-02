@@ -302,8 +302,7 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
 	{
-		std::wstring temp = tblModules->item(m_selectedRow,3)->text().toStdWString();
-		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,temp);
+		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,tblModules->item(m_selectedRow,3)->text());
 		dlgPEEditor->show();
 	}
 	else if(QString().compare(pAction->text(),"Open Module in Function View") == 0)
@@ -485,7 +484,7 @@ void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypoi
 	pMainWindow->logView->OnLog(logMessage);
 }
 
-void qtDLGDetailInfo::OnPID(DWORD processID,wstring sFile,DWORD exitCode,quint64 entrypointOffset,bool bFound)
+void qtDLGDetailInfo::OnPID(DWORD processID,QString sFile,DWORD exitCode,quint64 entrypointOffset,bool bFound)
 {
 
 	if(!bFound)
@@ -499,7 +498,7 @@ void qtDLGDetailInfo::OnPID(DWORD processID,wstring sFile,DWORD exitCode,quint64
 			new QTableWidgetItem(QString("%1").arg(entrypointOffset,16,16,QChar('0'))));
 
 		tblPIDs->setItem(tblPIDs->rowCount() - 1,3,
-			new QTableWidgetItem(QString::fromStdWString(sFile)));
+			new QTableWidgetItem(sFile));
 
 		tblPIDs->scrollToBottom();
 	}
@@ -526,7 +525,7 @@ void qtDLGDetailInfo::OnPID(DWORD processID,wstring sFile,DWORD exitCode,quint64
 	pMainWindow->UpdateStateBar(STATE_RUN);
 }
 
-void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quint64 exceptionOffset, quint64 exceptionCode, DWORD processID, DWORD threadID)
+void qtDLGDetailInfo::OnException(QString functionName, QString moduleName, quint64 exceptionOffset, quint64 exceptionCode, DWORD processID, DWORD threadID)
 {
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 	pMainWindow->lExceptionCount++;
@@ -544,7 +543,7 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 
 	if(functionName.length() > 0 )
 		tblExceptions->setItem(tblExceptions->rowCount() - 1,3,
-			new QTableWidgetItem(QString::fromStdWString(moduleName).append(".").append(QString::fromStdWString(functionName))));
+			new QTableWidgetItem(moduleName.append(".").append(functionName)));
 
 
 	QString logMessage;
@@ -555,8 +554,8 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 		.arg(threadID,6,16,QChar('0'))
 		.arg(exceptionCode,8,16,QChar('0'))
 		.arg(exceptionOffset,16,16,QChar('0'))
-		.arg(QString::fromStdWString(functionName))
-		.arg(QString::fromStdWString(moduleName));
+		.arg(functionName)
+		.arg(moduleName);
 	else
 		logMessage = QString("[!] Exception - PID: %1 TID: %2 - ExceptionCode: %3 - ExceptionOffset: %4")
 		.arg(processID,6,16,QChar('0'))
@@ -568,7 +567,7 @@ void qtDLGDetailInfo::OnException(wstring functionName, wstring moduleName, quin
 	pMainWindow->UpdateStateBar(STATE_RUN);
 }
 
-void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypointOffset, bool bLoaded)
+void qtDLGDetailInfo::OnDll(QString sDLLPath, DWORD processID, quint64 entrypointOffset, bool bLoaded)
 {
 	if(bLoaded)
 	{
@@ -584,7 +583,7 @@ void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypoin
 			new QTableWidgetItem("Loaded"));
 
 		tblModules->setItem(tblModules->rowCount() - 1,3,
-			new QTableWidgetItem(QString::fromStdWString(sDLLPath)));
+			new QTableWidgetItem(sDLLPath));
 	}
 	else
 	{
@@ -600,11 +599,11 @@ void qtDLGDetailInfo::OnDll(wstring sDLLPath, DWORD processID, quint64 entrypoin
 		logMessage = QString("[+] Loaded DLL - PID: %1 - Modulebase: %2 - %3")
 		.arg(processID,6,16,QChar('0'))
 		.arg(entrypointOffset,16,16,QChar('0'))
-		.arg(QString::fromStdWString(sDLLPath));
+		.arg(sDLLPath);
 	else
 		logMessage = QString("[+] Unloaded DLL - PID: %1 - %2")
 		.arg(processID,6,16,QChar('0'))
-		.arg(QString::fromStdWString(sDLLPath));
+		.arg(sDLLPath);
 
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 	pMainWindow->logView->OnLog(logMessage);

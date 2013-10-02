@@ -18,6 +18,7 @@
 #include "qtDLGExceptionEdit.h"
 
 #include <QStringList>
+#include <QCompleter>
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"

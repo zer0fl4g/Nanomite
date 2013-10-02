@@ -24,8 +24,6 @@
 #define BEA_USE_STDCALL
 #include <BeaEngine.h>
 
-using namespace std;
-
 clsFunctionsViewWorker::clsFunctionsViewWorker(QList<FunctionProcessingData> dataForProcessing)
 {
 	m_processingData = dataForProcessing;
@@ -375,7 +373,7 @@ DWORD clsFunctionsViewWorker::GetFunctionSizeFromCallPoint(quint64 sectionBuffer
 
 void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE processHandle)
 {
-	wstring sModName,sFuncName;
+	QString sModName,sFuncName;
 
 	if(functionList.size() > 0)
 	{
@@ -385,7 +383,7 @@ void clsFunctionsViewWorker::InsertSymbolsIntoLists(HANDLE processHandle)
 			{
 				clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,functionList[i].FunctionOffset,processHandle);
 				if(sFuncName.length() > 0)
-					functionList[i].functionSymbol = QString().fromStdWString(sFuncName);
+					functionList[i].functionSymbol = sFuncName;
 				else
 					functionList[i].functionSymbol = QString("sub_%1").arg(functionList[i].FunctionOffset,16,16,QChar('0'));
 			}		

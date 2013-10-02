@@ -18,8 +18,6 @@
 #define CLSPEFILE_H
 
 #include <Windows.h>
-#include <string>
-#include <vector>
 #include <QStringlist.h>
 
 struct APIData
@@ -31,7 +29,7 @@ struct APIData
 class clsPEFile
 {
 public:
-	clsPEFile(std::wstring FileName,bool *bLoaded);
+	clsPEFile(QString FileName,bool *bLoaded);
 	~clsPEFile();
 
 	bool isValidPEFile();
@@ -53,7 +51,7 @@ public:
 	float getEntropie();
 
 private:
-	std::wstring _FileName;
+	QString m_fileName;
 
 	LPVOID m_fileBuffer;
 
@@ -80,7 +78,7 @@ private:
 	
 	QList<IMAGE_SECTION_HEADER> loadSections();
 
-	bool LoadFile(std::wstring);
+	bool LoadFile(QString fileName);
 
 	DWORD dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
 	DWORD64 dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS64 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);

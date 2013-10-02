@@ -14,6 +14,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "qtDLGBreakPointManager.h"
+
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
 #include "clsMemManager.h"

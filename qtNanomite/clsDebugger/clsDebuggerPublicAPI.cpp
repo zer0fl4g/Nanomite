@@ -14,6 +14,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "qtDLGTrace.h"
+
 #include "clsDebugger.h"
 #include "clsMemManager.h"
 #include "clsAPIImport.h"
@@ -170,7 +172,7 @@ void clsDebugger::ClearTarget()
 	_sTarget.clear();
 }
 
-void clsDebugger::SetTarget(wstring sTarget)
+void clsDebugger::SetTarget(QString sTarget)
 {
 	_sTarget = sTarget;
 	_NormalDebugging = true;
@@ -192,7 +194,7 @@ DWORD clsDebugger::GetCurrentTID()
 		return pThis->GetMainThreadID();
 }
 
-void clsDebugger::SetCommandLine(std::wstring CommandLine)
+void clsDebugger::SetCommandLine(QString CommandLine)
 {
 	_sCommandLine = CommandLine;
 }
@@ -210,12 +212,12 @@ HANDLE clsDebugger::GetCurrentProcessHandle()
 		return GetProcessHandleByPID(-1);
 }
 
-wstring clsDebugger::GetCMDLine()
+QString clsDebugger::GetCMDLine()
 {
 	return _sCommandLine;
 }
 
-wstring clsDebugger::GetTarget()
+QString clsDebugger::GetTarget()
 {
 	return _sTarget;
 }

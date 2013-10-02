@@ -22,6 +22,8 @@
 
 #include <QClipboard>
 #include <QMenu>
+#include <QShortcut>
+#include <QMessageBox>
 
 qtDLGTIBView::qtDLGTIBView(HANDLE processHandle, HANDLE threadHandle, QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)

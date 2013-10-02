@@ -19,7 +19,6 @@
 
 #include "Ui_qtDLGDebugStrings.h"
 
-#include <string>
 #include <Windows.h>
 
 /**
@@ -54,7 +53,7 @@ public slots:
 	*
 	* @return no
 	*/
-	void OnDbgString(std::wstring debugString, DWORD processID);
+	void OnDbgString(QString debugString, DWORD processID);
 
 private:
 	int m_selectedRow; /* contains the selected row if the user opens a context menu */

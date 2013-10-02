@@ -25,37 +25,37 @@ class clsPEManager: public QObject
 {
 	Q_OBJECT
 public:
-	static QList<APIData> getImportsFromFile(std::wstring FileName);
+	static QList<APIData> getImportsFromFile(QString FileName);
 
 	static clsPEManager* GetInstance();
 
-	static QList<DWORD64> getTLSCallbackOffset(std::wstring FileName,int PID);
+	static QList<DWORD64> getTLSCallbackOffset(QString FileName,int PID);
 
 	clsPEManager();
 	~clsPEManager();
 
-	bool OpenFile(std::wstring FileName,int PID = -1);
-	bool isValidPEFile(std::wstring FileName,int PID = 0);
-	bool is64BitFile(std::wstring FileName,int PID = 0);
+	bool OpenFile(QString FileName,int PID = -1);
+	bool isValidPEFile(QString FileName,int PID = 0);
+	bool is64BitFile(QString FileName,int PID = 0);
 
-	DWORD64 VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset);
+	DWORD64 VAtoRaw(QString FileName,int PID, DWORD64 RVAOffset);
 
-	QList<APIData> getImports(std::wstring FileName,int PID = -1);
-	QList<APIData> getExports(std::wstring FileName,int PID = -1);
+	QList<APIData> getImports(QString FileName,int PID = -1);
+	QList<APIData> getExports(QString FileName,int PID = -1);
 	
-	QList<IMAGE_SECTION_HEADER> getSections(std::wstring FileName,int PID = -1);
+	QList<IMAGE_SECTION_HEADER> getSections(QString FileName,int PID = -1);
 
-	IMAGE_DOS_HEADER getDosHeader(std::wstring FileName,int PID = -1);
-	IMAGE_NT_HEADERS32 getNTHeader32(std::wstring FileName,int PID = -1);
-	IMAGE_NT_HEADERS64 getNTHeader64(std::wstring FileName,int PID = -1);
+	IMAGE_DOS_HEADER getDosHeader(QString FileName,int PID = -1);
+	IMAGE_NT_HEADERS32 getNTHeader32(QString FileName,int PID = -1);
+	IMAGE_NT_HEADERS64 getNTHeader64(QString FileName,int PID = -1);
 
-	float getEntropie(std::wstring FileName, int PID = -1);
+	float getEntropie(QString FileName, int PID = -1);
 
-	std::wstring getFilenameFromPID(int PID);
+	QString getFilenameFromPID(int PID);
 
 	public slots:
-		void InsertPIDForFile(std::wstring,int);
-		void CloseFile(std::wstring,int);
+		void InsertPIDForFile(QString,int);
+		void CloseFile(QString,int);
 		void CleanPEManager();
 
 private:
@@ -66,10 +66,10 @@ private:
 		clsPEFile *PEFile;
 		int PID;
 		bool is64Bit;
-		std::wstring FileName;
+		QString FileName;
 	};
 
-	std::vector<PEManager> PEFiles;
+	QList<PEManager> PEFiles;
 };
 
 #endif

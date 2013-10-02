@@ -19,8 +19,6 @@
 #include "clsMemManager.h"
 #include "dbghelp.h"
 
-using namespace std;
-
 bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew)
 {
 	bool bFound = false;
@@ -86,15 +84,15 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 	}
 
 	if(!bFound)
-		emit OnPID(dwPID,sFileName,dwExitCode,dwEP,bFound);
+		emit OnPID(dwPID,QString::fromWCharArray(sFileName),dwExitCode,dwEP,bFound);
 	else
-		emit OnPID(dwPID,L"",dwExitCode,NULL,bFound);
+		emit OnPID(dwPID,"",dwExitCode,NULL,bFound);
 	return true;
 }
 
 bool clsDebugger::PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
 {
-	wstring sModName,sFuncName;
+	QString sModName,sFuncName;
 	clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,dwExceptionOffset,GetCurrentProcessHandle(dwPID));
 
 	emit OnException(sFuncName,sModName,dwExceptionOffset,dwExceptionCode,dwPID,dwTID);
@@ -106,7 +104,7 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 	if(!bLoaded && pFoundDLL != NULL)
 	{
 		pFoundDLL->bLoaded = false;
-		emit OnDll(pFoundDLL->sPath, pFoundDLL->dwPID, pFoundDLL->dwBaseAdr, false);
+		emit OnDll(QString::fromWCharArray(pFoundDLL->sPath), pFoundDLL->dwPID, pFoundDLL->dwBaseAdr, false);
 	}
 	else
 	{
@@ -119,7 +117,7 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 		newDLL.dwPID = dwPID;
 
 		DLLs.push_back(newDLL);
-		emit OnDll(newDLL.sPath, newDLL.dwPID, newDLL.dwBaseAdr, true);
+		emit OnDll(QString::fromWCharArray(newDLL.sPath), newDLL.dwPID, newDLL.dwBaseAdr, true);
 	}	
 
 	return true;
@@ -127,7 +125,7 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 
 bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
 {
-	emit OnDbgString(sMessage,dwPID);
+	emit OnDbgString(QString::fromWCharArray(sMessage),dwPID);
 
 	clsMemManager::CFree(sMessage);
 	return true;
@@ -135,6 +133,6 @@ bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
 
 bool clsDebugger::PBLogInfo()
 {
-	emit OnLog(tcLogString);
+	emit OnLog(QString::fromWCharArray(tcLogString));
 	return true;
 }

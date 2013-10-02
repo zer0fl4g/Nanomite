@@ -15,13 +15,13 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include "qtDLGTrace.h"
+#include "qtDLGNanomite.h"
 
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
 #include <QWheelEvent>
-
-using namespace std;
+#include <QMenu>
 
 qtDLGTrace *qtDLGTrace::pThis = NULL;
 
@@ -112,7 +112,7 @@ void qtDLGTrace::OnShow(int delta)
 	scrollTrace->setMaximum(m_traceData.count() - m_maxRows - 1);
 
 	int printLine = NULL;
-	std::wstring FuncName,ModName;
+	QString FuncName,ModName;
 	TraceInfoRow currentTraceData;
 	while(printLine <= m_maxRows)
 	{
@@ -134,7 +134,7 @@ void qtDLGTrace::OnShow(int delta)
 		{
 			clsHelperClass::LoadSymbolForAddr(FuncName,ModName,currentTraceData.dwOffset,qtDLGNanomite::GetInstance()->coreDebugger->GetProcessHandleByPID(currentTraceData.PID));
 			if(ModName.length() > 0 && FuncName.length() > 0)
-				currentTraceData.debugSymbols.append(QString::fromStdWString(ModName)).append(".").append(QString::fromStdWString(FuncName));
+				currentTraceData.debugSymbols.append(ModName).append(".").append(FuncName);
 		}
 
 		tblTraceLog->setItem(printLine,3,

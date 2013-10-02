@@ -18,10 +18,6 @@
 #include "clsHelperClass.h"
 #include "clsMemManager.h"
 
-#include <string>
-
-using namespace std;
-
 clsSymbolAndSyntax::clsSymbolAndSyntax(HANDLE hProc)
 {
 	_hProc = hProc;
@@ -139,13 +135,13 @@ bool clsSymbolAndSyntax::CreateDataForRow(DisAsDataRow *pDataRow)
 
 QString clsSymbolAndSyntax::CreateSymbols(quint64 FuncOffset)
 {
-	wstring sFuncName, sModName;
+	QString sFuncName, sModName;
 
 	clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,FuncOffset,_hProc);
 	
 	if(sFuncName.length() > 0 && sModName.length() > 0)
-		return QString().append(QString::fromStdWString(sModName)).append(".").append(QString::fromStdWString(sFuncName));
+		return QString().append(sModName).append(".").append(sFuncName);
 	else if(sModName.length() > 0 && sFuncName.length() == 0)
-		return QString().append(QString::fromStdWString(sModName)).append(".").append(QString("%1").arg(FuncOffset,16,16,QChar('0')));
+		return QString().append(sModName).append(".").append(QString("%1").arg(FuncOffset,16,16,QChar('0')));
 	return "";
 }

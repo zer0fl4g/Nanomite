@@ -24,10 +24,6 @@
 #include "clsSymbolAndSyntax.h"
 #include "clsBreakpointManager.h"
 
-#include <string>
-
-using namespace std;
-
 qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	: QWidget(parent)
 {
@@ -171,12 +167,12 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		}
 
 		// Update Window Title
-		wstring ModName,FuncName;
+		QString ModName,FuncName;
 		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
 		if(ModName.length() > 0 && FuncName.length() > 0)
-			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(QString().fromStdWString(FuncName)));
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(FuncName));
 		else if(ModName.length() > 0 && FuncName.length() <= 0)
-			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(QString().fromStdWString(ModName)).arg(dwEIP,16,16,QChar('0')));
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(dwEIP,16,16,QChar('0')));
 	}
 	else
 	{
@@ -365,11 +361,11 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 	}
 	else if(QString().compare(pAction->text(),"Show Source") == 0)
 	{
-		wstring fileName = L"";
+		QString fileName;
 		int lineNumber = NULL;
 		clsHelperClass::LoadSourceForAddr(fileName, lineNumber, tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16), coreDebugger->GetCurrentProcessHandle());
 
-		dlgSourceViewer->OnDisplaySource(QString::fromStdWString(fileName), lineNumber);
+		dlgSourceViewer->OnDisplaySource(fileName, lineNumber);
 		if(dlgSourceViewer->IsSourceAvailable)
 			dlgSourceViewer->show();
 		else
@@ -491,7 +487,7 @@ void qtDLGDisassembler::OnEditInstruction()
 														coreDebugger->GetCurrentProcessHandle(),
 														tblDisAs->item(selectedItem->row(),0)->text().toULongLong(0,16),
 														tblDisAs->item(selectedItem->row(),2)->text(),
-														coreDisAs,PEManager->is64BitFile(L"",coreDebugger->GetCurrentPID()));
+														coreDisAs,PEManager->is64BitFile("",coreDebugger->GetCurrentPID()));
 
 	dlgAssembler->show();
 }

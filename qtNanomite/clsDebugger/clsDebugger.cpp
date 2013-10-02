@@ -14,6 +14,8 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
+#include "qtDLGTrace.h"
+
 #include "clsDebugger.h"
 #include "dbghelp.h"
 #include "clsAPIImport.h"
@@ -56,7 +58,7 @@ clsDebugger::clsDebugger(clsBreakpointManager *pBPManager) :
 	pThis = this;
 
 	tcLogString = (PTCHAR)clsMemManager::CAlloc(LOGBUFFER);
-	_sCommandLine = L"";
+	_sCommandLine = "";
 
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
 	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
@@ -200,7 +202,7 @@ void clsDebugger::NormalDebugging()
 	if(dbgSettings.bDebugChilds == true)
 		dwCreationFlag = 0x1;
 
-	if(CreateProcess(_sTarget.c_str(),(LPWSTR)_sCommandLine.c_str(),NULL,NULL,false,dwCreationFlag,NULL,NULL,&_si,&_pi))
+	if(CreateProcess(_sTarget.toStdWString().c_str(),(LPWSTR)_sCommandLine.toStdWString().c_str(),NULL,NULL,false,dwCreationFlag,NULL,NULL,&_si,&_pi))
 		DebuggingLoop();
 	else
 	{
@@ -251,7 +253,7 @@ void clsDebugger::DebuggingLoop()
 				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,processHandle);
 				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
 
-				emit OnNewPID((wstring)tcDllFilepath,debug_event.dwProcessId);
+				emit OnNewPID(QString::fromWCharArray(tcDllFilepath),debug_event.dwProcessId);
 								
 				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
 				pCurrentPID->bSymLoad = SymInitialize(processHandle,NULL,false);
@@ -269,7 +271,7 @@ void clsDebugger::DebuggingLoop()
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
-					QList<quint64> tlsCallback = clsPEManager::getTLSCallbackOffset((wstring)tcDllFilepath,debug_event.dwProcessId);
+					QList<quint64> tlsCallback = clsPEManager::getTLSCallbackOffset(QString::fromWCharArray(tcDllFilepath),debug_event.dwProcessId);
 					if(tlsCallback.length() > 0)
 					{
 						for(int i = 0; i < tlsCallback.count(); i++)
@@ -306,7 +308,7 @@ void clsDebugger::DebuggingLoop()
 				PBProcInfo(debug_event.dwProcessId,L"",NULL,debug_event.u.ExitProcess.dwExitCode,NULL);
 				SymCleanup(GetCurrentProcessHandle(debug_event.dwProcessId));
 
-				emit DeletePEManagerObject(L"",debug_event.dwProcessId);
+				emit DeletePEManagerObject("", debug_event.dwProcessId);
 
 				bool bStillOneRunning = false;
 				for(size_t i = 0;i < PIDs.size();i++)

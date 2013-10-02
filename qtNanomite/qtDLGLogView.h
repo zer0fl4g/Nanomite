@@ -20,8 +20,6 @@
 #include <QDockWidget>
 #include <QString>
 
-#include <string>
-
 #include "ui_qtDLGLogView.h"
 
 /**
@@ -47,14 +45,6 @@ public:
 	*/
 	~qtDLGLogView();
 
-	/**
-	* @brief Is called from the OnLog Slot or if some message directly needs to be displayed
-	* @param logString The line which will be saved to gui
-	* 
-	* @return no
-	*/
-	void OnLog(QString logString);
-
 public slots:
 	/**
 	* @brief A Qt slot which is called when the user does a right click to open the
@@ -78,7 +68,7 @@ public slots:
 	* 
 	* @return no
 	*/
-	void OnLog(std::wstring logString);
+	void OnLog(QString logString);
 
 private:
 	int m_selectedRow; /* contains the selected row if the context menu was activated */

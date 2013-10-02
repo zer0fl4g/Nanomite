@@ -18,8 +18,6 @@
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 
-using namespace std;
-
 clsPEManager* clsPEManager::pThis = NULL;
 
 clsPEManager* clsPEManager::GetInstance()
@@ -32,25 +30,25 @@ clsPEManager::clsPEManager()
 	pThis = this;
 }
 
-wstring clsPEManager::getFilenameFromPID(int PID)
+QString clsPEManager::getFilenameFromPID(int PID)
 {
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
 		if(PEFiles[i].PID == PID)
 		{
 			return PEFiles[i].FileName;
 		}
 	}
-	return L"";
+	return QString("");
 }
 
-void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
+void clsPEManager::InsertPIDForFile(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0)
+		if(PEFiles[i].FileName.compare(FileName) == 0)
 		{
 			PEFiles[i].PID = PID;
 			return;
@@ -58,24 +56,24 @@ void clsPEManager::InsertPIDForFile(std::wstring FileName,int PID)
 	}
 
 	//File not found so open it (child proc)
-	OpenFile(newFileName,PID);
+	OpenFile(FileName,PID);
 }
 
-bool clsPEManager::OpenFile(std::wstring FileName,int PID)
+bool clsPEManager::OpenFile(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return false;
 	}
 
 	PEManager newPEFile;
 	bool bLoaded = false;
 
-	newPEFile.PEFile = new clsPEFile(newFileName,&bLoaded);
-	newPEFile.FileName = newFileName;
+	newPEFile.PEFile = new clsPEFile(FileName,&bLoaded);
+	newPEFile.FileName = FileName;
 	newPEFile.is64Bit = newPEFile.PEFile->is64Bit();
 	newPEFile.PID = PID;
 
@@ -90,26 +88,26 @@ bool clsPEManager::OpenFile(std::wstring FileName,int PID)
 	return true;
 }
 
-bool clsPEManager::isValidPEFile(std::wstring FileName,int PID)
+bool clsPEManager::isValidPEFile(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->isValidPEFile();
 	}
 	return false;
 }
 
-void clsPEManager::CloseFile(std::wstring FileName,int PID)
+void clsPEManager::CloseFile(QString FileName,int PID)
 {
 	if(PEFiles.size() <= 0) return;
 
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
-	for(vector<PEManager>::const_iterator it = PEFiles.cbegin(); it != PEFiles.cend(); ++it)
+	FileName.replace('/','\\');
+	for(QList<PEManager>::iterator it = PEFiles.begin(); it != PEFiles.end(); ++it)
 	{
-		if(it->FileName.compare(newFileName) == 0 || it->PID == PID) 
+		if(it->FileName.compare(FileName) == 0 || it->PID == PID) 
 		{
 			delete it->PEFile;
 			PEFiles.erase(it);
@@ -118,44 +116,44 @@ void clsPEManager::CloseFile(std::wstring FileName,int PID)
 	}
 }
 
-QList<APIData> clsPEManager::getImportsFromFile(std::wstring FileName)
+QList<APIData> clsPEManager::getImportsFromFile(QString FileName)
 {
 	return clsPEManager::pThis->getImports(FileName,0);
 }
 
-QList<APIData> clsPEManager::getImports(std::wstring FileName,int PID)
+QList<APIData> clsPEManager::getImports(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getImports();
 	}
 
 	return QList<APIData>();
 }
 
-QList<APIData> clsPEManager::getExports(std::wstring FileName,int PID)
+QList<APIData> clsPEManager::getExports(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID*/)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID*/)
 			return PEFiles[i].PEFile->getExports();
 	}
 
 	return QList<APIData>();
 }
 
-QList<IMAGE_SECTION_HEADER> clsPEManager::getSections(std::wstring FileName,int PID)
+QList<IMAGE_SECTION_HEADER> clsPEManager::getSections(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getSections();
 	}
 
@@ -169,18 +167,18 @@ clsPEManager::~clsPEManager()
 
 void clsPEManager::CleanPEManager()
 {
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 		delete PEFiles[i].PEFile;
 	PEFiles.clear();
 }
 
-IMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
+IMAGE_DOS_HEADER clsPEManager::getDosHeader(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getDosHeader();
 	}
 
@@ -188,13 +186,13 @@ IMAGE_DOS_HEADER clsPEManager::getDosHeader(std::wstring FileName,int PID)
 	return failed;
 }
 
-IMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
+IMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getNTHeader32();
 	}
 
@@ -202,13 +200,13 @@ IMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(std::wstring FileName,int PID)
 	return failed;
 }
 
-IMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
+IMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 			return PEFiles[i].PEFile->getNTHeader64();
 	}
 
@@ -216,25 +214,25 @@ IMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(std::wstring FileName,int PID)
 	return failed;
 }
 
-bool clsPEManager::is64BitFile(std::wstring FileName,int PID)
+bool clsPEManager::is64BitFile(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 || PEFiles[i].PID == PID)
+		if(PEFiles[i].FileName.compare(FileName) == 0 || PEFiles[i].PID == PID)
 			return PEFiles[i].is64Bit;
 	}
 	return false;
 }
 
-DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
+DWORD64 clsPEManager::VAtoRaw(QString FileName,int PID, DWORD64 RVAOffset)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < PEFiles.size(); i++)
+	for(int i = 0; i < PEFiles.size(); i++)
 	{
-		if(PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 		{
 			return PEFiles[i].PEFile->VAtoRaw(RVAOffset);
 		}
@@ -242,13 +240,13 @@ DWORD64 clsPEManager::VAtoRaw(std::wstring FileName,int PID, DWORD64 RVAOffset)
 	return NULL;
 }
 
-QList<DWORD64> clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
+QList<DWORD64> clsPEManager::getTLSCallbackOffset(QString FileName,int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < pThis->PEFiles.size(); i++)
+	for(int i = 0; i < pThis->PEFiles.size(); i++)
 	{
-		if(pThis->PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(pThis->PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 		{
 			return pThis->PEFiles[i].PEFile->getTLSCallbackOffset();
 		}
@@ -257,13 +255,13 @@ QList<DWORD64> clsPEManager::getTLSCallbackOffset(std::wstring FileName,int PID)
 	return QList<DWORD64>();
 }
 
-float clsPEManager::getEntropie(std::wstring FileName, int PID)
+float clsPEManager::getEntropie(QString FileName, int PID)
 {
-	wstring newFileName = clsHelperClass::replaceAll(FileName,'/','\\');
+	FileName.replace('/','\\');
 
-	for(size_t i = 0; i < pThis->PEFiles.size(); i++)
+	for(int i = 0; i < pThis->PEFiles.size(); i++)
 	{
-		if(pThis->PEFiles[i].FileName.compare(newFileName) == 0 /* || PEFiles[i].PID == PID */)
+		if(pThis->PEFiles[i].FileName.compare(FileName) == 0 /* || PEFiles[i].PID == PID */)
 		{
 			return pThis->PEFiles[i].PEFile->getEntropie();
 		}

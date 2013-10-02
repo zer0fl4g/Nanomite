@@ -21,10 +21,6 @@
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
 
-#include <string>
-
-using namespace std;
-
 qtDLGStack::qtDLGStack(QWidget *parent)
 	: QDockWidget(parent),
 	m_pCoreDebugger(qtDLGNanomite::GetInstance()->coreDebugger)
@@ -52,7 +48,7 @@ qtDLGStack::~qtDLGStack()
 
 void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 {
-	wstring sFuncName,sModName;
+	QString sFuncName,sModName;
 	HANDLE	hProcess		= m_pCoreDebugger->GetCurrentProcessHandle();
 	int		maxRows			= (tblStack->verticalHeader()->height() / 11) - 1;
 	DWORD	dwSize			= (maxRows + 1) * stackAlign;
@@ -101,7 +97,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 		clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,QString::fromWCharArray(sTemp).toULongLong(0,16),hProcess);
 		if(sFuncName.length() > 0 && sModName.length() > 0)
 			tblStack->setItem(lineCount, 2,
-			new QTableWidgetItem(QString::fromStdWString(sModName).append(".").append(QString::fromStdWString(sFuncName))));
+			new QTableWidgetItem(sModName.append(".").append(sFuncName)));
 		else
 			tblStack->setItem(lineCount, 2, new QTableWidgetItem(""));
 

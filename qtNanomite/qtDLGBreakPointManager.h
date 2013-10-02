@@ -102,7 +102,7 @@ public slots:
 	*
 	* @return no
 	*/
-	void UpdateCompleter(std::wstring FilePath, int processID);
+	void UpdateCompleter(QString FilePath, int processID);
 
 private:
 	QStringList	m_completerList; /* a QStringList which contains all the imports of the loaded processes */

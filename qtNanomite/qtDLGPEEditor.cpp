@@ -21,7 +21,7 @@
 #include "clsPEManager.h"
 #include "clsHelperClass.h"
 
-qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID, std::wstring FileName)
+qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID, QString FileName)
 	: QWidget(parent,flags)
 {
 	setupUi(this);
@@ -53,7 +53,7 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 			close();
 		}
 
-		this->setWindowTitle(QString("[Nanomite] - PEEditor - FileName: %1").arg(QString::fromStdWString(m_currentFile)));
+		this->setWindowTitle(QString("[Nanomite] - PEEditor - FileName: %1").arg(m_currentFile));
 
 		InitList();
 		LoadPEView();
@@ -134,7 +134,7 @@ void qtDLGPEEditor::InsertExports()
 
 	QTreeWidgetItem *topElement,
 					*exportElement;
-	PTCHAR currentFileBase = clsHelperClass::reverseStrip((PTCHAR)m_currentFile.c_str(),'\\');
+	PTCHAR currentFileBase = clsHelperClass::reverseStrip((PTCHAR)m_currentFile.toStdWString().c_str(),'\\');
 	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule(currentFileBase,NULL,m_processID);
 
 	topElement = new QTreeWidgetItem();

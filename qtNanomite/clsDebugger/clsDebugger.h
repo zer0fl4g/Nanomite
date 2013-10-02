@@ -17,7 +17,6 @@
 #ifndef CLSDEBUGGER
 #define CLSDEBUGGER
 
-#include <string>
 #include <vector>
 #include <Windows.h>
 #include <time.h>
@@ -162,16 +161,16 @@ public:
 		
 	void ClearTarget();
 	void ClearCommandLine();
-	void SetTarget(std::wstring sTarget);
-	void SetCommandLine(std::wstring sCommandLine);
+	void SetTarget(QString sTarget);
+	void SetCommandLine(QString sCommandLine);
 	void CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,quint64 dwHandler);
 	void CustomExceptionRemove(DWORD dwExceptionType);
 	void CustomExceptionRemoveAll();
 
 	HANDLE GetCurrentProcessHandle();
 
-	std::wstring GetTarget();
-	std::wstring GetCMDLine();
+	QString GetTarget();
+	QString GetCMDLine();
 
 public slots:
 	void HandleForException(int handleException);
@@ -181,13 +180,13 @@ signals:
 	void OnDebuggerTerminated();
 	void AskForException(DWORD exceptionCode);
 	void OnThread(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,bool bFound);
-	void OnPID(DWORD dwPID,std::wstring sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
-	void OnException(std::wstring sFuncName,std::wstring sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	void OnDbgString(std::wstring sMessage,DWORD dwPID);
-	void OnLog(std::wstring sLog);
-	void OnDll(std::wstring sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
-	void OnNewPID(std::wstring,int);
-	void DeletePEManagerObject(std::wstring,int);
+	void OnPID(DWORD dwPID,QString sFile,DWORD dwExitCode,quint64 dwEP,bool bFound);
+	void OnException(QString sFuncName,QString sModName,quint64 dwOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
+	void OnDbgString(QString sMessage,DWORD dwPID);
+	void OnLog(QString sLog);
+	void OnDll(QString sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
+	void OnNewPID(QString,int);
+	void DeletePEManagerObject(QString,int);
 	void CleanPEManager();
 	void UpdateOffsetsPatches(HANDLE hProc, int PID);
 
@@ -197,8 +196,8 @@ private:
 	clsBreakpointManager *m_pBreakpointManager;
 
 	PTCHAR tcLogString;
-	std::wstring _sTarget;
-	std::wstring _sCommandLine;
+	QString _sTarget;
+	QString _sCommandLine;
 
 	STARTUPINFO _si;
 	PROCESS_INFORMATION _pi;

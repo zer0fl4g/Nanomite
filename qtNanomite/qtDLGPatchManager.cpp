@@ -486,14 +486,14 @@ bool qtDLGPatchManager::SavePatchToFile(QString patchFilePath, QString currentFi
 	}
 
 	clsPEManager *pPEManager = clsPEManager::GetInstance();
-	DWORD64 rawOffset = pPEManager->VAtoRaw(currentFilePath.toStdWString().c_str(),NULL,currentPatch->Offset - currentPatch->BaseOffset);
+	DWORD64 rawOffset = pPEManager->VAtoRaw(currentFilePath,NULL,currentPatch->Offset - currentPatch->BaseOffset);
 	if(rawOffset <= 0)
 	{
-		pPEManager->OpenFile(currentFilePath.toStdWString());
+		pPEManager->OpenFile(currentFilePath);
 
-		rawOffset = pPEManager->VAtoRaw(currentFilePath.toStdWString().c_str(),NULL,currentPatch->Offset - currentPatch->BaseOffset);
+		rawOffset = pPEManager->VAtoRaw(currentFilePath,NULL,currentPatch->Offset - currentPatch->BaseOffset);
 		
-		pPEManager->CloseFile(currentFilePath.toStdWString(),-1);
+		pPEManager->CloseFile(currentFilePath,-1);
 	}
 
 	DWORD64 fileDataOffset = (DWORD64)lpFileBuffer + rawOffset;
