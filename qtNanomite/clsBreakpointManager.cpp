@@ -162,6 +162,8 @@ bool clsBreakpointManager::BreakpointRemove(DWORD64 breakpointOffset, DWORD brea
 
 bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType)
 {
+	if(breakpointOffset == NULL) return false;
+
 	bool	bExists		= false,
 			bRetValue	= false;
 

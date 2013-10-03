@@ -51,16 +51,16 @@ clsDebugger::clsDebugger(clsBreakpointManager *pBPManager) :
 
 	ZeroMemory(&dbgSettings, sizeof(clsDebuggerSettings));
 
-	_NormalDebugging = true;
-	_isDebugging = false;
+	m_normalDebugging = true;
+	m_isDebugging = false;
 	m_debuggerBreak = false;
 	
 	pThis = this;
 
-	_sCommandLine = "";
+	m_commandLine = "";
 
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
-	_hDbgEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
+	m_debugEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
 	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
 }
@@ -70,7 +70,7 @@ clsDebugger::~clsDebugger()
 	CleanWorkSpace();
 	
 	CloseHandle(m_waitForGUI);
-	CloseHandle(_hDbgEvent);
+	CloseHandle(m_debugEvent);
 }
 
 void clsDebugger::CleanWorkSpace()
@@ -154,23 +154,23 @@ PTCHAR clsDebugger::GetFileNameFromModuleBase(HANDLE processHandle, LPVOID image
 
 void clsDebugger::run()
 {
-	_bStopDebugging = false;
-	if(_dwPidToAttach != 0 && !_NormalDebugging)
+	m_stopDebugging = false;
+	if(m_attachPID != 0 && !m_normalDebugging)
 	{
 		CleanWorkSpace();
-		_isDebugging = true;
-		_bSingleStepFlag = false;
+		m_isDebugging = true;
+		m_singleStepFlag = false;
 
 		AttachedDebugging();
 	}	
 	else
 	{
-		if(_sTarget.length() <= 0 || _isDebugging)
+		if(m_targetFile.length() <= 0 || m_isDebugging)
 			return;
 
 		CleanWorkSpace();
-		_isDebugging = true;
-		_bSingleStepFlag = false;
+		m_isDebugging = true;
+		m_singleStepFlag = false;
 		
 		NormalDebugging();
 	}
@@ -178,16 +178,16 @@ void clsDebugger::run()
 
 void clsDebugger::AttachedDebugging()
 {
-	if(CheckProcessState(_dwPidToAttach) && DebugActiveProcess(_dwPidToAttach))
+	if(CheckProcessState(m_attachPID) && DebugActiveProcess(m_attachPID))
 	{
 		emit OnLog("[+] Attached to Process");
 
 		DebuggingLoop();
-		_NormalDebugging = true;
+		m_normalDebugging = true;
 		return;
 	}
 
-	_isDebugging = false;
+	m_isDebugging = false;
 	emit OnDebuggerTerminated();
 }
 
@@ -198,11 +198,11 @@ void clsDebugger::NormalDebugging()
 	if(dbgSettings.bDebugChilds == true)
 		dwCreationFlag = 0x1;
 
-	if(CreateProcess(_sTarget.toStdWString().c_str(),(LPWSTR)_sCommandLine.toStdWString().c_str(),NULL,NULL,false,dwCreationFlag,NULL,NULL,&_si,&_pi))
+	if(CreateProcess(m_targetFile.toStdWString().c_str(),(LPWSTR)m_commandLine.toStdWString().c_str(),NULL,NULL,false,dwCreationFlag,NULL,NULL,&_si,&_pi))
 		DebuggingLoop();
 	else
 	{
-		_isDebugging = false;
+		m_isDebugging = false;
 		emit OnDebuggerTerminated();
 	}
 }
@@ -216,14 +216,14 @@ void clsDebugger::DebuggingLoop()
 
 	DebugSetProcessKillOnExit(false);
 
-	while(bContinueDebugging && _isDebugging)
+	while(bContinueDebugging && m_isDebugging)
 	{ 
 		if (!WaitForDebugEvent(&debug_event, INFINITE))
 			bContinueDebugging = false;
 
-		if(_bStopDebugging)
+		if(m_stopDebugging)
 		{
-			_bStopDebugging = false;
+			m_stopDebugging = false;
 			DebugActiveProcessStop(debug_event.dwProcessId);
 			ContinueDebugEvent(debug_event.dwProcessId,debug_event.dwThreadId,DBG_CONTINUE);
 			break;
@@ -480,7 +480,7 @@ void clsDebugger::DebuggingLoop()
 										m_pBreakpointManager->BreakpointRemove(pCurrentBP->dwOffset,SOFTWARE_BP);
 										break;
 									case BP_TRACETO: // Trace End BP
-										_bSingleStepFlag = false;
+										m_singleStepFlag = false;
 
 										m_pBreakpointManager->BreakpointRemove(pCurrentBP->dwOffset,SOFTWARE_BP);
 										break;
@@ -537,16 +537,16 @@ void clsDebugger::DebuggingLoop()
 				case 0x4000001E: // Single Step in x86 Process which got executed in a x64 environment
 				case EXCEPTION_SINGLE_STEP:
 					{
-						if(pCurrentPID->bTraceFlag && _bSingleStepFlag)
+						if(pCurrentPID->bTraceFlag && m_singleStepFlag)
 						{
 							bIsBP = true;
 							SetThreadContextHelper(false, true, debug_event.dwThreadId, pCurrentPID);
 							qtDLGTrace::addTraceData((quint64)exInfo.ExceptionAddress, debug_event.dwProcessId, debug_event.dwThreadId);
 							break;
 						}
-						else if(_bSingleStepFlag)
+						else if(m_singleStepFlag)
 						{
-							_bSingleStepFlag = false;
+							m_singleStepFlag = false;
 							bIsBP = true;
 
 							dwContinueStatus = CallBreakDebugger(&debug_event,0);
@@ -780,7 +780,7 @@ void clsDebugger::DebuggingLoop()
 		dwContinueStatus = DBG_CONTINUE;
 	}
 
-	_isDebugging = false;
+	m_isDebugging = false;
 
 	emit OnLog("[-] Debugging finished!");
 
@@ -797,23 +797,23 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 	case 0:
 		{
 			HANDLE hThread = OpenThread(THREAD_GETSET_CONTEXT,false,debug_event->dwThreadId);
-			_dwCurPID = debug_event->dwProcessId;
-			_dwCurTID = debug_event->dwThreadId;
-			_hCurProc = GetCurrentProcessHandle(debug_event->dwProcessId);
+			m_currentPID = debug_event->dwProcessId;
+			m_currentTID = debug_event->dwThreadId;
+			m_currentProcess = GetCurrentProcessHandle(debug_event->dwProcessId);
 			m_debuggerBreak = true;
 
 #ifdef _AMD64_
 			BOOL bIsWOW64 = false;
 
 			if(clsAPIImport::pIsWow64Process)
-				clsAPIImport::pIsWow64Process(_hCurProc,&bIsWOW64);
+				clsAPIImport::pIsWow64Process(m_currentProcess,&bIsWOW64);
 			if(bIsWOW64)
 			{
 				wowProcessContext.ContextFlags = WOW64_CONTEXT_ALL;
 				clsAPIImport::pWow64GetThreadContext(hThread,&wowProcessContext);
 
 				emit OnDebuggerBreak();
-				WaitForSingleObject(_hDbgEvent,INFINITE);
+				WaitForSingleObject(m_debugEvent,INFINITE);
 				clsAPIImport::pWow64SetThreadContext(hThread,&wowProcessContext);
 			}
 			else
@@ -822,7 +822,7 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 				GetThreadContext(hThread,&ProcessContext);
 
 				emit OnDebuggerBreak();
-				WaitForSingleObject(_hDbgEvent,INFINITE);
+				WaitForSingleObject(m_debugEvent,INFINITE);
 				SetThreadContext(hThread,&ProcessContext);
 			}
 
@@ -831,10 +831,10 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 			GetThreadContext(hThread,&ProcessContext);
 
 			emit OnDebuggerBreak();
-			WaitForSingleObject(_hDbgEvent,INFINITE);
+			WaitForSingleObject(m_debugEvent,INFINITE);
 			SetThreadContext(hThread,&ProcessContext);
 #endif
-			_dwCurPID = NULL;_dwCurTID = NULL;_hCurProc = NULL;
+			m_currentPID = NULL;m_currentTID = NULL;m_currentProcess = NULL;
 			m_debuggerBreak = false;
 
 			CloseHandle(hThread);
@@ -888,7 +888,7 @@ bool clsDebugger::CheckIfExceptionIsBP(PIDStruct *pCurrentPID, quint64 dwExcepti
 			pCurrentPID->bTrapFlag = false;
 		return true;
 	}
-	else if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && _bSingleStepFlag)
+	else if((dwExceptionType == EXCEPTION_SINGLE_STEP || dwExceptionType == 0x4000001e) && m_singleStepFlag)
 	{
 		return isExceptionRelevant;
 	}

@@ -19,7 +19,6 @@
 
 #include <vector>
 #include <Windows.h>
-#include <time.h>
 #include <QtCore>
 
 #include "../clsBreakpointManager.h"
@@ -195,23 +194,23 @@ private:
 
 	clsBreakpointManager *m_pBreakpointManager;
 
-	QString _sTarget;
-	QString _sCommandLine;
+	QString m_targetFile;
+	QString m_commandLine;
 
 	STARTUPINFO _si;
 	PROCESS_INFORMATION _pi;
 	PROCESS_INFORMATION m_dbgPI;
-	bool _isDebugging;
-	bool _NormalDebugging;
-	bool _bStopDebugging;
-	bool _bSingleStepFlag;
+	bool m_isDebugging;
+	bool m_normalDebugging;
+	bool m_stopDebugging;
+	bool m_singleStepFlag;
 	bool m_debuggerBreak;
-	HANDLE _hDbgEvent;
-	HANDLE _hCurProc;
+	HANDLE m_debugEvent;
+	HANDLE m_currentProcess;
 	HANDLE m_waitForGUI;
-	DWORD _dwPidToAttach;
-	DWORD _dwCurPID;
-	DWORD _dwCurTID;
+	DWORD m_attachPID;
+	DWORD m_currentPID;
+	DWORD m_currentTID;
 	 
 	int m_continueWithException;
 

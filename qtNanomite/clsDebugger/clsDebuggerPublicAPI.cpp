@@ -27,9 +27,9 @@ using namespace std;
 
 bool clsDebugger::DetachFromProcess()
 {
-	_NormalDebugging = true;
+	m_normalDebugging = true;
 	//_isDebugging = false;
-	_bStopDebugging = true;
+	m_stopDebugging = true;
 
 	m_pBreakpointManager->BreakpointClear();
 
@@ -39,7 +39,7 @@ bool clsDebugger::DetachFromProcess()
 			break;
 		DebugBreakProcess(PIDs[d].hProc);
 		//DebugActiveProcessStop(PIDs[d].dwPID);
-		PulseEvent(_hDbgEvent);
+		PulseEvent(m_debugEvent);
 	}
 
 	//emit OnDebuggerTerminated();
@@ -49,7 +49,7 @@ bool clsDebugger::DetachFromProcess()
 bool clsDebugger::AttachToProcess(DWORD dwPID)
 {
 	CleanWorkSpace();
-	_NormalDebugging = false;_dwPidToAttach = dwPID;
+	m_normalDebugging = false;m_attachPID = dwPID;
 	return true;
 }
 
@@ -97,7 +97,7 @@ bool clsDebugger::StopDebuggingAll()
 {
 	for(size_t i = 0;i < PIDs.size();i++)
 		StopDebugging(PIDs[i].dwPID);
-	return PulseEvent(_hDbgEvent);
+	return PulseEvent(m_debugEvent);
 }
 
 bool clsDebugger::StopDebugging(DWORD dwPID)
@@ -118,12 +118,12 @@ bool clsDebugger::ResumeDebugging()
 {
 	for(size_t i = 0;i < PIDs.size(); i++)
 		SuspendProcess(PIDs[i].dwPID,false);
-	return PulseEvent(_hDbgEvent);
+	return PulseEvent(m_debugEvent);
 }
 
 bool clsDebugger::GetDebuggingState()
 {
-	if(_isDebugging == true)
+	if(m_isDebugging == true)
 		return true;
 	else
 		return false;
@@ -131,23 +131,23 @@ bool clsDebugger::GetDebuggingState()
 
 bool clsDebugger::IsTargetSet()
 {
-	if(_sTarget.length() > 0)
+	if(m_targetFile.length() > 0)
 		return true;
 	return false;
 }
 
 bool clsDebugger::StepOver(quint64 dwNewOffset)
 {
-	if(!m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, _dwCurPID, dwNewOffset, 1, BP_STEPOVER))
+	if(!m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, m_currentPID, dwNewOffset, 1, BP_STEPOVER))
 		return false;
 
-	PulseEvent(_hDbgEvent);
+	PulseEvent(m_debugEvent);
 	return true;
 }
 
 bool clsDebugger::StepIn()
 {
-	_bSingleStepFlag = true;
+	m_singleStepFlag = true;
 
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
@@ -162,24 +162,24 @@ bool clsDebugger::StepIn()
 	ProcessContext.EFlags |= 0x100;
 #endif
 
-	return PulseEvent(_hDbgEvent);
+	return PulseEvent(m_debugEvent);
 }
 
 void clsDebugger::ClearTarget()
 {
-	_sTarget.clear();
+	m_targetFile.clear();
 }
 
 void clsDebugger::SetTarget(QString sTarget)
 {
-	_sTarget = sTarget;
-	_NormalDebugging = true;
+	m_targetFile = sTarget;
+	m_normalDebugging = true;
 }
 
 DWORD clsDebugger::GetCurrentPID()
 {
 	if(pThis->IsDebuggerSuspended())
-		return pThis->_dwCurPID;
+		return pThis->m_currentPID;
 	else
 		return pThis->GetMainProcessID();
 }
@@ -187,37 +187,37 @@ DWORD clsDebugger::GetCurrentPID()
 DWORD clsDebugger::GetCurrentTID()
 {
 	if(pThis->IsDebuggerSuspended())
-		return pThis->_dwCurTID;
+		return pThis->m_currentTID;
 	else
 		return pThis->GetMainThreadID();
 }
 
 void clsDebugger::SetCommandLine(QString CommandLine)
 {
-	_sCommandLine = CommandLine;
+	m_commandLine = CommandLine;
 }
 
 void clsDebugger::ClearCommandLine()
 {
-	_sCommandLine.clear();
+	m_commandLine.clear();
 }
 
 HANDLE clsDebugger::GetCurrentProcessHandle()
 {
 	if(IsDebuggerSuspended())
-		return _hCurProc;
+		return m_currentProcess;
 	else
 		return GetProcessHandleByPID(-1);
 }
 
 QString clsDebugger::GetCMDLine()
 {
-	return _sCommandLine;
+	return m_commandLine;
 }
 
 QString clsDebugger::GetTarget()
 {
-	return _sTarget;
+	return m_targetFile;
 }
 
 bool clsDebugger::SetTraceFlagForPID(DWORD dwPID,bool bIsEnabled)

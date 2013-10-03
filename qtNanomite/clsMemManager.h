@@ -26,8 +26,7 @@
 //#define MEMLEAKTRACE 
 #ifdef MEMLEAKTRACE   
 #include <dbghelp.h> 
-#include <string> 
-  
+
 #include <QList> 
 #include <QMap> 
 #include <QString> 

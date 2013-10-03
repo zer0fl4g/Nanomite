@@ -429,7 +429,7 @@ void qtDLGNanomite::closeEvent(QCloseEvent* closeEvent)
 void qtDLGNanomite::ParseCommandLineArgs()
 {
 	PTCHAR currentCommandLine = GetCommandLineW();
-	QStringList splittedCommandLine = QString::fromWCharArray(currentCommandLine,wcslen(currentCommandLine)).split(" ");
+	QStringList splittedCommandLine = QString::fromWCharArray(currentCommandLine, wcslen(currentCommandLine)).split(" ");
 
 	for(QStringList::const_iterator i = splittedCommandLine.constBegin(); i != splittedCommandLine.constEnd(); ++i)
 	{

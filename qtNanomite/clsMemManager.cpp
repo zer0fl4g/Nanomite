@@ -125,8 +125,6 @@ void* clsMemManager::CAlloc(size_t ulSize)
 
 	IMAGEHLP_LINEW64 imgSource = {0}; 
 	IMAGEHLP_MODULEW64 imgMod = {0}; 
-	std::wstring sFuncName, 
-        sFuncMod;
     quint64 dwReturnTo, 
         dwEIP, 
         dwDisplacement; 
@@ -165,15 +163,13 @@ void* clsMemManager::CAlloc(size_t ulSize)
         pSymbol->MaxNameLen = MAX_PATH;
   
         bSuccess = SymGetModuleInfoW64(hProc,dwEIP,&imgMod); 
-        bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol); 
-        sFuncName = pSymbol->Name;        
-        sFuncMod = imgMod.ModuleName;        
+        bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);    
 
         callstackdata newCallstack;
         newCallstack.callFrom = dwReturnTo; 
         newCallstack.currentOffset = dwEIP; 
-        newCallstack.functionName = QString().fromStdWString(sFuncName); 
-        newCallstack.moduleName = QString().fromStdWString(sFuncMod);
+        newCallstack.functionName = QString::fromWCharArray(pSymbol->Name); 
+        newCallstack.moduleName = QString::fromWCharArray(imgMod.ModuleName);
 
 		memset(&imgSource,0,sizeof(IMAGEHLP_LINEW64)); 
 		imgSource.SizeOfStruct = sizeof(IMAGEHLP_LINEW64); 
@@ -181,7 +177,7 @@ void* clsMemManager::CAlloc(size_t ulSize)
 		bSuccess = SymGetLineFromAddrW64(hProc,dwEIP,(PDWORD)&dwDisplacement,&imgSource); 
 		if(bSuccess)
 		{
-			newCallstack.sourceFile = QString().fromStdWString(imgSource.FileName);
+			newCallstack.sourceFile = QString::fromWCharArray(imgSource.FileName);
 			newCallstack.sourceLine = imgSource.LineNumber;
 		}
 
