@@ -512,6 +512,15 @@
     <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsBreakpointManager.cpp">
       <Filter>Generierte Dateien\Release</Filter>
     </ClCompile>
+    <ClCompile Include="qtDLGBookmark.cpp">
+      <Filter>Source Dateien\Dialogs</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_qtDLGBookmark.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_qtDLGBookmark.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -763,6 +772,12 @@
     <CustomBuild Include="clsBreakpointManager.h">
       <Filter>Header Dateien</Filter>
     </CustomBuild>
+    <CustomBuild Include="qtDLGBookmark.ui">
+      <Filter>Form Dateien</Filter>
+    </CustomBuild>
+    <CustomBuild Include="qtDLGBookmark.h">
+      <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="NativeHeaders.h">
@@ -914,6 +929,9 @@
     </ClInclude>
     <ClInclude Include="clsBreakpointHardware.h">
       <Filter>Header Dateien</Filter>
+    </ClInclude>
+    <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGBookmark.h">
+      <Filter>Generierte Dateien</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>

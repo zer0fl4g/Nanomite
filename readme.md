@@ -97,11 +97,14 @@
 ###Version 0.1 beta 16
 + fixed a bug which can lead to a access violation in the debugge when using step over while debugge was running
 + fixed a bug which can lead to a crash when using more than one memory breakpoint
++ fixed a bug which lead to a lost commandline when restarting as admin
 + added space shortcut in disassembly view to edit instruction
 + added error message if x86 build wants to load x64 binarys
 + added entropy check to display a warning if a (may) packed or crypted file will be started
 + added support for different breakpoint sizes
 + added resolving of drag n dropped .lnk files
++ added bookmarks
++ added comments
 
 ####Notes:
 	- Supported breakpoint sizes are 1,2 and 4 bytes for software and hardware breakpoints

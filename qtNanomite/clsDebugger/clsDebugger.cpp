@@ -1078,25 +1078,37 @@ HANDLE clsDebugger::GetProcessHandleByPID(DWORD PID)
 
 bool clsDebugger::IsOffsetEIP(quint64 Offset)
 {
-#ifdef _AMD64_
-	BOOL bIsWOW64 = false;
-	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(pThis->GetCurrentProcessHandle(),&bIsWOW64);
+//#ifdef _AMD64_
+//	BOOL bIsWOW64 = false;
+//	if(clsAPIImport::pIsWow64Process)
+//		clsAPIImport::pIsWow64Process(pThis->GetCurrentProcessHandle(),&bIsWOW64);
+//
+//	if(bIsWOW64)
+//	{
+//		if(pThis->wowProcessContext.Eip == Offset)
+//			return true;
+//	}
+//	else
+//	{
+//		if(pThis->ProcessContext.Rip == Offset)
+//			return true;
+//	}
+//#else
+//	if(pThis->ProcessContext.Eip == Offset)
+//		return true;
+//#endif	
 
-	if(bIsWOW64)
-	{
-		if(pThis->wowProcessContext.Eip == Offset)
-			return true;
-	}
-	else
-	{
-		if(pThis->ProcessContext.Rip == Offset)
-			return true;
-	}
+#ifdef _AMD64_
+	if(pThis->wowProcessContext.Eip == Offset)
+		return true;
+
+	if(pThis->ProcessContext.Rip == Offset)
+		return true;
 #else
 	if(pThis->ProcessContext.Eip == Offset)
 		return true;
-#endif	
+#endif
+
 	return false;
 }
 

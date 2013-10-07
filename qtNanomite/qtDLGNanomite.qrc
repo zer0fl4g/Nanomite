@@ -1,5 +1,6 @@
 <RCC>
   <qresource prefix="DLGNanomite">
+    <file>../Icons/ID_Bookmarks.ico</file>
     <file>../Icons/ID_Privileges.ico</file>
     <file>../Icons/ID_PatchManager.ico</file>
     <file>../Icons/ID_Functions.ico</file>

@@ -18,6 +18,7 @@
 #include "qtDLGAssembler.h"
 #include "qtDLGNanomite.h"
 #include "qtDLGGoToDialog.h"
+#include "qtDLGBookmark.h"
 
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
@@ -89,7 +90,6 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 	if(coreDisAs->SectionDisAs.count() > 0 && dwEIP != 0)
 	{
 		m_lastEIP = dwEIP;
-		bool IsAlreadyEIPSet = false;
 		int lineCount = 0;
 
 		QMap<QString,DisAsDataRow>::const_iterator disassemblyDataCurrent = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
@@ -128,6 +128,10 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		}
 
 		quint64 itemStyle;
+		int processID = clsDebugger::GetCurrentPID();
+		QString bookmarkComment;
+		bool IsAlreadyEIPSet = false;
+
 		while(lineCount <= m_maxRows)
 		{
 			itemStyle = disassemblyDataCurrent.value().itemStyle;
@@ -145,6 +149,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			tblDisAs->setItem(lineCount, 1,new QTableWidgetItem(disassemblyDataCurrent.value().OpCodes));
 
 			tblDisAs->setItem(lineCount, 2,new QTableWidgetItem(disassemblyDataCurrent.value().ASM));
+
 			if(itemStyle & COLOR_CALLS)
 				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorCall));
 			else if(itemStyle & COLOR_JUMP)
@@ -156,7 +161,13 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			else if(itemStyle & COLOR_MATH)
 				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMath));
 
-			tblDisAs->setItem(lineCount, 3,new QTableWidgetItem(disassemblyDataCurrent.value().Comment));
+			
+			bookmarkComment = qtDLGBookmark::BookmarkGetComment(processID, disassemblyDataCurrent.value().Offset.toULongLong(0,16));
+			if(bookmarkComment.length() <= 0)
+				tblDisAs->setItem(lineCount, 3, new QTableWidgetItem(disassemblyDataCurrent.value().Comment));
+			else
+				tblDisAs->setItem(lineCount, 3, new QTableWidgetItem(bookmarkComment));
+
 
 			++lineCount;++disassemblyDataCurrent;
 			if(disassemblyDataCurrent == disassemblyDataEnd)
@@ -170,9 +181,9 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		QString ModName,FuncName;
 		clsHelperClass::LoadSymbolForAddr(FuncName,ModName,dwEIP,coreDebugger->GetCurrentProcessHandle());
 		if(ModName.length() > 0 && FuncName.length() > 0)
-			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(FuncName));
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(processID,6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(FuncName));
 		else if(ModName.length() > 0 && FuncName.length() <= 0)
-			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(clsDebugger::GetCurrentPID(),6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(dwEIP,16,16,QChar('0')));
+			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(processID,6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(dwEIP,16,16,QChar('0')));
 	}
 	else
 	{
@@ -270,19 +281,21 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	if(m_iSelectedRow < 0) return;
 
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
-	submenu->addAction(new QAction("Line",this));
-	submenu->addAction(new QAction("Offset",this));
-	submenu->addAction(new QAction("OpCodes",this));
-	submenu->addAction(new QAction("Mnemonic",this));
-	submenu->addAction(new QAction("Comment",this));
+	submenu->addAction(new QAction("Line", this));
+	submenu->addAction(new QAction("Offset", this));
+	submenu->addAction(new QAction("OpCodes", this));
+	submenu->addAction(new QAction("Mnemonic", this));
+	submenu->addAction(new QAction("Comment", this));
 
 	menu.addMenu(submenu);
-	menu.addAction(new QAction("Edit Instruction",this));	
-	menu.addAction(new QAction("Goto Offset / Function",this));
-	menu.addAction(new QAction("Set R/EIP to this",this));
-	menu.addAction(new QAction("Show Source",this));	
+	menu.addAction(new QAction("Edit Instruction", this));	
+	menu.addAction(new QAction("Goto Offset / Function", this));
+	menu.addAction(new QAction("Set Comment", this));
+	menu.addAction(new QAction("Set Bookmark", this));
+	menu.addAction(new QAction("Set R/EIP to this", this));
+	menu.addAction(new QAction("Show Source", this));	
 	menu.addAction(new QAction("Toggle SW Breakpoint", this));
-	menu.addAction(new QAction("Trace to this",this));
+	menu.addAction(new QAction("Trace to this", this));
 	
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
 
@@ -308,6 +321,17 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		coreDebugger->ProcessContext.Eip = tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16);
 #endif
 		emit OnDebuggerBreak();
+	}
+	else if(QString().compare(pAction->text(),"Set Bookmark") == 0)
+	{
+		qtDLGBookmark::BookmarkAdd(coreDebugger->GetCurrentPID(), tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16));
+	}
+	else if(QString().compare(pAction->text(),"Set Comment") == 0)
+	{
+		QString commentString = QInputDialog::getText(this, "Nanomite", "Comment:");
+
+		if(commentString.length() > 0)
+			qtDLGBookmark::BookmarkAdd(coreDebugger->GetCurrentPID(), tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16), commentString);
 	}
 	else if(QString().compare(pAction->text(),"Trace to this") == 0)
 	{

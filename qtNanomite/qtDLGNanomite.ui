@@ -140,6 +140,7 @@
     </property>
     <addaction name="actionWindow_Detail_Information"/>
     <addaction name="actionWindow_Breakpoint_Manager"/>
+    <addaction name="actionWindow_Show_Bookmarks"/>
     <addaction name="separator"/>
     <addaction name="actionWindow_Show_Memory"/>
     <addaction name="actionWindow_Show_Heap"/>
@@ -182,6 +183,7 @@
    <addaction name="actionWindow_Detail_Information"/>
    <addaction name="actionWindow_Breakpoint_Manager"/>
    <addaction name="actionWindow_Show_Patches"/>
+   <addaction name="actionWindow_Show_Bookmarks"/>
    <addaction name="separator"/>
    <addaction name="actionDebug_Trace_Start"/>
    <addaction name="actionDebug_Trace_Stop"/>
@@ -520,6 +522,15 @@
   <action name="actionOptions_Update">
    <property name="text">
     <string>Update</string>
+   </property>
+  </action>
+  <action name="actionWindow_Show_Bookmarks">
+   <property name="icon">
+    <iconset resource="qtDLGNanomite.qrc">
+     <normaloff>:/DLGNanomite/Icons/ID_Bookmarks.ico</normaloff>:/DLGNanomite/Icons/ID_Bookmarks.ico</iconset>
+   </property>
+   <property name="text">
+    <string>Bookmark / Comment</string>
    </property>
   </action>
  </widget>

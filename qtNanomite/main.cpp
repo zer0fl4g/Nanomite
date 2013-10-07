@@ -80,7 +80,7 @@ int main(int argc, char *argv[])
 			TCHAR fileName[MAX_PATH];
 			if(GetModuleFileNameW(NULL,fileName, MAX_PATH) > 0)
 			{
-				if((int)ShellExecute(NULL,L"runas", fileName, NULL, NULL, SW_SHOW) > 32)
+				if((int)ShellExecute(NULL,L"runas", fileName, GetCommandLineW(), NULL, SW_SHOW) > 32)
 				{
 					TerminateProcess(GetCurrentProcess(),0);
 				}

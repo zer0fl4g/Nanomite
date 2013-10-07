@@ -40,8 +40,6 @@
 #include <TlHelp32.h>
 #include <Psapi.h>
 
-using namespace std;
-
 void qtDLGNanomite::action_FileTerminateGUI()
 {
 	if(coreDebugger->GetDebuggingState())
@@ -116,6 +114,7 @@ void qtDLGNanomite::action_DebugStart()
 			else
 				return;
 
+			qtDLGBookmark::BookmarkClear();
 			qtDLGPatchManager::ClearAllPatches();
 		}
 
@@ -174,6 +173,7 @@ void qtDLGNanomite::action_DebugAttachStart(int iPID,QString FilePath)
 			QMessageBox::information(this, "Nanomite", "It seems that this file is packed or encrypted!\nThis can lead to wrong display (or none) of disassembly!", QMessageBox::Ok, QMessageBox::Ok);
 		}
 		
+		qtDLGBookmark::BookmarkClear();
 		qtDLGPatchManager::ClearAllPatches();
 
 		InsertRecentDebuggedFile(FilePath);
@@ -688,4 +688,9 @@ void qtDLGNanomite::action_WindowShowFunctions()
 		actionWindow_Show_Functions->setEnabled(true);
 		m_iMenuProcessID = -1;
 	}
+}
+
+void qtDLGNanomite::action_WindowShowBookmarks()
+{
+	dlgBookmark->show();
 }

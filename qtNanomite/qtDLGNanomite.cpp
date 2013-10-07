@@ -51,15 +51,16 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 	clsAPIImport::LoadFunctions();
 
-	coreBPManager = new clsBreakpointManager;
-	coreDebugger = new clsDebugger(coreBPManager);
-	coreDisAs = new clsDisassembler;
-	PEManager = new clsPEManager;
-	dlgDetInfo = new qtDLGDetailInfo(this,Qt::Window);
-	dlgDbgStr = new qtDLGDebugStrings(this,Qt::Window);
-	dlgBPManager = new qtDLGBreakPointManager(this,Qt::Window);
-	dlgTraceWindow = new qtDLGTrace(this,Qt::Window);
+	coreBPManager	= new clsBreakpointManager;
+	coreDebugger	= new clsDebugger(coreBPManager);
+	coreDisAs		= new clsDisassembler;
+	PEManager		= new clsPEManager;
+	dlgDetInfo		= new qtDLGDetailInfo(this,Qt::Window);
+	dlgDbgStr		= new qtDLGDebugStrings(this,Qt::Window);
+	dlgBPManager	= new qtDLGBreakPointManager(this,Qt::Window);
+	dlgTraceWindow	= new qtDLGTrace(this,Qt::Window);
 	dlgPatchManager = new qtDLGPatchManager(this,Qt::Window);
+	dlgBookmark		= new qtDLGBookmark(this, Qt::Window);
 	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;	
 
 	qtDLGMyWindow = this;
@@ -94,6 +95,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnDebuggerBreak()),this,SLOT(OnDebuggerBreak()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnDebuggerTerminated()),this,SLOT(OnDebuggerTerminated()),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),dlgBPManager,SLOT(UpdateCompleter(QString,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),dlgBookmark,SLOT(UpdateBookmarks(QString,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgPatchManager,SLOT(UpdateOffsetPatch(HANDLE,int)),Qt::QueuedConnection);
 
 	connect(coreBPManager,SIGNAL(OnBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
@@ -130,6 +132,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionWindow_Show_Windows, SIGNAL(triggered()), this, SLOT(action_WindowShowWindows()));
 	connect(actionWindow_Show_Functions, SIGNAL(triggered()), this, SLOT(action_WindowShowFunctions()));
 	connect(actionWindow_Show_Privileges, SIGNAL(triggered()), this, SLOT(action_WindowShowPrivileges()));
+	connect(actionWindow_Show_Bookmarks, SIGNAL(triggered()), this, SLOT(action_WindowShowBookmarks()));
 	connect(action_Debug_Run_to_UserCode,SIGNAL(triggered()), this, SLOT(action_DebugRunToUserCode()));
 	connect(actionDebug_Trace_Start, SIGNAL(triggered()), this, SLOT(action_DebugTraceStart()));
 	connect(actionDebug_Trace_Stop, SIGNAL(triggered()), this, SLOT(action_DebugTraceStop()));
@@ -142,6 +145,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(dlgDetInfo,SIGNAL(ShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 	connect(coreDisAs,SIGNAL(DisAsFinished(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)),Qt::QueuedConnection);
 	connect(dlgBPManager,SIGNAL(OnDisplayDisassembly(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
+	connect(dlgBookmark,SIGNAL(ShowInDisassembler(quint64)),DisAsGUI,SLOT(OnDisplayDisassembly(quint64)));
 
 	// Callbacks from PatchManager to GUI
 	connect(dlgPatchManager,SIGNAL(OnReloadDebugger()),this,SLOT(OnDebuggerBreak()));
@@ -173,6 +177,7 @@ qtDLGNanomite::~qtDLGNanomite()
 	delete dlgBPManager;
 	delete dlgTraceWindow;
 	delete dlgPatchManager;
+	delete dlgBookmark;
 	delete qtNanomiteDisAsColor;
 	delete cpuRegView;
 	delete callstackView;

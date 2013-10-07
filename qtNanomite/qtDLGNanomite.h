@@ -22,6 +22,7 @@
 #include "qtDLGBreakPointManager.h"
 #include "qtDLGTrace.h"
 #include "qtDLGPatchManager.h"
+#include "qtDLGBookmark.h"
 
 // Dock Widget Classes
 #include "qtDLGRegisters.h"
@@ -62,24 +63,25 @@ public:
 	static qtDLGNanomite* GetInstance();
 
 	long lExceptionCount;
-	clsDebugger *coreDebugger;
-	clsDisassembler *coreDisAs;
-	clsPEManager *PEManager;
-	clsAppSettings *settings;
-	clsBreakpointManager *coreBPManager;
+	clsDebugger				*coreDebugger;
+	clsDisassembler			*coreDisAs;
+	clsPEManager			*PEManager;
+	clsAppSettings			*settings;
+	clsBreakpointManager	*coreBPManager;
 
-	qtDLGDetailInfo *dlgDetInfo;
-	qtDLGDebugStrings *dlgDbgStr;
-	qtDLGBreakPointManager *dlgBPManager;
-	qtDLGTrace *dlgTraceWindow;
-	qtDLGPatchManager *dlgPatchManager;
+	qtDLGDetailInfo			*dlgDetInfo;
+	qtDLGDebugStrings		*dlgDbgStr;
+	qtDLGBreakPointManager	*dlgBPManager;
+	qtDLGTrace				*dlgTraceWindow;
+	qtDLGPatchManager		*dlgPatchManager;
+	qtDLGBookmark			*dlgBookmark;
 
 	// Docks
-	qtDLGRegisters	*cpuRegView;
-	qtDLGCallstack	*callstackView;
-	qtDLGStack		*stackView;
-	qtDLGLogView	*logView;	
-	qtDLGDisassembler *DisAsGUI;
+	qtDLGRegisters			*cpuRegView;
+	qtDLGCallstack			*callstackView;
+	qtDLGStack				*stackView;
+	qtDLGLogView			*logView;	
+	qtDLGDisassembler		*DisAsGUI;
 
 	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
 
@@ -118,6 +120,7 @@ private slots:
 	void action_WindowShowPEEditor();
 	void action_WindowShowFunctions();
 	void action_WindowShowPrivileges();
+	void action_WindowShowBookmarks();
 	void action_DebugTraceStart();
 	void action_DebugTraceStop();
 	void action_DebugTraceShow();
