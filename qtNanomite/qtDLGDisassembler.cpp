@@ -275,19 +275,18 @@ bool qtDLGDisassembler::eventFilter(QObject *pObject, QEvent *event)
 
 void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 {
-	QMenu menu;
-
 	m_iSelectedRow = tblDisAs->indexAt(qPoint).row();
 	if(m_iSelectedRow < 0) return;
 
+	QMenu menu;
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line", this));
 	submenu->addAction(new QAction("Offset", this));
 	submenu->addAction(new QAction("OpCodes", this));
 	submenu->addAction(new QAction("Mnemonic", this));
 	submenu->addAction(new QAction("Comment", this));
-
 	menu.addMenu(submenu);
+
 	menu.addAction(new QAction("Edit Instruction", this));	
 	menu.addAction(new QAction("Goto Offset / Function", this));
 	menu.addAction(new QAction("Set Comment", this));

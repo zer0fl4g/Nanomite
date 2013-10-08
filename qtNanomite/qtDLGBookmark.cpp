@@ -148,7 +148,7 @@ bool qtDLGBookmark::BookmarkAdd(int processID, quint64 bookmarkOffset, QString b
 	newBookmark.bookmarkOffset = bookmarkOffset;
 	newBookmark.bookmarkPID = processID;
 
-	TCHAR moduleName[MAX_PATH * sizeof(TCHAR)];
+	TCHAR moduleName[MAX_PATH * sizeof(TCHAR)] = { 0 };
 	clsHelperClass::CalcOffsetForModule(moduleName, bookmarkOffset, processID);
 
 	newBookmark.bookmarkModule = QString::fromWCharArray(moduleName); 

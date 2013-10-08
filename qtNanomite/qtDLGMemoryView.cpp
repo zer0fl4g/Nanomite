@@ -274,9 +274,8 @@ void qtDLGMemoryView::DisplayMemory()
 
 			memset(sTemp,0,MAX_PATH * sizeof(TCHAR));
 			memset(sTemp2,0,MAX_PATH * sizeof(TCHAR));
-			GetMappedFileName(m_pMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH);
 
-			iModLen = wcslen(sTemp2);
+			iModLen = GetMappedFileName(m_pMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,sTemp2,MAX_PATH);
 			if(iModLen > 0)
 			{
 				for(size_t i = iModLen; i > 0 ; i--)
