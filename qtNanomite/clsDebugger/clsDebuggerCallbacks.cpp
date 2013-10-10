@@ -23,7 +23,7 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspen
 {
 	bool bFound = false;
 
-	for(size_t i = 0;i < TIDs.size();i++)
+	for(int i = 0;i < TIDs.size();i++)
 	{
 		if(TIDs[i].dwTID == dwTID && TIDs[i].dwPID == dwPID)
 		{
@@ -42,7 +42,7 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspen
 		newTID.dwPID = dwPID;
 		newTID.dwExitCode = 0;
 
-		TIDs.push_back(newTID);
+		TIDs.append(newTID);
 	}
 
 	emit OnThread(dwPID,dwTID,dwEP,bSuspended,dwExitCode,bFound);
@@ -53,7 +53,7 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 {
 	bool bFound = false;
 
-	for(size_t i = 0;i < PIDs.size();i++)
+	for(int i = 0;i < PIDs.size();i++)
 	{
 		if(PIDs[i].dwPID == dwPID)
 		{
@@ -80,7 +80,7 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 			newPID.bKernelBP = true;
 		}
 
-		PIDs.push_back(newPID);
+		PIDs.append(newPID);
 	}
 
 	if(!bFound)
@@ -116,7 +116,7 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 		newDLL.sPath = sDLLPath;
 		newDLL.dwPID = dwPID;
 
-		DLLs.push_back(newDLL);
+		DLLs.append(newDLL);
 		emit OnDll(QString::fromWCharArray(newDLL.sPath), newDLL.dwPID, newDLL.dwBaseAdr, true);
 	}	
 

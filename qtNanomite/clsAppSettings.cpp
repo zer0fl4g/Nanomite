@@ -101,7 +101,7 @@ void clsAppSettings::SaveDebuggerSettings(clsDebugger *pDebugger)
 		exceptionString = userSettings->value(QString("EXCEPTION%1").arg(exceptionHCounter)).toString();
 	}
 
-	for(size_t i = 0;i < pDebugger->ExceptionHandler.size();i++)
+	for(int i = 0;i < pDebugger->ExceptionHandler.size();i++)
 	{
 		userSettings->setValue(QString("EXCEPTION%1").arg(i),QString("%1:%2").arg(pDebugger->ExceptionHandler[i].dwExceptionType,8,16,QChar('0')).arg(pDebugger->ExceptionHandler[i].dwAction));
 	}

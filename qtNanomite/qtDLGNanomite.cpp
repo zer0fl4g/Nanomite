@@ -252,13 +252,6 @@ void qtDLGNanomite::OnDebuggerBreak()
 		dwEIP = coreDebugger->ProcessContext.Eip;
 		stackView->LoadStackView(coreDebugger->ProcessContext.Esp,4);
 #endif
-		// Load SourceFile to Dlg
-		QString FilePath; 
-		int LineNumber = NULL;
-
-		clsHelperClass::LoadSourceForAddr(FilePath,LineNumber,dwEIP,coreDebugger->GetCurrentProcessHandle());
-		if(FilePath.length() > 0 && LineNumber > 0)
-			DisAsGUI->dlgSourceViewer->OnDisplaySource(FilePath, LineNumber);	
 
 		// Update Disassembler
 		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
@@ -302,12 +295,11 @@ void qtDLGNanomite::UpdateStateBar(int actionType, quint64 stepCount)
 
 void qtDLGNanomite::CleanGUI(bool bKeepLogBox)
 {
-	stackView->tblStack->setRowCount(0);
-	if(!bKeepLogBox)
-		logView->tblLogBox->setRowCount(0);
+	if(!bKeepLogBox) logView->tblLogBox->setRowCount(0);
 	callstackView->tblCallstack->setRowCount(0);
 	DisAsGUI->tblDisAs->setRowCount(0);
 	cpuRegView->tblRegView->setRowCount(0);
+	stackView->tblStack->setRowCount(0);
 
 	dlgDetInfo->tblPIDs->setRowCount(0);
 	dlgDetInfo->tblTIDs->setRowCount(0);
@@ -372,10 +364,11 @@ void qtDLGNanomite::GenerateMenu(bool isAllEnabled)
 				menu.addAction(qAction);
 			}
 		}
-		menu.addSeparator();
-
+		
 		if(isAllEnabled)
 		{
+			menu.addSeparator();
+
 			qAction = new QAction("All",this);
 			menu.addAction(qAction);
 		}
@@ -405,9 +398,7 @@ void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
 
 		if(droppedFile.contains(".lnk", Qt::CaseInsensitive))
 		{
-			QString resolvedPath = clsHelperClass::ResolveShortcut(droppedFile);
-
-			coreDebugger->SetTarget(resolvedPath);
+			coreDebugger->SetTarget(clsHelperClass::ResolveShortcut(droppedFile));
 			action_DebugStart();
 		}
 		else if(droppedFile.contains(".exe", Qt::CaseInsensitive))

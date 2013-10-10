@@ -23,7 +23,6 @@
 #include "clsPEManager.h"
 #include "clsMemManager.h"
 
-#include <process.h>
 #include <Psapi.h>
 #include <TlHelp32.h>
 
@@ -34,11 +33,6 @@
 #else
 #pragma comment(lib,"clsDebugger/dbghelp_x86.lib")
 #endif
-
-// defuq?
-#define SYNCHRONIZE                      (0x00100000L)
-
-using namespace std;
 
 clsDebugger* clsDebugger::pThis = NULL;
 
@@ -75,15 +69,15 @@ clsDebugger::~clsDebugger()
 
 void clsDebugger::CleanWorkSpace()
 {
-	for(vector<PIDStruct>::const_iterator i = PIDs.cbegin(); i != PIDs.cend(); ++i)
+	for(int i = 0; i < PIDs.size(); ++i)
 	{
-		SymCleanup(i->hProc);
-		clsMemManager::CFree(i->sFileName);
+		SymCleanup(PIDs.at(i).hProc);
+		clsMemManager::CFree(PIDs.at(i).sFileName);
 	}
 
-	for(vector<DLLStruct>::const_iterator i = DLLs.cbegin(); i != DLLs.cend(); ++i)
+	for(int i = 0; i < DLLs.size(); ++i)
 	{
-		clsMemManager::CFree(i->sPath);
+		clsMemManager::CFree(DLLs.at(i).sPath);
 	}
 
 	m_pBreakpointManager->BreakpointCleanup();
@@ -307,7 +301,7 @@ void clsDebugger::DebuggingLoop()
 				emit DeletePEManagerObject("", debug_event.dwProcessId);
 
 				bool bStillOneRunning = false;
-				for(size_t i = 0;i < PIDs.size();i++)
+				for(int i = 0; i < PIDs.size(); i++)
 				{
 					if(PIDs[i].bRunning && debug_event.dwProcessId != PIDs[i].dwPID)
 					{
@@ -351,7 +345,7 @@ void clsDebugger::DebuggingLoop()
 				DLLStruct *pCurrent = NULL;
 				size_t countDLL = DLLs.size();
 
-				for(size_t i = 0;i < countDLL; i++)
+				for(int i = 0; i < countDLL; i++)
 				{
 					pCurrent = &DLLs[i];
 
@@ -397,7 +391,7 @@ void clsDebugger::DebuggingLoop()
 				bool	bIsEP			= false,
 						bIsBP			= false,
 						bIsKernelBP		= false;
-				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
+				PIDStruct *pCurrentPID	= GetCurrentPIDDataPointer(debug_event.dwProcessId);
 
 				switch (exInfo.ExceptionCode)
 				{
@@ -729,7 +723,7 @@ void clsDebugger::DebuggingLoop()
 
 					PBExceptionInfo((quint64)exInfo.ExceptionAddress, exInfo.ExceptionCode, debug_event.dwProcessId, debug_event.dwThreadId);
 
-					for (size_t i = 0; i < ExceptionHandler.size();i++)
+					for (int i = 0; i < ExceptionHandler.size(); i++)
 					{
 						if(exInfo.ExceptionCode == ExceptionHandler[i].dwExceptionType)
 						{
@@ -746,7 +740,7 @@ void clsDebugger::DebuggingLoop()
 							else
 								dwContinueStatus = CallBreakDebugger(&debug_event,ExceptionHandler[i].dwAction);
 
-							break;
+							break; // remove this to allow multiple exception handlers for the same event
 						}
 					}
 
@@ -967,19 +961,17 @@ bool clsDebugger::SuspendProcess(DWORD dwPID,bool bSuspend)
 
 void clsDebugger::CustomExceptionAdd(DWORD dwExceptionType,DWORD dwAction,quint64 dwHandler)
 {
-	if(dwExceptionType != EXCEPTION_SINGLE_STEP && dwExceptionType != EXCEPTION_BREAKPOINT)
-	{
-		customException custEx;
-		custEx.dwAction = dwAction;
-		custEx.dwExceptionType = dwExceptionType;
-		custEx.dwHandler = dwHandler;
-		ExceptionHandler.push_back(custEx);
-	}
+	customException custEx;
+	custEx.dwAction = dwAction;
+	custEx.dwExceptionType = dwExceptionType;
+	custEx.dwHandler = dwHandler;
+	ExceptionHandler.append(custEx);
 }
 
 void clsDebugger::CustomExceptionRemove(DWORD dwExceptionType)
 {
-	for (vector<customException>::iterator it = ExceptionHandler.begin(); it != ExceptionHandler.end(); ++it) {
+	for (QVector<customException>::iterator it = ExceptionHandler.begin(); it != ExceptionHandler.end(); ++it)
+	{
 		if(it->dwExceptionType == dwExceptionType)
 		{
 			ExceptionHandler.erase(it);
@@ -1060,7 +1052,7 @@ bool clsDebugger::SetThreadContextHelper(bool bDecIP, bool bSetTrapFlag, DWORD d
 
 HANDLE clsDebugger::GetCurrentProcessHandle(DWORD dwPID)
 {
-	for(size_t i = 0;i < PIDs.size();i++)
+	for(int i = 0; i < PIDs.size(); i++)
 	{
 		if(PIDs[i].dwPID == dwPID)
 			return PIDs[i].hProc;
@@ -1078,26 +1070,6 @@ HANDLE clsDebugger::GetProcessHandleByPID(DWORD PID)
 
 bool clsDebugger::IsOffsetEIP(quint64 Offset)
 {
-//#ifdef _AMD64_
-//	BOOL bIsWOW64 = false;
-//	if(clsAPIImport::pIsWow64Process)
-//		clsAPIImport::pIsWow64Process(pThis->GetCurrentProcessHandle(),&bIsWOW64);
-//
-//	if(bIsWOW64)
-//	{
-//		if(pThis->wowProcessContext.Eip == Offset)
-//			return true;
-//	}
-//	else
-//	{
-//		if(pThis->ProcessContext.Rip == Offset)
-//			return true;
-//	}
-//#else
-//	if(pThis->ProcessContext.Eip == Offset)
-//		return true;
-//#endif	
-
 #ifdef _AMD64_
 	if(pThis->wowProcessContext.Eip == Offset)
 		return true;
@@ -1129,9 +1101,9 @@ void clsDebugger::SetNewThreadContext(bool isWow64, CONTEXT newProcessContext, W
 PIDStruct* clsDebugger::GetCurrentPIDDataPointer(DWORD processID)
 {
 	PIDStruct *pCurrentPID = NULL;
-	size_t countPID = PIDs.size();
+	int countPID = PIDs.size();
 
-	for(size_t i = 0;i < countPID; i++)
+	for(int i = 0;i < countPID; i++)
 	{
 		pCurrentPID = &PIDs[i];
 

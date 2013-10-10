@@ -44,7 +44,7 @@ qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 proce
 	m_forEntry = 0;
 	m_forEnd = m_pMainWindow->coreDebugger->PIDs.size();
 
-	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
+	for(int i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
 		{
@@ -72,7 +72,7 @@ void qtDLGStringView::DataProcessing()
 	QList<StringProcessingData> dataForProcessing;
 	StringProcessingData newData;
 	
-	for(size_t i = m_forEntry; i < m_forEnd; i++)
+	for(int i = m_forEntry; i < m_forEnd; i++)
 	{
 		newData.filePath = m_pMainWindow->coreDebugger->PIDs[m_forEntry].sFileName;
 		newData.processID = m_pMainWindow->coreDebugger->PIDs[m_forEntry].dwPID;

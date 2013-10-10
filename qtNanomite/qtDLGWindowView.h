@@ -49,7 +49,7 @@ public:
 	~qtDLGWindowView();
 
 private:
-	size_t	m_processID, /* contains the needed process id */
+	int		m_processID, /* contains the needed process id */
 			m_processCountEntry, /* begin of the loop if we need more than one process */
 			m_processCountEnd; /* end of the loop if we need more than one process */
 

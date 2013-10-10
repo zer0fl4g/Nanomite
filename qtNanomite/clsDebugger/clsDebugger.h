@@ -17,7 +17,6 @@
 #ifndef CLSDEBUGGER
 #define CLSDEBUGGER
 
-#include <vector>
 #include <Windows.h>
 #include <QtCore>
 
@@ -122,10 +121,10 @@ class clsDebugger : public QThread
 	Q_OBJECT
 
 public:
-	std::vector<DLLStruct> DLLs;
-	std::vector<ThreadStruct> TIDs;
-	std::vector<PIDStruct> PIDs;
-	std::vector<customException> ExceptionHandler;
+	QVector<DLLStruct> DLLs;
+	QVector<ThreadStruct> TIDs;
+	QVector<PIDStruct> PIDs;
+	QVector<customException> ExceptionHandler;
 
 	CONTEXT ProcessContext;
 	WOW64_CONTEXT wowProcessContext;
@@ -135,7 +134,6 @@ public:
 	clsDebugger(clsBreakpointManager *pBPManager);
 	~clsDebugger();
 
-	static bool IsOffsetAnBP(quint64 Offset);
 	static bool IsOffsetEIP(quint64 Offset);
 
 	static void SetNewThreadContext(bool isWow64, CONTEXT newProcessContext, WOW64_CONTEXT newWowProcessContext);

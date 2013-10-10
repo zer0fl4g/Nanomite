@@ -376,7 +376,7 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 			lpCurrentFileName = NULL;
 	bool	bWeGotIt = false;
 
-	for(size_t i = 0; i < coreDebugger->PIDs.size(); i++)
+	for(int i = 0; i < coreDebugger->PIDs.size(); i++)
 	{
 		if(coreDebugger->PIDs[i].hProc == hProcess)
 		{

@@ -193,19 +193,7 @@ void qtDLGOption::OnSave()
 	{	
 		if(tblCustomExceptions->item(i,0)->text().length() > 0 && tblCustomExceptions->item(i,1)->text().length() > 0)
 		{
-			bool bExists = false;
-			for(int iCheck = 0; iCheck < m_pMainWindow->coreDebugger->ExceptionHandler.size(); iCheck++)
-			{
-				if(m_pMainWindow->coreDebugger->ExceptionHandler[iCheck].dwExceptionType == tblCustomExceptions->item(i,0)->text().toULong())
-					bExists = true;
-			}
-
-			if(!bExists)
-				m_pMainWindow->coreDebugger->CustomExceptionAdd(tblCustomExceptions->item(i,0)->text().toULong(0,16),
-				tblCustomExceptions->item(i,1)->text().toInt(),NULL);
-			else
-				MessageBox(NULL,QString("The exception : %1 does already exists!").arg(tblCustomExceptions->item(i,0)->text().toULong(0,16)).toStdWString().c_str(),
-				L"Nanomite - Option",MB_OK);
+			m_pMainWindow->coreDebugger->CustomExceptionAdd(tblCustomExceptions->item(i,0)->text().toULong(0,16), tblCustomExceptions->item(i,1)->text().toInt(),NULL);
 		}
 	}
 
