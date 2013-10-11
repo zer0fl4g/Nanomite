@@ -33,16 +33,14 @@ bool clsDebugger::DetachFromProcess()
 
 	m_pBreakpointManager->BreakpointClear();
 
-	for(size_t d = 0;d < PIDs.size();d++)
+	for(int d = 0; d < PIDs.size(); d++)
 	{
 		if(!CheckProcessState(PIDs[d].dwPID))
 			break;
 		DebugBreakProcess(PIDs[d].hProc);
-		//DebugActiveProcessStop(PIDs[d].dwPID);
 		PulseEvent(m_debugEvent);
 	}
-
-	//emit OnDebuggerTerminated();
+	
 	return true;
 }
 
@@ -55,7 +53,7 @@ bool clsDebugger::AttachToProcess(DWORD dwPID)
 
 bool clsDebugger::SuspendDebuggingAll()
 {
-	for(size_t i = 0;i < PIDs.size();i++)
+	for(int i = 0;i < PIDs.size();i++)
 		SuspendDebugging(PIDs[i].dwPID);
 	return true;
 }
@@ -67,7 +65,7 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 		if(dbgSettings.dwSuspendType == 0x0)
 		{
 			HANDLE hProcess = NULL;
-			for(size_t i = 0;i < PIDs.size();i++)
+			for(int i = 0;i < PIDs.size(); i++)
 			{
 				if(PIDs[i].bRunning && PIDs[i].dwPID == dwPID)
 					hProcess = PIDs[i].hProc;
@@ -95,7 +93,7 @@ bool clsDebugger::SuspendDebugging(DWORD dwPID)
 
 bool clsDebugger::StopDebuggingAll()
 {
-	for(size_t i = 0;i < PIDs.size();i++)
+	for(int i = 0;i < PIDs.size();i++)
 		StopDebugging(PIDs[i].dwPID);
 	return PulseEvent(m_debugEvent);
 }
@@ -116,7 +114,7 @@ bool clsDebugger::StopDebugging(DWORD dwPID)
 
 bool clsDebugger::ResumeDebugging()
 {
-	for(size_t i = 0;i < PIDs.size(); i++)
+	for(int i = 0;i < PIDs.size(); i++)
 		SuspendProcess(PIDs[i].dwPID,false);
 	return PulseEvent(m_debugEvent);
 }

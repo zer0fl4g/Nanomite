@@ -49,10 +49,10 @@ public:
 	~qtDLGStringView();
 
 private:
-	size_t				m_processID,
+	int					m_processID,
 						m_forEntry,
-						m_forEnd;
-	int					m_selectedRow,
+						m_forEnd,
+						m_selectedRow,
 						m_maxRows;
 
 	bool				m_isFinished;  /* contains the state of the worker thread */

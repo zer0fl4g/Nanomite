@@ -115,7 +115,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			}
 		}
 
-		
+		tblDisAs->setUpdatesEnabled(false);
 		if((tblDisAs->rowCount() - 1) != m_maxRows)
 		{
 			tblDisAs->setRowCount(0);
@@ -173,6 +173,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			if(disassemblyDataCurrent == disassemblyDataEnd)
 			{
 				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(5,0)->text().toULongLong(0,16),true);
+				tblDisAs->setUpdatesEnabled(true);
 				return;
 			}
 		}
@@ -184,6 +185,8 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(processID,6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(FuncName));
 		else if(ModName.length() > 0 && FuncName.length() <= 0)
 			qtDLGNanomite::GetInstance()->setWindowTitle(QString("[Nanomite v 0.1 - PID: %1 - TID: %2]- %3.%4").arg(processID,6,16,QChar('0')).arg(clsDebugger::GetCurrentTID(),6,16,QChar('0')).arg(ModName).arg(dwEIP,16,16,QChar('0')));
+
+		tblDisAs->setUpdatesEnabled(true);
 	}
 	else
 	{

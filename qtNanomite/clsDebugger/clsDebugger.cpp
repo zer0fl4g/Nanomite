@@ -56,7 +56,8 @@ clsDebugger::clsDebugger(clsBreakpointManager *pBPManager) :
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
 	m_debugEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
-	//SymSetOptions(SYMOPT_DEFERRED_LOADS);
+	wowProcessContext.ContextFlags = WOW64_CONTEXT_ALL;
+	ProcessContext.ContextFlags = CONTEXT_ALL;
 }
 
 clsDebugger::~clsDebugger()
@@ -457,8 +458,12 @@ void clsDebugger::DebuggingLoop()
 
 								if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionAddress, SOFTWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
 								{
-									bool b = WriteProcessMemory(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL);
-									bool c = FlushInstructionCache(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, pCurrentBP->dwSize);
+									if(!WriteProcessMemory(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL) &&
+										!FlushInstructionCache(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, pCurrentBP->dwSize))
+									{
+										dwContinueStatus = CallBreakDebugger(&debug_event,0);
+										break;
+									}
 
 									switch(pCurrentBP->dwHandle)
 									{
@@ -803,29 +808,29 @@ DWORD clsDebugger::CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle)
 				clsAPIImport::pIsWow64Process(m_currentProcess,&bIsWOW64);
 			if(bIsWOW64)
 			{
-				wowProcessContext.ContextFlags = WOW64_CONTEXT_ALL;
 				clsAPIImport::pWow64GetThreadContext(hThread,&wowProcessContext);
 
 				emit OnDebuggerBreak();
 				WaitForSingleObject(m_debugEvent,INFINITE);
+
 				clsAPIImport::pWow64SetThreadContext(hThread,&wowProcessContext);
 			}
 			else
 			{
-				ProcessContext.ContextFlags = CONTEXT_ALL;
 				GetThreadContext(hThread,&ProcessContext);
 
 				emit OnDebuggerBreak();
 				WaitForSingleObject(m_debugEvent,INFINITE);
+
 				SetThreadContext(hThread,&ProcessContext);
 			}
 
 #else
-			ProcessContext.ContextFlags = CONTEXT_ALL;
 			GetThreadContext(hThread,&ProcessContext);
 
 			emit OnDebuggerBreak();
 			WaitForSingleObject(m_debugEvent,INFINITE);
+
 			SetThreadContext(hThread,&ProcessContext);
 #endif
 			m_currentPID = NULL;m_currentTID = NULL;m_currentProcess = NULL;

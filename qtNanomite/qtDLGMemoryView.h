@@ -47,11 +47,10 @@ public:
 	~qtDLGMemoryView();
 
 private:
-	size_t	m_processID,
+	int		m_processID,
 			m_processCountEntry,
-			m_processCountEnd;
-
-	int		m_selectedRow;
+			m_processCountEnd,
+			m_selectedRow;
 
 	qtDLGNanomite *m_pMainWindow;
 

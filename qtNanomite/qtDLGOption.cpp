@@ -286,7 +286,7 @@ void qtDLGOption::OnLoad()
 		cbExceptionAssist->setChecked(false);
 
 	tblCustomExceptions->setRowCount(0);
-	for(size_t i = 0;i < m_pMainWindow->coreDebugger->ExceptionHandler.size();i++)
+	for(int i = 0; i < m_pMainWindow->coreDebugger->ExceptionHandler.size(); i++)
 	{
 		tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 

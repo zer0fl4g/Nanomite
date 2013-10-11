@@ -48,8 +48,8 @@ public:
 
 private:
 	int			m_processID,
-				m_selectedRow;
-	size_t		m_processLoopEntry,
+				m_selectedRow,
+				m_processLoopEntry,
 				m_processLoopEnd;
 
 	qtDLGNanomite *m_pMainWindow;

@@ -48,7 +48,7 @@ qtDLGMemoryView::qtDLGMemoryView(QWidget *parent, Qt::WFlags flags,qint32 proces
 	m_pMainWindow = qtDLGNanomite::GetInstance();
 
 	m_processCountEnd = m_pMainWindow->coreDebugger->PIDs.size();
-	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
+	for(int i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
 		{
@@ -242,7 +242,7 @@ void qtDLGMemoryView::DisplayMemory()
 	MEMORY_BASIC_INFORMATION mbi;
 
 	tblMemoryView->setRowCount(0);
-	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
+	for(int i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
 		quint64 dwAddress = NULL;
 		while(VirtualQueryEx(m_pMainWindow->coreDebugger->PIDs[i].hProc,(LPVOID)dwAddress,&mbi,sizeof(mbi)))

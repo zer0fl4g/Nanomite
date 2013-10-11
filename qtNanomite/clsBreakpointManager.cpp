@@ -103,56 +103,68 @@ bool clsBreakpointManager::BreakpointRemove(DWORD64 breakpointOffset, DWORD brea
 	switch(breakpointType)
 	{
 	case SOFTWARE_BP:
-		for (QList<BPStruct>::iterator it = SoftwareBPs.begin(); it != SoftwareBPs.end(); ++it)
 		{
-			if(it->dwOffset == breakpointOffset /* && it->dwPID == dwPID */)
+			BPStruct *pCurrentBP;
+
+			for (int i = 0; i < SoftwareBPs.size(); i++)
 			{
-				clsBreakpointSoftware::dSoftwareBP(it->dwPID,it->dwOffset,it->dwSize,it->bOrgByte);
-				clsMemManager::CFree(it->moduleName);
-				clsMemManager::CFree(it->bOrgByte);
+				pCurrentBP = &SoftwareBPs[i];
 
-				SoftwareBPs.erase(it);
-				it = SoftwareBPs.begin();
+				if(pCurrentBP->dwOffset == breakpointOffset)
+				{
+					clsBreakpointSoftware::dSoftwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, pCurrentBP->bOrgByte);
+					clsMemManager::CFree(pCurrentBP->moduleName);
+					clsMemManager::CFree(pCurrentBP->bOrgByte);
 
-				if(it == SoftwareBPs.end())
-					break;
+					SoftwareBPs.removeAt(i);
+
+					break; // add allows only one so we can stop here
+				}
 			}
+			break;
 		}
-		break;
-
 	case MEMORY_BP:
-		for (QList<BPStruct>::iterator it = MemoryBPs.begin();it != MemoryBPs.end(); ++it)
 		{
-			if(it->dwOffset == breakpointOffset /* && it->dwPID == dwPID */)
+			BPStruct *pCurrentBP;
+
+			for (int i = 0; i < MemoryBPs.size(); i++)
 			{
-				clsBreakpointMemory::dMemoryBP(it->dwPID,it->dwOffset,it->dwSize,it->dwOldProtection);
-				clsMemManager::CFree(it->moduleName);
+				pCurrentBP = &MemoryBPs[i];
 
-				MemoryBPs.erase(it);
-				it = MemoryBPs.begin();
+				if(pCurrentBP->dwOffset == breakpointOffset)
+				{
+					clsBreakpointMemory::dMemoryBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, pCurrentBP->dwOldProtection);
+					clsMemManager::CFree(pCurrentBP->moduleName);
+					clsMemManager::CFree(pCurrentBP->bOrgByte);
 
-				if(it == MemoryBPs.end())
-					break;
+					MemoryBPs.removeAt(i);
+
+					break; // add allows only one so we can stop here
+				}
 			}
+			break;
 		}
-		break;
-
 	case HARDWARE_BP:
-		for (QList<BPStruct>::iterator it = HardwareBPs.begin();it != HardwareBPs.end(); ++it)
 		{
-			if(it->dwOffset == breakpointOffset /* && it->dwPID == dwPID */)
+			BPStruct *pCurrentBP;
+
+			for (int i = 0; i < HardwareBPs.size(); i++)
 			{
-				clsBreakpointHardware::dHardwareBP(it->dwPID,it->dwOffset,it->dwSlot);
-				clsMemManager::CFree(it->moduleName);
+				pCurrentBP = &HardwareBPs[i];
 
-				HardwareBPs.erase(it);
-				it = HardwareBPs.begin();
+				if(pCurrentBP->dwOffset == breakpointOffset)
+				{
+					clsBreakpointHardware::dHardwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSlot);
+					clsMemManager::CFree(pCurrentBP->moduleName);
+					clsMemManager::CFree(pCurrentBP->bOrgByte);
 
-				if(it == HardwareBPs.end())
-					break;
+					HardwareBPs.removeAt(i);
+
+					break; // add allows only one so we can stop here
+				}
 			}
+			break;
 		}
-		break;
 	}
 	
 	emit OnBreakpointDeleted(breakpointOffset);
@@ -461,6 +473,7 @@ void clsBreakpointManager::BreakpointCleanup()
 bool clsBreakpointManager::BreakpointFind(DWORD64 breakpointOffset, int breakpointType, DWORD processID, bool takeAll, BPStruct** pBreakpointSearched)
 {
 	DWORD tempSearchPID = processID;
+	BPStruct *pTempBP;
 
 	if(takeAll)
 		tempSearchPID = -1;
@@ -471,10 +484,12 @@ bool clsBreakpointManager::BreakpointFind(DWORD64 breakpointOffset, int breakpoi
 		{
 			for(int i = 0; i < SoftwareBPs.size(); i++)
 			{
-				if(SoftwareBPs[i].dwOffset == breakpointOffset && 
-					(SoftwareBPs[i].dwPID == processID || SoftwareBPs[i].dwPID == tempSearchPID))
+				pTempBP = &SoftwareBPs[i];
+
+				if(pTempBP->dwOffset == breakpointOffset && 
+					(pTempBP->dwPID == processID || pTempBP->dwPID == tempSearchPID))
 				{
-					*pBreakpointSearched = &SoftwareBPs[i];
+					*pBreakpointSearched = pTempBP;
 
 					return true;
 				}
@@ -486,10 +501,12 @@ bool clsBreakpointManager::BreakpointFind(DWORD64 breakpointOffset, int breakpoi
 		{
 			for(int i = 0; i < MemoryBPs.size(); i++)
 			{
-				if(MemoryBPs[i].dwOffset == breakpointOffset && 
-					(MemoryBPs[i].dwPID == processID || MemoryBPs[i].dwPID == tempSearchPID))
+				pTempBP = &MemoryBPs[i];
+
+				if(pTempBP->dwOffset == breakpointOffset && 
+					(pTempBP->dwPID == processID || pTempBP->dwPID == tempSearchPID))
 				{
-					*pBreakpointSearched = &MemoryBPs[i];
+					*pBreakpointSearched = pTempBP;
 
 					return true;
 				}
@@ -501,10 +518,12 @@ bool clsBreakpointManager::BreakpointFind(DWORD64 breakpointOffset, int breakpoi
 		{
 			for(int i = 0; i < HardwareBPs.size(); i++)
 			{
-				if(HardwareBPs[i].dwOffset == breakpointOffset && 
-					(HardwareBPs[i].dwPID == processID || HardwareBPs[i].dwPID == tempSearchPID))
+				pTempBP = &HardwareBPs[i];
+
+				if(pTempBP->dwOffset == breakpointOffset && 
+					(pTempBP->dwPID == processID || pTempBP->dwPID == tempSearchPID))
 				{
-					*pBreakpointSearched = &HardwareBPs[i];
+					*pBreakpointSearched = pTempBP;
 
 					return true;
 				}
