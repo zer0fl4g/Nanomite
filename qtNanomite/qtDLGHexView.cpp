@@ -42,7 +42,7 @@ qtDLGHexView::qtDLGHexView(QWidget *parent, Qt::WFlags flags,unsigned long dwPID
 	tblHexView->setRowCount(0);
 
 	HANDLE hProcess = NULL;
-	for(size_t i = 0;i < MyMainWindow->coreDebugger->PIDs.size();i++)
+	for(int i = 0;i < MyMainWindow->coreDebugger->PIDs.size();i++)
 	{
 		if(dwPID == MyMainWindow->coreDebugger->PIDs[i].dwPID)
 		{

@@ -85,7 +85,7 @@ void qtDLGHandleView::OnDisplayHandles()
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
 	tblHandleView->setRowCount(0);
-	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
+	for(int i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
 		NTSTATUS status;
 		ULONG handleInfoSize = 0x10000;

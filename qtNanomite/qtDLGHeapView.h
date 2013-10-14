@@ -49,11 +49,10 @@ public:
 	~qtDLGHeapView();
 
 private:
-	size_t			m_processID,
-					m_processCountEntry,
-					m_processCountEnd;
-
-	int				m_selectedRow;
+	int	m_processID,
+		m_processCountEntry,
+		m_processCountEnd,
+		m_selectedRow;
 
 	qtDLGNanomite	*m_pMainWindow;
 

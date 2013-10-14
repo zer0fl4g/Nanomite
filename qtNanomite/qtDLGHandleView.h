@@ -47,10 +47,10 @@ public:
 	~qtDLGHandleView();
 
 private:
-	size_t	m_processID,			/* contains the process id from which the handle will be shown */
-			m_processCountEntry,	/* loop for process ids to show if we have more than one */
-			m_processCountEnd;		/* loop for process ids to show if we have more than one */
-	int		m_selectedRow;			/* contains the row on which the user opend the context menu */
+	int	m_processID,			/* contains the process id from which the handle will be shown */
+		m_processCountEntry,	/* loop for process ids to show if we have more than one */
+		m_processCountEnd,		/* loop for process ids to show if we have more than one */
+		m_selectedRow;			/* contains the row on which the user opend the context menu */
 	
 	/**
 	* @brief A Qt slot which is called when the user scrolls, resizes

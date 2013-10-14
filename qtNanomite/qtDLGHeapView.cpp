@@ -52,7 +52,7 @@ qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int processID)
 	m_pMainWindow = qtDLGNanomite::GetInstance();
 
 	m_processCountEnd = m_pMainWindow->coreDebugger->PIDs.size();
-	for(size_t i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
+	for(int i = 0; i < m_pMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(m_pMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
 		{
@@ -223,7 +223,7 @@ void qtDLGHeapView::DisplayHeap()
 	tblHeapView->setRowCount(0);
 	tblHeapBlocks->setRowCount(0);
 
-	for(size_t i = m_processCountEntry; i < m_processCountEnd;i++)
+	for(int i = m_processCountEntry; i < m_processCountEnd;i++)
 	{
 		HEAPLIST32 heapList;
 		heapList.dwSize = sizeof(HEAPLIST32);

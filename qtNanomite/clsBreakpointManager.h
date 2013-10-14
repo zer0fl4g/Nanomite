@@ -32,6 +32,7 @@ struct BPStruct
 	DWORD dwTypeFlag;	/* see BP_BREAKON		*/
 	DWORD dwHandle;		/* see BREAKPOINT_TYPE	*/
 	DWORD dwOldProtection;
+	DWORD dwDataType;
 	quint64 dwOffset;
 	quint64 dwBaseOffset;
 	quint64 dwOldOffset;
@@ -55,7 +56,7 @@ public:
 
 	bool BreakpointRemove(DWORD64 breakpointOffset, DWORD breakpointType);
 	bool BreakpointClear();
-	bool BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType);
+	bool BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType, DWORD breakpointDataType);
 	bool BreakpointInit(DWORD processID, bool isThread = false);
 	bool BreakpointFind(DWORD64 breakpointOffset, int breakpointType, DWORD processID, bool takeAll, BPStruct** pBreakpointSearched);
 
@@ -63,7 +64,7 @@ public:
 	void BreakpointUpdateOffsets();
 
 	static bool IsOffsetAnBP(quint64 Offset);
-	static bool BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType);
+	static bool BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType, DWORD breakpointDataType = NULL);
 	static bool BreakpointDelete(DWORD64 breakpointOffset, DWORD breakpointType);
 
 	static void RemoveSBPFromMemory(bool isDisable, DWORD processID);

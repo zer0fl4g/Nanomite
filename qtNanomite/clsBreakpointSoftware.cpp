@@ -18,7 +18,7 @@
 #include "clsBreakpointSoftware.h"
 #include "clsDebugger\clsDebugger.h"
 
-bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE **dataBackup)
+bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE **dataBackup, DWORD breakpointDataType)
 {
 	SIZE_T	bytesWritten			= NULL,
 			bytesRead				= NULL;
@@ -29,9 +29,28 @@ bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 	HANDLE	processHandle			= clsDebugger::GetProcessHandleByPID(processID);
 	bool	returnValue				= false;
 
-	memset(breakpointData, 0xCC, breakpointSize);
+	if(breakpointDataType == BP_SW_LONGINT3)
+	{
+		breakpointData[0] = 0xCD;
+		breakpointData[1] = 0x03;
+	}
+	else if(breakpointDataType == BP_SW_UD2)
+	{
+		breakpointData[0] = 0x0F;
+		breakpointData[1] = 0x0B;
+	}
+	else if(breakpointDataType == BP_SW_HLT)
+	{
+		memset(breakpointData, 0xF4, breakpointSize);
+	}
+	else
+	{
+		memset(breakpointData, 0xCC, breakpointSize);
+	}
+
 	memset(breakpointDataBackup, NULL, breakpointSize);
 
+		
 	if(VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection) &&
 		ReadProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)breakpointDataBackup, breakpointSize, &bytesRead))
 	{

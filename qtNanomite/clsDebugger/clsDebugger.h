@@ -86,9 +86,9 @@ struct customException
 
 enum BREAKPOINT
 {
-	SOFTWARE_BP = 0,
-	MEMORY_BP	= 1,
-	HARDWARE_BP = 2
+	SOFTWARE_BP			= 0,
+	MEMORY_BP			= 1,
+	HARDWARE_BP			= 2
 };
 
 enum BREAKPOINT_TYPE
@@ -97,7 +97,10 @@ enum BREAKPOINT_TYPE
 	BP_KEEP			= 1,
 	BP_STEPOVER		= 2,
 	BP_OFFSETUPDATE = 3,
-	BP_TRACETO		= 4
+	BP_TRACETO		= 4,
+	BP_SW_LONGINT3	= 5,
+	BP_SW_UD2		= 6,
+	BP_SW_HLT		= 7
 };
 
 enum BP_BREAKON

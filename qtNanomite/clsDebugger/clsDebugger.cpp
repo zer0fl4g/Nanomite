@@ -258,7 +258,7 @@ void clsDebugger::DebuggingLoop()
 				}
 
 				m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId);
-				m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpStartAddress, 1, BP_DONOTKEEP);
+				m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpStartAddress, 1, BP_DONOTKEEP, NULL);
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
@@ -267,7 +267,7 @@ void clsDebugger::DebuggingLoop()
 					{
 						for(int i = 0; i < tlsCallback.count(); i++)
 						{
-							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i), 1, BP_DONOTKEEP);
+							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i), 1, BP_DONOTKEEP, NULL);
 						}
 					}						
 				}			
@@ -415,7 +415,6 @@ void clsDebugger::DebuggingLoop()
 						pCurrentPID->bWOW64KernelBP = true;
 						bIsKernelBP = true;
 					}
-
 				case EXCEPTION_BREAKPOINT:
 					{
 						bool bStepOver = false;
@@ -533,6 +532,42 @@ void clsDebugger::DebuggingLoop()
 						}
 						break;
 					}
+				case STATUS_PRIVILEGED_INSTRUCTION: // software bp - hlt
+				case STATUS_ILLEGAL_INSTRUCTION: // software bp - ud2
+					{
+						bIsBP = CheckIfExceptionIsBP(pCurrentPID, (quint64)exInfo.ExceptionAddress, EXCEPTION_BREAKPOINT, true);
+						if(bIsBP)
+						{
+							BPStruct *pCurrentBP;
+
+							if(m_pBreakpointManager->BreakpointFind((DWORD64)exInfo.ExceptionAddress, SOFTWARE_BP, debug_event.dwProcessId, true, &pCurrentBP))
+							{
+								if(!WriteProcessMemory(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, (LPVOID)pCurrentBP->bOrgByte, pCurrentBP->dwSize,NULL) &&
+									!FlushInstructionCache(pCurrentPID->hProc, (LPVOID)pCurrentBP->dwOffset, pCurrentBP->dwSize))
+								{
+									dwContinueStatus = CallBreakDebugger(&debug_event,0);
+									break;
+								}
+
+								pCurrentBP->bRestoreBP = true;
+							}
+								
+							SetThreadContextHelper(false, true, debug_event.dwThreadId, pCurrentPID);
+							pCurrentPID->bTrapFlag = true;
+							pCurrentPID->dwBPRestoreFlag = RESTORE_BP_SOFTWARE;
+								
+							emit OnLog(QString("[!] Break on - Software BP - PID %1 - %2")
+									.arg(debug_event.dwProcessId, 6, 16, QChar('0'))
+#ifdef _AMD64_
+									.arg((DWORD64)exInfo.ExceptionAddress, 16, 16, QChar('0')));
+#else
+									.arg((DWORD)exInfo.ExceptionAddress, 8, 16, QChar('0')));
+#endif
+					
+							dwContinueStatus = CallBreakDebugger(&debug_event,0);
+						}
+						break;
+					}
 				case 0x4000001E: // Single Step in x86 Process which got executed in a x64 environment
 				case EXCEPTION_SINGLE_STEP:
 					{
@@ -568,7 +603,7 @@ void clsDebugger::DebuggingLoop()
 										pCurrentBP->dwHandle == BP_KEEP &&
 										(pCurrentBP->dwPID == debug_event.dwProcessId || pCurrentBP->dwPID == -1))
 									{
-										clsBreakpointSoftware::wSoftwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, &pCurrentBP->bOrgByte);
+										clsBreakpointSoftware::wSoftwareBP(pCurrentBP->dwPID, pCurrentBP->dwOffset, pCurrentBP->dwSize, &pCurrentBP->bOrgByte, pCurrentBP->dwDataType);
 										pCurrentBP->bRestoreBP = false;
 
 										break;

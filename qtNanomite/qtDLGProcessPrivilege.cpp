@@ -66,7 +66,7 @@ void qtDLGProcessPrivilege::DisplayPrivileges()
 {
 	tblProcPriv->setRowCount(0);
 
-	for(size_t i = m_processLoopEntry; i < m_processLoopEnd;i++)
+	for(int i = m_processLoopEntry; i < m_processLoopEnd;i++)
 	{
 		HANDLE	hProcess	= m_pMainWindow->coreDebugger->PIDs[i].hProc,
 				hToken		= NULL;

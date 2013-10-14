@@ -45,6 +45,7 @@ qtDLGBreakPointManager::qtDLGBreakPointManager(QWidget *parent, Qt::WFlags flags
 	connect(tblBPs,SIGNAL(cellClicked(int,int)),this,SLOT(OnSelectedBPChanged(int,int)));
 	connect(tblBPs,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnSendToDisassembler(QTableWidgetItem *)));
 	connect(cbType,SIGNAL(currentIndexChanged(const QString &)),this,SLOT(OnBPTypeSelectionChanged(const QString &)));
+	connect(cbOpcode,SIGNAL(currentIndexChanged(const QString &)),this,SLOT(OnBPOpcodeSelectionChanged(const QString &)));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnBPRemove()));
 	connect(new QShortcut(Qt::Key_Escape,this),SIGNAL(activated()),this,SLOT(close()));
 
@@ -78,6 +79,14 @@ void qtDLGBreakPointManager::OnUpdate(BPStruct newBP,int breakpointType)
 		{
 		case 0:
 			TempString = "Software BP";
+
+			switch(newBP.dwDataType)
+			{
+				case BP_SW_HLT: TempString.append(" - HLT"); break;
+				case BP_SW_UD2: TempString.append(" - UD2"); break;
+				default:		TempString.append(" - INT3"); break;
+			}
+
 			break;
 		case 1:
 			TempString = "Memory BP";
@@ -168,26 +177,20 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	if(iUpdateLine != -1)
 	{
 		DWORD dwType = 0;
-		if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Software BP") == 0)
+		if(QString::compare(tblBPs->item(iUpdateLine,2)->text(),"Software BP") == 0)
 			dwType = SOFTWARE_BP;
-		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Hardware BP") == 0)
+		else if(QString::compare(tblBPs->item(iUpdateLine,2)->text(),"Hardware BP") == 0)
 			dwType = HARDWARE_BP;
-		else if(QString().compare(tblBPs->item(iUpdateLine,2)->text(),"Memory BP") == 0)
+		else if(QString::compare(tblBPs->item(iUpdateLine,2)->text(),"Memory BP") == 0)
 			dwType = MEMORY_BP;
 
 		clsBreakpointManager::BreakpointDelete(tblBPs->item(iUpdateLine,1)->text().toULongLong(0,16),dwType);
 		tblBPs->removeRow(iUpdateLine);
 	}
 
-	DWORD dwType = 0,
-		dwBreakOn = 0;
-
-	if(cbType->currentText().compare("Software BP") == 0)
-		dwType = SOFTWARE_BP;
-	else if(cbType->currentText().compare("Hardware BP") == 0)
-		dwType = HARDWARE_BP;
-	else if(cbType->currentText().compare("Memory BP") == 0)
-		dwType = MEMORY_BP;
+	DWORD	dwType = 0,
+			dwBreakOn = 0,
+			dwBreakpointDataType = 0;
 
 	if(cbBreakOn->currentText().compare("Execute") == 0)
 		dwBreakOn = BP_EXEC;
@@ -198,10 +201,25 @@ void qtDLGBreakPointManager::OnAddUpdate()
 	else if(cbBreakOn->currentText().compare("Access") == 0)
 		dwBreakOn = BP_ACCESS;
 
+	if(cbType->currentText().compare("Software BP") == 0)
+	{
+		dwType = SOFTWARE_BP;
+
+		if(cbOpcode->currentText().compare("HLT") == 0)
+			dwBreakpointDataType = BP_SW_HLT;
+		else if(cbOpcode->currentText().compare("UD2") == 0)
+			dwBreakpointDataType = BP_SW_UD2;
+	}
+	else if(cbType->currentText().compare("Hardware BP") == 0)
+		dwType = HARDWARE_BP;
+	else if(cbType->currentText().compare("Memory BP") == 0)
+		dwType = MEMORY_BP;
+
+
 	if(lePID->text().toInt() == -1)
-		clsBreakpointManager::BreakpointInsert(dwType, dwBreakOn, lePID->text().toInt(), dwOffset, cbSize->currentText().toInt(), BP_KEEP);
+		clsBreakpointManager::BreakpointInsert(dwType, dwBreakOn, lePID->text().toInt(), dwOffset, cbSize->currentText().toInt(), BP_KEEP, dwBreakpointDataType);
 	else
-		clsBreakpointManager::BreakpointInsert(dwType, dwBreakOn, lePID->text().toInt(0,16), dwOffset, cbSize->currentText().toInt(), BP_KEEP);
+		clsBreakpointManager::BreakpointInsert(dwType, dwBreakOn, lePID->text().toInt(0,16), dwOffset, cbSize->currentText().toInt(), BP_KEEP, dwBreakpointDataType);
 }
 
 void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
@@ -221,7 +239,7 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 	else if(QString().compare(tblBPs->item(iRow,4)->text(),"Access") == 0)
 		selectedBreakType = BP_ACCESS;
 
-	if(QString().compare(tblBPs->item(iRow,2)->text(),"Software BP") == 0)
+	if(tblBPs->item(iRow,2)->text().contains("Software BP"))
 	{
 		cbBreakOn->clear();
 		cbBreakOn->addItem("Execute");
@@ -241,8 +259,18 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		case 2: cbSize->setCurrentIndex(1); break;
 		case 4: cbSize->setCurrentIndex(2); break;
 		}
+
+		cbOpcode->setEnabled(true);
+
+		if(tblBPs->item(iRow,2)->text().contains("INT3"))
+			cbOpcode->setCurrentIndex(0);
+		else if(tblBPs->item(iRow,2)->text().contains("HLT"))
+			cbOpcode->setCurrentIndex(1);
+		else if(tblBPs->item(iRow,2)->text().contains("UD2"))
+			cbOpcode->setCurrentIndex(2);
+		
 	}
-	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Hardware BP") == 0)
+	else if(QString::compare(tblBPs->item(iRow,2)->text(),"Hardware BP") == 0)
 	{
 		cbBreakOn->clear();
 		cbBreakOn->addItem("Execute");
@@ -271,8 +299,10 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		case 2: cbSize->setCurrentIndex(1); break;
 		case 4: cbSize->setCurrentIndex(2); break;
 		}
+
+		cbOpcode->setEnabled(false);
 	}
-	else if(QString().compare(tblBPs->item(iRow,2)->text(),"Memory BP") == 0)
+	else if(QString::compare(tblBPs->item(iRow,2)->text(),"Memory BP") == 0)
 	{
 		cbBreakOn->clear();
 		cbBreakOn->addItem("Access");
@@ -292,6 +322,8 @@ void qtDLGBreakPointManager::OnSelectedBPChanged(int iRow,int iCol)
 		case BP_EXEC: cbBreakOn->setCurrentIndex(1); break;
 		case BP_WRITE: cbBreakOn->setCurrentIndex(2); break;
 		}	
+
+		cbOpcode->setEnabled(false);
 	}
 }
 
@@ -375,6 +407,8 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbSize->addItem("2");
 		cbSize->addItem("4");
 		cbSize->setEnabled(true);
+
+		cbOpcode->setEnabled(true);
 	}
 	else if(selectedItemText.compare("Hardware BP") == 0)
 	{
@@ -389,6 +423,8 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbSize->addItem("2");
 		cbSize->addItem("4");
 		cbSize->setEnabled(true);
+
+		cbOpcode->setEnabled(false);
 	}
 	else if(selectedItemText.compare("Memory BP") == 0)
 	{
@@ -401,5 +437,24 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbSize->clear();
 		cbSize->addItem("0");
 		cbSize->setEnabled(false);
+
+		cbOpcode->setEnabled(false);
 	}
+}
+
+void qtDLGBreakPointManager::OnBPOpcodeSelectionChanged(const QString &selectedItemText)
+{
+	if(selectedItemText.contains("HLT"))
+	{
+		cbSize->setEnabled(true);
+	}
+	else if(selectedItemText.contains("INT3"))
+	{
+		cbSize->setEnabled(true);
+	}
+	else if(selectedItemText.contains("UD2"))
+	{
+		cbSize->setCurrentIndex(1);
+		cbSize->setEnabled(false);
+	}	
 }

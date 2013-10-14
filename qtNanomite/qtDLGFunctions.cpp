@@ -44,10 +44,10 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags fla
 
 	qtDLGNanomite *myMainWindow = qtDLGNanomite::GetInstance();
 
-	size_t	iForEntry = 0,
-			iForEnd = myMainWindow->coreDebugger->PIDs.size();
+	int	iForEntry = 0,
+		iForEnd = myMainWindow->coreDebugger->PIDs.size();
 
-	for(size_t i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
+	for(int i = 0; i < myMainWindow->coreDebugger->PIDs.size(); i++)
 	{
 		if(myMainWindow->coreDebugger->PIDs[i].dwPID == m_processID)
 		{
@@ -58,7 +58,7 @@ qtDLGFunctions::qtDLGFunctions(qint32 processID, QWidget *parent, Qt::WFlags fla
 	}
 
 	QList<FunctionProcessingData> dataForProcessing;
-	for(size_t i = iForEntry; i < iForEnd;i++)
+	for(int i = iForEntry; i < iForEnd;i++)
 	{
 		FunctionProcessingData newData;
 		newData.currentModule = (PTCHAR)myMainWindow->coreDebugger->PIDs[i].sFileName;

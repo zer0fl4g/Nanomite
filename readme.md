@@ -105,8 +105,13 @@
 + added resolving of drag n dropped .lnk files
 + added bookmarks
 + added comments
++ added HLT and UD2 software breakpoint types
 
 ####Notes:
 	- Supported breakpoint sizes are 1,2 and 4 bytes for software and hardware breakpoints
+	- In the breakpoint manager you can now choose between int3, hlt and ud2 software breakpoints
+		- int3 = 0xCC
+		- hlt  = 0xF4
+		- ud2  = 0x0F0B
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

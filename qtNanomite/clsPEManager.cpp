@@ -182,7 +182,7 @@ IMAGE_DOS_HEADER clsPEManager::getDosHeader(QString FileName,int PID)
 			return PEFiles[i].PEFile->getDosHeader();
 	}
 
-	IMAGE_DOS_HEADER failed;
+	IMAGE_DOS_HEADER failed = { 0 };
 	return failed;
 }
 
@@ -196,7 +196,7 @@ IMAGE_NT_HEADERS32 clsPEManager::getNTHeader32(QString FileName,int PID)
 			return PEFiles[i].PEFile->getNTHeader32();
 	}
 
-	IMAGE_NT_HEADERS32 failed;
+	IMAGE_NT_HEADERS32 failed =  { 0 };
 	return failed;
 }
 
@@ -210,7 +210,7 @@ IMAGE_NT_HEADERS64 clsPEManager::getNTHeader64(QString FileName,int PID)
 			return PEFiles[i].PEFile->getNTHeader64();
 	}
 
-	IMAGE_NT_HEADERS64 failed;
+	IMAGE_NT_HEADERS64 failed =  { 0 };
 	return failed;
 }
 

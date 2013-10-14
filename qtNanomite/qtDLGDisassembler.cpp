@@ -340,7 +340,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		int processID = coreDebugger->GetCurrentPID();
 		qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 
-		pMainWindow->coreBPManager->BreakpointAdd(SOFTWARE_BP, BP_TRACETO, processID, tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16), 1, BP_TRACETO);
+		pMainWindow->coreBPManager->BreakpointAdd(SOFTWARE_BP, BP_TRACETO, processID, tblDisAs->item(m_iSelectedRow,0)->text().toULongLong(0,16), 1, BP_TRACETO, NULL);
 		qtDLGTrace::clearTraceData();
 		pMainWindow->actionDebug_Trace_Stop->setEnabled(true);
 		pMainWindow->actionDebug_Trace_Start->setEnabled(false);

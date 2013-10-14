@@ -172,7 +172,7 @@ bool clsBreakpointManager::BreakpointRemove(DWORD64 breakpointOffset, DWORD brea
 	return true;
 }
 
-bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType)
+bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType, DWORD breakpointDataType)
 {
 	if(breakpointOffset == NULL) return false;
 
@@ -204,21 +204,46 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 		}
 	}
 
+	BPStruct newBP;
+	ZeroMemory(&newBP,sizeof(BPStruct));
+
 	if(!bExists)
 	{
 		switch(breakpointType)
 		{
 		case SOFTWARE_BP:
 			{
-				BPStruct newBP;
-				ZeroMemory(&newBP,sizeof(BPStruct));
+				/*if(breakpointDataType == BP_SW_LONGINT3)
+				{
+					breakpointSize = 2;
 
-				if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, breakpointSize, &newBP.bOrgByte))
-					break;
+					if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, breakpointSize, &newBP.bOrgByte, BP_SW_LONGINT3))
+						break;
+
+					breakpointOffset += 1;
+				}
+				else*/ if(breakpointDataType == BP_SW_UD2)
+				{
+					breakpointSize = 2;
+
+					if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, breakpointSize, &newBP.bOrgByte, BP_SW_UD2))
+						break;
+				}
+				else if(breakpointDataType == BP_SW_HLT)
+				{
+					if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, breakpointSize, &newBP.bOrgByte, BP_SW_HLT))
+						break;
+				}
+				else
+				{
+					if(!clsBreakpointSoftware::wSoftwareBP(processID, breakpointOffset, breakpointSize, &newBP.bOrgByte))
+						break;
+				}
 
 				newBP.dwOffset = breakpointOffset;
 				newBP.dwHandle = breakpointHandleType;
 				newBP.dwSize = breakpointSize;
+				newBP.dwDataType = breakpointDataType;
 				newBP.dwPID = processID;
 				newBP.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 				ZeroMemory(newBP.moduleName,MAX_PATH * sizeof(TCHAR));
@@ -239,10 +264,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 
 				if(!clsBreakpointMemory::wMemoryBP(processID, breakpointOffset, breakpointSize, typeFlag, &oldProtection))
 					break;
-
-				BPStruct newBP;
-				ZeroMemory(&newBP,sizeof(BPStruct));
-
+				
 				newBP.dwOffset = breakpointOffset;
 				newBP.dwHandle = breakpointHandleType;
 				newBP.dwSize = breakpointSize;
@@ -265,10 +287,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 			{
 				if(HardwareBPs.size() == 4)
 					break;
-
-				BPStruct newBP;
-				ZeroMemory(&newBP,sizeof(BPStruct));
-
+				
 				newBP.dwOffset = breakpointOffset;
 				newBP.dwHandle = breakpointHandleType;
 				newBP.dwSize = breakpointSize;
@@ -437,14 +456,14 @@ void clsBreakpointManager::RemoveSBPFromMemory(bool isDisable, DWORD processID)
 		for (QList<BPStruct>::iterator it = pThis->SoftwareBPs.begin();it != pThis->SoftwareBPs.end(); ++it)
 		{
 			if((it->dwPID == processID || it->dwPID == -1) && it->bRestoreBP == false)
-				clsBreakpointSoftware::wSoftwareBP(it->dwPID, it->dwOffset, it->dwSize, &it->bOrgByte);
+				clsBreakpointSoftware::wSoftwareBP(it->dwPID, it->dwOffset, it->dwSize, &it->bOrgByte, it->dwDataType);
 		}
 	}
 }
 
-bool clsBreakpointManager::BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType)
+bool clsBreakpointManager::BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType, DWORD breakpointDataType)
 {
-	return pThis->BreakpointAdd(breakpointType, typeFlag, processID, breakpointOffset, breakpointSize, breakpointHandleType);
+	return pThis->BreakpointAdd(breakpointType, typeFlag, processID, breakpointOffset, breakpointSize, breakpointHandleType, breakpointDataType);
 }
 
 bool clsBreakpointManager::BreakpointDelete(DWORD64 breakpointOffset, DWORD breakpointType)
