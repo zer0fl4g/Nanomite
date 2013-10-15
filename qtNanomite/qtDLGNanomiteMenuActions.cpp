@@ -30,6 +30,7 @@
 #include "qtDLGProcessPrivilege.h"
 #include "qtDLGOpenNewFile.h"
 
+#include "clsProjectFile.h"
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
@@ -85,6 +86,22 @@ void qtDLGNanomite::action_FileDetach()
 		else
 			UpdateStateBar(STATE_TERMINATE);
 	}
+}
+
+void qtDLGNanomite::action_FileLoad()
+{
+	if(coreDebugger->GetDebuggingState())
+	{
+		QMessageBox::warning(this, "Nanomite", "Please finish debugging first!", QMessageBox::Ok, QMessageBox::Ok);
+		return;
+	}
+
+	clsProjectFile(false);
+}
+
+void qtDLGNanomite::action_FileSave()
+{
+	clsProjectFile(true);
 }
 
 void qtDLGNanomite::action_DebugStart()

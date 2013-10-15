@@ -197,3 +197,8 @@ QString qtDLGBookmark::BookmarkGetComment(int processID, quint64 bookmarkOffset)
 
 	return QString("");
 }
+
+QList<BookmarkData> qtDLGBookmark::BookmarkGetList()
+{
+	return pThis->m_bookmarkData;
+}

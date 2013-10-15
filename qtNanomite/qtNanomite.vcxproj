@@ -252,6 +252,7 @@
     <ClCompile Include="clsPEFile.cpp" />
     <ClCompile Include="clsPEManager.cpp" />
     <ClCompile Include="clsProcessDump.cpp" />
+    <ClCompile Include="clsProjectFile.cpp" />
     <ClCompile Include="clsStringViewWorker.cpp" />
     <ClCompile Include="clsSymbolAndSyntax.cpp" />
     <ClCompile Include="main.cpp" />
@@ -791,6 +792,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -D_AMD64_ -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I.\TempOutput\GeneratedFiles\$(ConfigurationName)\." "-I.\TempOutput\GeneratedFiles"</Command>
     </CustomBuild>
+    <ClInclude Include="clsProjectFile.h" />
     <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGBookmark.h" />
     <ClInclude Include="TempOutput\GeneratedFiles\ui_qtDLGGoToDialog.h" />
     <ClInclude Include="TempOutput\GeneratedFiles\ui_ucheckupdateswidget.h" />

@@ -96,6 +96,8 @@ private slots:
 	void action_FileAttachTo();
 	void action_FileDetach();
 	void action_FileTerminateGUI();
+	void action_FileLoad();
+	void action_FileSave();
 	void action_DebugStart();
 	void action_DebugAttachStart(int iPID,QString FilePath);
 	void action_DebugStop();

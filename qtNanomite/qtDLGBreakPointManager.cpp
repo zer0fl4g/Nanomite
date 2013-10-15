@@ -335,11 +335,11 @@ void qtDLGBreakPointManager::OnBPRemove()
 	{
 		if(tblBPs->item(i,0)->isSelected())
 		{
-			if(QString().compare(tblBPs->item(i,2)->text(),"Software BP") == 0)
+			if(tblBPs->item(i,2)->text().compare("Software BP") == 0)
 				dwType = SOFTWARE_BP;
-			else if(QString().compare(tblBPs->item(i,2)->text(),"Hardware BP") == 0)
+			else if(tblBPs->item(i,2)->text().compare("Hardware BP") == 0)
 				dwType = HARDWARE_BP;
-			else if(QString().compare(tblBPs->item(i,2)->text(),"Memory BP") == 0)
+			else if(tblBPs->item(i,2)->text().compare("Memory BP") == 0)
 				dwType = MEMORY_BP;
 
 			clsBreakpointManager::BreakpointDelete(tblBPs->item(i,1)->text().toULongLong(0,16),dwType);
@@ -409,6 +409,7 @@ void qtDLGBreakPointManager::OnBPTypeSelectionChanged(const QString &selectedIte
 		cbSize->setEnabled(true);
 
 		cbOpcode->setEnabled(true);
+		OnBPOpcodeSelectionChanged(cbOpcode->currentText());
 	}
 	else if(selectedItemText.compare("Hardware BP") == 0)
 	{

@@ -44,6 +44,8 @@ public:
 	
 	static void BookmarkClear();
 
+	static QList<BookmarkData> BookmarkGetList();
+
 signals:
 	void ShowInDisassembler(quint64 bookmarkOffset);
 

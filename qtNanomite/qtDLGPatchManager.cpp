@@ -574,3 +574,8 @@ void qtDLGPatchManager::OnReturnPressed()
 
 	OnSendToDisassembler(tblPatches->selectedItems()[0]);
 }
+
+QList<PatchData> qtDLGPatchManager::GetPatchList()
+{
+	return pThis->m_patches;
+}

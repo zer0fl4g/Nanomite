@@ -111,6 +111,8 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(actionFile_AttachTo, SIGNAL(triggered()), this, SLOT(action_FileAttachTo()));
 	connect(actionFile_Detach, SIGNAL(triggered()), this, SLOT(action_FileDetach()));
 	connect(actionFile_Exit, SIGNAL(triggered()), this, SLOT(action_FileTerminateGUI()));
+	connect(actionFile_Load, SIGNAL(triggered()), this, SLOT(action_FileLoad()));
+	connect(actionFile_Save, SIGNAL(triggered()), this, SLOT(action_FileSave()));
 	connect(actionDebug_Start, SIGNAL(triggered()), this, SLOT(action_DebugStart()));
 	connect(actionDebug_Stop, SIGNAL(triggered()), this, SLOT(action_DebugStop()));
 	connect(actionDebug_Restart, SIGNAL(triggered()), this, SLOT(action_DebugRestart()));

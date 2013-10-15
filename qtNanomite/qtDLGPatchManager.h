@@ -52,6 +52,8 @@ public:
 	static void ClearAllPatches();
 	static void ResetPatches();
 
+	static QList<PatchData> GetPatchList();
+
 signals:
 	void OnReloadDebugger();
 
