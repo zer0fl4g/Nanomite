@@ -106,6 +106,7 @@
 + added bookmarks
 + added comments
 + added HLT and UD2 software breakpoint types
++ added project files
 
 ####Notes:
 	- Supported breakpoint sizes are 1,2 and 4 bytes for software and hardware breakpoints
@@ -113,5 +114,6 @@
 		- int3 = 0xCC
 		- hlt  = 0xF4
 		- ud2  = 0x0F0B
+	- Project files allow to save bookmarks, comments, patches and breakpoints of the current project
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

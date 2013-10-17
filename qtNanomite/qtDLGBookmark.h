@@ -21,10 +21,13 @@
 
 #include <QList>
 
+#include <Windows.h>
+
 struct BookmarkData
 {
 	int		bookmarkPID;
 	quint64 bookmarkOffset;
+	quint64 bookmarkBaseOffset;
 	QString	bookmarkComment;
 	QString bookmarkModule;
 };
@@ -46,11 +49,14 @@ public:
 
 	static QList<BookmarkData> BookmarkGetList();
 
+	void BookmarkInsertFromProjectFile(BookmarkData newBookmark);
+
 signals:
 	void ShowInDisassembler(quint64 bookmarkOffset);
 
 public slots:
 	void UpdateBookmarks(QString fileName, int processID);
+	void BookmarkUpdateOffsets(HANDLE processHandle, int processID);
 
 private:
 	static qtDLGBookmark *pThis;

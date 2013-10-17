@@ -24,7 +24,7 @@
 class clsProjectFile
 {
 public:
-	clsProjectFile(bool isSaveFile);
+	clsProjectFile(bool isSaveFile, bool *pStartDebugging = NULL);
 	~clsProjectFile();
 
 private:
@@ -38,6 +38,12 @@ private:
 	void WriteDebugDataToFile(QXmlStreamWriter &xmlWriter);
 	void WriteBreakpointDataToFile(QXmlStreamWriter &xmlWriter);
 	void WriteBreakpointListToFile(QList<BPStruct> &tempBP, int bpType, QXmlStreamWriter &xmlWriter);
+
+	bool ReadDebugDataFromFile(QXmlStreamReader &xmlReader);
+
+	void ReadBookmarkDataFromFile(QXmlStreamReader &xmlReader);
+	void ReadBreakpointDataFromFile(QXmlStreamReader &xmlReader);
+	void ReadPatchDataFromFile(QXmlStreamReader &xmlReader);
 };
 
 #endif

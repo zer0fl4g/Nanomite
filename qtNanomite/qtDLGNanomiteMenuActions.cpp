@@ -96,7 +96,11 @@ void qtDLGNanomite::action_FileLoad()
 		return;
 	}
 
-	clsProjectFile(false);
+	bool startDebugging = false;
+	clsProjectFile(false, &startDebugging);
+
+	if(startDebugging)
+		action_DebugStart();
 }
 
 void qtDLGNanomite::action_FileSave()

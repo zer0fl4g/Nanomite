@@ -65,8 +65,7 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 
 	if(!bFound)
 	{
-		PIDStruct newPID;
-		ZeroMemory(&newPID, sizeof(PIDStruct));
+		PIDStruct newPID = { 0 };
 
 		newPID.dwPID = dwPID;
 		newPID.dwEP = dwEP;

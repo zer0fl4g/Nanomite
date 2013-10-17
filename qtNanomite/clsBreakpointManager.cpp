@@ -206,8 +206,7 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 
 	if(!bExists)
 	{
-		BPStruct newBP;
-		ZeroMemory(&newBP,sizeof(BPStruct));
+		BPStruct newBP = { 0 };
 
 		switch(breakpointType)
 		{

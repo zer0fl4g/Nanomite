@@ -152,8 +152,7 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 
 void qtDLGHeapView::OnSelectionChanged()
 {
-	HEAPENTRY32 he;
-	ZeroMemory(&he, sizeof(HEAPENTRY32));
+	HEAPENTRY32 he = { 0 };
 	he.dwSize = sizeof(HEAPENTRY32);
 
 	if(tblHeapView->selectedItems().size() <= 0) 
@@ -238,8 +237,7 @@ void qtDLGHeapView::DisplayHeap()
 					quint64 commitedSize	= NULL,
 							usedSize		= NULL,
 							BlockCount		= NULL;
-					HEAPENTRY32 he;
-					ZeroMemory(&he, sizeof(HEAPENTRY32));
+					HEAPENTRY32 he = { 0 };
 					he.dwSize = sizeof(HEAPENTRY32);
 
 					if(Heap32First(&he,m_pMainWindow->coreDebugger->PIDs[i].dwPID,heapList.th32HeapID))

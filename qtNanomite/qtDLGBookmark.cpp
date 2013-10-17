@@ -149,8 +149,7 @@ bool qtDLGBookmark::BookmarkAdd(int processID, quint64 bookmarkOffset, QString b
 	newBookmark.bookmarkPID = processID;
 
 	TCHAR moduleName[MAX_PATH * sizeof(TCHAR)] = { 0 };
-	clsHelperClass::CalcOffsetForModule(moduleName, bookmarkOffset, processID);
-
+	newBookmark.bookmarkBaseOffset = clsHelperClass::CalcOffsetForModule(moduleName, bookmarkOffset, processID);
 	newBookmark.bookmarkModule = QString::fromWCharArray(moduleName); 
 
 	pBookmarkList->append(newBookmark);
@@ -189,7 +188,7 @@ QString qtDLGBookmark::BookmarkGetComment(int processID, quint64 bookmarkOffset)
 
 	for(int i = 0; i < pBookmarkList->size(); i++)
 	{
-		if(pBookmarkList->at(i).bookmarkOffset == bookmarkOffset && pBookmarkList->at(i).bookmarkPID == processID)
+		if(pBookmarkList->at(i).bookmarkOffset == bookmarkOffset/* && pBookmarkList->at(i).bookmarkPID == processID*/)
 		{
 			return pBookmarkList->at(i).bookmarkComment;
 		}
@@ -201,4 +200,32 @@ QString qtDLGBookmark::BookmarkGetComment(int processID, quint64 bookmarkOffset)
 QList<BookmarkData> qtDLGBookmark::BookmarkGetList()
 {
 	return pThis->m_bookmarkData;
+}
+
+void qtDLGBookmark::BookmarkUpdateOffsets(HANDLE processHandle, int processID)
+{
+	for(int i = 0; i < m_bookmarkData.size(); i++)
+	{
+		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)m_bookmarkData.at(i).bookmarkModule.toStdWString().c_str(),
+																	m_bookmarkData.at(i).bookmarkOffset,
+																	processID);
+
+		if(newBaseOffset != m_bookmarkData.at(i).bookmarkBaseOffset)
+		{
+			DWORD64 tempOffset = m_bookmarkData.at(i).bookmarkOffset - m_bookmarkData.at(i).bookmarkBaseOffset;
+
+			m_bookmarkData[i].bookmarkBaseOffset = newBaseOffset;
+			m_bookmarkData[i].bookmarkOffset = newBaseOffset + tempOffset;
+
+			if(m_bookmarkData.at(i).bookmarkPID == NULL)
+				m_bookmarkData[i].bookmarkPID = processID;
+		}
+	}
+
+	UpdateDisplay();
+}
+
+void qtDLGBookmark::BookmarkInsertFromProjectFile(BookmarkData newBookmark)
+{
+	m_bookmarkData.append(newBookmark);
 }

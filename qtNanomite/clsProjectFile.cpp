@@ -20,12 +20,12 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-clsProjectFile::clsProjectFile(bool isSaveFile) :
+clsProjectFile::clsProjectFile(bool isSaveFile, bool *pStartDebugging) :
 	m_pMainWindow(qtDLGNanomite::GetInstance())
 {
 	if(isSaveFile)
 	{
-		QString saveFilePath = QFileDialog::getSaveFileName(m_pMainWindow, "Please select a save path!", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
+		QString saveFilePath = QFileDialog::getSaveFileName(m_pMainWindow, "Please select a save path", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
 
 		if(saveFilePath.length() <= 0)
 		{
@@ -44,7 +44,7 @@ clsProjectFile::clsProjectFile(bool isSaveFile) :
 	}
 	else
 	{
-		QString loadFilePath = QFileDialog::getOpenFileName(m_pMainWindow, "Please select a save path!", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
+		QString loadFilePath = QFileDialog::getOpenFileName(m_pMainWindow, "Please select a file to load", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
 
 		if(loadFilePath.length() <= 0)
 		{
@@ -55,11 +55,14 @@ clsProjectFile::clsProjectFile(bool isSaveFile) :
 		if(!ReadDataFromFile(loadFilePath))
 		{
 			QMessageBox::critical(m_pMainWindow, "Nanomite", "Error while reading the data!", QMessageBox::Ok, QMessageBox::Ok);
+			return;
 		}
 		else
 		{
 			QMessageBox::information(m_pMainWindow, "Nanomite", "Data has been loaded!", QMessageBox::Ok, QMessageBox::Ok);
 		}
+
+		*pStartDebugging = true;
 	}
 }
 
@@ -126,7 +129,7 @@ void clsProjectFile::WriteBookmarkDataToFile(QXmlStreamWriter &xmlWriter)
 	for(int i = 0; i < tempBookmarkList.size(); i++)
 	{
 		xmlWriter.writeStartElement(QString("BOOKMARK_%1").arg(i));
-		xmlWriter.writeTextElement("bookmarkOffset",	QString("%1").arg(tempBookmarkList.at(i).bookmarkOffset, 16, 16, QChar('0')));
+		xmlWriter.writeTextElement("bookmarkOffset",	QString("%1").arg(tempBookmarkList.at(i).bookmarkOffset - tempBookmarkList.at(i).bookmarkBaseOffset, 16, 16, QChar('0')));
 		xmlWriter.writeTextElement("bookmarkComment",	tempBookmarkList.at(i).bookmarkComment);
 		xmlWriter.writeTextElement("bookmarkModule",	tempBookmarkList.at(i).bookmarkModule);
 		xmlWriter.writeEndElement();
@@ -167,8 +170,8 @@ void clsProjectFile::WriteBreakpointListToFile(QList<BPStruct> &tempBP, int bpTy
 			xmlWriter.writeStartElement(QString("BREAKPOINT_%1_%2").arg(bpTypeString).arg(i));
 
 			xmlWriter.writeTextElement("breakpointOffset",		QString("%1").arg(tempBP.at(i).dwOffset - tempBP.at(i).dwBaseOffset, 16, 16, QChar('0')));
-			xmlWriter.writeTextElement("breakpointSize",		QString("%1").arg(tempBP.at(i).dwSize, 16, 16, QChar('0')));
-			xmlWriter.writeTextElement("breakpointTypeFlag",	QString("%1").arg(tempBP.at(i).dwTypeFlag, 16, 16, QChar('0')));
+			xmlWriter.writeTextElement("breakpointSize",		QString("%1").arg(tempBP.at(i).dwSize, 8, 16, QChar('0')));
+			xmlWriter.writeTextElement("breakpointTypeFlag",	QString("%1").arg(tempBP.at(i).dwTypeFlag, 8, 16, QChar('0')));
 			xmlWriter.writeTextElement("breakpointModuleName",	QString(QString::fromWCharArray(tempBP.at(i).moduleName)));
 
 			switch(bpType) // save only breakpoint specific data
@@ -177,21 +180,21 @@ void clsProjectFile::WriteBreakpointListToFile(QList<BPStruct> &tempBP, int bpTy
 				{
 					QString tempBuffer;
 
-					for(int bpData = 0; bpData < tempBP.at(i).dwSize; bpData++)
+					for(unsigned int bpData = 0; bpData < tempBP.at(i).dwSize; bpData++)
 						tempBuffer.append(QString("%1").arg(*((BYTE *)tempBP.at(i).bOrgByte + bpData), 2, 16, QChar('0')));
 
-					xmlWriter.writeTextElement("breakpointData", QString(tempBuffer));
-					xmlWriter.writeTextElement("breakpointDataType", QString("%1").arg(tempBP.at(i).dwDataType, 16, 16, QChar('0')));
+					xmlWriter.writeTextElement("breakpointData", tempBuffer);
+					xmlWriter.writeTextElement("breakpointDataType", QString("%1").arg(tempBP.at(i).dwDataType, 8, 16, QChar('0')));
 					break;
 				}
 			case MEMORY_BP:
 				{
-					xmlWriter.writeTextElement("breakpointOldProtection", QString("%1").arg(tempBP.at(i).dwOldProtection, 16, 16, QChar('0')));
+					xmlWriter.writeTextElement("breakpointOldProtection", QString("%1").arg(tempBP.at(i).dwOldProtection, 8, 16, QChar('0')));
 					break;
 				}
 			case HARDWARE_BP:
 				{
-					xmlWriter.writeTextElement("breakpointSlot", QString("%1").arg(tempBP.at(i).dwSlot, 16, 16, QChar('0')));
+					xmlWriter.writeTextElement("breakpointSlot", QString("%1").arg(tempBP.at(i).dwSlot, 8, 16, QChar('0')));
 					break;
 				}
 			}
@@ -203,5 +206,139 @@ void clsProjectFile::WriteBreakpointListToFile(QList<BPStruct> &tempBP, int bpTy
 
 bool clsProjectFile::ReadDataFromFile(const QString &loadFilePath)
 {
+	QFile loadFile(loadFilePath);
+	if(!loadFile.open(QIODevice::ReadOnly | QIODevice::Text))
+		return false;
+
+	QXmlStreamReader xmlReader(&loadFile);
+
+	// add cleaning
+
+	while(!xmlReader.atEnd() && !xmlReader.hasError())
+	{
+		QXmlStreamReader::TokenType token = xmlReader.readNext();
+		if(token == QXmlStreamReader::StartDocument)
+		{
+			continue;
+		}
+		else if(token == QXmlStreamReader::StartElement)
+		{
+			if(xmlReader.name() == "NANOMITE_DATA")
+			{
+				continue;
+			}
+			else if(xmlReader.name() == "TARGET")
+			{
+				if(!ReadDebugDataFromFile(xmlReader))
+				{
+					loadFile.close();
+					return false;
+				}
+			}
+			else if(xmlReader.name().contains("BOOKMARK_"))
+			{
+				ReadBookmarkDataFromFile(xmlReader);
+			}
+			//else if(xmlReader.name().contains("PATCH_"))
+			//{
+			//	ReadBookmarkDataFromFile(xmlReader);
+			//}
+			//else if(xmlReader.name().contains("BREAKPOINT_"))
+			//{
+			//	ReadBookmarkDataFromFile(xmlReader);
+			//}
+		}
+	}
+
+	loadFile.close();
 	return true;
+}
+
+bool clsProjectFile::ReadDebugDataFromFile(QXmlStreamReader &xmlReader)
+{
+	QString filePath, commandLine;
+
+	xmlReader.readNext();
+
+	while(!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name() == "TARGET"))
+	{
+		if(xmlReader.tokenType() == QXmlStreamReader::StartElement)
+		{
+			if(xmlReader.name() == "FilePath")
+			{
+				xmlReader.readNext();
+				filePath = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "CommandLine")
+			{
+				xmlReader.readNext();
+				commandLine = xmlReader.text().toString();
+			}
+		}
+
+		xmlReader.readNext();
+	}
+
+	if(filePath.length() <= 0)
+	{
+		return false;
+	}
+	else
+	{
+		m_pMainWindow->coreDebugger->SetTarget(filePath);
+		m_pMainWindow->coreDebugger->SetCommandLine(commandLine);
+	}
+
+	return true;
+}
+
+void clsProjectFile::ReadBookmarkDataFromFile(QXmlStreamReader &xmlReader)
+{
+	QString bmOffset, bmComment, bmModule;
+
+	xmlReader.readNext();
+
+	while(!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name().contains("BOOKMARK_")))
+	{
+		if(xmlReader.tokenType() == QXmlStreamReader::StartElement)
+		{
+			if(xmlReader.name() == "bookmarkOffset")
+			{
+				xmlReader.readNext();
+				bmOffset = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "bookmarkComment")
+			{
+				xmlReader.readNext();
+				bmComment = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "bookmarkModule")
+			{
+				xmlReader.readNext();
+				bmModule = xmlReader.text().toString();
+			}
+		}
+
+		xmlReader.readNext();
+	}
+
+	if(bmOffset.length() >= 0 && bmComment.length() >= 0 && bmModule.length() >= 0)
+	{
+		BookmarkData newBookmark = { 0 };
+		newBookmark.bookmarkComment = bmComment;
+		newBookmark.bookmarkModule = bmModule;
+		newBookmark.bookmarkOffset = bmOffset.toULongLong(0,16);
+
+		m_pMainWindow->dlgBookmark->BookmarkInsertFromProjectFile(newBookmark);
+	}
+}
+
+void clsProjectFile::ReadBreakpointDataFromFile(QXmlStreamReader &xmlReader)
+{
+
+}
+
+void clsProjectFile::ReadPatchDataFromFile(QXmlStreamReader &xmlReader)
+{
+
 }

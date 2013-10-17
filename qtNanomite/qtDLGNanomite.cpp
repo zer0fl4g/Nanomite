@@ -97,6 +97,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),dlgBPManager,SLOT(UpdateCompleter(QString,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),dlgBookmark,SLOT(UpdateBookmarks(QString,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgPatchManager,SLOT(UpdateOffsetPatch(HANDLE,int)),Qt::QueuedConnection);
+	connect(coreDebugger,SIGNAL(UpdateOffsetsPatches(HANDLE,int)),dlgBookmark,SLOT(BookmarkUpdateOffsets(HANDLE,int)),Qt::QueuedConnection);
 
 	connect(coreBPManager,SIGNAL(OnBreakpointAdded(BPStruct,int)),dlgBPManager,SLOT(OnUpdate(BPStruct,int)),Qt::QueuedConnection);
 	connect(coreBPManager,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
