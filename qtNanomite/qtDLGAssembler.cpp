@@ -153,7 +153,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	memset(pBuffer,0x90,newOpcodeLen);
 	memcpy(pBuffer,pFileBuffer,BytesRead);
 
-	qtDLGPatchManager::AddNewPatch(0,m_processHandle,m_instructionOffset,newOpcodeLen,pBuffer);
+	qtDLGPatchManager::AddNewPatch(GetProcessId(m_processHandle), m_processHandle, m_instructionOffset, newOpcodeLen, pBuffer);
 
 	clsMemManager::CFree(pBuffer);
 	clsMemManager::CFree(pFileBuffer);

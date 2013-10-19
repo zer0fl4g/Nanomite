@@ -318,6 +318,22 @@ void qtDLGNanomite::CleanGUI(bool bKeepLogBox)
 	lExceptionCount = 0;
 }
 
+void qtDLGNanomite::ClearDebugData(bool cleanGUI)
+{
+	if(cleanGUI)
+		CleanGUI();
+
+	qtDLGBookmark::BookmarkClear();
+	qtDLGPatchManager::ClearAllPatches();
+	qtDLGTrace::disableStatusBarTimer();
+	qtDLGTrace::clearTraceData();
+
+	PEManager->CleanPEManager();
+	coreBPManager->BreakpointClear();
+	coreDisAs->SectionDisAs.clear();
+	dlgBPManager->DeleteCompleterContent();
+}
+
 void qtDLGNanomite::OnDebuggerTerminated()
 {
 	coreDisAs->SectionDisAs.clear();
@@ -510,7 +526,8 @@ void qtDLGNanomite::DebugRecentFile(QAction *qAction)
 {
 	if(!coreDebugger->GetDebuggingState())
 	{
-		coreBPManager->BreakpointClear();
+		ClearDebugData(true);
+
 		coreDebugger->ClearTarget();
 		coreDebugger->ClearCommandLine();
 		coreDebugger->SetTarget(qAction->text());

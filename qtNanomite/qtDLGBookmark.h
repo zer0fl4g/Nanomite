@@ -30,6 +30,7 @@ struct BookmarkData
 	quint64 bookmarkBaseOffset;
 	QString	bookmarkComment;
 	QString bookmarkModule;
+	QString bookmarkProcessModule;
 };
 
 class qtDLGBookmark : public QWidget, public Ui_qtDLGBookmarkClass

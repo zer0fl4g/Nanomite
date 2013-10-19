@@ -172,7 +172,11 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			++lineCount;++disassemblyDataCurrent;
 			if(disassemblyDataCurrent == disassemblyDataEnd)
 			{
-				coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(5,0)->text().toULongLong(0,16),true);
+				if(tblDisAs->rowCount() < 5 && tblDisAs->rowCount() > 0)
+					coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(tblDisAs->rowCount() - 1,0)->text().toULongLong(0,16),true);
+				else
+					coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),tblDisAs->item(5,0)->text().toULongLong(0,16),true);
+				
 				tblDisAs->setUpdatesEnabled(true);
 				return;
 			}

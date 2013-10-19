@@ -22,20 +22,21 @@
 #include <Windows.h>
 
 #include <QList>
+#include <QString>
 
 struct PatchData
 {
-	quint64 Offset;
-	quint64 BaseOffset;
-	quint64 OldBaseOffset;
+	bool bWritten;
+	bool bSaved;
 	int PID;
 	int PatchSize;
 	HANDLE hProc;
 	PTCHAR ModuleName;
+	QString processModule;
 	LPVOID orgData;
 	LPVOID newData;
-	bool bWritten;
-	bool bSaved;
+	quint64 Offset;
+	quint64 BaseOffset;
 };
 
 class qtDLGPatchManager : public QWidget, public Ui_qtDLGPatchManagerClass
@@ -51,6 +52,7 @@ public:
 	static bool DeletePatch(int PID, quint64 Offset);
 	static void ClearAllPatches();
 	static void ResetPatches();
+	static void InsertPatchFromProjectFile(PatchData newPatchData);
 
 	static QList<PatchData> GetPatchList();
 

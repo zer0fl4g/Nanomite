@@ -64,7 +64,11 @@ bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 		
 		VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &newProtection);
 	}
-	
+	else
+	{
+		clsMemManager::CFree(breakpointDataBackup);
+	}
+
 	clsMemManager::CFree(breakpointData);
 	return returnValue;
 }

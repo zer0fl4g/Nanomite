@@ -61,7 +61,7 @@ public:
 	bool BreakpointFind(DWORD64 breakpointOffset, int breakpointType, DWORD processID, bool takeAll, BPStruct** pBreakpointSearched);
 
 	void BreakpointCleanup();
-	void BreakpointUpdateOffsets();
+	void BreakpointUpdateOffsets(HANDLE processHandle, DWORD processID);
 
 	static bool IsOffsetAnBP(quint64 Offset);
 	static bool BreakpointInsert(DWORD breakpointType, DWORD typeFlag, DWORD processID, DWORD64 breakpointOffset, int breakpointSize, DWORD breakpointHandleType, DWORD breakpointDataType = NULL);
@@ -75,6 +75,8 @@ signals:
 
 private: 
 	static clsBreakpointManager *pThis;
+
+	void BreakpointRebase(BPStruct *pCurrentBP, int bpType, HANDLE processHandle, DWORD processID);
 };
 
 #endif

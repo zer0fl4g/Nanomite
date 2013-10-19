@@ -443,7 +443,7 @@ void clsDebugger::DebuggingLoop()
 							{
 								bIsEP = true;
 								
-								m_pBreakpointManager->BreakpointUpdateOffsets();
+								m_pBreakpointManager->BreakpointUpdateOffsets(pCurrentPID->hProc,pCurrentPID->dwPID);
 								emit UpdateOffsetsPatches(pCurrentPID->hProc,pCurrentPID->dwPID);
 
 								m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId);

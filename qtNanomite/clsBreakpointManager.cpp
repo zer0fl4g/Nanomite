@@ -340,87 +340,42 @@ bool clsBreakpointManager::BreakpointAdd(DWORD breakpointType, DWORD typeFlag, D
 	return bRetValue;
 }
 
-void clsBreakpointManager::BreakpointUpdateOffsets()
+void clsBreakpointManager::BreakpointUpdateOffsets(HANDLE processHandle, DWORD processID)
 {
 	for(int i = 0;i < SoftwareBPs.size(); i++)
 	{
 		if(SoftwareBPs[i].dwHandle != BP_KEEP) continue;
 
-		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(SoftwareBPs[i].moduleName,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwPID);
-		if(newBaseOffset != SoftwareBPs[i].dwOffset && newBaseOffset != SoftwareBPs[i].dwBaseOffset)
-		{
-			if(SoftwareBPs[i].dwBaseOffset == NULL)
-			{
-				SoftwareBPs[i].dwOldOffset = SoftwareBPs[i].dwOffset;
-				SoftwareBPs[i].dwBaseOffset = newBaseOffset;
-			}
-			else
-			{
-				DWORD64 newOffset = (SoftwareBPs[i].dwOffset - SoftwareBPs[i].dwBaseOffset);
-
-				SoftwareBPs[i].dwOldOffset = SoftwareBPs[i].dwOffset;
-				SoftwareBPs[i].dwBaseOffset = newBaseOffset;
-				SoftwareBPs[i].dwOffset = newOffset + newBaseOffset;
-			}
-			
-			SoftwareBPs[i].dwHandle = BP_OFFSETUPDATE;
-			emit OnBreakpointAdded(SoftwareBPs[i], SOFTWARE_BP);
-			SoftwareBPs[i].dwHandle = BP_KEEP;
-		}
+		BreakpointRebase(&SoftwareBPs[i], SOFTWARE_BP, processHandle, processID);
 	}
 
 	for(int i = 0;i < MemoryBPs.size(); i++)
 	{
 		if(MemoryBPs[i].dwHandle != BP_KEEP) continue;
 
-		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(MemoryBPs[i].moduleName,MemoryBPs[i].dwOffset,MemoryBPs[i].dwPID);
-		if(newBaseOffset != MemoryBPs[i].dwOffset && newBaseOffset != MemoryBPs[i].dwBaseOffset)
-		{
-			if(MemoryBPs[i].dwBaseOffset == NULL)
-			{
-				MemoryBPs[i].dwOldOffset = MemoryBPs[i].dwOffset;
-				MemoryBPs[i].dwBaseOffset = newBaseOffset;
-			}
-			else
-			{
-				DWORD64 newOffset = (MemoryBPs[i].dwOffset - MemoryBPs[i].dwBaseOffset);
-
-				MemoryBPs[i].dwOldOffset = MemoryBPs[i].dwOffset;
-				MemoryBPs[i].dwBaseOffset = newBaseOffset;
-				MemoryBPs[i].dwOffset = newOffset + newBaseOffset;
-			}
-
-			MemoryBPs[i].dwHandle = BP_OFFSETUPDATE;
-			emit OnBreakpointAdded(MemoryBPs[i], MEMORY_BP);
-			MemoryBPs[i].dwHandle = BP_KEEP;
-		}
+		BreakpointRebase(&MemoryBPs[i], MEMORY_BP, processHandle, processID);
 	}
 
 	for(int i = 0;i < HardwareBPs.size(); i++)
 	{
 		if(HardwareBPs[i].dwHandle != BP_KEEP) continue;
 
-		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(HardwareBPs[i].moduleName,HardwareBPs[i].dwOffset,HardwareBPs[i].dwPID);
-		if(newBaseOffset != HardwareBPs[i].dwOffset && newBaseOffset != HardwareBPs[i].dwBaseOffset)
-		{
-			if(HardwareBPs[i].dwBaseOffset == NULL)
-			{
-				HardwareBPs[i].dwOldOffset = HardwareBPs[i].dwOffset;
-				HardwareBPs[i].dwBaseOffset = newBaseOffset;
-			}
-			else
-			{
-				DWORD64 newOffset = (HardwareBPs[i].dwOffset - HardwareBPs[i].dwBaseOffset);
+		BreakpointRebase(&HardwareBPs[i], HARDWARE_BP, processHandle, processID);
+	}
+}
 
-				HardwareBPs[i].dwOldOffset = HardwareBPs[i].dwOffset;
-				HardwareBPs[i].dwBaseOffset = newBaseOffset;
-				HardwareBPs[i].dwOffset = newOffset + newBaseOffset;
-			}
+void clsBreakpointManager::BreakpointRebase(BPStruct *pCurrentBP, int bpType, HANDLE processHandle, DWORD processID)
+{
+	DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(pCurrentBP->moduleName, pCurrentBP->dwOffset, pCurrentBP->dwPID);
+	if(newBaseOffset != pCurrentBP->dwBaseOffset)
+	{
+		pCurrentBP->dwOldOffset = pCurrentBP->dwOffset;
+		pCurrentBP->dwOffset = (pCurrentBP->dwOffset - pCurrentBP->dwBaseOffset) + newBaseOffset;
+		pCurrentBP->dwBaseOffset = newBaseOffset;
 
-			HardwareBPs[i].dwHandle = BP_OFFSETUPDATE;
-			emit OnBreakpointAdded(HardwareBPs[i], HARDWARE_BP);
-			HardwareBPs[i].dwHandle = BP_KEEP;
-		}
+		pCurrentBP->dwHandle = BP_OFFSETUPDATE;
+		emit OnBreakpointAdded(*pCurrentBP, bpType);
+		pCurrentBP->dwHandle = BP_KEEP;
 	}
 }
 

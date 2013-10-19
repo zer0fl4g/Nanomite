@@ -143,12 +143,12 @@ bool qtDLGBookmark::BookmarkAdd(int processID, quint64 bookmarkOffset, QString b
 			return false;
 	}
 
+	TCHAR moduleName[MAX_PATH * sizeof(TCHAR)] = { 0 };
 	BookmarkData newBookmark;
 	newBookmark.bookmarkComment = bookmarkComment;
 	newBookmark.bookmarkOffset = bookmarkOffset;
 	newBookmark.bookmarkPID = processID;
-
-	TCHAR moduleName[MAX_PATH * sizeof(TCHAR)] = { 0 };
+	newBookmark.bookmarkProcessModule = qtDLGNanomite::GetInstance()->PEManager->getFilenameFromPID(processID);
 	newBookmark.bookmarkBaseOffset = clsHelperClass::CalcOffsetForModule(moduleName, bookmarkOffset, processID);
 	newBookmark.bookmarkModule = QString::fromWCharArray(moduleName); 
 
@@ -204,21 +204,26 @@ QList<BookmarkData> qtDLGBookmark::BookmarkGetList()
 
 void qtDLGBookmark::BookmarkUpdateOffsets(HANDLE processHandle, int processID)
 {
+	QString processModule = qtDLGNanomite::GetInstance()->PEManager->getFilenameFromPID(processID);
+
 	for(int i = 0; i < m_bookmarkData.size(); i++)
 	{
-		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)m_bookmarkData.at(i).bookmarkModule.toStdWString().c_str(),
-																	m_bookmarkData.at(i).bookmarkOffset,
-																	processID);
-
-		if(newBaseOffset != m_bookmarkData.at(i).bookmarkBaseOffset)
+		if(processModule.contains(m_bookmarkData.at(i).bookmarkProcessModule))
 		{
-			DWORD64 tempOffset = m_bookmarkData.at(i).bookmarkOffset - m_bookmarkData.at(i).bookmarkBaseOffset;
+			DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)m_bookmarkData.at(i).bookmarkModule.toStdWString().c_str(),
+																		m_bookmarkData.at(i).bookmarkOffset,
+																		processID);
 
-			m_bookmarkData[i].bookmarkBaseOffset = newBaseOffset;
-			m_bookmarkData[i].bookmarkOffset = newBaseOffset + tempOffset;
+			if(newBaseOffset != m_bookmarkData.at(i).bookmarkBaseOffset)
+			{
+				DWORD64 tempOffset = m_bookmarkData.at(i).bookmarkOffset - m_bookmarkData.at(i).bookmarkBaseOffset;
 
-			if(m_bookmarkData.at(i).bookmarkPID == NULL)
-				m_bookmarkData[i].bookmarkPID = processID;
+				m_bookmarkData[i].bookmarkBaseOffset = newBaseOffset;
+				m_bookmarkData[i].bookmarkOffset = newBaseOffset + tempOffset;
+
+				if(m_bookmarkData.at(i).bookmarkPID == NULL)
+					m_bookmarkData[i].bookmarkPID = processID;
+			}
 		}
 	}
 

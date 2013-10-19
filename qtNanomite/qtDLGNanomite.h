@@ -88,6 +88,8 @@ public:
 	qtDLGNanomite(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGNanomite();
 
+	void ClearDebugData(bool cleanGUI = false);
+
 public slots:
 	void UpdateStateBar(int actionType, quint64 stepCount = 0);
 
@@ -145,12 +147,12 @@ private:
 
 	static qtDLGNanomite *qtDLGMyWindow;
 
-	void CleanGUI(bool bKeepLogBox = false);
 	void GenerateMenu(bool isAllEnabled = true);
 	void LoadWidgets();
 	void LoadRecentFileMenu(bool isFirstLoad = false);
 	void ParseCommandLineArgs();
 	void InsertRecentDebuggedFile(QString fileName);
+	void CleanGUI(bool bKeepLogBox = false);
 
 protected:
 	void dragEnterEvent(QDragEnterEvent* pEvent);

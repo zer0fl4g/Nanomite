@@ -106,7 +106,8 @@ void clsProjectFile::WritePatchDataToFile(QXmlStreamWriter &xmlWriter)
 		xmlWriter.writeTextElement("patchOffset",	QString("%1").arg(tempPatchList.at(i).Offset - tempPatchList.at(i).BaseOffset, 16, 16, QChar('0')));
 		xmlWriter.writeTextElement("patchSize",		QString("%1").arg(tempPatchList.at(i).PatchSize));
 		xmlWriter.writeTextElement("patchModule",	QString::fromWCharArray(tempPatchList.at(i).ModuleName));
-
+		xmlWriter.writeTextElement("patchPMod",		tempPatchList.at(i).processModule);
+	
 		tempPatchData.clear();
 		for(int patchData = 0; patchData < tempPatchList.at(i).PatchSize; patchData++)
 			tempPatchData.append(QString("%1").arg(*((BYTE *)tempPatchList.at(i).newData + patchData), 2, 16, QChar('0')));
@@ -132,6 +133,7 @@ void clsProjectFile::WriteBookmarkDataToFile(QXmlStreamWriter &xmlWriter)
 		xmlWriter.writeTextElement("bookmarkOffset",	QString("%1").arg(tempBookmarkList.at(i).bookmarkOffset - tempBookmarkList.at(i).bookmarkBaseOffset, 16, 16, QChar('0')));
 		xmlWriter.writeTextElement("bookmarkComment",	tempBookmarkList.at(i).bookmarkComment);
 		xmlWriter.writeTextElement("bookmarkModule",	tempBookmarkList.at(i).bookmarkModule);
+		xmlWriter.writeTextElement("bookmarkPMod",		tempBookmarkList.at(i).bookmarkProcessModule);
 		xmlWriter.writeEndElement();
 	}
 }
@@ -210,10 +212,9 @@ bool clsProjectFile::ReadDataFromFile(const QString &loadFilePath)
 	if(!loadFile.open(QIODevice::ReadOnly | QIODevice::Text))
 		return false;
 
+	m_pMainWindow->ClearDebugData(true);
+
 	QXmlStreamReader xmlReader(&loadFile);
-
-	// add cleaning
-
 	while(!xmlReader.atEnd() && !xmlReader.hasError())
 	{
 		QXmlStreamReader::TokenType token = xmlReader.readNext();
@@ -239,13 +240,13 @@ bool clsProjectFile::ReadDataFromFile(const QString &loadFilePath)
 			{
 				ReadBookmarkDataFromFile(xmlReader);
 			}
-			//else if(xmlReader.name().contains("PATCH_"))
-			//{
-			//	ReadBookmarkDataFromFile(xmlReader);
-			//}
+			else if(xmlReader.name().contains("PATCH_"))
+			{
+				ReadPatchDataFromFile(xmlReader);
+			}
 			//else if(xmlReader.name().contains("BREAKPOINT_"))
 			//{
-			//	ReadBookmarkDataFromFile(xmlReader);
+			//	ReadBreakpointDataFromFile(xmlReader);
 			//}
 		}
 	}
@@ -294,7 +295,7 @@ bool clsProjectFile::ReadDebugDataFromFile(QXmlStreamReader &xmlReader)
 
 void clsProjectFile::ReadBookmarkDataFromFile(QXmlStreamReader &xmlReader)
 {
-	QString bmOffset, bmComment, bmModule;
+	QString bmOffset, bmComment, bmModule, bmPModule;
 
 	xmlReader.readNext();
 
@@ -317,16 +318,22 @@ void clsProjectFile::ReadBookmarkDataFromFile(QXmlStreamReader &xmlReader)
 				xmlReader.readNext();
 				bmModule = xmlReader.text().toString();
 			}
+			else if(xmlReader.name() == "bookmarkPMod")
+			{
+				xmlReader.readNext();
+				bmPModule = xmlReader.text().toString();
+			}
 		}
 
 		xmlReader.readNext();
 	}
 
-	if(bmOffset.length() >= 0 && bmComment.length() >= 0 && bmModule.length() >= 0)
+	if(bmOffset.length() > 0 && bmComment.length() > 0 && bmModule.length() > 0 && bmPModule.length() > 0)
 	{
 		BookmarkData newBookmark = { 0 };
 		newBookmark.bookmarkComment = bmComment;
 		newBookmark.bookmarkModule = bmModule;
+		newBookmark.bookmarkProcessModule = bmPModule;
 		newBookmark.bookmarkOffset = bmOffset.toULongLong(0,16);
 
 		m_pMainWindow->dlgBookmark->BookmarkInsertFromProjectFile(newBookmark);
@@ -340,5 +347,72 @@ void clsProjectFile::ReadBreakpointDataFromFile(QXmlStreamReader &xmlReader)
 
 void clsProjectFile::ReadPatchDataFromFile(QXmlStreamReader &xmlReader)
 {
+	QString patchOffset, patchSize, patchModule, patchPMod, patchNewData, patchOrgData;
 
+	xmlReader.readNext();
+
+	while(!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name().contains("PATCH_")))
+	{
+		if(xmlReader.tokenType() == QXmlStreamReader::StartElement)
+		{
+			if(xmlReader.name() == "patchOffset")
+			{
+				xmlReader.readNext();
+				patchOffset = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "patchSize")
+			{
+				xmlReader.readNext();
+				patchSize = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "patchModule")
+			{
+				xmlReader.readNext();
+				patchModule = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "patchPMod")
+			{
+				xmlReader.readNext();
+				patchPMod = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "patchNewData")
+			{
+				xmlReader.readNext();
+				patchNewData = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "patchOrgData")
+			{
+				xmlReader.readNext();
+				patchOrgData = xmlReader.text().toString();
+			}
+		}
+
+		xmlReader.readNext();
+	}
+
+	if(patchOffset.length() > 0 && patchSize.length() > 0 && patchModule.length() > 0 && patchPMod.length() > 0 && patchNewData.length() > 0 && patchOrgData.length() > 0)
+	{
+		PatchData newPatch = { 0 };
+		newPatch.Offset = patchOffset.toULongLong(0,16);
+		newPatch.PatchSize = patchSize.toInt();
+		newPatch.processModule = patchPMod;
+		newPatch.newData = clsMemManager::CAlloc(newPatch.PatchSize);
+		newPatch.orgData = clsMemManager::CAlloc(newPatch.PatchSize);
+		newPatch.ModuleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+
+		ZeroMemory(newPatch.ModuleName, MAX_PATH * sizeof(TCHAR));
+		patchModule.toWCharArray(newPatch.ModuleName);
+
+		BYTE tempNewData = NULL, tempOrgData = NULL;
+		for(int i = 0, d = 0; i < newPatch.PatchSize; i++ , d += 2)
+		{
+			tempNewData = patchNewData.mid(d, 2).toInt(0, 16);
+			tempOrgData = patchOrgData.mid(d, 2).toInt(0, 16);
+
+			memcpy((LPVOID)((DWORD)newPatch.newData + i), (LPVOID)&tempNewData, 1);
+			memcpy((LPVOID)((DWORD)newPatch.orgData + i), (LPVOID)&tempOrgData, 1);
+		}
+		
+		qtDLGPatchManager::InsertPatchFromProjectFile(newPatch);
+	}
 }

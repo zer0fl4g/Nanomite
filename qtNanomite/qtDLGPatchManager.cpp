@@ -200,27 +200,32 @@ bool qtDLGPatchManager::AddNewPatch(int PID, HANDLE hProc, quint64 Offset, int P
 		}
 	}
 	
-	PatchData newPatch;
-	memset((LPVOID)&newPatch,0,sizeof(PatchData));
+	PatchData newPatch = { 0 };
 	newPatch.hProc = hProc;
 	newPatch.Offset = Offset;
 	newPatch.PID = PID;
 	newPatch.PatchSize = PatchSize;
 	newPatch.ModuleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	newPatch.processModule = qtDLGNanomite::GetInstance()->PEManager->getFilenameFromPID(PID);
 	newPatch.newData = clsMemManager::CAlloc(PatchSize);
 	newPatch.orgData = clsMemManager::CAlloc(PatchSize);
 	newPatch.bSaved = false;
-
+	
 	memset(newPatch.ModuleName,0,MAX_PATH * sizeof(TCHAR));
 	memcpy(newPatch.newData,newData,PatchSize);
+
+	newPatch.BaseOffset = clsHelperClass::CalcOffsetForModule(newPatch.ModuleName, Offset, PID);
 
 	if(pThis->WritePatchToProc(hProc,Offset,PatchSize,newData,newPatch.orgData))
 		newPatch.bWritten = true;
 	else
 		newPatch.bWritten = false;
 	
-	pThis->m_patches.push_back(newPatch);
+	pThis->m_patches.append(newPatch);
 	pThis->UpdateOffsetPatch(hProc,PID);
+
+	
+	qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(), Offset, true);
 
 	return true;
 }
@@ -357,43 +362,27 @@ void qtDLGPatchManager::UpdatePatchTable()
 
 void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 {
-	bool bThingsChanged = false;
-	quint64 latestPatchOffset = NULL;
-
+	QString currentPModule = qtDLGNanomite::GetInstance()->PEManager->getFilenameFromPID(newPID);
 	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
-		DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(i->ModuleName,i->Offset,newPID);
-		if(newBaseOffset != i->Offset && newBaseOffset != i->BaseOffset)
+		if(currentPModule.contains(i->processModule))
 		{
-			if(i->BaseOffset == NULL)
+			DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(i->ModuleName, NULL, newPID);
+			if(newBaseOffset != i->BaseOffset)
 			{
-				i->OldBaseOffset = i->Offset;
+				i->Offset = (i->Offset - i->BaseOffset) + newBaseOffset;
 				i->BaseOffset = newBaseOffset;
-			}
-			else
-			{
-				DWORD64 newOffset = (i->Offset - i->BaseOffset);
-
-				i->OldBaseOffset = i->Offset;
-				i->BaseOffset = newBaseOffset;
-				i->Offset = newOffset + newBaseOffset;
 			}
 
 			i->PID = newPID;
 			i->hProc = newProc;
-			bThingsChanged = WritePatchToProc(i->hProc,i->Offset,i->PatchSize,i->newData,NULL,true);
-			if(bThingsChanged)
-			{
-				latestPatchOffset = i->Offset;
+
+			if(WritePatchToProc(i->hProc,i->Offset,i->PatchSize,i->newData,NULL,true))
 				i->bWritten = true;
-			}
 			else
 				i->bWritten = false;
 		}
 	}
-
-	if(bThingsChanged)
-		qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(qtDLGNanomite::GetInstance()->coreDebugger->GetCurrentProcessHandle(),latestPatchOffset,true);
 
 	UpdatePatchTable();
 }
@@ -573,6 +562,11 @@ void qtDLGPatchManager::OnReturnPressed()
 	if(tblPatches->selectedItems().count() <= 0) return;
 
 	OnSendToDisassembler(tblPatches->selectedItems()[0]);
+}
+
+void qtDLGPatchManager::InsertPatchFromProjectFile(PatchData newPatchData)
+{
+	pThis->m_patches.append(newPatchData);
 }
 
 QList<PatchData> qtDLGPatchManager::GetPatchList()
