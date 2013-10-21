@@ -17,6 +17,7 @@
 #include "clsMemManager.h"
 #include "clsBreakpointSoftware.h"
 #include "clsDebugger\clsDebugger.h"
+#include "clsMemoryProtector.h"
 
 bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffset, DWORD breakpointSize, BYTE **dataBackup, DWORD breakpointDataType)
 {
@@ -27,7 +28,8 @@ bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 	DWORD	oldProtection			= NULL,
 			newProtection			= PAGE_READWRITE;
 	HANDLE	processHandle			= clsDebugger::GetProcessHandleByPID(processID);
-	bool	returnValue				= false;
+	bool	returnValue				= false,
+			worked					= false;
 
 	if(breakpointDataType == BP_SW_LONGINT3)
 	{
@@ -50,9 +52,9 @@ bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 
 	memset(breakpointDataBackup, NULL, breakpointSize);
 
-		
-	if(VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection) &&
-		ReadProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)breakpointDataBackup, breakpointSize, &bytesRead))
+	
+	clsMemoryProtector tempMemoryProtector(processHandle, PAGE_READWRITE, breakpointSize, breakpointOffset, &worked);
+	if(worked && ReadProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)breakpointDataBackup, breakpointSize, &bytesRead))
 	{
 		if(*dataBackup == NULL)
 			*dataBackup = breakpointDataBackup;
@@ -61,8 +63,6 @@ bool clsBreakpointSoftware::wSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 
 		if(WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)breakpointData, breakpointSize, &bytesWritten))
 			returnValue = true;
-		
-		VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &newProtection);
 	}
 	else
 	{
@@ -82,11 +82,13 @@ bool clsBreakpointSoftware::dSoftwareBP(DWORD processID, DWORD64 breakpointOffse
 	HANDLE	processHandle	= clsDebugger::GetProcessHandleByPID(processID);
 	DWORD	oldProtection	= NULL,
 			newProtection	= PAGE_READWRITE;
+	bool	worked			= false;
 
-	if(VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, newProtection, &oldProtection) &&
-		WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)orgBreakpointData, breakpointSize, &bytesWritten))
+
+	clsMemoryProtector tempMemoryProtector(processHandle, PAGE_READWRITE, breakpointSize, breakpointOffset, &worked);
+	if(worked && WriteProcessMemory(processHandle, (LPVOID)breakpointOffset, (LPVOID)orgBreakpointData, breakpointSize, &bytesWritten))
 	{
-		return VirtualProtectEx(processHandle, (LPVOID)breakpointOffset, breakpointSize, oldProtection, &newProtection);
+		return true;
 	}
 
 	return false;

@@ -20,6 +20,7 @@
 #include "clsMemManager.h"
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
+#include "clsMemoryProtector.h"
 
 qtDLGStack::qtDLGStack(QWidget *parent)
 	: QDockWidget(parent),
@@ -56,6 +57,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 	LPBYTE	bBuffer			= (LPBYTE)clsMemManager::CAlloc(dwSize);
 	PTCHAR	sTemp			= (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
 	quint64	dwStartOffset	= stackBaseOffset - stackAlign;
+	bool	worked			= false;
 
 	if(hProcess == INVALID_HANDLE_VALUE)
 	{
@@ -64,7 +66,9 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 		return;
 	}
 
-	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,NULL))
+	clsMemoryProtector tempMemProtect(hProcess, PAGE_READWRITE, dwSize, dwStartOffset, &worked);
+
+	if(!worked && !ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,NULL))
 	{
 		clsMemManager::CFree(bBuffer);
 		clsMemManager::CFree(sTemp);

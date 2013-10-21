@@ -115,6 +115,11 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 			}
 		}
 
+		if(m_maxRows == -1)
+		{
+			m_maxRows = (tblDisAs->verticalHeader()->height() / 11) - 1;
+		}
+
 		tblDisAs->setUpdatesEnabled(false);
 		if((tblDisAs->rowCount() - 1) != m_maxRows)
 		{

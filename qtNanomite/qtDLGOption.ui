@@ -42,7 +42,7 @@
        <x>10</x>
        <y>133</y>
        <width>331</width>
-       <height>241</height>
+       <height>191</height>
       </rect>
      </property>
      <property name="sizePolicy">
@@ -60,7 +60,7 @@
         <x>10</x>
         <y>20</y>
         <width>311</width>
-        <height>191</height>
+        <height>150</height>
        </rect>
       </property>
       <property name="sizePolicy">
@@ -116,8 +116,8 @@
      <widget class="QCheckBox" name="cbIgEx">
       <property name="geometry">
        <rect>
-        <x>13</x>
-        <y>218</y>
+        <x>10</x>
+        <y>171</y>
         <width>131</width>
         <height>17</height>
        </rect>
@@ -450,6 +450,32 @@
        <string>Exception Assistant</string>
       </property>
      </widget>
+    </widget>
+    <widget class="QPushButton" name="bpRegisterNDB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>330</y>
+       <width>90</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Register .ndb</string>
+     </property>
+    </widget>
+    <widget class="QPushButton" name="bpUnregisterNDB">
+     <property name="geometry">
+      <rect>
+       <x>10</x>
+       <y>351</y>
+       <width>90</width>
+       <height>20</height>
+      </rect>
+     </property>
+     <property name="text">
+      <string>Unregister .ndb</string>
+     </property>
     </widget>
    </widget>
    <widget class="QWidget" name="Colors">

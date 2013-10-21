@@ -115,6 +115,6 @@
 		- int3 = 0xCC
 		- hlt  = 0xF4
 		- ud2  = 0x0F0B
-	- Project files allow to save bookmarks, comments, patches and breakpoints of the current project
+	- Project files allow to save and load bookmarks, comments, patches and breakpoints of the current project
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

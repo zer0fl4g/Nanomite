@@ -248,6 +248,7 @@
     <ClCompile Include="clsHexViewWorker.cpp" />
     <ClCompile Include="clsMemDump.cpp" />
     <ClCompile Include="clsMemManager.cpp" />
+    <ClCompile Include="clsMemoryProtector.cpp" />
     <ClCompile Include="clsMemPool.cpp" />
     <ClCompile Include="clsPEFile.cpp" />
     <ClCompile Include="clsPEManager.cpp" />
@@ -773,6 +774,7 @@
     </CustomBuild>
     <ClInclude Include="clsBreakpointMemory.h" />
     <ClInclude Include="clsBreakpointSoftware.h" />
+    <ClInclude Include="clsMemoryProtector.h" />
     <ClInclude Include="clsProcessDump.h" />
     <CustomBuild Include="qtDLGBookmark.h">
       <AdditionalInputs Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">$(QTDIR)\bin\moc.exe;%(FullPath)</AdditionalInputs>

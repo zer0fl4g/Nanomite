@@ -41,6 +41,8 @@ public:
 		void OnRestoreOrg();
 		void OnExceptionRemove();
 		void OnInsertNewException(DWORD exceptionCode, int handleException);
+		void EnableNDBExtension();
+		void DisableNDBExtension();
 
 private:
 	int m_selectedRow;

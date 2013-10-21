@@ -19,6 +19,8 @@
 
 #include "clsMemManager.h"
 
+#include <ShlObj.h>
+
 qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	: QDialog(parent, flags)
 {
@@ -54,6 +56,8 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	connect(btnSave,SIGNAL(clicked()),this,SLOT(OnSave()));
 	connect(pbSetNanomite,SIGNAL(clicked()),this,SLOT(OnSetNanomiteDefault()));
 	connect(pbRestoreOrg,SIGNAL(clicked()),this,SLOT(OnRestoreOrg()));
+	connect(bpRegisterNDB,SIGNAL(clicked()),this,SLOT(EnableNDBExtension()));
+	connect(bpUnregisterNDB,SIGNAL(clicked()),this,SLOT(DisableNDBExtension()));
 	connect(new QShortcut(QKeySequence(QKeySequence::Delete),this),SIGNAL(activated()),this,SLOT(OnExceptionRemove()));
 }
 
@@ -450,4 +454,44 @@ void qtDLGOption::OnInsertNewException(DWORD exceptionCode, int handleException)
 	tblCustomExceptions->insertRow(tblCustomExceptions->rowCount());
 	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,0,	new QTableWidgetItem(QString("%1").arg(exceptionCode,8,16,QChar('0'))));
 	tblCustomExceptions->setItem(tblCustomExceptions->rowCount() - 1,1,	new QTableWidgetItem(QString("%1").arg(handleException)));
+}
+
+void qtDLGOption::EnableNDBExtension()
+{
+	QSettings registerExtension("HKEY_CURRENT_USER\\Software\\Classes\\nanomite.debugger.v1\\shell\\open\\command", QSettings::NativeFormat);
+	registerExtension.setValue(".", "\"" + QApplication::applicationFilePath().replace("/", "\\") + "\" -f \"%1\"");
+	registerExtension.sync();
+
+	QSettings registerDefaultIcon("HKEY_CURRENT_USER\\Software\\Classes\\nanomite.debugger.v1\\DefaultIcon", QSettings::NativeFormat);
+	registerDefaultIcon.setValue(".", QApplication::applicationFilePath() + ",0");
+	registerDefaultIcon.sync();
+
+	QSettings registerFileExtension("HKEY_CURRENT_USER\\Software\\Classes\\.ndb", QSettings::NativeFormat);
+	registerFileExtension.setValue(".", "nanomite.debugger.v1");
+	registerFileExtension.sync();
+
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+	
+	if(registerFileExtension.status() == QSettings::NoError && registerExtension.status() == QSettings::NoError && registerDefaultIcon.status() == QSettings::NoError)
+		QMessageBox::information(this, "Nanomite", "File extension registered successfully!", QMessageBox::Ok, QMessageBox::Ok);
+}
+
+void qtDLGOption::DisableNDBExtension()
+{
+	QSettings registerExtension("HKEY_CURRENT_USER\\Software\\Classes\\nanomite.debugger.v1\\shell\\open\\command", QSettings::NativeFormat);
+	registerExtension.remove(".");
+	registerExtension.sync();
+	
+	QSettings registerFileExtension("HKEY_CURRENT_USER\\Software\\Classes\\.ndb", QSettings::NativeFormat);
+	registerFileExtension.remove(".");
+	registerFileExtension.sync();
+	
+	QSettings registerFileIcon("HKEY_CURRENT_USER\\Software\\Classes\\nanomite.debugger.v1\\DefaultIcon", QSettings::NativeFormat);
+	registerFileIcon.remove(".");
+	registerFileIcon.sync();
+
+	SHChangeNotify(SHCNE_ASSOCCHANGED, SHCNF_IDLIST, NULL, NULL);
+
+	if(registerFileExtension.status() == QSettings::NoError && registerExtension.status() == QSettings::NoError && registerFileIcon.status() == QSettings::NoError)
+		QMessageBox::information(this, "Nanomite", "File extension removed successfully!", QMessageBox::Ok, QMessageBox::Ok);
 }

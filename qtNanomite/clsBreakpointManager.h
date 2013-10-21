@@ -68,6 +68,7 @@ public:
 	static bool BreakpointDelete(DWORD64 breakpointOffset, DWORD breakpointType);
 
 	static void RemoveSBPFromMemory(bool isDisable, DWORD processID);
+	static void BreakpointInsertFromProjectFile(BPStruct newBreakpoint, int bpType);
 
 signals:
 	void OnBreakpointAdded(BPStruct newBreakpoint, int breakpointType);

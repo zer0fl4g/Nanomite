@@ -54,6 +54,8 @@ bool clsBreakpointManager::BreakpointInit(DWORD newProcessID, bool isThread)
 	{
 		for(int i = 0;i < SoftwareBPs.size(); i++)
 		{
+			if(SoftwareBPs[i].dwBaseOffset == NULL) continue;
+
 			if(SoftwareBPs[i].dwPID == -1)
 				clsBreakpointSoftware::wSoftwareBP(newProcessID,SoftwareBPs[i].dwOffset,SoftwareBPs[i].dwSize, &SoftwareBPs[i].bOrgByte);
 			else if(SoftwareBPs[i].dwPID == newProcessID)
@@ -62,6 +64,8 @@ bool clsBreakpointManager::BreakpointInit(DWORD newProcessID, bool isThread)
 
 		for(int i = 0;i < MemoryBPs.size(); i++)
 		{
+			if(MemoryBPs[i].dwBaseOffset == NULL) continue;
+
 			if(MemoryBPs[i].dwPID == -1)
 				clsBreakpointMemory::wMemoryBP(newProcessID,MemoryBPs[i].dwOffset,MemoryBPs[i].dwSize,MemoryBPs[i].dwTypeFlag,&MemoryBPs[i].dwOldProtection);
 			else if(MemoryBPs[i].dwPID == newProcessID)
@@ -71,6 +75,8 @@ bool clsBreakpointManager::BreakpointInit(DWORD newProcessID, bool isThread)
 
 	for(int i = 0;i < HardwareBPs.size(); i++)
 	{
+		if(HardwareBPs[i].dwBaseOffset == NULL) continue;
+
 		if(HardwareBPs[i].dwPID == -1)
 			clsBreakpointHardware::wHardwareBP(newProcessID,HardwareBPs[i].dwOffset,HardwareBPs[i].dwSize,HardwareBPs[i].dwSlot,HardwareBPs[i].dwTypeFlag);
 		else if(HardwareBPs[i].dwPID == newProcessID)
@@ -507,4 +513,29 @@ bool clsBreakpointManager::BreakpointFind(DWORD64 breakpointOffset, int breakpoi
 	}
 
 	return false;
+}
+
+void clsBreakpointManager::BreakpointInsertFromProjectFile(BPStruct newBreakpoint, int bpType)
+{
+	if(pThis == NULL) return;
+
+	switch(bpType)
+	{
+	case SOFTWARE_BP: 
+		{
+			pThis->SoftwareBPs.append(newBreakpoint);
+			break;
+		}
+	case HARDWARE_BP:
+		{
+			pThis->HardwareBPs.append(newBreakpoint);
+			break;
+		}
+	case MEMORY_BP:
+		{
+			pThis->MemoryBPs.append(newBreakpoint);
+			break;
+		}
+	default: return;
+	}
 }

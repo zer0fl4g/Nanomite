@@ -16,37 +16,27 @@
  */
 #include "clsMemDump.h"
 #include "clsMemManager.h"
+#include "clsMemoryProtector.h"
 
 #include <QFileDialog>
 #include <QMessageBox>
 
 clsMemDump::clsMemDump( HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, DWORD Size, QWidget *pParent)
 {
-	bool	isProtectionChanged = false;
-	DWORD	OldProtection	= NULL,
-			NewProtection	= PAGE_READWRITE,
-			BytesWrote		= NULL;
-	SIZE_T	BytesReaded		= NULL;
-	LPVOID pBuffer			= malloc(Size);
+	bool	isProtectionChanged = false,
+			worked				= false;
+	DWORD	BytesWrote			= NULL;
+	SIZE_T	BytesReaded			= NULL;
+	LPVOID pBuffer				= malloc(Size);
 
-	if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
+	clsMemoryProtector tempMemProtector(hProc, PAGE_READWRITE, Size, BaseOffset, &worked);
+	if(!worked && !ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
 	{
-		if(!VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,NewProtection,&OldProtection))
-		{
-			QMessageBox::critical(pParent,"Nanomite","Failed to access Memory!",QMessageBox::Ok,QMessageBox::Ok);
-			free(pBuffer);
-			return;
-		}
-		isProtectionChanged = true;
-
-		if(!ReadProcessMemory(hProc,(LPVOID)BaseOffset,pBuffer,Size,&BytesReaded))
-		{
-			QMessageBox::critical(pParent,"Nanomite","Failed to read Memory!",QMessageBox::Ok,QMessageBox::Ok);
-			free(pBuffer);
-			return;
-		}
+		QMessageBox::critical(pParent,"Nanomite","Failed to read Memory!",QMessageBox::Ok,QMessageBox::Ok);
+		free(pBuffer);
+		return;
 	}
-	
+
 	PTCHAR FileName = (PTCHAR)malloc(MAX_PATH * sizeof(TCHAR));
 	if(wcslen(FileBaseName) <= 0)
 		wsprintf(FileName,L"NANOMITEDUMP_%016I64X-%016I64X_%08X.bin",BaseOffset,BaseOffset + Size,Size);
@@ -76,9 +66,6 @@ clsMemDump::clsMemDump( HANDLE hProc, PTCHAR FileBaseName, DWORD64 BaseOffset, D
 	free(pBuffer);
 	CloseHandle(hFile);
 
-	if(isProtectionChanged && !VirtualProtectEx(hProc,(LPVOID)BaseOffset,Size,OldProtection,&NewProtection))
-		QMessageBox::critical(pParent,"Nanomite","Failed to reprotect the Memory!",QMessageBox::Ok,QMessageBox::Ok);
-	
 	QMessageBox::information(pParent,"Nanomite","Memory Dump finished!",QMessageBox::Ok,QMessageBox::Ok);
 }
 

@@ -26,6 +26,7 @@
 #include "clsHelperClass.h"
 #include "clsDisassembler.h"
 #include "clsAPIImport.h"
+#include "clsProjectFile.h"
 #include "clsMemManager.h"
 
 #include <Psapi.h>
@@ -425,6 +426,20 @@ void qtDLGNanomite::dropEvent(QDropEvent* pEvent)
 			coreDebugger->SetTarget(droppedFile);
 			action_DebugStart();
 		}
+		else if(droppedFile.contains(".ndb", Qt::CaseInsensitive))
+		{
+			if(coreDebugger->GetDebuggingState())
+			{
+				QMessageBox::warning(this, "Nanomite", "Please finish debugging first!", QMessageBox::Ok, QMessageBox::Ok);
+				return;
+			}
+
+			bool startDebugging = false;
+			clsProjectFile(false, &startDebugging, droppedFile);
+
+			if(startDebugging)
+				action_DebugStart();
+		}
 		else
 		{
 			QMessageBox::critical(this, "Nanomite", "This seems to be an invalid file!", QMessageBox::Ok, QMessageBox::Ok);
@@ -491,6 +506,19 @@ void qtDLGNanomite::ParseCommandLineArgs()
 
 			action_DebugStart();
 			return;
+		}
+		else if(i->compare("-f") == 0)
+		{
+			i++;
+			if(i == splittedCommandLine.constEnd()) return;
+
+			QString temp = *i;
+
+			bool startDebugging = false;
+			clsProjectFile(false, &startDebugging, temp.replace("\"", ""));
+
+			if(startDebugging)
+				action_DebugStart();
 		}
 	}
 	return;

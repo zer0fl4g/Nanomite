@@ -19,6 +19,7 @@
 
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
+#include "clsMemoryProtector.h"
 
 #include <Psapi.h>
 
@@ -286,27 +287,23 @@ void qtDLGPatchManager::ClearAllPatches()
 
 bool qtDLGPatchManager::WritePatchToProc(HANDLE hProc, quint64 Offset, int PatchSize, LPVOID DataToWrite, LPVOID OrgData, bool bRemove)
 {
-	DWORD 	NewProtection = PAGE_READWRITE,
-			OldProtection = NULL;
+	bool	worked			= false;
 
-	VirtualProtectEx(hProc,(LPVOID)Offset,PatchSize,NewProtection,&OldProtection);
+	clsMemoryProtector tempMemoryProtector(hProc, PAGE_READWRITE, PatchSize, Offset, &worked);
 	
 	if(!bRemove)
 	{
 		if(!ReadProcessMemory(hProc,(LPVOID)Offset,OrgData,PatchSize,NULL))
 		{
-			VirtualProtectEx(hProc,(LPVOID)Offset,PatchSize,OldProtection,&NewProtection);
 			return false;
 		}
 	}
 
 	if(!WriteProcessMemory(hProc,(LPVOID)Offset,DataToWrite,PatchSize,NULL))
 	{
-		VirtualProtectEx(hProc,(LPVOID)Offset,PatchSize,OldProtection,&NewProtection);
 		return false;
 	}
 
-	VirtualProtectEx(hProc,(LPVOID)Offset,PatchSize,OldProtection,&NewProtection);
 	return true;
 }
 

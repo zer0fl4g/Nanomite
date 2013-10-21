@@ -20,20 +20,23 @@
 #include <QFileDialog>
 #include <QMessageBox>
 
-clsProjectFile::clsProjectFile(bool isSaveFile, bool *pStartDebugging) :
+clsProjectFile::clsProjectFile(bool isSaveFile, bool *pStartDebugging, QString projectFile) :
 	m_pMainWindow(qtDLGNanomite::GetInstance())
 {
 	if(isSaveFile)
 	{
-		QString saveFilePath = QFileDialog::getSaveFileName(m_pMainWindow, "Please select a save path", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
-
-		if(saveFilePath.length() <= 0)
+		if(projectFile.length() <= 0)
 		{
-			QMessageBox::critical(m_pMainWindow, "Nanomite", "Invalid file selected!", QMessageBox::Ok, QMessageBox::Ok);
-			return;
+			projectFile = QFileDialog::getSaveFileName(m_pMainWindow, "Please select a save path", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
+
+			if(projectFile.length() <= 0)
+			{
+				QMessageBox::critical(m_pMainWindow, "Nanomite", "Invalid file selected!", QMessageBox::Ok, QMessageBox::Ok);
+				return;
+			}
 		}
-		
-		if(!WriteDataToFile(saveFilePath))
+
+		if(!WriteDataToFile(projectFile))
 		{
 			QMessageBox::critical(m_pMainWindow, "Nanomite", "Error while saving the data!", QMessageBox::Ok, QMessageBox::Ok);
 		}
@@ -44,15 +47,18 @@ clsProjectFile::clsProjectFile(bool isSaveFile, bool *pStartDebugging) :
 	}
 	else
 	{
-		QString loadFilePath = QFileDialog::getOpenFileName(m_pMainWindow, "Please select a file to load", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
-
-		if(loadFilePath.length() <= 0)
+		if(projectFile.length() <= 0)
 		{
-			QMessageBox::critical(m_pMainWindow, "Nanomite", "Invalid file selected!", QMessageBox::Ok, QMessageBox::Ok);
-			return;
+			projectFile = QFileDialog::getOpenFileName(m_pMainWindow, "Please select a file to load", QDir::currentPath(), "Nanomite Project Files (*.ndb)");
+
+			if(projectFile.length() <= 0)
+			{
+				QMessageBox::critical(m_pMainWindow, "Nanomite", "Invalid file selected!", QMessageBox::Ok, QMessageBox::Ok);
+				return;
+			}
 		}
-		
-		if(!ReadDataFromFile(loadFilePath))
+
+		if(!ReadDataFromFile(projectFile))
 		{
 			QMessageBox::critical(m_pMainWindow, "Nanomite", "Error while reading the data!", QMessageBox::Ok, QMessageBox::Ok);
 			return;
@@ -63,6 +69,7 @@ clsProjectFile::clsProjectFile(bool isSaveFile, bool *pStartDebugging) :
 		}
 
 		*pStartDebugging = true;
+
 	}
 }
 
@@ -176,30 +183,8 @@ void clsProjectFile::WriteBreakpointListToFile(QList<BPStruct> &tempBP, int bpTy
 			xmlWriter.writeTextElement("breakpointTypeFlag",	QString("%1").arg(tempBP.at(i).dwTypeFlag, 8, 16, QChar('0')));
 			xmlWriter.writeTextElement("breakpointModuleName",	QString(QString::fromWCharArray(tempBP.at(i).moduleName)));
 
-			switch(bpType) // save only breakpoint specific data
-			{
-			case SOFTWARE_BP:
-				{
-					QString tempBuffer;
-
-					for(unsigned int bpData = 0; bpData < tempBP.at(i).dwSize; bpData++)
-						tempBuffer.append(QString("%1").arg(*((BYTE *)tempBP.at(i).bOrgByte + bpData), 2, 16, QChar('0')));
-
-					xmlWriter.writeTextElement("breakpointData", tempBuffer);
-					xmlWriter.writeTextElement("breakpointDataType", QString("%1").arg(tempBP.at(i).dwDataType, 8, 16, QChar('0')));
-					break;
-				}
-			case MEMORY_BP:
-				{
-					xmlWriter.writeTextElement("breakpointOldProtection", QString("%1").arg(tempBP.at(i).dwOldProtection, 8, 16, QChar('0')));
-					break;
-				}
-			case HARDWARE_BP:
-				{
-					xmlWriter.writeTextElement("breakpointSlot", QString("%1").arg(tempBP.at(i).dwSlot, 8, 16, QChar('0')));
-					break;
-				}
-			}
+			if(bpType == SOFTWARE_BP)
+				xmlWriter.writeTextElement("breakpointDataType", QString("%1").arg(tempBP.at(i).dwDataType, 8, 16, QChar('0')));
 
 			xmlWriter.writeEndElement();
 		}
@@ -244,10 +229,10 @@ bool clsProjectFile::ReadDataFromFile(const QString &loadFilePath)
 			{
 				ReadPatchDataFromFile(xmlReader);
 			}
-			//else if(xmlReader.name().contains("BREAKPOINT_"))
-			//{
-			//	ReadBreakpointDataFromFile(xmlReader);
-			//}
+			else if(xmlReader.name().contains("BREAKPOINT_"))
+			{
+				ReadBreakpointDataFromFile(xmlReader);
+			}
 		}
 	}
 
@@ -342,7 +327,70 @@ void clsProjectFile::ReadBookmarkDataFromFile(QXmlStreamReader &xmlReader)
 
 void clsProjectFile::ReadBreakpointDataFromFile(QXmlStreamReader &xmlReader)
 {
+	QString bpOffset, bpSize, bpTypeFlag, bpModName, bpDataType;
+	int bpType = NULL;
 
+	if(xmlReader.name().contains("BREAKPOINT_SW_BP"))
+		bpType = SOFTWARE_BP;
+	else if(xmlReader.name().contains("BREAKPOINT_HW_BP"))
+		bpType = HARDWARE_BP;
+	else if(xmlReader.name().contains("BREAKPOINT_MEM_BP"))
+		bpType = MEMORY_BP;
+
+	xmlReader.readNext();
+
+	while(!(xmlReader.tokenType() == QXmlStreamReader::EndElement && xmlReader.name().contains("BREAKPOINT_")))
+	{
+		if(xmlReader.tokenType() == QXmlStreamReader::StartElement)
+		{
+			if(xmlReader.name() == "breakpointOffset")
+			{
+				xmlReader.readNext();
+				bpOffset = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "breakpointSize")
+			{
+				xmlReader.readNext();
+				bpSize = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "breakpointTypeFlag")
+			{
+				xmlReader.readNext();
+				bpTypeFlag = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "breakpointModuleName")
+			{
+				xmlReader.readNext();
+				bpModName = xmlReader.text().toString();
+			}
+			else if(xmlReader.name() == "breakpointDataType")
+			{
+				xmlReader.readNext();
+				bpDataType = xmlReader.text().toString();
+			}
+		}
+
+		xmlReader.readNext();
+	}
+
+	if(bpOffset.length() > 0 && bpSize.length() > 0 && bpModName.length() > 0 && bpTypeFlag.length() > 0)
+	{
+		BPStruct newBreakpoint = { 0 };
+		newBreakpoint.dwOffset = bpOffset.toULongLong(0, 16);
+		newBreakpoint.dwSize = bpSize.toUInt();
+		newBreakpoint.dwTypeFlag = bpTypeFlag.toInt(0, 16);
+
+		if(bpType == SOFTWARE_BP && bpDataType.length() > 0)
+			newBreakpoint.dwDataType = bpDataType.toInt();
+
+		newBreakpoint.dwHandle = BP_KEEP;
+		newBreakpoint.dwPID = -1;
+		newBreakpoint.moduleName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+		ZeroMemory(newBreakpoint.moduleName, MAX_PATH * sizeof(TCHAR));
+		bpModName.toWCharArray(newBreakpoint.moduleName);
+
+		clsBreakpointManager::BreakpointInsertFromProjectFile(newBreakpoint, bpType);
+	}
 }
 
 void clsProjectFile::ReadPatchDataFromFile(QXmlStreamReader &xmlReader)

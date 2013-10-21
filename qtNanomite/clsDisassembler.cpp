@@ -21,6 +21,7 @@
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 #include "clsSymbolAndSyntax.h"
+#include "clsMemoryProtector.h"
 
 #define BEA_ENGINE_STATIC
 #define BEA_USE_STDCALL
@@ -127,17 +128,18 @@ void clsDisassembler::run()
 
 	clsBreakpointManager::RemoveSBPFromMemory(true, GetProcessId(m_processHandle));
 
-	if(ReadProcessMemory(m_processHandle,(LPVOID)m_startPage,pBuffer,dwSize,NULL))
+	bool worked = false;
+	clsMemoryProtector tempMemProtector(m_processHandle, PAGE_READWRITE, dwSize, m_startPage, &worked);
+
+	if(worked && ReadProcessMemory(m_processHandle,(LPVOID)m_startPage,pBuffer,dwSize,NULL))
 	{
 		clsBreakpointManager::RemoveSBPFromMemory(false, GetProcessId(m_processHandle));
 
-		DISASM newDisAss;
+		DISASM newDisAss = { 0 };
 		bool bContinueDisAs = true;
 		int iLen = 0;
 		DisAsDataRow newRow;
 		BYTE bBuffer;
-
-		memset(&newDisAss, 0, sizeof(DISASM));
 
 		newDisAss.EIP = (quint64)pBuffer;
 		newDisAss.VirtualAddr = m_startPage;
