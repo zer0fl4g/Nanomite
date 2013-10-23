@@ -17,7 +17,6 @@
 #include "clsFunctionsViewWorker.h"
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
-#include "clsMemoryProtector.h"
 
 #include <Psapi.h>
 
@@ -68,10 +67,7 @@ void clsFunctionsViewWorker::GetValidMemoryParts(PTCHAR lpCurrentName,HANDLE pro
 					LPVOID lpBuffer = malloc(mbi.RegionSize);
 					if(lpBuffer == NULL) continue;
 
-					bool worked = false;
-					clsMemoryProtector tempMemProtector(processHandle, PAGE_READWRITE, mbi.RegionSize, (DWORD64)mbi.BaseAddress, &worked);
-
-					if(!worked && !ReadProcessMemory(processHandle, (LPVOID)mbi.BaseAddress, lpBuffer, mbi.RegionSize, NULL))
+					if(!ReadProcessMemory(processHandle, (LPVOID)mbi.BaseAddress, lpBuffer, mbi.RegionSize, NULL))
 					{
 						free(lpBuffer);
 						continue;

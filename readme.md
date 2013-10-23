@@ -4,8 +4,14 @@
 - Debugging x86 and x64 (+ WOW64) processes
 - Breakpoints
     - Software
+		- Sizes: 1,2 and 4 bytes
+		- Types: INT3, UD2, HLT
+		- OnExecution
 	- Memory
+		- OnExecution, OnAccess and OnWrite
 	- Hardware
+		- Sizes: 1,2 and 4 bytes
+		- OnExecution, OnRead and OnWrite
 - Step In
 - Step Over
 - Step Out
@@ -17,6 +23,9 @@
 - Supporting multithreading
 - Display source code
 - Patching of instructions
+- Bookmarks
+- Comments
+- Save and load project files
 - Detailed view of:
 	- disassembly
 	- windows
@@ -77,7 +86,6 @@
 	+ F2			= Set software breakpoint to selected line
 	+ Return		= Follow selected jump, call
 	+ Backspace		= Go back after goto/follow
-	+ Escape		= Close window 
 	+ Space			= Edit selected Instruction
 - Function Window
 	+ Double Click	= Show selected function in diassembler

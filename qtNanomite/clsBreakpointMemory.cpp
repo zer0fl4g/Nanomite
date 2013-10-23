@@ -34,13 +34,13 @@ bool clsBreakpointMemory::wMemoryBP(DWORD processID, DWORD64 breakpointOffset, D
 		newProtection = MBI.Protect | PAGE_GUARD;
 		break;
 	case BP_WRITE:
-		newProtection = PAGE_EXECUTE_READ;//MBI.Protect | PAGE_GUARD;
+		newProtection = PAGE_EXECUTE_READ;
 		break;
 	//case BP_READ:
 	//	newProtection = MBI.Protect | PAGE_GUARD;
 		break;
 	case BP_EXEC:
-		newProtection = PAGE_READWRITE;//MBI.Protect | PAGE_GUARD;
+		newProtection = PAGE_READWRITE;
 		break;
 	default:
 		newProtection = MBI.Protect | PAGE_GUARD;

@@ -362,7 +362,7 @@ void qtDLGPatchManager::UpdateOffsetPatch(HANDLE newProc, int newPID)
 	QString currentPModule = qtDLGNanomite::GetInstance()->PEManager->getFilenameFromPID(newPID);
 	for(QList<PatchData>::iterator i = m_patches.begin(); i != m_patches.end(); ++i)
 	{
-		if(currentPModule.contains(i->processModule))
+		if(currentPModule.contains(i->processModule, Qt::CaseInsensitive))
 		{
 			DWORD64 newBaseOffset = clsHelperClass::CalcOffsetForModule(i->ModuleName, NULL, newPID);
 			if(newBaseOffset != i->BaseOffset)
