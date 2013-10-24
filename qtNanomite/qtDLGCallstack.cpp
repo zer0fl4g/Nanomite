@@ -253,7 +253,6 @@ void qtDLGCallstack::ShowCallStack()
 		dwDisplacement;
 	IMAGEHLP_LINEW64 imgSource = {0};
 	IMAGEHLP_MODULEW64 imgMod = {0};
-	BOOL bSuccess;
 
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
@@ -299,9 +298,7 @@ void qtDLGCallstack::ShowCallStack()
 
 	do
 	{
-		bSuccess = StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0);
-
-		if(!bSuccess)        
+		if(!StackWalk64(dwMaschineMode,hProc,hThread,&stackFr,pContext,NULL,SymFunctionTableAccess64,SymGetModuleBase64,0))        
 			break;
 
 		memset(&imgSource,0,sizeof(IMAGEHLP_LINEW64));
@@ -318,8 +315,8 @@ void qtDLGCallstack::ShowCallStack()
 		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 		pSymbol->MaxNameLen = MAX_PATH;
 
-		bSuccess = SymGetModuleInfoW64(hProc,dwEIP,&imgMod);
-		bSuccess = SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
+		SymGetModuleInfoW64(hProc,dwEIP,&imgMod);
+		SymFromAddrW(hProc,dwEIP,&dwDisplacement,pSymbol);
 		sFuncName = QString::fromWCharArray(pSymbol->Name);
 		sFuncMod = QString::fromWCharArray(imgMod.ModuleName);
 
@@ -330,23 +327,25 @@ void qtDLGCallstack::ShowCallStack()
 		pSymbol->SizeOfStruct = sizeof(SYMBOL_INFOW);
 		pSymbol->MaxNameLen = MAX_PATH;
 
-		bSuccess = SymGetModuleInfoW64(hProc,dwReturnTo,&imgMod);
-		bSuccess = SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
+		SymGetModuleInfoW64(hProc,dwReturnTo,&imgMod);
+		SymFromAddrW(hProc,dwReturnTo,&dwDisplacement,pSymbol);
 		sReturnToMod = QString::fromWCharArray(imgMod.ModuleName);
 		sReturnToFunc = QString::fromWCharArray(pSymbol->Name);
 
-		bSuccess = SymGetLineFromAddrW64(hProc,dwEIP,(PDWORD)&dwDisplacement,&imgSource);
-
-		if(bSuccess)
+		if(SymGetLineFromAddrW64(hProc,dwEIP,(PDWORD)&dwDisplacement,&imgSource))
+		{
 			OnCallStack(dwStackAddr,
 				dwReturnTo,sReturnToFunc,sReturnToMod,
 				dwEIP,sFuncName,sFuncMod,
 				QString::fromWCharArray(imgSource.FileName),imgSource.LineNumber);
+		}
 		else
+		{
 			OnCallStack(dwStackAddr,
 				dwReturnTo,sReturnToFunc,sReturnToMod,
 				dwEIP,sFuncName,sFuncMod,
 				QString(""),0);
+		}
 
 	}while(stackFr.AddrReturn.Offset != 0);
 

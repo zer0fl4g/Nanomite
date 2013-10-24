@@ -68,7 +68,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 
 	clsMemoryProtector tempMemProtect(hProcess, PAGE_READWRITE, dwSize, dwStartOffset, &worked);
 
-	if(!worked && !ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,NULL))
+	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,NULL))
 	{
 		clsMemManager::CFree(bBuffer);
 		clsMemManager::CFree(sTemp);

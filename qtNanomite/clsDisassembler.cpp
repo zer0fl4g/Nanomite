@@ -237,9 +237,10 @@ bool clsDisassembler::GetPageRangeForOffset(quint64 IP, quint64 &PageBase, quint
 					{
 						case MEM_IMAGE:		
 						case MEM_MAPPED:
-							if((mbi.Protect & PAGE_EXECUTE) ||
-								(mbi.Protect & PAGE_EXECUTE_READ) ||
-								(mbi.Protect & PAGE_EXECUTE_READWRITE) ||
+							if((mbi.Protect & PAGE_EXECUTE)				||
+								(mbi.Protect & PAGE_EXECUTE_READ)		||
+								(mbi.Protect & PAGE_EXECUTE_READWRITE)	||
+								(mbi.Protect & PAGE_WRITECOPY)			|| // needed for OnExecuteMemBP
 								(mbi.Protect & PAGE_EXECUTE_WRITECOPY))
 							{
 								PageBase = (quint64)mbi.BaseAddress;
