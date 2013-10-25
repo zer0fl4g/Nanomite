@@ -117,6 +117,7 @@
 + added comments
 + added HLT and UD2 software breakpoint types
 + added project files
++ updated dbghelp to version 6.3.9600
 
 ####Notes:
 	- Supported breakpoint sizes are 1,2 and 4 bytes for software and hardware breakpoints

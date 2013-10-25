@@ -64,14 +64,7 @@ void qtDLGTrace::addTraceData(DWORD64 dwOffset,DWORD PID,DWORD TID)
 {
 	if(pThis == NULL) return;
 
-	TraceInfoRow newTraceRow;
-	newTraceRow.PID = PID;
-	newTraceRow.TID = TID;
-	newTraceRow.debugSymbols = QString("");
-	//newTraceRow.cpuReg = QString("");
-	newTraceRow.dwOffset = dwOffset;
-
-	pThis->m_traceData.append(newTraceRow);
+	pThis->m_traceData.append(TraceInfoRow(dwOffset, PID, TID));
 }
 
 void qtDLGTrace::clearTraceData()

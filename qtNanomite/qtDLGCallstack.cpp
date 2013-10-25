@@ -263,8 +263,7 @@ void qtDLGCallstack::ShowCallStack()
 	if(bIsWOW64)
 	{
 		dwMaschineMode = IMAGE_FILE_MACHINE_I386;
-		WOW64_CONTEXT cTT;
-		cTT = pDebugger->wowProcessContext;
+		WOW64_CONTEXT cTT = pDebugger->wowProcessContext;
 		pContext = &cTT;
 
 		stackFr.AddrPC.Offset = cTT.Eip;
@@ -274,8 +273,7 @@ void qtDLGCallstack::ShowCallStack()
 	else
 	{
 		dwMaschineMode = IMAGE_FILE_MACHINE_AMD64;
-		CONTEXT cTT;
-		cTT = pDebugger->ProcessContext;
+		CONTEXT cTT = pDebugger->ProcessContext;
 		pContext = &cTT;
 
 		stackFr.AddrPC.Offset = cTT.Rip;
@@ -284,8 +282,7 @@ void qtDLGCallstack::ShowCallStack()
 	}
 #else
 	dwMaschineMode = IMAGE_FILE_MACHINE_I386;
-	CONTEXT cTT;
-	cTT = pDebugger->ProcessContext;
+	CONTEXT cTT = pDebugger->ProcessContext;
 	pContext = &cTT;
 
 	stackFr.AddrPC.Offset = cTT.Eip;

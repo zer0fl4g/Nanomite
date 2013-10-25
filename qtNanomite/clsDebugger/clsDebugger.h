@@ -46,29 +46,29 @@ struct clsDebuggerSettings
 
 struct DLLStruct
 {
+	quint64 dwBaseAdr;
 	PTCHAR sPath;
 	DWORD dwPID;
-	quint64 dwBaseAdr;
 	bool bLoaded;
 };
 
 struct ThreadStruct
 {
+	quint64 dwEP;
 	DWORD dwTID;
 	DWORD dwPID;
 	DWORD dwExitCode;
-	quint64 dwEP;
 	bool bSuspended;
 };
 
 struct PIDStruct
 {
+	quint64 dwEP;
 	DWORD dwPID;
 	DWORD dwExitCode;
 	DWORD dwBPRestoreFlag;
 	HANDLE hProc;
 	PTCHAR sFileName;
-	quint64 dwEP;
 	bool bKernelBP;
 	bool bWOW64KernelBP;
 	bool bRunning;
@@ -79,9 +79,9 @@ struct PIDStruct
 
 struct customException
 {
+	quint64 dwHandler;
 	DWORD dwAction;
 	DWORD dwExceptionType;
-	quint64 dwHandler;
 };
 
 enum BREAKPOINT

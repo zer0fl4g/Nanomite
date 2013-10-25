@@ -30,6 +30,8 @@ struct TraceInfoRow
 	DWORD	PID;
 	DWORD	TID;
 	QString debugSymbols;
+
+	TraceInfoRow(DWORD64 dwOffset = 0, DWORD PID = 0, DWORD TID = 0) : dwOffset(dwOffset), PID(PID), TID(TID), debugSymbols(""){}
 };
 
 class qtDLGTrace : public QWidget, public Ui_qtDLGTraceClass
