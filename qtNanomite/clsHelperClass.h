@@ -35,6 +35,7 @@ public:
 	static DWORD GetMainThread(DWORD ThreadID);
 	static DWORD64 RemoteGetProcAddr(QString apiName, quint64 moduleBase, quint64 processID);
 	static PTCHAR reverseStrip(PTCHAR lpString, TCHAR lpSearchString);
+	static PTCHAR GetFileNameFromModuleBase(HANDLE processHandle, LPVOID imageBase);
 	static QString ResolveShortcut(QString shortcutFile);
 	static QString LoadStyleSheet();
 	static quint64 CalcOffsetForModule(PTCHAR moduleName,quint64 Offset,DWORD PID);

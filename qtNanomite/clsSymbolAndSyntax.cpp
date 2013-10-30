@@ -141,7 +141,7 @@ QString clsSymbolAndSyntax::CreateSymbols(quint64 FuncOffset)
 	
 	if(sFuncName.length() > 0 && sModName.length() > 0)
 		return QString().append(sModName).append(".").append(sFuncName);
-	else if(sModName.length() > 0 && sFuncName.length() == 0)
+	else if(sModName.length() > 0 && sFuncName.length() <= 0)
 		return QString().append(sModName).append(".").append(QString("%1").arg(FuncOffset,16,16,QChar('0')));
 	return "";
 }

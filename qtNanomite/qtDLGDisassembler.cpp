@@ -92,8 +92,8 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		m_lastEIP = dwEIP;
 		int lineCount = 0;
 
-		QMap<QString,DisAsDataRow>::const_iterator disassemblyDataCurrent = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
-		QMap<QString,DisAsDataRow>::const_iterator disassemblyDataEnd = coreDisAs->SectionDisAs.constEnd(); --disassemblyDataEnd;
+		QMap<quint64,DisAsDataRow>::const_iterator disassemblyDataCurrent = coreDisAs->SectionDisAs.constFind(dwEIP);
+		QMap<quint64,DisAsDataRow>::const_iterator disassemblyDataEnd = coreDisAs->SectionDisAs.constEnd(); --disassemblyDataEnd;
 
 		if(disassemblyDataCurrent == coreDisAs->SectionDisAs.constEnd())
 		{
@@ -102,7 +102,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		}
 		else if(disassemblyDataCurrent == coreDisAs->SectionDisAs.constBegin())
 		{
-			if(coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
+			if(coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),disassemblyDataCurrent.value().Offset))
 				return;
 		}
 		else
@@ -141,11 +141,12 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 		{
 			itemStyle = disassemblyDataCurrent.value().itemStyle;
 
-			tblDisAs->setItem(lineCount, 0,new QTableWidgetItem(disassemblyDataCurrent.value().Offset));
-			if(clsBreakpointManager::IsOffsetAnBP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
+			tblDisAs->setItem(lineCount, 0,new QTableWidgetItem(QString("%1").arg(disassemblyDataCurrent.value().Offset,16,16,QChar('0'))));
+
+			if(clsBreakpointManager::IsOffsetAnBP(disassemblyDataCurrent.value().Offset))
 				tblDisAs->item(lineCount,0)->setForeground(QColor(qtNanomiteDisAsColor->colorBP));
 
-			if(!IsAlreadyEIPSet && clsDebugger::IsOffsetEIP(disassemblyDataCurrent.value().Offset.toULongLong(0,16)))
+			if(!IsAlreadyEIPSet && clsDebugger::IsOffsetEIP(disassemblyDataCurrent.value().Offset))
 			{
 				tblDisAs->item(lineCount,0)->setBackground(QColor("Magenta"));
 				IsAlreadyEIPSet = true;
@@ -167,7 +168,7 @@ void qtDLGDisassembler::OnDisplayDisassembly(quint64 dwEIP)
 				tblDisAs->item(lineCount,2)->setForeground(QColor(qtNanomiteDisAsColor->colorMath));
 
 			
-			bookmarkComment = qtDLGBookmark::BookmarkGetComment(processID, disassemblyDataCurrent.value().Offset.toULongLong(0,16));
+			bookmarkComment = qtDLGBookmark::BookmarkGetComment(processID, disassemblyDataCurrent.value().Offset);
 			if(bookmarkComment.length() <= 0)
 				tblDisAs->setItem(lineCount, 3, new QTableWidgetItem(disassemblyDataCurrent.value().Comment));
 			else

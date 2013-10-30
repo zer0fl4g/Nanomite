@@ -205,7 +205,31 @@ HANDLE clsDebugger::GetCurrentProcessHandle()
 	if(IsDebuggerSuspended())
 		return m_currentProcess;
 	else
-		return GetProcessHandleByPID(-1);
+		return GetCurrentProcessHandle(-1);
+}
+
+HANDLE clsDebugger::GetProcessHandleByPID(DWORD PID)
+{
+	if(pThis != NULL)
+		return pThis->GetCurrentProcessHandle(PID);
+
+	return NULL;
+}
+
+bool clsDebugger::IsOffsetEIP(quint64 Offset)
+{
+#ifdef _AMD64_
+	if(pThis->wowProcessContext.Eip == Offset)
+		return true;
+
+	if(pThis->ProcessContext.Rip == Offset)
+		return true;
+#else
+	if(pThis->ProcessContext.Eip == Offset)
+		return true;
+#endif
+
+	return false;
 }
 
 QString clsDebugger::GetCMDLine()

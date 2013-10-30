@@ -25,7 +25,7 @@
 struct DisAsDataRow
 {
 	quint64 itemStyle;
-	QString Offset;
+	quint64 Offset;
 	QString OpCodes;
 	QString ASM;
 	QString Comment;
@@ -36,7 +36,7 @@ class clsDisassembler: public QThread
 	Q_OBJECT
 
 public:
-	QMap<QString,DisAsDataRow> SectionDisAs;
+	QMap<quint64,DisAsDataRow> SectionDisAs;
 
 	clsDisassembler();
 	~clsDisassembler();

@@ -38,7 +38,6 @@
 
 #include "..\NanomiteUpdater\UpdaterWidget\uupdatewidget.h"
 
-#include <TlHelp32.h>
 #include <Psapi.h>
 
 void qtDLGNanomite::action_FileTerminateGUI()
@@ -280,7 +279,7 @@ void qtDLGNanomite::action_DebugStepOver()
 	eFlags = coreDebugger->ProcessContext.EFlags;
 #endif
 
-	QMap<QString,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(QString("%1").arg(dwEIP,16,16,QChar('0')).toUpper());
+	QMap<quint64,DisAsDataRow>::const_iterator i = coreDisAs->SectionDisAs.constFind(dwEIP);
 	if(i == coreDisAs->SectionDisAs.constEnd())
 		return;
 
@@ -363,10 +362,13 @@ void qtDLGNanomite::action_DebugStepOver()
 	{
 		// normal step over
 		++i;
-		if((QMapData::Node *)i == (QMapData::Node *)coreDisAs->SectionDisAs.constEnd())
+		if(i == coreDisAs->SectionDisAs.constEnd())
+		{
 			coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP);
+			return;
+		}
 
-		coreDebugger->StepOver(i.value().Offset.toULongLong(0,16));
+		coreDebugger->StepOver(i.value().Offset);
 	}
 }
 

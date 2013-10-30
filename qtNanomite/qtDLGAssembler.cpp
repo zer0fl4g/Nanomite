@@ -54,7 +54,7 @@ void qtDLGAssembler::InsertNewInstructions()
 		return;
 	}
 
-	QMap<QString,DisAsDataRow>::const_iterator i = m_pCurrentDisassembler->SectionDisAs.constFind(QString("%1").arg(m_instructionOffset,16,16,QChar('0')).toUpper());
+	QMap<quint64,DisAsDataRow>::const_iterator i = m_pCurrentDisassembler->SectionDisAs.constFind(m_instructionOffset);
 	if(i == m_pCurrentDisassembler->SectionDisAs.constEnd()) 
 	{
 		close();

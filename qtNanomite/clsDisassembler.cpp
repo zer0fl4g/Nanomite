@@ -183,7 +183,7 @@ void clsDisassembler::run()
 					// Comment/Symbol && itemStyle		
 					DataVisualizer.CreateDataForRow(&newRow);
 
-					newRow.Offset = QString("%1").arg(newDisAss.VirtualAddr,16,16,QChar('0')).toUpper();
+					newRow.Offset = newDisAss.VirtualAddr;
 					SectionDisAs.insert(newRow.Offset,newRow);
 				}
 			}
@@ -209,9 +209,9 @@ void clsDisassembler::run()
 
 	if(SectionDisAs.count() > 0)
 	{
-		QMap<QString,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
-		m_endOffset = iEnd.key().toULongLong(0,16);
-		m_startOffset = SectionDisAs.begin().value().Offset.toULongLong(0,16);
+		QMap<quint64,DisAsDataRow>::iterator iEnd = SectionDisAs.end();iEnd--;
+		m_endOffset = iEnd.key();
+		m_startOffset = SectionDisAs.begin().value().Offset;
 	}
 	else
 	{

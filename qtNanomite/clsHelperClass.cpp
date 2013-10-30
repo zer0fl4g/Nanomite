@@ -357,3 +357,51 @@ QString clsHelperClass::ResolveShortcut(QString shortcutFile)
 
 	return QString::fromWCharArray(resolvedFilePath);
 }
+
+PTCHAR clsHelperClass::GetFileNameFromModuleBase(HANDLE processHandle, LPVOID imageBase) 
+{
+	PTCHAR tcFilename = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	if (!GetMappedFileName(processHandle, imageBase, tcFilename, MAX_PATH)) 
+	{
+		clsMemManager::CFree(tcFilename);
+		return NULL;
+	}
+
+	PTCHAR tcTemp = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	if (!GetLogicalDriveStrings(MAX_PATH - 1, tcTemp)) 
+	{
+		clsMemManager::CFree(tcFilename);
+		clsMemManager::CFree(tcTemp);
+		return NULL;
+	}
+
+	PTCHAR tcName = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	PTCHAR tcFile = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	TCHAR tcDrive[3] = TEXT(" :");
+	BOOL bFound = false;
+	PTCHAR p = tcTemp;
+
+	do 
+	{
+		*tcDrive = *p;
+
+		if(QueryDosDevice(tcDrive, tcName, MAX_PATH))
+		{
+			size_t uNameLen = wcslen(tcName);
+			if(uNameLen < MAX_PATH) 
+			{
+				bFound = _wcsnicmp(tcFilename, tcName, uNameLen) == 0;
+				if(bFound)
+					swprintf_s(tcFile, MAX_PATH, L"%s%s", tcDrive, (tcFilename + uNameLen));
+			}
+		}
+
+		while (*p++);
+	} while (!bFound && *p);
+
+	clsMemManager::CFree(tcName);
+	clsMemManager::CFree(tcTemp);
+	clsMemManager::CFree(tcFilename);
+
+	return tcFile;
+}

@@ -125,7 +125,7 @@ void qtDLGBookmark::CellDataChanged(int row, int column)
 
 void qtDLGBookmark::CleanIfOffsetLoaded(quint64 bookmarkOffset)
 {
-	if(qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.contains(QString("%1").arg(bookmarkOffset, 16, 16, QChar('0')).toUpper()))
+	if(qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.contains(bookmarkOffset))
 	{
 		qtDLGNanomite::GetInstance()->coreDisAs->SectionDisAs.clear();
 		emit pThis->ShowInDisassembler(bookmarkOffset);

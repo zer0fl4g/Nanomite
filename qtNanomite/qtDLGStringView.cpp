@@ -76,6 +76,7 @@ void qtDLGStringView::DataProcessing()
 	{
 		newData.filePath = m_pMainWindow->coreDebugger->PIDs[m_forEntry].sFileName;
 		newData.processID = m_pMainWindow->coreDebugger->PIDs[m_forEntry].dwPID;
+		//newData.processHandle = m_pMainWindow->coreDebugger->PIDs[m_forEntry].hProc;
 
 		dataForProcessing.append(newData);
 	}

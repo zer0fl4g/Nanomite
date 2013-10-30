@@ -25,14 +25,17 @@
 struct StringProcessingData
 {
 	PTCHAR filePath;
+	//HANDLE processHandle;
 	int processID;
 };
 
 struct StringData
 {
-	QString DataString;
 	DWORD64 StringOffset;
+	QString DataString;
 	int PID;
+
+	StringData(DWORD64 stringOffset = 0, int processID = NULL, QString dataString = "") : StringOffset(stringOffset), PID(processID), DataString(dataString){}
 };
 
 class clsStringViewWorker : public QThread
@@ -47,6 +50,9 @@ public:
 
 private:
 	QList<StringProcessingData> m_processingData;
+
+	//void ParseMemoryForAsciiStrings(DWORD64 virtualAddress, LPVOID sectionBuffer, DWORD sectionSize);
+	//void ParseMemoryForUnicodeStrings(DWORD64 virtualAddress, LPVOID sectionBuffer, DWORD sectionSize);
 
 protected:
 	void run();

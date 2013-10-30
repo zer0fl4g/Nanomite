@@ -103,11 +103,12 @@
 
 ## Changelog
 ###Version 0.1 beta 16
-+ fixed a bug which can lead to a access violation in the debugge when using step over while debugge was running
++ fixed a bug which can lead to a crash of the debugge when using step over while debugge was running
++ fixed a bug which can lead to a crash while using step over
 + fixed a bug which can lead to a crash when using more than one memory breakpoint
 + fixed a bug which can lead to a missing display of disassembly when breaking on a onexecute memory bp
 + fixed a bug which lead to a lost commandline when restarting as admin
-+ fixed a bug which did not clean up correctly if starting the same file again over the recent debugged file menu
++ fixed a bug which did not clean up correctly if restarting the file over the recent debugged file menu
 + added space shortcut in disassembly view to edit instruction
 + added error message if x86 build wants to load x64 binarys
 + added entropy check to display a warning if a (may) packed or crypted file will be started
@@ -117,6 +118,7 @@
 + added comments
 + added HLT and UD2 software breakpoint types
 + added project files
++ added different performance improvements
 + updated dbghelp to version 6.3.9600
 
 ####Notes:

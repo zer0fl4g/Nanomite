@@ -573,7 +573,7 @@ void qtDLGNanomite::InsertRecentDebuggedFile(QString fileName)
 
 	for(int i = 0; i < 4; i++)
 	{
-		if(!m_recentDebuggedFiles.value(i).contains(fileName))
+		if(!m_recentDebuggedFiles.value(i).contains(fileName, Qt::CaseInsensitive))
 			tempFileList.append(m_recentDebuggedFiles.value(i));
 	}
 

@@ -16,9 +16,11 @@
  */
 #include "clsStringViewWorker.h"
 #include "clsMemManager.h"
+//#include "clsPEManager.h"
+//#include "clsMemoryProtector.h"
+//#include "clsHelperClass.h"
 
 #include <fstream>
-#include <sstream>
 
 using namespace std;
 
@@ -36,6 +38,39 @@ clsStringViewWorker::~clsStringViewWorker()
 void clsStringViewWorker::run()
 {
 	stringList.clear();
+	//clsPEManager *pPEManager = clsPEManager::GetInstance();
+
+	//for(int i = 0; i < m_processingData.size(); i++)
+	//{
+	//	PTCHAR moduleName = clsHelperClass::reverseStrip(m_processingData.at(i).filePath, '\\');		
+	//	if(moduleName == NULL) continue;
+	//	
+	//	DWORD64 fileImageBase = clsHelperClass::CalcOffsetForModule(moduleName, NULL, m_processingData.at(i).processID);
+	//	clsMemManager::CFree(moduleName);
+
+	//	QList<IMAGE_SECTION_HEADER> fileSections = pPEManager->getSections(QString::fromWCharArray(m_processingData.at(i).filePath), m_processingData.at(i).processID);
+	//	for(int sectionNum = 0; sectionNum < fileSections.size(); sectionNum++)
+	//	{
+	//		bool worked = false;
+	//		clsMemoryProtector sectionMemory(	m_processingData.at(i).processHandle,
+	//											PAGE_READWRITE,
+	//											fileSections.at(sectionNum).SizeOfRawData,
+	//											(fileSections.at(sectionNum).VirtualAddress + fileImageBase),
+	//											&worked);
+
+	//		LPVOID sectionBuffer = clsMemManager::CAlloc(fileSections.at(sectionNum).SizeOfRawData);
+
+	//		if(ReadProcessMemory(m_processingData.at(i).processHandle, (LPVOID)(fileSections.at(sectionNum).VirtualAddress + fileImageBase), sectionBuffer, fileSections.at(sectionNum).SizeOfRawData, NULL))
+	//		{
+	//			ParseMemoryForAscciiStrings(fileSections.at(sectionNum).VirtualAddress + fileImageBase, sectionBuffer, fileSections.at(sectionNum).SizeOfRawData);
+	//		}
+	//		
+	//		clsMemManager::CFree(sectionBuffer);
+	//	}
+	//}	
+
+	//return;
+
 
 	for(QList<StringProcessingData>::const_iterator i = m_processingData.constBegin(); i != m_processingData.constEnd(); ++i)
 	{
@@ -72,12 +107,7 @@ void clsStringViewWorker::run()
 
 			if((int)sT == 0 && asciiChar.length() > 3)
 			{
-				StringData newStringData;
-				newStringData.DataString = asciiChar;
-				newStringData.PID = i->processID;
-				newStringData.StringOffset = inputFile.tellg();
-
-				stringList.append(newStringData);
+				stringList.append(StringData(inputFile.tellg(), i->processID, asciiChar));
 			}
 		}
 		inputFile.close();
@@ -120,5 +150,39 @@ void clsStringViewWorker::run()
 		//uniInputFile.close();
 	}
 
-	return;
+	 return;
 }
+
+//void clsStringViewWorker::ParseMemoryForAsciiStrings(DWORD64 virtualAddress, LPVOID sectionBuffer, DWORD sectionSize)
+//{
+//	CHAR currentElement = NULL;
+//	QString newString;
+//
+//	for(unsigned int i = 0; i < sectionSize; i++)
+//	{
+//		currentElement = *((PTCHAR)sectionBuffer);
+//
+//		if(((int)currentElement >= 0x41 && (int)currentElement <= 0x5a)		||
+//			((int)currentElement >= 0x61 && (int)currentElement <= 0x7a)	||
+//			((int)currentElement >= 0x30 && (int)currentElement <= 0x39)	|| 
+//			((int)currentElement == 0x20)									||
+//			((int)currentElement == 0xA))
+//		{
+//			newString.append(currentElement);
+//		}
+//		else if((int)currentElement == 0 && newString.length() > 3)
+//		{
+//			StringData newStringData;
+//			newStringData.DataString = newString;
+//			//newStringData.PID = i->processID;
+//			newStringData.StringOffset = virtualAddress;
+//
+//			stringList.append(newStringData);
+//			newString.clear();
+//		}
+//
+//		sectionBuffer = (LPVOID)((DWORD64)sectionBuffer + 1);
+//		virtualAddress++;
+//	}
+//	return;
+//}
