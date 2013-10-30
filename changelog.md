@@ -1,6 +1,33 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 16
++ fixed a bug which can lead to a crash of the debugge when using step over while debugge was running
++ fixed a bug which can lead to a crash while using step over
++ fixed a bug which can lead to a crash when using more than one memory breakpoint
++ fixed a bug which can lead to a missing display of disassembly when breaking on a onexecute memory bp
++ fixed a bug which lead to a lost commandline when restarting as admin
++ fixed a bug which did not clean up correctly if restarting the file over the recent debugged file menu
++ added space shortcut in disassembly view to edit instruction
++ added error message if x86 build wants to load x64 binarys
++ added entropy check to display a warning if a (may) packed or crypted file will be started
++ added support for different breakpoint sizes
++ added resolving of drag n dropped .lnk files
++ added bookmarks
++ added comments
++ added HLT and UD2 software breakpoint types
++ added project files
++ added different performance improvements
++ updated dbghelp to version 6.3.9600
+
+####Notes:
+	- Supported breakpoint sizes are 1,2 and 4 bytes for software and hardware breakpoints
+	- In the breakpoint manager you can now choose between int3, hlt and ud2 software breakpoints
+		- int3 = 0xCC
+		- hlt  = 0xF4
+		- ud2  = 0x0F0B
+	- Project files allow to save and load bookmarks, comments, patches and breakpoints of the current project
+	
 ###Version 0.1 beta 15
 + fixed a bug which lead to a memory leak when a invalid file was loaded
 + fixed a bug which caused a break when continue was used after a trace
