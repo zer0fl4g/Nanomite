@@ -31,8 +31,6 @@
 #include <QtCore>
 #include <QMenu>
 
-using namespace std;
-
 qtDLGDetailInfo::qtDLGDetailInfo(QWidget *parent, Qt::WFlags flags)
 	: QWidget(parent, flags)
 {
@@ -452,17 +450,20 @@ void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypoi
 		tblTIDs->setItem(tblTIDs->rowCount() - 1,4,
 			new QTableWidgetItem("Running"));
 
-		tblTIDs->scrollToBottom();
+		//tblTIDs->scrollToBottom();
 	} 
 	else
 	{
 		for(int i = 0; i < tblTIDs->rowCount();i++)
-			if(QString().compare(tblTIDs->item(i,0)->text(),QString("%1").arg(processID,8,16,QChar('0'))) == 0 &&
-				QString().compare(tblTIDs->item(i,1)->text(),QString("%1").arg(threadID,8,16,QChar('0'))) == 0)
+		{
+			if(tblTIDs->item(i,0)->text().toULongLong(0,16) == processID && tblTIDs->item(i,1)->text().toULongLong(0,16) == threadID)
 			{
 				tblTIDs->setItem(i,4,new QTableWidgetItem(QString("Terminated")));
 				tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(exitCode,8,16,QChar('0'))));
+
+				break;
 			}
+		}
 	}
 	
 
@@ -500,13 +501,18 @@ void qtDLGDetailInfo::OnPID(DWORD processID,QString sFile,DWORD exitCode,quint64
 		tblPIDs->setItem(tblPIDs->rowCount() - 1,3,
 			new QTableWidgetItem(sFile));
 
-		tblPIDs->scrollToBottom();
+		//tblPIDs->scrollToBottom();
 	}
 	else
 	{
 		for(int i = 0; i < tblPIDs->rowCount();i++)
-			if(QString().compare(tblPIDs->item(i,0)->text(),QString("%1").arg(processID,8,16,QChar('0'))) == 0)
+		{
+			if(tblPIDs->item(i,0)->text().toULongLong(0,16) == processID)
+			{
 				tblPIDs->setItem(i,2, new QTableWidgetItem(QString("%1").arg(exitCode,8,16,QChar('0'))));
+				break;
+			}
+		}
 	}
 
 	QString logMessage;
@@ -588,9 +594,14 @@ void qtDLGDetailInfo::OnDll(QString sDLLPath, DWORD processID, quint64 entrypoin
 	else
 	{
 		for(int i = 0; i < tblModules->rowCount();i++)
-			if(QString().compare(tblModules->item(i,0)->text(),QString("%1").arg(processID,8,16,QChar('0'))) == 0 &&
-				QString().compare(tblModules->item(i,1)->text(),QString("%1").arg(entrypointOffset,16,16,QChar('0'))) == 0)
+		{
+			if(tblModules->item(i,0)->text().toULongLong(0,16) == processID && tblModules->item(i,1)->text().toULongLong(0,16) == entrypointOffset)
+			{
 				tblModules->setItem(i,2, new QTableWidgetItem("Unloaded"));
+
+				break;
+			}
+		}
 	}
 
 	QString logMessage;
