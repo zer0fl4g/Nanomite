@@ -49,7 +49,7 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspen
 	return true;
 }
 
-bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwExitCode,HANDLE hProc)
+bool clsDebugger::PBProcInfo(DWORD dwPID, PTCHAR sFileName, quint64 dwEP, DWORD dwExitCode, HANDLE hProc, DWORD64 imageBase)
 {
 	bool bFound = false;
 
@@ -73,6 +73,8 @@ bool clsDebugger::PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwE
 		newPID.dwExitCode = dwExitCode;
 		newPID.hProc = hProc;
 		newPID.bRunning = true;
+		newPID.imageBase = imageBase;
+
 		if(!m_normalDebugging)
 		{
 			m_normalDebugging = true;

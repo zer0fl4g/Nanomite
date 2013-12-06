@@ -29,7 +29,7 @@ struct APIData
 class clsPEFile
 {
 public:
-	clsPEFile(QString FileName,bool *bLoaded);
+	clsPEFile(QString FileName,bool *bLoaded, int PID = -1, quint64 imageBase = 0);
 	~clsPEFile();
 
 	bool isValidPEFile();
@@ -78,11 +78,9 @@ private:
 	
 	QList<IMAGE_SECTION_HEADER> loadSections();
 
-	bool LoadFile(QString fileName);
-
-	DWORD dwCalculateTableOffset32(int iTableEntryNr,PIMAGE_NT_HEADERS32 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
-	DWORD64 dwCalculateTableOffset64(int iTableEntryNr,PIMAGE_NT_HEADERS64 pINH,PIMAGE_DOS_HEADER pIDH,PBYTE pBuffer);
-
+	bool LoadFile(QString fileName, int PID = -1, quint64 imageBase = 0);
+	bool CheckFile(QString fileName);
+	
 	QList<DWORD64> loadTLSCallbackOffset64();
 	QList<DWORD64> loadTLSCallbackOffset32();
 

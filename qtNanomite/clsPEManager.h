@@ -34,7 +34,7 @@ public:
 	clsPEManager();
 	~clsPEManager();
 
-	bool OpenFile(QString FileName,int PID = -1);
+	bool OpenFile(QString FileName,int PID = -1, quint64 imageBase = 0);
 	bool isValidPEFile(QString FileName,int PID = 0);
 	bool is64BitFile(QString FileName,int PID = 0);
 

@@ -42,7 +42,7 @@ QString clsPEManager::getFilenameFromPID(int PID)
 	return QString("");
 }
 
-void clsPEManager::InsertPIDForFile(QString FileName,int PID)
+void clsPEManager::InsertPIDForFile(QString FileName, int PID)
 {
 	FileName.replace('/','\\');
 
@@ -59,7 +59,7 @@ void clsPEManager::InsertPIDForFile(QString FileName,int PID)
 	OpenFile(FileName,PID);
 }
 
-bool clsPEManager::OpenFile(QString FileName,int PID)
+bool clsPEManager::OpenFile(QString FileName, int PID, quint64 imageBase)
 {
 	FileName.replace('/','\\');
 
@@ -72,7 +72,7 @@ bool clsPEManager::OpenFile(QString FileName,int PID)
 	PEManager newPEFile;
 	bool bLoaded = false;
 
-	newPEFile.PEFile = new clsPEFile(FileName,&bLoaded);
+	newPEFile.PEFile = new clsPEFile(FileName,&bLoaded, PID, imageBase);
 	newPEFile.FileName = FileName;
 	newPEFile.is64Bit = newPEFile.PEFile->is64Bit();
 	newPEFile.PID = PID;

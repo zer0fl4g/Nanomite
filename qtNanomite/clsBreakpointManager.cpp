@@ -48,6 +48,11 @@ clsBreakpointManager::~clsBreakpointManager()
 	pThis = NULL;
 }
 
+clsBreakpointManager* clsBreakpointManager::GetInstance()
+{
+	return pThis;
+}
+
 bool clsBreakpointManager::BreakpointInit(DWORD newProcessID, bool isThread)
 {
 	if(!isThread)

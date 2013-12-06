@@ -70,6 +70,8 @@ public:
 	static void RemoveSBPFromMemory(bool isDisable, DWORD processID);
 	static void BreakpointInsertFromProjectFile(BPStruct newBreakpoint, int bpType);
 
+	static clsBreakpointManager* GetInstance();
+
 signals:
 	void OnBreakpointAdded(BPStruct newBreakpoint, int breakpointType);
 	void OnBreakpointDeleted(quint64 bpOffset);

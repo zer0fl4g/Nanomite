@@ -17,11 +17,12 @@
 #include "qtDLGTrace.h"
 
 #include "clsDebugger.h"
-#include "dbghelp.h"
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
 #include "clsPEManager.h"
 #include "clsMemManager.h"
+
+#include "dbghelp.h"
 
 #include <Psapi.h>
 #include <TlHelp32.h>
@@ -36,9 +37,11 @@
 
 clsDebugger* clsDebugger::pThis = NULL;
 
-clsDebugger::clsDebugger(clsBreakpointManager *pBPManager) :
-	m_pBreakpointManager(pBPManager)
+clsDebugger::clsDebugger()
 {
+	m_pPEManager = clsPEManager::GetInstance();
+	m_pBreakpointManager = clsBreakpointManager::GetInstance();
+
 	ZeroMemory(&_si, sizeof(_si));
 	_si.cb = sizeof(_si);
 	ZeroMemory(&_pi, sizeof(_pi));
@@ -194,10 +197,14 @@ void clsDebugger::DebuggingLoop()
 				}
 
 				PTCHAR tcDllFilepath = clsHelperClass::GetFileNameFromModuleBase(processHandle, debug_event.u.CreateProcessInfo.lpBaseOfImage);
-				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,processHandle);
+				QString processPath = QString::fromWCharArray(tcDllFilepath);
+				
+				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,processHandle, (DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage);
 				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
 
-				emit OnNewPID(QString::fromWCharArray(tcDllFilepath),debug_event.dwProcessId);
+				emit OnNewPID(processPath, debug_event.dwProcessId);
+				
+				m_pPEManager->OpenFile(processPath, debug_event.dwProcessId, (DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage);
 								
 				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
 				pCurrentPID->bSymLoad = SymInitialize(processHandle,NULL,false);
@@ -215,7 +222,7 @@ void clsDebugger::DebuggingLoop()
 				
 				if(dbgSettings.bBreakOnTLS)
 				{
-					QList<quint64> tlsCallback = clsPEManager::getTLSCallbackOffset(QString::fromWCharArray(tcDllFilepath),debug_event.dwProcessId);
+					QList<quint64> tlsCallback = clsPEManager::getTLSCallbackOffset(processPath,debug_event.dwProcessId);
 					if(tlsCallback.length() > 0)
 					{
 						for(int i = 0; i < tlsCallback.count(); i++)
@@ -227,7 +234,8 @@ void clsDebugger::DebuggingLoop()
 				
 				if(dbgSettings.bBreakOnNewPID)
 					dwContinueStatus = CallBreakDebugger(&debug_event,0);
-							
+				
+				m_pPEManager->CloseFile(processPath, debug_event.dwProcessId);
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
@@ -249,7 +257,7 @@ void clsDebugger::DebuggingLoop()
 
 		case EXIT_PROCESS_DEBUG_EVENT:
 			{
-				PBProcInfo(debug_event.dwProcessId,L"",NULL,debug_event.u.ExitProcess.dwExitCode,NULL);
+				PBProcInfo(debug_event.dwProcessId,L"",NULL,debug_event.u.ExitProcess.dwExitCode,NULL,NULL);
 				SymCleanup(GetCurrentProcessHandle(debug_event.dwProcessId));
 
 				emit DeletePEManagerObject("", debug_event.dwProcessId);
@@ -399,6 +407,8 @@ void clsDebugger::DebuggingLoop()
 							{
 								bIsEP = true;
 								
+								m_pPEManager->OpenFile(QString::fromWCharArray(pCurrentPID->sFileName), pCurrentPID->dwPID, pCurrentPID->imageBase);
+
 								m_pBreakpointManager->BreakpointUpdateOffsets(pCurrentPID->hProc,pCurrentPID->dwPID);
 								emit UpdateOffsetsPatches(pCurrentPID->hProc,pCurrentPID->dwPID);
 
@@ -794,7 +804,7 @@ void clsDebugger::DebuggingLoop()
 
 	CleanWorkSpace();
 	
-	emit CleanPEManager();
+	m_pPEManager->CleanPEManager();
 	emit OnDebuggerTerminated();
 }
 

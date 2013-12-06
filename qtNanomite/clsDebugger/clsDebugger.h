@@ -21,6 +21,7 @@
 #include <QtCore>
 
 #include "../clsBreakpointManager.h"
+#include "../clsPEManager.h"
 
 #define LOGBUFFER (512 * sizeof(TCHAR))
 #define LOGBUFFERCHAR (512)
@@ -64,6 +65,7 @@ struct ThreadStruct
 struct PIDStruct
 {
 	quint64 dwEP;
+	quint64 imageBase;
 	DWORD dwPID;
 	DWORD dwExitCode;
 	DWORD dwBPRestoreFlag;
@@ -134,7 +136,7 @@ public:
 
 	clsDebuggerSettings dbgSettings;
 
-	clsDebugger(clsBreakpointManager *pBPManager);
+	clsDebugger();
 	~clsDebugger();
 
 	static bool IsOffsetEIP(quint64 Offset);
@@ -187,13 +189,13 @@ signals:
 	void OnDll(QString sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded);
 	void OnNewPID(QString,int);
 	void DeletePEManagerObject(QString,int);
-	void CleanPEManager();
 	void UpdateOffsetsPatches(HANDLE hProc, int PID);
 
 private:
 	static clsDebugger *pThis;
 
 	clsBreakpointManager *m_pBreakpointManager;
+	clsPEManager *m_pPEManager;
 
 	QString m_targetFile;
 	QString m_commandLine;
@@ -220,20 +222,20 @@ private:
 	void NormalDebugging();
 	void CleanWorkSpace();
 	
-	bool PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew);
-	bool PBProcInfo(DWORD dwPID,PTCHAR sFileName,quint64 dwEP,DWORD dwExitCode,HANDLE hProc);
-	bool PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID);
-	bool PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, DLLStruct *pFoundDLL = NULL);
-	bool PBDbgString(PTCHAR sMessage,DWORD dwPID);
+	bool PBThreadInfo(DWORD dwPID, DWORD dwTID, quint64 dwEP, bool bSuspended, DWORD dwExitCode, BOOL bNew);
+	bool PBProcInfo(DWORD dwPID, PTCHAR sFileName, quint64 dwEP, DWORD dwExitCode, HANDLE hProc, DWORD64 imageBase);
+	bool PBExceptionInfo(quint64 dwExceptionOffset, quint64 dwExceptionCode, DWORD dwPID, DWORD dwTID);
+	bool PBDLLInfo(PTCHAR sDLLPath, DWORD dwPID, quint64 dwEP, bool bLoaded, DLLStruct *pFoundDLL = NULL);
+	bool PBDbgString(PTCHAR sMessage, DWORD dwPID);
 	bool CheckProcessState(DWORD dwPID);
 	bool CheckIfExceptionIsBP(PIDStruct *pCurrentPID, quint64 dwExceptionOffset, quint64 dwExceptionType, bool bClearTrapFlag, bool isExceptionRelevant = true);
-	bool SuspendProcess(DWORD dwPID,bool bSuspend);
+	bool SuspendProcess(DWORD dwPID, bool bSuspend);
 	bool IsDebuggerSuspended();
-	inline bool SetThreadContextHelper(bool bDecIP,bool bSetTrapFlag,DWORD dwThreadID, PIDStruct *pCurrentPID);
+	inline bool SetThreadContextHelper(bool bDecIP, bool bSetTrapFlag, DWORD dwThreadID, PIDStruct *pCurrentPID);
 
 	HANDLE GetCurrentProcessHandle(DWORD dwPID);
 
-	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event,DWORD dwHandle);
+	DWORD CallBreakDebugger(DEBUG_EVENT *debug_event, DWORD dwHandle);
 	DWORD GetMainProcessID();
 	DWORD GetMainThreadID();
 

@@ -53,9 +53,9 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	clsAPIImport::LoadFunctions();
 
 	coreBPManager	= new clsBreakpointManager;
-	coreDebugger	= new clsDebugger(coreBPManager);
-	coreDisAs		= new clsDisassembler;
 	PEManager		= new clsPEManager;
+	coreDebugger	= new clsDebugger();
+	coreDisAs		= new clsDisassembler;
 	dlgDetInfo		= new qtDLGDetailInfo(this,Qt::Window);
 	dlgDbgStr		= new qtDLGDebugStrings(this,Qt::Window);
 	dlgBPManager	= new qtDLGBreakPointManager(this,Qt::Window);
@@ -104,9 +104,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	connect(coreBPManager,SIGNAL(OnBreakpointDeleted(quint64)),dlgBPManager,SLOT(OnDelete(quint64)),Qt::QueuedConnection);
 
 	// Callbacks from Debugger to PEManager
-	connect(coreDebugger,SIGNAL(OnNewPID(QString,int)),PEManager,SLOT(InsertPIDForFile(QString,int)),Qt::QueuedConnection);
 	connect(coreDebugger,SIGNAL(DeletePEManagerObject(QString,int)),PEManager,SLOT(CloseFile(QString,int)),Qt::QueuedConnection);
-	connect(coreDebugger,SIGNAL(CleanPEManager()),PEManager,SLOT(CleanPEManager()),Qt::QueuedConnection);
 
 	// Actions for the MainMenu and Toolbar
 	connect(actionFile_OpenNew, SIGNAL(triggered()), this, SLOT(action_FileOpenNewFile()));

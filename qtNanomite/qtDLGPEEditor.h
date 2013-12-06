@@ -40,7 +40,7 @@ public:
 	*
 	* @return no
 	*/
-	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int processID = 0, QString FileName = "");
+	qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent = 0, Qt::WFlags flags = 0, int processID = 0, QString FileName = "", DWORD64 imageBase = NULL);
 	/**
 	* @brief Deconstructs qtDLGPEEditor()
 	*

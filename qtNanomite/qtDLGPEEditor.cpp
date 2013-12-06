@@ -21,7 +21,7 @@
 #include "clsPEManager.h"
 #include "clsHelperClass.h"
 
-qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID, QString FileName)
+qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags flags, int PID, QString FileName, DWORD64 imageBase)
 	: QWidget(parent,flags)
 {
 	setupUi(this);
@@ -43,18 +43,16 @@ qtDLGPEEditor::qtDLGPEEditor(clsPEManager *PEManager,QWidget *parent, Qt::WFlags
 		else
 			m_currentFile = m_pEManager->getFilenameFromPID(m_processID);
 
-		if(m_processID == -1)
-			m_pEManager->OpenFile(m_currentFile);
-
 		if(m_currentFile.length() <= 0) 
 		{
 			QMessageBox::critical(this,"Nanomite","Could not load File!",QMessageBox::Ok,QMessageBox::Ok);
 
 			close();
 		}
-
 		this->setWindowTitle(QString("[Nanomite] - PEEditor - FileName: %1").arg(m_currentFile));
 
+		m_pEManager->OpenFile(m_currentFile, m_processID, imageBase);
+		
 		InitList();
 		LoadPEView();
 	}
@@ -100,7 +98,7 @@ void qtDLGPEEditor::InsertImports()
 	QTreeWidgetItem *topElement,
 					*moduleElement;
 	QString lastTopElement;
-	quint64	dwOffset = NULL;
+	//DWORD64 moduleIB = NULL;
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Imports");
@@ -115,15 +113,12 @@ void qtDLGPEEditor::InsertImports()
 			moduleElement = new QTreeWidgetItem(topElement);
 			moduleElement->setText(0,currentElement[0]);  
 			lastTopElement = currentElement[0];
-			dwOffset = clsHelperClass::CalcOffsetForModule((PTCHAR)currentElement[0].toLower().toStdWString().c_str(),NULL,m_processID);
+			//moduleIB = clsHelperClass::CalcOffsetForModule((PTCHAR)currentElement[0].toStdWString().c_str(), NULL, m_processID);
 		}
 		
 		QTreeWidgetItem* childElement = new QTreeWidgetItem(moduleElement);
 		childElement->setText(0,currentElement[1]);
-		if(dwOffset == 0)
-			childElement->setText(1,QString("%1").arg(0,16,16,QChar('0')));
-		else
-			childElement->setText(1,QString("%1").arg(clsHelperClass::RemoteGetProcAddr(currentElement[1],dwOffset,m_processID),16,16,QChar('0')));
+		childElement->setText(1,QString("%1").arg(imports.value(importCount).APIOffset/* + moduleIB*/, 16, 16, QChar('0')));
 	}
 }
 
@@ -134,8 +129,6 @@ void qtDLGPEEditor::InsertExports()
 
 	QTreeWidgetItem *topElement,
 					*exportElement;
-	PTCHAR currentFileBase = clsHelperClass::reverseStrip((PTCHAR)m_currentFile.toStdWString().c_str(),'\\');
-	DWORD64 moduleBase = clsHelperClass::CalcOffsetForModule(currentFileBase,NULL,m_processID);
 
 	topElement = new QTreeWidgetItem();
 	topElement->setText(0,"Exports");
@@ -145,10 +138,8 @@ void qtDLGPEEditor::InsertExports()
 	{		
 		exportElement = new QTreeWidgetItem(topElement);
 		exportElement->setText(0,exports.at(exportsCount).APIName);
-		exportElement->setText(1,QString("%1").arg(exports.value(exportsCount).APIOffset + moduleBase,16,16,QChar('0')));  
+		exportElement->setText(1,QString("%1").arg(exports.value(exportsCount).APIOffset,16,16,QChar('0')));  
 	}
-
-	clsMemManager::CFree(currentFileBase);
 }
 
 void qtDLGPEEditor::InsertDosHeader()

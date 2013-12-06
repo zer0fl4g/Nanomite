@@ -300,7 +300,10 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 {
 	if(QString().compare(pAction->text(),"Open Module in PE View") == 0)
 	{
-		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,-1,tblModules->item(m_selectedRow,3)->text());
+		qtDLGPEEditor *dlgPEEditor = new qtDLGPEEditor(clsPEManager::GetInstance(),this,Qt::Window,
+			tblModules->item(m_selectedRow,0)->text().toInt(0,16),
+			tblModules->item(m_selectedRow,3)->text(),			
+			tblModules->item(m_selectedRow,1)->text().toULongLong(0, 16));
 		dlgPEEditor->show();
 	}
 	else if(QString().compare(pAction->text(),"Open Module in Function View") == 0)
