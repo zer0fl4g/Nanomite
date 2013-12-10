@@ -435,7 +435,7 @@
       <property name="geometry">
        <rect>
         <x>10</x>
-        <y>63</y>
+        <y>79</y>
         <width>121</width>
         <height>17</height>
        </rect>
@@ -448,6 +448,44 @@
       </property>
       <property name="text">
        <string>Exception Assistant</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbMSSym">
+      <property name="geometry">
+       <rect>
+        <x>30</x>
+        <y>60</y>
+        <width>101</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>use MS - Server</string>
+      </property>
+     </widget>
+     <widget class="QCheckBox" name="cbKillOnExit">
+      <property name="geometry">
+       <rect>
+        <x>10</x>
+        <y>96</y>
+        <width>121</width>
+        <height>17</height>
+       </rect>
+      </property>
+      <property name="sizePolicy">
+       <sizepolicy hsizetype="Fixed" vsizetype="Fixed">
+        <horstretch>0</horstretch>
+        <verstretch>0</verstretch>
+       </sizepolicy>
+      </property>
+      <property name="text">
+       <string>Kill childs on exit</string>
       </property>
      </widget>
     </widget>

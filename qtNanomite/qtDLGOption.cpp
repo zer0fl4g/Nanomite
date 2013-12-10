@@ -50,6 +50,8 @@ qtDLGOption::qtDLGOption(QWidget *parent, Qt::WFlags flags)
 	OnLoad();
 
 	// Events for the GUI
+	connect(cbLoadSym, SIGNAL(stateChanged(int)), this, SLOT(SetUseSym(int)));
+	connect(cbMSSym, SIGNAL(stateChanged(int)), this, SLOT(OnMSSymWarning(int)));
 	connect(tblCustomExceptions,SIGNAL(customContextMenuRequested(const QPoint &)),this,SLOT(OnRightClickCustomException(const QPoint &)));
 	connect(btnClose,SIGNAL(clicked()),this,SLOT(OnClose()));
 	connect(btnReload,SIGNAL(clicked()),this,SLOT(OnReload()));
@@ -147,6 +149,16 @@ void qtDLGOption::OnSave()
 	else
 		m_pMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols = false;
 
+	if(cbMSSym->isChecked())
+		m_pMainWindow->coreDebugger->dbgSettings.bUseMSSymbols = true;
+	else
+		m_pMainWindow->coreDebugger->dbgSettings.bUseMSSymbols = false;
+
+	if(cbKillOnExit->isChecked())
+		m_pMainWindow->coreDebugger->dbgSettings.bKillOnExit = true;
+	else
+		m_pMainWindow->coreDebugger->dbgSettings.bKillOnExit = false;
+
 	if(cbDebugChild->isChecked())
 		m_pMainWindow->coreDebugger->dbgSettings.bDebugChilds = true;
 	else
@@ -220,9 +232,25 @@ void qtDLGOption::OnLoad()
 	m_pSettings->LoadDefaultJITDebugger(m_originalJIT, m_originalJITWOW64);
 	
 	if(m_pMainWindow->coreDebugger->dbgSettings.bAutoLoadSymbols)
+	{
+		cbMSSym->setEnabled(true);
 		cbLoadSym->setChecked(true);
+	}
 	else
+	{
 		cbLoadSym->setChecked(false);
+		cbMSSym->setEnabled(false);
+	}
+
+	if(m_pMainWindow->coreDebugger->dbgSettings.bUseMSSymbols)
+		cbMSSym->setChecked(true);
+	else
+		cbMSSym->setChecked(false);
+
+	if(m_pMainWindow->coreDebugger->dbgSettings.bKillOnExit)
+		cbKillOnExit->setChecked(true);
+	else
+		cbKillOnExit->setChecked(false);
 
 	if(m_pMainWindow->coreDebugger->dbgSettings.bDebugChilds)
 		cbDebugChild->setChecked(true);
@@ -494,4 +522,27 @@ void qtDLGOption::DisableNDBExtension()
 
 	if(registerFileExtension.status() == QSettings::NoError && registerExtension.status() == QSettings::NoError && registerFileIcon.status() == QSettings::NoError)
 		QMessageBox::information(this, "Nanomite", "File extension removed successfully!", QMessageBox::Ok, QMessageBox::Ok);
+}
+
+void qtDLGOption::SetUseSym(int newState)
+{
+	if(newState == 2)
+		cbMSSym->setEnabled(true);
+	else
+	{
+		cbMSSym->setChecked(false);
+		cbMSSym->setEnabled(false);
+	}
+}
+
+void qtDLGOption::OnMSSymWarning(int newState)
+{
+	if(newState == 2)
+	{
+		QMessageBox::warning(this,
+			"Nanomite",
+			"Using this option will download the symbols from MS Servers.\nAn internet connection will be required!",
+			QMessageBox::Ok,
+			QMessageBox::Ok);
+	}
 }

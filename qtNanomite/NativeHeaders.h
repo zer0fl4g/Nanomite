@@ -19,7 +19,6 @@
 
 #define NT_SUCCESS(x) ((x) >= 0)
 #define STATUS_INFO_LENGTH_MISMATCH 0xc0000004
-#define SystemHandleInformation 16
 #define ObjectBasicInformation 0
 #define ObjectNameInformation 1
 #define ObjectTypeInformation 2
@@ -89,49 +88,6 @@ typedef struct _OBJECT_TYPE_INFORMATION
 	ULONG PagedPoolUsage;
 	ULONG NonPagedPoolUsage;
 } OBJECT_TYPE_INFORMATION, *POBJECT_TYPE_INFORMATION;
-
-//typedef struct _DEBUG_BUFFER 
-//{
-//      HANDLE SectionHandle;
-//      PVOID SectionBase;
-//      PVOID RemoteSectionBase;
-//      ULONG SectionBaseDelta;
-//      HANDLE EventPairHandle;
-//      ULONG Unknown[2];
-//      HANDLE RemoteThreadHandle;
-//      ULONG InfoClassMask;
-//      ULONG SizeOfInfo;
-//      ULONG AllocatedSize;
-//      ULONG SectionSize;
-//      PVOID ModuleInformation;
-//      PVOID BackTraceInformation;
-//      PVOID HeapInformation;
-//      PVOID LockInformation;
-//      PVOID Reserved[8];
-//} DEBUG_BUFFER, *PDEBUG_BUFFER;
-//
-//typedef struct _DEBUG_HEAP_INFORMATION 
-//{
-//      ULONG Base; // 0x00
-//      ULONG Flags; // 0x04
-//      USHORT Granularity; // 0x08
-//      USHORT Unknown; // 0x0A
-//      ULONG Allocated; // 0x0C
-//      ULONG Committed; // 0x10
-//      ULONG TagCount; // 0x14
-//      ULONG BlockCount; // 0x18
-//      ULONG Reserved[7]; // 0x1C
-//      PVOID Tags; // 0x38
-//      PVOID Blocks; // 0x3C
-//} DEBUG_HEAP_INFORMATION, *PDEBUG_HEAP_INFORMATION;
-//
-//struct HeapBlock
-//{
-//      PVOID dwAddress;
-//      DWORD dwSize;
-//      DWORD dwFlags;
-//      ULONG reserved;
-//};
 
 typedef enum _THREAD_INFORMATION_CLASS {
     ThreadBasicInformation,
@@ -346,5 +302,176 @@ typedef struct _PROCESS_BASIC_INFORMATION
     ULONG_PTR	UniqueProcessId;
     ULONG_PTR	InheritedFromUniqueProcessId;
 } PROCESS_BASIC_INFORMATION, *PPROCESS_BASIC_INFORMATION;
+
+typedef enum _KWAIT_REASON   
+{   
+    Executive = 0,   
+    FreePage = 1,   
+    PageIn = 2,   
+    PoolAllocation = 3,   
+    DelayExecution = 4,   
+    Suspended = 5,   
+    UserRequest = 6,   
+    WrExecutive = 7,   
+    WrFreePage = 8,   
+    WrPageIn = 9,   
+    WrPoolAllocation = 10,   
+    WrDelayExecution = 11,   
+    WrSuspended = 12,   
+    WrUserRequest = 13,   
+    WrEventPair = 14,   
+    WrQueue = 15,   
+    WrLpcReceive = 16,   
+    WrLpcReply = 17,   
+    WrVirtualMemory = 18,   
+    WrPageOut = 19,   
+    WrRendezvous = 20,   
+    Spare2 = 21,   
+    Spare3 = 22,   
+    Spare4 = 23,   
+    Spare5 = 24,   
+    WrCalloutStack = 25,   
+    WrKernel = 26,   
+    WrResource = 27,   
+    WrPushLock = 28,   
+    WrMutex = 29,   
+    WrQuantumEnd = 30,   
+    WrDispatchInt = 31,   
+    WrPreempted = 32,   
+    WrYieldExecution = 33,   
+    WrFastMutex = 34,   
+    WrGuardedMutex = 35,   
+    WrRundown = 36,   
+    MaximumWaitReason = 37   
+} KWAIT_REASON;
+
+typedef enum _THREAD_STATE   
+{   
+    StateInitialized,   
+    StateReady,   
+    StateRunning,   
+    StateStandby,   
+    StateTerminated,   
+    StateWait,   
+    StateTransition,   
+    StateUnknown   
+} THREAD_STATE;   
+   
+typedef struct _SYSTEM_THREADS   
+{   
+    LARGE_INTEGER KernelTime;   
+    LARGE_INTEGER UserTime;   
+    LARGE_INTEGER CreateTime;   
+    ULONG WaitTime;   
+    PVOID StartAddress;   
+    CLIENT_ID ClientId;   
+    KPRIORITY Priority;   
+    KPRIORITY BasePriority;   
+    ULONG ContextSwitchCount;   
+    THREAD_STATE State;   
+    KWAIT_REASON WaitReason;   
+} SYSTEM_THREADS, *PSYSTEM_THREADS;
+  
+typedef struct _VM_COUNTERS   
+{   
+    ULONG PeakVirtualSize;   
+    ULONG VirtualSize;   
+    ULONG PageFaultCount;   
+    ULONG PeakWorkingSetSize;   
+    ULONG WorkingSetSize;   
+    ULONG QuotaPeakPagedPoolUsage;   
+    ULONG QuotaPagedPoolUsage;   
+    ULONG QuotaPeakNonPagedPoolUsage;   
+    ULONG QuotaNonPagedPoolUsage;   
+    ULONG PagefileUsage;   
+    ULONG PeakPagefileUsage;   
+} VM_COUNTERS, *PVM_COUNTERS;
+
+typedef struct _IO_COUNTERSEX   
+{   
+    LARGE_INTEGER ReadOperationCount;   
+    LARGE_INTEGER WriteOperationCount;   
+    LARGE_INTEGER OtherOperationCount;   
+    LARGE_INTEGER ReadTransferCount;   
+    LARGE_INTEGER WriteTransferCount;   
+    LARGE_INTEGER OtherTransferCount;   
+} IO_COUNTERSEX, *PIO_COUNTERSEX; 
+
+typedef struct _SYSTEM_PROCESSES   
+{   
+    ULONG NextEntryDelta;   
+    ULONG ThreadCount;   
+    ULONG Reserved1[6];   
+    LARGE_INTEGER CreateTime;   
+    LARGE_INTEGER UserTime;   
+    LARGE_INTEGER KernelTime;   
+    UNICODE_STRING ProcessName;   
+    KPRIORITY BasePriority;   
+    ULONG ProcessId;   
+    ULONG InheritedFromProcessId;   
+    ULONG HandleCount;   
+    ULONG Reserved2[2];   
+    VM_COUNTERS VmCounters;   
+    IO_COUNTERSEX IoCounters;   
+    SYSTEM_THREADS Threads[1];   
+} SYSTEM_PROCESSES, *PSYSTEM_PROCESSES;
+   
+typedef enum _SYSTEM_INFORMATION_CLASS   
+{   
+    SystemBasicInformation,   
+    SystemProcessorInformation,   
+    SystemPerformanceInformation,   
+    SystemTimeOfDayInformation,   
+    SystemNotImplemented1,   
+    SystemProcessesAndThreadsInformation,   
+    SystemCallCounts,   
+    SystemConfigurationInformation,   
+    SystemProcessorTimes,   
+    SystemGlobalFlag,   
+    SystemNotImplemented2,   
+    SystemModuleInformation,   
+    SystemLockInformation,   
+    SystemNotImplemented3,   
+    SystemNotImplemented4,   
+    SystemNotImplemented5,   
+    SystemHandleInformation,   
+    SystemObjectInformation,   
+    SystemPagefileInformation,   
+    SystemInstructionEmulationCounts,   
+    SystemInvalidInfoClass1,   
+    SystemCacheInformation,   
+    SystemPoolTagInformation,   
+    SystemProcessorStatistics,   
+    SystemDpcInformation,   
+    SystemNotImplemented6,   
+    SystemLoadImage,   
+    SystemUnloadImage,   
+    SystemTimeAdjustment,   
+    SystemNotImplemented7,   
+    SystemNotImplemented8,   
+    SystemNotImplemented9,   
+    SystemCrashDumpInformation,   
+    SystemExceptionInformation,   
+    SystemCrashDumpStateInformation,   
+    SystemKernelDebuggerInformation,   
+    SystemContextSwitchInformation,   
+    SystemRegistryQuotaInformation,   
+    SystemLoadAndCallImage,   
+    SystemPrioritySeparation,   
+    SystemNotImplemented10,   
+    SystemNotImplemented11,   
+    SystemInvalidInfoClass2,   
+    SystemInvalidInfoClass3,   
+    SystemTimeZoneInformation,   
+    SystemLookasideInformation,   
+    SystemSetTimeSlipEvent,   
+    SystemCreateSession,   
+    SystemDeleteSession,   
+    SystemInvalidInfoClass4,   
+    SystemRangeStartInformation,   
+    SystemVerifierInformation,   
+    SystemAddVerifier,   
+    SystemSessionProcessesInformation   
+} SYSTEM_INFORMATION_CLASS;
 
 #endif

@@ -79,6 +79,8 @@ void clsAppSettings::SaveDebuggerSettings(clsDebugger *pDebugger)
 
 	userSettings->setValue("DebugChilds", pDebugger->dbgSettings.bDebugChilds);
 	userSettings->setValue("AutoLoadSym", pDebugger->dbgSettings.bAutoLoadSymbols);
+	userSettings->setValue("UseMSSym", pDebugger->dbgSettings.bUseMSSymbols);
+	userSettings->setValue("KillOnExit", pDebugger->dbgSettings.bKillOnExit);
 	userSettings->setValue("BreakOnNewDLL", pDebugger->dbgSettings.bBreakOnNewDLL);
 	userSettings->setValue("BreakOnNewTID", pDebugger->dbgSettings.bBreakOnNewTID);
 	userSettings->setValue("BreakOnNewPID", pDebugger->dbgSettings.bBreakOnNewPID);
@@ -143,6 +145,8 @@ void clsAppSettings::LoadDebuggerSettings(clsDebugger *pDebugger)
 	userSettings->sync();
 	pDebugger->dbgSettings.bDebugChilds = userSettings->value("DebugChilds").toBool();
 	pDebugger->dbgSettings.bAutoLoadSymbols = userSettings->value("AutoLoadSym").toBool();
+	pDebugger->dbgSettings.bUseMSSymbols = userSettings->value("UseMSSym").toBool();
+	pDebugger->dbgSettings.bKillOnExit = userSettings->value("KillOnExit").toBool();
 	pDebugger->dbgSettings.bBreakOnNewDLL = userSettings->value("BreakOnNewDLL").toBool();
 	pDebugger->dbgSettings.bBreakOnNewTID = userSettings->value("BreakOnNewTID").toBool();
 	pDebugger->dbgSettings.bBreakOnNewPID = userSettings->value("BreakOnNewPID").toBool();
@@ -237,6 +241,8 @@ void clsAppSettings::WriteDefaultSettings()
 
 	userSettings->setValue("DebugChilds", true);
 	userSettings->setValue("AutoLoadSym", true);
+	userSettings->setValue("UseMSSym", false);
+	userSettings->setValue("KillOnExit", false);
 	userSettings->setValue("BreakOnNewDLL", false);
 	userSettings->setValue("BreakOnNewTID", false);
 	userSettings->setValue("BreakOnNewPID", false);

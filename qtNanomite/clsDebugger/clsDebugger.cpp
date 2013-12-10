@@ -61,6 +61,8 @@ clsDebugger::clsDebugger()
 
 	wowProcessContext.ContextFlags = WOW64_CONTEXT_ALL;
 	ProcessContext.ContextFlags = CONTEXT_ALL;
+
+	//SymSetOptions(SYMOPT_DEBUG);
 }
 
 clsDebugger::~clsDebugger()
@@ -164,8 +166,17 @@ void clsDebugger::DebuggingLoop()
 	bool bContinueDebugging = true;
 	DWORD dwContinueStatus = DBG_CONTINUE;
 	ZeroMemory(&m_dbgPI, sizeof(m_dbgPI));
+	QString symbolPath = "";
 
-	DebugSetProcessKillOnExit(false);
+	if(dbgSettings.bUseMSSymbols)
+	{
+		symbolPath = "srv*C:\\symbols*http://msdl.microsoft.com/download/symbols";
+	}
+
+	if(dbgSettings.bKillOnExit)
+		DebugSetProcessKillOnExit(true);
+	else
+		DebugSetProcessKillOnExit(false);
 
 	while(bContinueDebugging && m_isDebugging)
 	{ 
@@ -207,7 +218,7 @@ void clsDebugger::DebuggingLoop()
 				m_pPEManager->OpenFile(processPath, debug_event.dwProcessId, (DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage);
 								
 				PIDStruct *pCurrentPID = GetCurrentPIDDataPointer(debug_event.dwProcessId);
-				pCurrentPID->bSymLoad = SymInitialize(processHandle,NULL,false);
+				pCurrentPID->bSymLoad = SymInitialize(processHandle, symbolPath.toStdString().c_str(), false);
 				if(pCurrentPID->bSymLoad)
 				{
 					SymLoadModuleExW(processHandle,NULL,tcDllFilepath,0,(quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage,0,0,0);

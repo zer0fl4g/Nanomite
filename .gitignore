@@ -25,5 +25,3 @@ qtNanomite/TempOutput/
 *_manifest.rc
 *.cbp
 *.layout
-Build/Win32/Debug/
-Build/x64/Debug/

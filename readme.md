@@ -104,6 +104,9 @@
 ## Changelog
 ###Version 0.1 beta 17
 + fixed a bug in the internal exception handler which caused a termination on windows 8.1
++ fixed a bug which made patching jumps impossible
++ added option for "DebugSetProcessKillOnExit"
++ added option to load symbols from ms servers
 + improved internal PE file handling
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

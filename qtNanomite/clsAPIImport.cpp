@@ -41,19 +41,22 @@ clsAPIImport::~clsAPIImport()
 
 bool clsAPIImport::LoadFunctions()
 {
-	PTCHAR szWarning = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
-	bool bGotAFail = false;
+	PTCHAR szWarning		= (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+	bool bGotAFail			= false;
+	HMODULE kernel32Handle	= GetModuleHandle(L"Kernel32.dll"),
+			ntdllHandle		= GetModuleHandle(L"ntdll.dll");
 
 #ifdef _AMD64_
-	pIsWow64Process = (MyIsWow64Process)GetProcAddress(GetModuleHandle(L"Kernel32"),"IsWow64Process");
-	pWow64GetThreadContext = (MyWow64GetThreadContext)GetProcAddress(GetModuleHandle(L"Kernel32"),"Wow64GetThreadContext");
-	pWow64SetThreadContext = (MyWow64SetThreadContext)GetProcAddress(GetModuleHandle(L"Kernel32"),"Wow64SetThreadContext");
+	pIsWow64Process			= (MyIsWow64Process)GetProcAddress(kernel32Handle,"IsWow64Process");
+	pWow64GetThreadContext	= (MyWow64GetThreadContext)GetProcAddress(kernel32Handle,"Wow64GetThreadContext");
+	pWow64SetThreadContext	= (MyWow64SetThreadContext)GetProcAddress(kernel32Handle,"Wow64SetThreadContext");
 #endif
-	pNtQuerySystemInformation = (MyNtQuerySystemInformation)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQuerySystemInformation");
-	pNtDuplicateObject = (MyNtDuplicateObject)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtDuplicateObject");
-	pNtQueryObject = (MyNtQueryObject)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryObject");
-	pNtQueryInformationThread = (MyNtQueryInformationThread)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryInformationThread");
-	pNtQueryInformationProcess = (MyNtQueryInformationProcess)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"NtQueryInformationProcess");
+	
+	pNtDuplicateObject			= (MyNtDuplicateObject)GetProcAddress(ntdllHandle,"NtDuplicateObject");
+	pNtQueryObject				= (MyNtQueryObject)GetProcAddress(ntdllHandle,"NtQueryObject");
+	pNtQueryInformationThread	= (MyNtQueryInformationThread)GetProcAddress(ntdllHandle,"NtQueryInformationThread");
+	pNtQueryInformationProcess	= (MyNtQueryInformationProcess)GetProcAddress(ntdllHandle,"NtQueryInformationProcess");
+	pNtQuerySystemInformation	= (MyNtQuerySystemInformation)GetProcAddress(ntdllHandle,"NtQuerySystemInformation");
 	//pRtlCreateQueryDebugBuffer = (MyRtlCreateQueryDebugBuffer)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"RtlCreateQueryDebugBuffer");
 	//pRtlQueryProcessDebugInformation = (MyRtlQueryProcessDebugInformation)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"RtlQueryProcessDebugInformation");
 	//pRtlDestroyQueryDebugBuffer = (MyRtlDestroyQueryDebugBuffer)GetProcAddress(GetModuleHandle(L"ntdll.dll"),"RtlDestroyQueryDebugBuffer");
@@ -77,6 +80,7 @@ bool clsAPIImport::LoadFunctions()
 		wcscat_s(szWarning,MAX_PATH,L"Kernel32.dll::Wow64SetThreadContext\r\n");
 	}
 #endif
+
 	if(!pNtQuerySystemInformation)
 	{
 		bGotAFail = true;

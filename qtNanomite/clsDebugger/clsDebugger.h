@@ -40,9 +40,11 @@ struct clsDebuggerSettings
 	bool bBreakOnModuleEP;
 	bool bBreakOnSystemEP;
 	bool bBreakOnTLS;
+	bool bKillOnExit;
 	bool bDebugChilds;
 	bool bAutoLoadSymbols;
 	bool bUseExceptionAssist;
+	bool bUseMSSymbols;
 };
 
 struct DLLStruct

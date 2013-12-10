@@ -62,7 +62,7 @@ void clsStringViewWorker::run()
 
 	//		if(ReadProcessMemory(m_processingData.at(i).processHandle, (LPVOID)(fileSections.at(sectionNum).VirtualAddress + fileImageBase), sectionBuffer, fileSections.at(sectionNum).SizeOfRawData, NULL))
 	//		{
-	//			ParseMemoryForAscciiStrings(fileSections.at(sectionNum).VirtualAddress + fileImageBase, sectionBuffer, fileSections.at(sectionNum).SizeOfRawData);
+	//			ParseMemoryForAsciiStrings(fileSections.at(sectionNum).VirtualAddress + fileImageBase, sectionBuffer, fileSections.at(sectionNum).SizeOfRawData);
 	//		}
 	//		
 	//		clsMemManager::CFree(sectionBuffer);

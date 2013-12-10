@@ -43,6 +43,8 @@ public:
 		void OnInsertNewException(DWORD exceptionCode, int handleException);
 		void EnableNDBExtension();
 		void DisableNDBExtension();
+		void SetUseSym(int);
+		void OnMSSymWarning(int);
 
 private:
 	int m_selectedRow;

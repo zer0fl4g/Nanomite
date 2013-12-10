@@ -74,7 +74,7 @@ void qtDLGAssembler::InsertNewInstructions()
 	else
 		out << "BITS 32\n";
 
-	out << "org 0x" << i.value().Offset << "\r\n";
+	out << "org 0x" << hex << i.value().Offset << "\r\n";
 	out << lineEdit->text();
 	tempOutput.close();
 
