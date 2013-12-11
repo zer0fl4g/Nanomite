@@ -435,9 +435,9 @@ void qtDLGDetailInfo::MenuCallback(QAction* pAction)
 		SetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16),THREAD_PRIORITY_LOWEST);
 }
 
-void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypointOffset, bool bSuspended,DWORD exitCode, bool bFound)
+void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypointOffset, bool bSuspended,DWORD exitCode, bool isNewThread)
 {
-	if(!bFound)
+	if(isNewThread)
 	{
 		tblTIDs->insertRow(tblTIDs->rowCount());
 		
@@ -459,7 +459,7 @@ void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypoi
 	{
 		for(int i = 0; i < tblTIDs->rowCount();i++)
 		{
-			if(tblTIDs->item(i,0)->text().toULongLong(0,16) == processID && tblTIDs->item(i,1)->text().toULongLong(0,16) == threadID)
+			if(tblTIDs->item(i,1)->text().toULongLong(0,16) == threadID && tblTIDs->item(i,0)->text().toULongLong(0,16) == processID)
 			{
 				tblTIDs->setItem(i,4,new QTableWidgetItem(QString("Terminated")));
 				tblTIDs->setItem(i,3,new QTableWidgetItem(QString("%1").arg(exitCode,8,16,QChar('0'))));
@@ -472,26 +472,25 @@ void qtDLGDetailInfo::OnThread(DWORD processID, DWORD threadID, quint64 entrypoi
 
 	QString logMessage;
 
-	if(bFound)
-		logMessage = QString("[-] Exit Thread - PID: %1 TID: %2 - Exitcode: %3")
-		.arg(processID,6,16,QChar('0'))
-		.arg(threadID,6,16,QChar('0'))
-		.arg(exitCode,8,16,QChar('0'));
-	else
+	if(isNewThread)
 		logMessage = QString("[+] New Thread - PID: %1 TID: %2 Entrypoint: %3")
-		.arg(processID,6,16,QChar('0'))
-		.arg(threadID,6,16,QChar('0'))
-		.arg(entrypointOffset,16,16,QChar('0'));
-
+			.arg(processID,6,16,QChar('0'))
+			.arg(threadID,6,16,QChar('0'))
+			.arg(entrypointOffset,16,16,QChar('0'));
+	else
+		logMessage = QString("[-] Exit Thread - PID: %1 TID: %2 - Exitcode: %3")
+			.arg(processID,6,16,QChar('0'))
+			.arg(threadID,6,16,QChar('0'))
+			.arg(exitCode,8,16,QChar('0'));
+	
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 	pMainWindow->UpdateStateBar(STATE_RUN);
 	pMainWindow->logView->OnLog(logMessage);
 }
 
-void qtDLGDetailInfo::OnPID(DWORD processID,QString sFile,DWORD exitCode,quint64 entrypointOffset,bool bFound)
+void qtDLGDetailInfo::OnPID(DWORD processID,QString sFile,DWORD exitCode,quint64 entrypointOffset,bool isNewProc)
 {
-
-	if(!bFound)
+	if(isNewProc)
 	{
 		tblPIDs->insertRow(tblPIDs->rowCount());
 		
@@ -520,15 +519,15 @@ void qtDLGDetailInfo::OnPID(DWORD processID,QString sFile,DWORD exitCode,quint64
 
 	QString logMessage;
 
-	if(bFound)
-		logMessage = QString("[-] Exit Process - PID: %1 Exitcode: %2")
-		.arg(processID,6,16,QChar('0'))
-		.arg(exitCode,8,16,QChar('0'));
-	else
+	if(isNewProc)
 		logMessage = QString("[+] New Process - PID: %1 Entrypoint: %2")
 		.arg(processID,6,16,QChar('0'))
 		.arg(entrypointOffset,16,16,QChar('0'));
-
+	else
+		logMessage = QString("[-] Exit Process - PID: %1 Exitcode: %2")
+		.arg(processID,6,16,QChar('0'))
+		.arg(exitCode,8,16,QChar('0'));
+	
 	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
 	pMainWindow->logView->OnLog(logMessage);
 	pMainWindow->UpdateStateBar(STATE_RUN);

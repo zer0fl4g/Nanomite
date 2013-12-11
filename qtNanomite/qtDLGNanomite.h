@@ -66,7 +66,7 @@ public:
 	clsDebugger				*coreDebugger;
 	clsDisassembler			*coreDisAs;
 	clsPEManager			*PEManager;
-	clsAppSettings			*settings;
+	clsAppSettings			*settingManager;
 	clsBreakpointManager	*coreBPManager;
 
 	qtDLGDetailInfo			*dlgDetInfo;
@@ -83,7 +83,7 @@ public:
 	qtDLGLogView			*logView;	
 	qtDLGDisassembler		*DisAsGUI;
 
-	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
+	disasColors				*disasColor;
 
 	qtDLGNanomite(QWidget *parent = 0, Qt::WFlags flags = 0);
 	~qtDLGNanomite();

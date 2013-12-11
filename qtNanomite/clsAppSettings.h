@@ -34,11 +34,11 @@ public:
 	bool RestoreWindowState(QMainWindow* window);
 	void ResetWindowState();
 
-	void SaveDebuggerSettings(clsDebugger *pDebugger);
-	void SaveDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor);
+	void SaveDebuggerSettings();
+	void SaveDisassemblerColor();
 	void SaveDefaultJITDebugger(QString savedJIT, QString savedJITWOW64);
-	void LoadDebuggerSettings(clsDebugger *pDebugger);
-	void LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor);
+	void LoadDebuggerSettings();
+	void LoadDisassemblerColor();
 	void LoadDefaultJITDebugger(QString& savedJIT, QString& savedJITWOW64);
 	void WriteDefaultSettings();
 	void CheckIfFirstRun();
@@ -57,6 +57,9 @@ protected:
 private:
 	static clsAppSettings *instance;
 	QMutex *readWriteMutex;
+
+	clsDebugger *m_pDebugger;
+	disasColors	*m_pColors;
 };
 
 #endif // CLSAPPSETTINGS_H

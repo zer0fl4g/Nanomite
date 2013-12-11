@@ -79,10 +79,8 @@ bool clsHelperClass::LoadSourceForAddr(QString &fileName, int &lineNumber, quint
 PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 {
 	size_t	iModPos = NULL,
-			iModLen = NULL;
-	PTCHAR	lpTempString = (PTCHAR)clsMemManager::CAlloc(MAX_PATH * sizeof(TCHAR));
+			iModLen = wcslen(lpString);
 
-	iModLen = wcslen(lpString);
 	if(iModLen > 0)
 	{
 		for(size_t i = iModLen; i > 0 ; i--)
@@ -94,11 +92,12 @@ PTCHAR clsHelperClass::reverseStrip(PTCHAR lpString, TCHAR lpSearchString)
 			}
 		}
 
+		PTCHAR lpTempString = (PTCHAR)clsMemManager::CAlloc((iModLen - iModPos) * sizeof(TCHAR));
+
 		memcpy(lpTempString,(LPVOID)&lpString[iModPos + 1],(iModLen - iModPos) * sizeof(TCHAR));
 		return lpTempString;
 	}					
 
-	clsMemManager::CFree(lpTempString);
 	return NULL;
 }
 

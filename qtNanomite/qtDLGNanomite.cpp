@@ -35,8 +35,11 @@ qtDLGNanomite* qtDLGNanomite::qtDLGMyWindow = NULL;
 
 qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	: QMainWindow(parent, flags),
-	m_IsRestart(false)
+	m_IsRestart(false),
+	lExceptionCount(0)
 {
+	qtDLGMyWindow = this;
+
 	setupUi(this);
 
 	setAcceptDrops(true);
@@ -62,17 +65,15 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	dlgTraceWindow	= new qtDLGTrace(this,Qt::Window);
 	dlgPatchManager = new qtDLGPatchManager(this,Qt::Window);
 	dlgBookmark		= new qtDLGBookmark(this, Qt::Window);
-	qtNanomiteDisAsColor = new qtNanomiteDisAsColorSettings;	
-
-	qtDLGMyWindow = this;
-	lExceptionCount = 0;
+	disasColor		= new disasColors;	
+	settingManager	= clsAppSettings::SharedInstance();
 
 	LoadWidgets();
 
-	settings->CheckIfFirstRun();
-	settings->LoadDebuggerSettings(coreDebugger);
-	settings->LoadDisassemblerColor(qtNanomiteDisAsColor);
-	settings->LoadRecentDebuggedFiles(m_recentDebuggedFiles);
+	settingManager->CheckIfFirstRun();
+	settingManager->LoadDebuggerSettings();
+	settingManager->LoadDisassemblerColor();
+	settingManager->LoadRecentDebuggedFiles(m_recentDebuggedFiles);
 	
 	LoadRecentFileMenu(true);
 
@@ -165,22 +166,22 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 
 qtDLGNanomite::~qtDLGNanomite()
 {
-	settings->SaveDebuggerSettings(coreDebugger);
-	settings->SaveDisassemblerColor(qtNanomiteDisAsColor);
-	settings->SaveRecentDebuggedFiles(m_recentDebuggedFiles);
+	settingManager->SaveDebuggerSettings();
+	settingManager->SaveDisassemblerColor();
+	settingManager->SaveRecentDebuggedFiles(m_recentDebuggedFiles);
 
 	delete coreBPManager;
 	delete coreDebugger;
 	delete coreDisAs;
 	delete PEManager;
-	delete settings;
+	delete settingManager;
 	delete dlgDetInfo;
 	delete dlgDbgStr;
 	delete dlgBPManager;
 	delete dlgTraceWindow;
 	delete dlgPatchManager;
 	delete dlgBookmark;
-	delete qtNanomiteDisAsColor;
+	delete disasColor;
 	delete cpuRegView;
 	delete callstackView;
 	delete stackView;
@@ -207,9 +208,7 @@ void qtDLGNanomite::LoadWidgets()
 	this->addDockWidget(Qt::BottomDockWidgetArea, this->stackView);
 	this->addDockWidget(Qt::BottomDockWidgetArea, this->logView);
 
-	settings = clsAppSettings::SharedInstance();
-
-	if (!settings->RestoreWindowState(this))
+	if (!settingManager->RestoreWindowState(this))
 	{
 		this->splitDockWidget(this->callstackView, this->stackView, Qt::Vertical);
 		this->splitDockWidget(this->stackView, this->logView, Qt::Horizontal);
@@ -335,6 +334,7 @@ void qtDLGNanomite::ClearDebugData(bool cleanGUI)
 
 void qtDLGNanomite::OnDebuggerTerminated()
 {
+	PEManager->CleanPEManager();
 	coreDisAs->SectionDisAs.clear();
 	dlgBPManager->DeleteCompleterContent();
 	qtDLGTrace::disableStatusBarTimer();
@@ -346,7 +346,7 @@ void qtDLGNanomite::OnDebuggerTerminated()
 	qtDLGPatchManager::ResetPatches();
 	UpdateStateBar(STATE_TERMINATE);
 	LoadRecentFileMenu();
-
+	
 	if(m_IsRestart)
 	{
 		m_IsRestart = false;

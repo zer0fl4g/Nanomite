@@ -70,22 +70,22 @@ public slots:
 	* @param entrypointOffset The entrypoint of the thread
 	* @param bSuspended Is this thread suspended or running
 	* @param exitCode The exitcode of the thread
-	* @param bFound Does this thread already exists ( true = exit thread event)
+	* @param isNewThread Is this a new thread?
 	*
 	* @return no
 	*/
-	void OnThread(DWORD processID, DWORD threadID, quint64 entrypointOffset, bool bSuspended, DWORD exitCode, bool bFound);
+	void OnThread(DWORD processID, DWORD threadID, quint64 entrypointOffset, bool bSuspended, DWORD exitCode, bool isNewThread);
 	/**
 	* @brief A Qt slot which is called when the clsDebugger instance catched create/exit process event
 	* @param processID The process id
 	* @param sFile The file which is running
 	* @param exitCode The exitcode of the process
 	* @param entrypointOffset The entrypoint of the process
-	* @param bFound Does this process already exists ( true = exit process event)
+	* @param isNewProc Is this a new process?
 	*
 	* @return no
 	*/
-	void OnPID(DWORD processID, QString sFile, DWORD exitCode, quint64 entrypointOffset, bool bFound);
+	void OnPID(DWORD processID, QString sFile, DWORD exitCode, quint64 entrypointOffset, bool isNewProc);
 	/**
 	* @brief A Qt slot which is called when the clsDebugger instance catched exception
 	* @param functionName A string containing the function name which created the exception

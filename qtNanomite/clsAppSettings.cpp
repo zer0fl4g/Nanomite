@@ -17,12 +17,17 @@
 #include "clsAppSettings.h"
 #include "clsMemManager.h"
 
+#include "qtDLGNanomite.h"
+
 clsAppSettings::clsAppSettings()
 	: QObject()
 {
 	userSettings = new QSettings(QSettings::NativeFormat, QSettings::UserScope, "Nanomite", "Nanomite");
 
 	readWriteMutex = new QMutex();
+
+	m_pDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
+	m_pColors	= qtDLGNanomite::GetInstance()->disasColor;
 }
 
 clsAppSettings::~clsAppSettings()
@@ -33,12 +38,13 @@ clsAppSettings::~clsAppSettings()
 	
 	readWriteMutex->unlock();
 
-	delete userSettings;
-	
+	delete userSettings;	
 	delete readWriteMutex;
 
-	readWriteMutex = NULL;
-	userSettings = NULL;
+	readWriteMutex	= NULL;
+	userSettings	= NULL;
+	m_pDebugger		= NULL;
+	m_pColors		= NULL;
 }
 
 void clsAppSettings::SaveWindowState(QMainWindow* window)
@@ -73,26 +79,26 @@ void clsAppSettings::ResetWindowState()
 	userSettings->remove("mainWindowState");
 }
 
-void clsAppSettings::SaveDebuggerSettings(clsDebugger *pDebugger)
+void clsAppSettings::SaveDebuggerSettings()
 {
 	readWriteMutex->lockInline();
 
-	userSettings->setValue("DebugChilds", pDebugger->dbgSettings.bDebugChilds);
-	userSettings->setValue("AutoLoadSym", pDebugger->dbgSettings.bAutoLoadSymbols);
-	userSettings->setValue("UseMSSym", pDebugger->dbgSettings.bUseMSSymbols);
-	userSettings->setValue("KillOnExit", pDebugger->dbgSettings.bKillOnExit);
-	userSettings->setValue("BreakOnNewDLL", pDebugger->dbgSettings.bBreakOnNewDLL);
-	userSettings->setValue("BreakOnNewTID", pDebugger->dbgSettings.bBreakOnNewTID);
-	userSettings->setValue("BreakOnNewPID", pDebugger->dbgSettings.bBreakOnNewPID);
-	userSettings->setValue("BreakOnExDLL", pDebugger->dbgSettings.bBreakOnExDLL);
-	userSettings->setValue("BreakOnExTID", pDebugger->dbgSettings.bBreakOnExTID);
-	userSettings->setValue("BreakOnExPID", pDebugger->dbgSettings.bBreakOnExPID);
-	userSettings->setValue("BreakOnModuleEP", pDebugger->dbgSettings.bBreakOnModuleEP);
-	userSettings->setValue("BreakOnSystemEP", pDebugger->dbgSettings.bBreakOnSystemEP);
-	userSettings->setValue("BreakOnTLS", pDebugger->dbgSettings.bBreakOnTLS);
-	userSettings->setValue("ExceptionAssist", pDebugger->dbgSettings.bUseExceptionAssist);
-	userSettings->setValue("SUSPENDTYPE", QString("%1").arg(pDebugger->dbgSettings.dwSuspendType));
-	userSettings->setValue("DefaultExceptionMode", QString("%1").arg(pDebugger->dbgSettings.dwDefaultExceptionMode));
+	userSettings->setValue("DebugChilds", m_pDebugger->dbgSettings.bDebugChilds);
+	userSettings->setValue("AutoLoadSym", m_pDebugger->dbgSettings.bAutoLoadSymbols);
+	userSettings->setValue("UseMSSym", m_pDebugger->dbgSettings.bUseMSSymbols);
+	userSettings->setValue("KillOnExit", m_pDebugger->dbgSettings.bKillOnExit);
+	userSettings->setValue("BreakOnNewDLL", m_pDebugger->dbgSettings.bBreakOnNewDLL);
+	userSettings->setValue("BreakOnNewTID", m_pDebugger->dbgSettings.bBreakOnNewTID);
+	userSettings->setValue("BreakOnNewPID", m_pDebugger->dbgSettings.bBreakOnNewPID);
+	userSettings->setValue("BreakOnExDLL", m_pDebugger->dbgSettings.bBreakOnExDLL);
+	userSettings->setValue("BreakOnExTID", m_pDebugger->dbgSettings.bBreakOnExTID);
+	userSettings->setValue("BreakOnExPID", m_pDebugger->dbgSettings.bBreakOnExPID);
+	userSettings->setValue("BreakOnModuleEP", m_pDebugger->dbgSettings.bBreakOnModuleEP);
+	userSettings->setValue("BreakOnSystemEP", m_pDebugger->dbgSettings.bBreakOnSystemEP);
+	userSettings->setValue("BreakOnTLS", m_pDebugger->dbgSettings.bBreakOnTLS);
+	userSettings->setValue("ExceptionAssist", m_pDebugger->dbgSettings.bUseExceptionAssist);
+	userSettings->setValue("SUSPENDTYPE", QString("%1").arg(m_pDebugger->dbgSettings.dwSuspendType));
+	userSettings->setValue("DefaultExceptionMode", QString("%1").arg(m_pDebugger->dbgSettings.dwDefaultExceptionMode));
 
 	int exceptionHCounter = 0;
 	QString exceptionString = userSettings->value(QString("EXCEPTION%1").arg(exceptionHCounter)).toString();
@@ -103,25 +109,25 @@ void clsAppSettings::SaveDebuggerSettings(clsDebugger *pDebugger)
 		exceptionString = userSettings->value(QString("EXCEPTION%1").arg(exceptionHCounter)).toString();
 	}
 
-	for(int i = 0;i < pDebugger->ExceptionHandler.size();i++)
+	for(int i = 0;i < m_pDebugger->ExceptionHandler.size();i++)
 	{
-		userSettings->setValue(QString("EXCEPTION%1").arg(i),QString("%1:%2").arg(pDebugger->ExceptionHandler[i].dwExceptionType,8,16,QChar('0')).arg(pDebugger->ExceptionHandler[i].dwAction));
+		userSettings->setValue(QString("EXCEPTION%1").arg(i),QString("%1:%2").arg(m_pDebugger->ExceptionHandler[i].dwExceptionType,8,16,QChar('0')).arg(m_pDebugger->ExceptionHandler[i].dwAction));
 	}
 
 	userSettings->sync();
 	readWriteMutex->unlockInline();
 }
 
-void clsAppSettings::SaveDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor)
+void clsAppSettings::SaveDisassemblerColor()
 {
 	readWriteMutex->lockInline();
 
-	userSettings->setValue("COLOR_BP", pDisassemlberColor->colorBP);
-	userSettings->setValue("COLOR_CALL", pDisassemlberColor->colorCall);
-	userSettings->setValue("COLOR_JUMP", pDisassemlberColor->colorJump);
-	userSettings->setValue("COLOR_MOVE", pDisassemlberColor->colorMove);
-	userSettings->setValue("COLOR_STACK", pDisassemlberColor->colorStack);
-	userSettings->setValue("COLOR_MATH", pDisassemlberColor->colorMath);
+	userSettings->setValue("COLOR_BP", m_pColors->colorBP);
+	userSettings->setValue("COLOR_CALL", m_pColors->colorCall);
+	userSettings->setValue("COLOR_JUMP", m_pColors->colorJump);
+	userSettings->setValue("COLOR_MOVE", m_pColors->colorMove);
+	userSettings->setValue("COLOR_STACK", m_pColors->colorStack);
+	userSettings->setValue("COLOR_MATH", m_pColors->colorMath);
 
 	userSettings->sync();
 	readWriteMutex->unlockInline();
@@ -138,36 +144,36 @@ void clsAppSettings::SaveDefaultJITDebugger(QString savedJIT, QString savedJITWO
 	readWriteMutex->unlockInline();
 }
 
-void clsAppSettings::LoadDebuggerSettings(clsDebugger *pDebugger)
+void clsAppSettings::LoadDebuggerSettings()
 {
 	readWriteMutex->lockInline();
 	
 	userSettings->sync();
-	pDebugger->dbgSettings.bDebugChilds = userSettings->value("DebugChilds").toBool();
-	pDebugger->dbgSettings.bAutoLoadSymbols = userSettings->value("AutoLoadSym").toBool();
-	pDebugger->dbgSettings.bUseMSSymbols = userSettings->value("UseMSSym").toBool();
-	pDebugger->dbgSettings.bKillOnExit = userSettings->value("KillOnExit").toBool();
-	pDebugger->dbgSettings.bBreakOnNewDLL = userSettings->value("BreakOnNewDLL").toBool();
-	pDebugger->dbgSettings.bBreakOnNewTID = userSettings->value("BreakOnNewTID").toBool();
-	pDebugger->dbgSettings.bBreakOnNewPID = userSettings->value("BreakOnNewPID").toBool();
-	pDebugger->dbgSettings.bBreakOnExDLL = userSettings->value("BreakOnExDLL").toBool();
-	pDebugger->dbgSettings.bBreakOnExTID = userSettings->value("BreakOnExTID").toBool();
-	pDebugger->dbgSettings.bBreakOnExPID = userSettings->value("BreakOnExPID").toBool();
-	pDebugger->dbgSettings.bBreakOnModuleEP = userSettings->value("BreakOnModuleEP").toBool();
-	pDebugger->dbgSettings.bBreakOnSystemEP = userSettings->value("BreakOnSystemEP").toBool();
-	pDebugger->dbgSettings.bBreakOnTLS = userSettings->value("BreakOnTLS").toBool();
-	pDebugger->dbgSettings.bUseExceptionAssist = userSettings->value("ExceptionAssist").toBool();
-	pDebugger->dbgSettings.dwSuspendType = userSettings->value("SUSPENDTYPE").toInt();
-	pDebugger->dbgSettings.dwDefaultExceptionMode = userSettings->value("DefaultExceptionMode").toInt();
+	m_pDebugger->dbgSettings.bDebugChilds = userSettings->value("DebugChilds").toBool();
+	m_pDebugger->dbgSettings.bAutoLoadSymbols = userSettings->value("AutoLoadSym").toBool();
+	m_pDebugger->dbgSettings.bUseMSSymbols = userSettings->value("UseMSSym").toBool();
+	m_pDebugger->dbgSettings.bKillOnExit = userSettings->value("KillOnExit").toBool();
+	m_pDebugger->dbgSettings.bBreakOnNewDLL = userSettings->value("BreakOnNewDLL").toBool();
+	m_pDebugger->dbgSettings.bBreakOnNewTID = userSettings->value("BreakOnNewTID").toBool();
+	m_pDebugger->dbgSettings.bBreakOnNewPID = userSettings->value("BreakOnNewPID").toBool();
+	m_pDebugger->dbgSettings.bBreakOnExDLL = userSettings->value("BreakOnExDLL").toBool();
+	m_pDebugger->dbgSettings.bBreakOnExTID = userSettings->value("BreakOnExTID").toBool();
+	m_pDebugger->dbgSettings.bBreakOnExPID = userSettings->value("BreakOnExPID").toBool();
+	m_pDebugger->dbgSettings.bBreakOnModuleEP = userSettings->value("BreakOnModuleEP").toBool();
+	m_pDebugger->dbgSettings.bBreakOnSystemEP = userSettings->value("BreakOnSystemEP").toBool();
+	m_pDebugger->dbgSettings.bBreakOnTLS = userSettings->value("BreakOnTLS").toBool();
+	m_pDebugger->dbgSettings.bUseExceptionAssist = userSettings->value("ExceptionAssist").toBool();
+	m_pDebugger->dbgSettings.dwSuspendType = userSettings->value("SUSPENDTYPE").toInt();
+	m_pDebugger->dbgSettings.dwDefaultExceptionMode = userSettings->value("DefaultExceptionMode").toInt();
 
-	pDebugger->CustomExceptionRemoveAll();
+	m_pDebugger->CustomExceptionRemoveAll();
 	int i = 0;
 	QString exceptionString = userSettings->value(QString("EXCEPTION%1").arg(i)).toString();
 
 	while(exceptionString.contains(":"))
 	{
 		QStringList exceptionElements = exceptionString.split(":");
-		pDebugger->CustomExceptionAdd(exceptionElements.value(0).toULong(0,16),exceptionElements.value(1).toULong(0,16),NULL);
+		m_pDebugger->CustomExceptionAdd(exceptionElements.value(0).toULong(0,16),exceptionElements.value(1).toULong(0,16),NULL);
 		i++;
 		exceptionString = userSettings->value(QString("EXCEPTION%1").arg(i)).toString();
 	}
@@ -175,17 +181,17 @@ void clsAppSettings::LoadDebuggerSettings(clsDebugger *pDebugger)
 	readWriteMutex->unlockInline();
 }
 
-void clsAppSettings::LoadDisassemblerColor(qtNanomiteDisAsColorSettings *pDisassemlberColor)
+void clsAppSettings::LoadDisassemblerColor()
 {
 	readWriteMutex->lockInline();
 
 	userSettings->sync();
-	pDisassemlberColor->colorBP = userSettings->value("COLOR_BP").toString();
-	pDisassemlberColor->colorCall = userSettings->value("COLOR_CALL").toString();
-	pDisassemlberColor->colorJump = userSettings->value("COLOR_JUMP").toString();
-	pDisassemlberColor->colorMove = userSettings->value("COLOR_MOVE").toString();
-	pDisassemlberColor->colorStack = userSettings->value("COLOR_STACK").toString();
-	pDisassemlberColor->colorMath = userSettings->value("COLOR_MATH").toString();
+	m_pColors->colorBP = userSettings->value("COLOR_BP").toString();
+	m_pColors->colorCall = userSettings->value("COLOR_CALL").toString();
+	m_pColors->colorJump = userSettings->value("COLOR_JUMP").toString();
+	m_pColors->colorMove = userSettings->value("COLOR_MOVE").toString();
+	m_pColors->colorStack = userSettings->value("COLOR_STACK").toString();
+	m_pColors->colorMath = userSettings->value("COLOR_MATH").toString();
 
 	readWriteMutex->unlockInline();
 }
@@ -232,7 +238,6 @@ clsAppSettings* clsAppSettings::SharedInstance()
 	mutex.unlockInline();
 
 	return clsAppSettings::instance;
-	
 }
 
 void clsAppSettings::WriteDefaultSettings()

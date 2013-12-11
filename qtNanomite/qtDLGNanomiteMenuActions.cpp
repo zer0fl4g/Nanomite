@@ -104,7 +104,10 @@ void qtDLGNanomite::action_FileLoad()
 
 void qtDLGNanomite::action_FileSave()
 {
-	clsProjectFile(true);
+	if(coreDebugger->GetDebuggingState())
+		clsProjectFile(true);
+	else
+		QMessageBox::warning(this, "Nanomite", "It seems there is currently nothing to be saved!", QMessageBox::Ok, QMessageBox::Ok);
 }
 
 void qtDLGNanomite::action_DebugStart()
@@ -418,7 +421,7 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 
 	MEMORY_BASIC_INFORMATION mbi;
 		
-	while(VirtualQueryEx(hProcess,(LPVOID)CurAddress,&mbi,sizeof(mbi)))
+	while(VirtualQueryEx(hProcess, (LPVOID)CurAddress, &mbi, sizeof(mbi)))
 	{
 		if(GetMappedFileName(hProcess, (LPVOID)CurAddress, lpFileName, MAX_PATH) > 0)
 		{
@@ -447,6 +450,7 @@ void qtDLGNanomite::action_DebugRunToUserCode()
 				clsMemManager::CFree(lpCurrentFileName);
 			}
 		}
+
 		CurAddress += mbi.RegionSize;
 	}
 

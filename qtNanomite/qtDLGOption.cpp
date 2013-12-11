@@ -100,8 +100,8 @@ void qtDLGOption::OnClose()
 void qtDLGOption::OnReload()
 {
 	m_pSettings->WriteDefaultSettings();
-	m_pSettings->LoadDebuggerSettings(m_pMainWindow->coreDebugger);
-	m_pSettings->LoadDisassemblerColor(m_pMainWindow->qtNanomiteDisAsColor);
+	m_pSettings->LoadDebuggerSettings();
+	m_pSettings->LoadDisassemblerColor();
 	m_pSettings->LoadDefaultJITDebugger(m_originalJIT,m_originalJITWOW64);
 
 	OnLoad();
@@ -213,15 +213,15 @@ void qtDLGOption::OnSave()
 		}
 	}
 
-	m_pMainWindow->qtNanomiteDisAsColor->colorBP = comboBP->currentText();
-	m_pMainWindow->qtNanomiteDisAsColor->colorCall = comboCall->currentText();
-	m_pMainWindow->qtNanomiteDisAsColor->colorStack = comboStack->currentText();
-	m_pMainWindow->qtNanomiteDisAsColor->colorJump = comboJump->currentText();
-	m_pMainWindow->qtNanomiteDisAsColor->colorMove = comboMove->currentText();
-	m_pMainWindow->qtNanomiteDisAsColor->colorMath = comboMath->currentText();
+	m_pMainWindow->disasColor->colorBP = comboBP->currentText();
+	m_pMainWindow->disasColor->colorCall = comboCall->currentText();
+	m_pMainWindow->disasColor->colorStack = comboStack->currentText();
+	m_pMainWindow->disasColor->colorJump = comboJump->currentText();
+	m_pMainWindow->disasColor->colorMove = comboMove->currentText();
+	m_pMainWindow->disasColor->colorMath = comboMath->currentText();
 
-	m_pSettings->SaveDebuggerSettings(m_pMainWindow->coreDebugger);
-	m_pSettings->SaveDisassemblerColor(m_pMainWindow->qtNanomiteDisAsColor);
+	m_pSettings->SaveDebuggerSettings();
+	m_pSettings->SaveDisassemblerColor();
 	m_pSettings->SaveDefaultJITDebugger(m_originalJIT,m_originalJITWOW64);
 
 	QMessageBox::information(this, "Nanomite", "Your settings have been saved!", QMessageBox::Ok, QMessageBox::Ok);
@@ -330,22 +330,22 @@ void qtDLGOption::OnLoad()
 	}
 
 	int itemIndex = NULL;
-	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorBP)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->disasColor->colorBP)) != -1)
 		comboBP->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorCall)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->disasColor->colorCall)) != -1)
 		comboCall->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorStack)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->disasColor->colorStack)) != -1)
 		comboStack->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorJump)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->disasColor->colorJump)) != -1)
 		comboJump->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorMove)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->disasColor->colorMove)) != -1)
 		comboMove->setCurrentIndex(itemIndex);
 
-	if((itemIndex = getIndex(m_pMainWindow->qtNanomiteDisAsColor->colorMath)) != -1)
+	if((itemIndex = getIndex(m_pMainWindow->disasColor->colorMath)) != -1)
 		comboMath->setCurrentIndex(itemIndex);
 
 	// Read JIT Settings

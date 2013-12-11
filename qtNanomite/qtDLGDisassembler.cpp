@@ -31,11 +31,11 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	setupUi(this);
 	this->setLayout(horizontalLayout);
 
-	dlgSourceViewer = new qtDLGSourceViewer(this,Qt::Window);
-	qtNanomiteDisAsColor = qtDLGNanomite::GetInstance()->qtNanomiteDisAsColor;
-	coreDisAs = qtDLGNanomite::GetInstance()->coreDisAs;
-	coreDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
-	PEManager = qtDLGNanomite::GetInstance()->PEManager;
+	dlgSourceViewer			= new qtDLGSourceViewer(this,Qt::Window);
+	qtNanomiteDisAsColor	= qtDLGNanomite::GetInstance()->disasColor;
+	coreDisAs				= qtDLGNanomite::GetInstance()->coreDisAs;
+	coreDebugger			= qtDLGNanomite::GetInstance()->coreDebugger;
+	PEManager				= qtDLGNanomite::GetInstance()->PEManager;
 
 	connect(new QShortcut(QKeySequence("F2"), this), SIGNAL(activated()), this, SLOT(OnF2BreakPointPlace()));
 	connect(new QShortcut(QKeySequence::InsertParagraphSeparator, this), SIGNAL(activated()), this, SLOT(OnDisAsReturnPressed()));

@@ -81,7 +81,7 @@ private:
 	clsDebugger		*coreDebugger;
 	clsDisassembler	*coreDisAs;
 	
-	qtNanomiteDisAsColorSettings *qtNanomiteDisAsColor;
+	disasColors *qtNanomiteDisAsColor;
 
 	QList<quint64> m_offsetWalkHistory;
 

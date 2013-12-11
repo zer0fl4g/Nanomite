@@ -137,7 +137,12 @@ bool clsPEFile::LoadFile(QString FileName, int PID, quint64 imageBase)
 					if(!ReadProcessMemory(processHandle, (LPVOID)(imageBase + moduleSize), tempBuffer, MBI.RegionSize, NULL))
 					{
 						free(m_fileBuffer);
-						m_fileBuffer = NULL;
+						free(tempBuffer);
+
+						tempBuffer		= NULL;
+						m_fileBuffer	= NULL;
+
+						break;
 					}
 					else
 					{
@@ -145,6 +150,8 @@ bool clsPEFile::LoadFile(QString FileName, int PID, quint64 imageBase)
 					}
 
 					VirtualProtectEx(processHandle, (LPVOID)(imageBase + moduleSize), MBI.RegionSize, oldProtection, &newProtection);
+
+					free(tempBuffer);
 				}
 
 				moduleSize += MBI.RegionSize;
@@ -298,8 +305,10 @@ QList<DWORD64> clsPEFile::loadTLSCallbackOffset64()
 {
 	QList<DWORD64> tlsCallbacks;
 
-	DWORD64 vaOfTLSDir = m_INH64.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;//dwCalculateTableOffset64(IMAGE_DIRECTORY_ENTRY_TLS,&m_INH64,&m_IDH,(PBYTE)m_fileBuffer);
+	DWORD64 vaOfTLSDir = m_INH64.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
 	if(vaOfTLSDir == NULL) return tlsCallbacks;
+
+	vaOfTLSDir += (DWORD64)m_fileBuffer;
 
 	PIMAGE_TLS_DIRECTORY64 pTLS = (PIMAGE_TLS_DIRECTORY64)((DWORD64)vaOfTLSDir);
 	if(pTLS->AddressOfCallBacks == NULL) return tlsCallbacks;
@@ -328,8 +337,10 @@ QList<DWORD64> clsPEFile::loadTLSCallbackOffset32()
 {
 	QList<DWORD64> tlsCallbacks;
 
-	DWORD vaOfTLSDir = m_INH32.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress + (DWORD)m_fileBuffer;
+	DWORD vaOfTLSDir = m_INH32.OptionalHeader.DataDirectory[IMAGE_DIRECTORY_ENTRY_TLS].VirtualAddress;
 	if(vaOfTLSDir == NULL) return tlsCallbacks;
+
+	vaOfTLSDir += (DWORD)m_fileBuffer;
 
 	PIMAGE_TLS_DIRECTORY32 pTLS = (PIMAGE_TLS_DIRECTORY32)((DWORD)vaOfTLSDir);
 	if(pTLS->AddressOfCallBacks == NULL) return tlsCallbacks;

@@ -27,7 +27,7 @@
 #define COLOR_MATH		32
 
 
-struct qtNanomiteDisAsColorSettings
+struct disasColors
 { 
 	QString colorBP;
 	QString colorCall;

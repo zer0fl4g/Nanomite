@@ -37,10 +37,16 @@
 
 clsDebugger* clsDebugger::pThis = NULL;
 
-clsDebugger::clsDebugger()
+clsDebugger::clsDebugger() :
+	m_normalDebugging(true),
+	m_isDebugging(false),
+	m_debuggerBreak(false),
+	m_commandLine("")
 {
-	m_pPEManager = clsPEManager::GetInstance();
-	m_pBreakpointManager = clsBreakpointManager::GetInstance();
+	pThis = this;
+
+	m_pPEManager			= clsPEManager::GetInstance();
+	m_pBreakpointManager	= clsBreakpointManager::GetInstance();
 
 	ZeroMemory(&_si, sizeof(_si));
 	_si.cb = sizeof(_si);
@@ -48,19 +54,11 @@ clsDebugger::clsDebugger()
 
 	ZeroMemory(&dbgSettings, sizeof(clsDebuggerSettings));
 
-	m_normalDebugging = true;
-	m_isDebugging = false;
-	m_debuggerBreak = false;
-	
-	pThis = this;
-
-	m_commandLine = "";
-
 	m_waitForGUI = CreateEvent(NULL,false,false,L"hWaitForGUI");
 	m_debugEvent = CreateEvent(NULL,false,false,L"hDebugEvent");
 
-	wowProcessContext.ContextFlags = WOW64_CONTEXT_ALL;
-	ProcessContext.ContextFlags = CONTEXT_ALL;
+	wowProcessContext.ContextFlags	= WOW64_CONTEXT_ALL;
+	ProcessContext.ContextFlags		= CONTEXT_ALL;
 
 	//SymSetOptions(SYMOPT_DEBUG);
 }
@@ -170,7 +168,7 @@ void clsDebugger::DebuggingLoop()
 
 	if(dbgSettings.bUseMSSymbols)
 	{
-		symbolPath = "srv*C:\\symbols*http://msdl.microsoft.com/download/symbols";
+		symbolPath = QString("srv*%1/symbols*http://msdl.microsoft.com/download/symbols").arg(QDir::currentPath());
 	}
 
 	if(dbgSettings.bKillOnExit)
@@ -210,7 +208,7 @@ void clsDebugger::DebuggingLoop()
 				PTCHAR tcDllFilepath = clsHelperClass::GetFileNameFromModuleBase(processHandle, debug_event.u.CreateProcessInfo.lpBaseOfImage);
 				QString processPath = QString::fromWCharArray(tcDllFilepath);
 				
-				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,processHandle, (DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage);
+				PBProcInfo(debug_event.dwProcessId,tcDllFilepath,(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,-1,processHandle, (DWORD64)debug_event.u.CreateProcessInfo.lpBaseOfImage, true);
 				PBThreadInfo(debug_event.dwProcessId,clsHelperClass::GetMainThread(debug_event.dwProcessId),(quint64)debug_event.u.CreateProcessInfo.lpStartAddress,false,0,true);
 
 				emit OnNewPID(processPath, debug_event.dwProcessId);
@@ -250,25 +248,27 @@ void clsDebugger::DebuggingLoop()
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
-			PBThreadInfo(debug_event.dwProcessId,debug_event.dwThreadId,(quint64)debug_event.u.CreateThread.lpStartAddress,false,0,true);
-			m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId, true);
+			{
+				PBThreadInfo(debug_event.dwProcessId, debug_event.dwThreadId, (quint64)debug_event.u.CreateThread.lpStartAddress, false, NULL, true);
+				m_pBreakpointManager->BreakpointInit(debug_event.dwProcessId, true);
 
-			if(dbgSettings.bBreakOnNewTID)
-				dwContinueStatus = CallBreakDebugger(&debug_event,0);
+				if(dbgSettings.bBreakOnNewTID)
+					dwContinueStatus = CallBreakDebugger(&debug_event,0);
 
-			break;
-
+				break;
+			}
 		case EXIT_THREAD_DEBUG_EVENT:
-			PBThreadInfo(debug_event.dwProcessId,debug_event.dwThreadId,NULL,false,debug_event.u.ExitThread.dwExitCode,false);
+			{
+				PBThreadInfo(debug_event.dwProcessId, debug_event.dwThreadId, NULL, false, debug_event.u.ExitThread.dwExitCode, false);
 
-			if(dbgSettings.bBreakOnExTID)
-				dwContinueStatus = CallBreakDebugger(&debug_event,0);
+				if(dbgSettings.bBreakOnExTID)
+					dwContinueStatus = CallBreakDebugger(&debug_event,0);
 			
-			break;
-
+				break;
+			}
 		case EXIT_PROCESS_DEBUG_EVENT:
 			{
-				PBProcInfo(debug_event.dwProcessId,L"",NULL,debug_event.u.ExitProcess.dwExitCode,NULL,NULL);
+				PBProcInfo(debug_event.dwProcessId,L"",NULL,debug_event.u.ExitProcess.dwExitCode,NULL,NULL, false);
 				SymCleanup(GetCurrentProcessHandle(debug_event.dwProcessId));
 
 				emit DeletePEManagerObject("", debug_event.dwProcessId);
@@ -814,8 +814,7 @@ void clsDebugger::DebuggingLoop()
 	emit OnLog("[-] Debugging finished!");
 
 	CleanWorkSpace();
-	
-	m_pPEManager->CleanPEManager();
+
 	emit OnDebuggerTerminated();
 }
 

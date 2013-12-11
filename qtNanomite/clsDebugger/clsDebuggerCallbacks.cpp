@@ -19,21 +19,9 @@
 #include "clsMemManager.h"
 #include "dbghelp.h"
 
-bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspended,DWORD dwExitCode,BOOL bNew)
+bool clsDebugger::PBThreadInfo(DWORD dwPID, DWORD dwTID, quint64 dwEP, bool bSuspended, DWORD dwExitCode, bool isNewThread)
 {
-	bool bFound = false;
-
-	for(int i = 0;i < TIDs.size();i++)
-	{
-		if(TIDs[i].dwTID == dwTID && TIDs[i].dwPID == dwPID)
-		{
-			TIDs[i].dwExitCode = dwExitCode;
-			bFound = true;
-			break;
-		}
-	}
-
-	if(!bFound)
+	if(isNewThread)
 	{
 		ThreadStruct newTID;
 		newTID.bSuspended = bSuspended;
@@ -44,26 +32,26 @@ bool clsDebugger::PBThreadInfo(DWORD dwPID,DWORD dwTID,quint64 dwEP,bool bSuspen
 
 		TIDs.append(newTID);
 	}
-
-	emit OnThread(dwPID,dwTID,dwEP,bSuspended,dwExitCode,bFound);
-	return true;
-}
-
-bool clsDebugger::PBProcInfo(DWORD dwPID, PTCHAR sFileName, quint64 dwEP, DWORD dwExitCode, HANDLE hProc, DWORD64 imageBase)
-{
-	bool bFound = false;
-
-	for(int i = 0;i < PIDs.size();i++)
+	else
 	{
-		if(PIDs[i].dwPID == dwPID)
+		for(int i = 0;i < TIDs.size();i++)
 		{
-			PIDs[i].dwExitCode = dwExitCode;
-			PIDs[i].bRunning = false;
-			bFound = true;
+			if(TIDs[i].dwTID == dwTID && TIDs[i].dwPID == dwPID)
+			{
+				TIDs[i].dwExitCode = dwExitCode;
+
+				break;
+			}
 		}
 	}
 
-	if(!bFound)
+	emit OnThread(dwPID, dwTID, dwEP, bSuspended, dwExitCode, isNewThread);
+	return true;
+}
+
+bool clsDebugger::PBProcInfo(DWORD dwPID, PTCHAR sFileName, quint64 dwEP, DWORD dwExitCode, HANDLE hProc, DWORD64 imageBase, bool isNewProc)
+{
+	if(isNewProc)
 	{
 		PIDStruct newPID = { 0 };
 
@@ -82,25 +70,38 @@ bool clsDebugger::PBProcInfo(DWORD dwPID, PTCHAR sFileName, quint64 dwEP, DWORD 
 		}
 
 		PIDs.append(newPID);
+
+		emit OnPID(dwPID, QString::fromWCharArray(sFileName), dwExitCode, dwEP, true);
+	}
+	else
+	{
+		for(int i = 0;i < PIDs.size();i++)
+		{
+			if(PIDs[i].dwPID == dwPID)
+			{
+				PIDs[i].dwExitCode = dwExitCode;
+				PIDs[i].bRunning = false;
+
+				break;
+			}
+		}
+
+		emit OnPID(dwPID, "", dwExitCode, NULL, false);
 	}
 
-	if(!bFound)
-		emit OnPID(dwPID,QString::fromWCharArray(sFileName),dwExitCode,dwEP,bFound);
-	else
-		emit OnPID(dwPID,"",dwExitCode,NULL,bFound);
 	return true;
 }
 
-bool clsDebugger::PBExceptionInfo(quint64 dwExceptionOffset,quint64 dwExceptionCode,DWORD dwPID,DWORD dwTID)
+bool clsDebugger::PBExceptionInfo(quint64 dwExceptionOffset, quint64 dwExceptionCode, DWORD dwPID, DWORD dwTID)
 {
 	QString sModName,sFuncName;
-	clsHelperClass::LoadSymbolForAddr(sFuncName,sModName,dwExceptionOffset,GetCurrentProcessHandle(dwPID));
+	clsHelperClass::LoadSymbolForAddr(sFuncName, sModName, dwExceptionOffset, GetCurrentProcessHandle(dwPID));
 
-	emit OnException(sFuncName,sModName,dwExceptionOffset,dwExceptionCode,dwPID,dwTID);
+	emit OnException(sFuncName, sModName, dwExceptionOffset, dwExceptionCode, dwPID, dwTID);
 	return true;
 }
 
-bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoaded, DLLStruct *pFoundDLL)
+bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath, DWORD dwPID, quint64 dwEP, bool bLoaded, DLLStruct *pFoundDLL)
 {
 	if(!bLoaded && pFoundDLL != NULL)
 	{
@@ -124,9 +125,9 @@ bool clsDebugger::PBDLLInfo(PTCHAR sDLLPath,DWORD dwPID,quint64 dwEP,bool bLoade
 	return true;
 }
 
-bool clsDebugger::PBDbgString(PTCHAR sMessage,DWORD dwPID)
+bool clsDebugger::PBDbgString(PTCHAR sMessage, DWORD dwPID)
 {
-	emit OnDbgString(QString::fromWCharArray(sMessage),dwPID);
+	emit OnDbgString(QString::fromWCharArray(sMessage), dwPID);
 
 	clsMemManager::CFree(sMessage);
 	return true;
