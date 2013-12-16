@@ -71,6 +71,7 @@ void qtDLGPatchManager::OnCustomContextMenuRequested(QPoint qPoint)
 	menu.addAction(new QAction("Save Patch to File",this));
 	menu.addAction(new QAction("Save All Patches to File",this));
 	menu.addAction(new QAction("Send to Disassembler",this));
+	menu.addSeparator();
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Offset",this));

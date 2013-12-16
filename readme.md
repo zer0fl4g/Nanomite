@@ -84,6 +84,7 @@
 	+ Double Click	= Send offset to disassembler
 - Disassembler Window
 	+ F2			= Set software breakpoint to selected line
+	+ F4			= Execute until selected line
 	+ Return		= Follow selected jump, call
 	+ Backspace		= Go back after goto/follow
 	+ Space			= Edit selected Instruction
@@ -107,6 +108,8 @@
 + fixed a bug which made patching jumps impossible
 + added option for "DebugSetProcessKillOnExit"
 + added option to load symbols from ms servers
++ added execute to selected line
++ added possibility to toggle eflags directly from context menu in the register view
 + improved internal PE file handling
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

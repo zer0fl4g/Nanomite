@@ -527,6 +527,15 @@
     <ClCompile Include="clsMemoryProtector.cpp">
       <Filter>Source Dateien</Filter>
     </ClCompile>
+    <ClCompile Include="clsCallstackWorker.cpp">
+      <Filter>Source Dateien</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Debug\moc_clsCallstackWorker.cpp">
+      <Filter>Generierte Dateien\Debug</Filter>
+    </ClCompile>
+    <ClCompile Include="TempOutput\GeneratedFiles\Release\moc_clsCallstackWorker.cpp">
+      <Filter>Generierte Dateien\Release</Filter>
+    </ClCompile>
   </ItemGroup>
   <ItemGroup>
     <CustomBuild Include="qtDLGNanomite.ui">
@@ -783,6 +792,9 @@
     </CustomBuild>
     <CustomBuild Include="qtDLGBookmark.h">
       <Filter>Header Dateien\Dialogs</Filter>
+    </CustomBuild>
+    <CustomBuild Include="clsCallstackWorker.h">
+      <Filter>Header Dateien</Filter>
     </CustomBuild>
   </ItemGroup>
   <ItemGroup>

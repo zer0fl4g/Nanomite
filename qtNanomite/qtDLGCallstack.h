@@ -24,6 +24,8 @@
 
 #include "ui_qtDLGCallstack.h"
 
+#include "clsCallstackWorker.h"
+
 /**
 * @file qtDLGCallstack.h
 * @brief Displaying the callstack widget
@@ -52,25 +54,6 @@ public:
 	*/
 	void ShowCallStack();
 
-	/**
-	* @brief Get called from "ShowCallStack" and prints a line each time
-	* @param stackAddress The stack address
-	* @param returnOffset The address the function will return after executing
-	* @param returnFunctionName A string containing the function name which will be returned to
-	* @param returnModuleName A string containing the module name which contains the return to function
-	* @param currentOffset Contains the offset where the process is currently located
-	* @param currentFunctionName A string containing the current function name
-	* @param currentModuleName A string containing the module name where the current function is located
-	* @param sourceFilePath A string containing the sourcefile path
-	* @param sourceLineNumber Contains the line number
-	*
-	* @return no 
-	*/
-	void OnCallStack(	quint64 stackAddress,
-						quint64 returnOffset, QString returnFunctionName, QString returnModuleName,
-						quint64 currentOffset, QString currentFunctionName, QString currentModuleName,
-						QString sourceFilePath, int sourceLineNumber);
-
 public slots:
 	/**
 	* @brief A Qt slot which is called when the user wants to display the source code
@@ -94,6 +77,14 @@ public slots:
 	*/
 	void MenuCallback(QAction* pAction);
 
+	/**
+	* @brief Get called from "ShowCallStack" and prints a line each time
+	* @param callstackDisplayData The new data which will be displayed
+	*
+	* @return no 
+	*/
+	void OnCallstack(QList<callstackDisplay> callstackDisplayData);
+
 signals:
 	/**
 	* @brief A Qt signal which is send when the user selected an offset to show in disassembler
@@ -104,6 +95,8 @@ signals:
 	void OnDisplayDisassembly(quint64 selectedOffset);
 
 private:
+	clsCallstackWorker *p_ctWorker; /* pointer to the worker thread */
+
 	int m_selectedRow; /* contains the selected row when the users opens a context menu*/
 };
 

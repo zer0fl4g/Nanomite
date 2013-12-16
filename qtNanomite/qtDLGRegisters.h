@@ -25,6 +25,7 @@
 
 #include <stdint.h>
 
+
 class qtDLGRegisters : public QDockWidget, public Ui_qtDLGRegisters
 {
 	Q_OBJECT
@@ -33,25 +34,28 @@ public:
 	qtDLGRegisters(QWidget *parent = 0);
 	~qtDLGRegisters();
 
-	void LoadRegView(clsDebugger *coreDebugger);
-
-public slots:
 	void LoadRegView();
 
 signals:
 	void OnDisplayDisassembly(quint64 dwEIP);
 
 private:
-	typedef struct {
+	typedef struct
+	{
 		DWORD64 low;
 		DWORD64 high;
 	} uint128_t;
+
+	clsDebugger *m_pDebugger;
 
 	int m_iSelectedRow;
 
 	void PrintValueInTable(QTableWidget *pTable, QString regName, QString regValue);
 
 	double readFloat80(const uint8_t buffer[10]);
+
+	DWORD ToggleFlag(DWORD eFlags, QString selectedElement);
+	DWORD SetEFlag(DWORD eFlags, DWORD flag);
 
 private slots:
 	void OnContextMenu(QPoint);

@@ -236,7 +236,7 @@ void clsDebugger::DebuggingLoop()
 					{
 						for(int i = 0; i < tlsCallback.count(); i++)
 						{
-							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i), 1, BP_DONOTKEEP, NULL);
+							m_pBreakpointManager->BreakpointAdd(SOFTWARE_BP, NULL, debug_event.dwProcessId, (quint64)debug_event.u.CreateProcessInfo.lpBaseOfImage + tlsCallback.at(i), 1, BP_KEEP, NULL);
 						}
 					}						
 				}			
@@ -451,6 +451,7 @@ void clsDebugger::DebuggingLoop()
 									bpNeedsReplace = true;
 
 									break;
+								case BP_DONOTKEEP:
 								case BP_STEPOVER: // StepOver BP
 									if(!bIsEP)
 										bStepOver = true;

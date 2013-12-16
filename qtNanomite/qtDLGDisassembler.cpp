@@ -38,6 +38,7 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	PEManager				= qtDLGNanomite::GetInstance()->PEManager;
 
 	connect(new QShortcut(QKeySequence("F2"), this), SIGNAL(activated()), this, SLOT(OnF2BreakPointPlace()));
+	connect(new QShortcut(QKeySequence("F4"), this), SIGNAL(activated()), this, SLOT(OnF4ExecuteTo()));
 	connect(new QShortcut(QKeySequence::InsertParagraphSeparator, this), SIGNAL(activated()), this, SLOT(OnDisAsReturnPressed()));
 	connect(new QShortcut(QKeySequence("Backspace"), this), SIGNAL(activated()),this, SLOT(OnDisAsReturn()));
 	connect(new QShortcut(QKeySequence("space"), this), SIGNAL(activated()), this, SLOT(OnEditInstruction()));
@@ -299,14 +300,17 @@ void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
 	submenu->addAction(new QAction("Mnemonic", this));
 	submenu->addAction(new QAction("Comment", this));
 	menu.addMenu(submenu);
-
+	menu.addSeparator();
 	menu.addAction(new QAction("Edit Instruction", this));	
 	menu.addAction(new QAction("Goto Offset / Function", this));
-	menu.addAction(new QAction("Set Comment", this));
-	menu.addAction(new QAction("Set Bookmark", this));
 	menu.addAction(new QAction("Set R/EIP to this", this));
 	menu.addAction(new QAction("Show Source", this));	
 	menu.addAction(new QAction("Toggle SW Breakpoint", this));
+	menu.addSeparator();
+	menu.addAction(new QAction("Set Comment", this));
+	menu.addAction(new QAction("Set Bookmark", this));
+	menu.addSeparator();
+	menu.addAction(new QAction("Execute to this", this));
 	menu.addAction(new QAction("Trace to this", this));
 	
 	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
@@ -318,7 +322,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 {
 	if(!coreDebugger->GetDebuggingState()) return;
 	
-	if(QString().compare(pAction->text(),"Set R/EIP to this") == 0)
+	if(pAction->text().compare("Set R/EIP to this") == 0)
 	{
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
@@ -334,18 +338,18 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 #endif
 		emit OnDebuggerBreak();
 	}
-	else if(QString().compare(pAction->text(),"Set Bookmark") == 0)
+	else if(pAction->text().compare("Set Bookmark") == 0)
 	{
 		qtDLGBookmark::BookmarkAdd(coreDebugger->GetCurrentPID(), tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16));
 	}
-	else if(QString().compare(pAction->text(),"Set Comment") == 0)
+	else if(pAction->text().compare("Set Comment") == 0)
 	{
 		QString commentString = QInputDialog::getText(this, "Nanomite", "Comment:");
 
 		if(commentString.length() > 0)
 			qtDLGBookmark::BookmarkAdd(coreDebugger->GetCurrentPID(), tblDisAs->item(m_iSelectedRow, 0)->text().toULongLong(0,16), commentString);
 	}
-	else if(QString().compare(pAction->text(),"Trace to this") == 0)
+	else if(pAction->text().compare("Trace to this") == 0)
 	{
 		int processID = coreDebugger->GetCurrentPID();
 		qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
@@ -356,11 +360,15 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		pMainWindow->actionDebug_Trace_Start->setEnabled(false);
 		coreDebugger->SetTraceFlagForPID(processID,true);
 	}
-	else if(QString().compare(pAction->text(),"Edit Instruction") == 0)
+	else if(pAction->text().compare("Edit Instruction") == 0)
 	{
 		OnEditInstruction();
 	}
-	else if(QString().compare(pAction->text(),"Goto Offset / Function") == 0)
+	else if(pAction->text().compare("Execute to this") == 0)
+	{
+		OnF4ExecuteTo();
+	}
+	else if(pAction->text().compare("Goto Offset / Function") == 0)
 	{
 		QString searchedOffset;
 
@@ -395,7 +403,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 				OnDisplayDisassembly(searchedOffset.toULongLong(0,16));	
 		}
 	}
-	else if(QString().compare(pAction->text(),"Show Source") == 0)
+	else if(pAction->text().compare("Show Source") == 0)
 	{
 		QString fileName;
 		int lineNumber = NULL;
@@ -407,7 +415,7 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 		else
 			QMessageBox::information(this,"Nanomite","Sorry, there is no source available!",QMessageBox::Ok,QMessageBox::Ok);
 	}
-	else if(QString().compare(pAction->text(),"Line") == 0)
+	else if(pAction->text().compare("Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2:%3:%4")
@@ -416,27 +424,27 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 			.arg(tblDisAs->item(m_iSelectedRow,2)->text())
 			.arg(tblDisAs->item(m_iSelectedRow,3)->text()));
 	}
-	else if(QString().compare(pAction->text(),"Offset") == 0)
+	else if(pAction->text().compare("Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblDisAs->item(m_iSelectedRow,0)->text());
 	}
-	else if(QString().compare(pAction->text(),"OpCodes") == 0)
+	else if(pAction->text().compare("OpCodes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblDisAs->item(m_iSelectedRow,1)->text());
 	}
-	else if(QString().compare(pAction->text(),"Mnemonic") == 0)
+	else if(pAction->text().compare("Mnemonic") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblDisAs->item(m_iSelectedRow,2)->text());
 	}
-	else if(QString().compare(pAction->text(),"Comment") == 0)
+	else if(pAction->text().compare("Comment") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblDisAs->item(m_iSelectedRow,3)->text());
 	}
-	else if(QString().compare(pAction->text(), "Toggle SW Breakpoint") == 0)
+	else if(pAction->text().compare("Toggle SW Breakpoint") == 0)
 	{
 		OnF2BreakPointPlace();
 	}
@@ -456,6 +464,20 @@ void qtDLGDisassembler::OnF2BreakPointPlace()
 		currentSelectedItems.value(0)->setForeground(QColor("Black"));
 	}	
 	return;
+}
+
+void qtDLGDisassembler::OnF4ExecuteTo()
+{
+	QList<QTableWidgetItem *> currentSelectedItems = tblDisAs->selectedItems();
+	if(currentSelectedItems.count() <= 0) return;
+
+	quint64 dwSelectedVA = currentSelectedItems.value(0)->text().toULongLong(0,16);
+	if(dwSelectedVA > 0 && clsBreakpointManager::BreakpointInsert(SOFTWARE_BP, BP_EXEC, -1, dwSelectedVA, 1, BP_STEPOVER))
+	{
+		qtDLGTrace::clearTraceData();
+		coreDebugger->ResumeDebugging();
+		qtDLGNanomite::GetInstance()->UpdateStateBar(STATE_RUN);
+	}
 }
 
 void qtDLGDisassembler::resizeEvent(QResizeEvent *event)

@@ -79,6 +79,7 @@ void qtDLGHeapView::OnCustomContextMenuRequested(QPoint qPoint)
 
 	menu.addAction(new QAction("Send Offset To HexView",this));
 	menu.addAction(new QAction("Dump Memory To File",this));
+	menu.addSeparator();
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("HeapID",this));

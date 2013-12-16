@@ -54,6 +54,7 @@ void qtDLGLogView::OnContextMenu(QPoint qPoint)
 	
 	menu.addAction(new QAction("Clear Log",this));
 	menu.addAction(new QAction("Write Log to File",this));
+	menu.addSeparator();
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Time",this));

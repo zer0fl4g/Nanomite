@@ -14,55 +14,53 @@
  *    You should have received a copy of the GNU General Public License
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
-#ifndef CLSDISAS_H
-#define CLSDISAS_H
+#ifndef CLSCALLSTACKWORKER_H
+#define CLSCALLSTACKWORKER_H
+
+#include <QObject>
+#include <QRunnable>
+#include <QString>
+#include <QList>
 
 #include <Windows.h>
 
-#include <QRunnable>
-#include <QtCore>
-#include <QtGui>
-
-struct DisAsDataRow
+struct callstackData
 {
-	quint64 itemStyle;
-	quint64 Offset;
-	QString OpCodes;
-	QString ASM;
-	QString Comment;
+	HANDLE	processHandle;
+	DWORD	threadID;
+	bool	isWOW64;
+	CONTEXT	processContext;
+	WOW64_CONTEXT wowProcessContext;
 };
 
-class clsDisassembler: public QObject, public QRunnable
+struct callstackDisplay
+{
+	quint64 stackAddress;
+	quint64 returnOffset;
+	QString returnFunctionName;
+	QString returnModuleName;
+	quint64 currentOffset;
+	QString currentFunctionName;
+	QString currentModuleName;
+	QString sourceFilePath;
+	int sourceLineNumber;
+};
+
+class clsCallstackWorker : public QObject, public QRunnable
 {
 	Q_OBJECT
 
 public:
-	QMap<quint64,DisAsDataRow> SectionDisAs;
+	clsCallstackWorker();
+	~clsCallstackWorker();
 
-	clsDisassembler();
-	~clsDisassembler();
-
-	bool InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClear = false);
-	bool GetPageRangeForOffset(quint64 IP, quint64 &PageBase, quint64 &PageEnd);
+	void setCallstackData(callstackData ctProcessingData);
 
 signals:
-	void DisAsFinished(quint64 dwEIP);
-	void finished();
+	void OnCallstackFinished(QList<callstackDisplay> callstackDisplayData);
 
 private:
-	HANDLE	m_processHandle;
-	quint64 m_searchedOffset,
-			m_startOffset,
-			m_endOffset,
-			m_startPage;
-
-	bool m_isWorking;
-
-	bool IsNewInsertNeeded();
-	bool IsNewInsertPossible();
-
-private slots:
-	void OnThreadFinished();
+	callstackData m_processingData;
 
 protected:
 	void run();

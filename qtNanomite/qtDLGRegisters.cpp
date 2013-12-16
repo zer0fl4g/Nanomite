@@ -57,13 +57,15 @@ qtDLGRegisters::qtDLGRegisters(QWidget *parent)
 	tabWidget->removeTab(3);
 	tabWidget->removeTab(2);
 
+	m_pDebugger = qtDLGNanomite::GetInstance()->coreDebugger;
+
 	connect(tblRegView,SIGNAL(customContextMenuRequested(QPoint)),this,SLOT(OnContextMenu(QPoint)));
 	connect(tblRegView,SIGNAL(itemDoubleClicked(QTableWidgetItem *)),this,SLOT(OnChangeRequest(QTableWidgetItem *)));
 }
 
 qtDLGRegisters::~qtDLGRegisters()
 {
-
+	m_pDebugger = NULL;
 }
 
 void qtDLGRegisters::OnContextMenu(QPoint qPoint)
@@ -74,8 +76,59 @@ void qtDLGRegisters::OnContextMenu(QPoint qPoint)
 	if(m_iSelectedRow < 0) return;
 
 
-	menu.addAction(new QAction("Send to StackView",this));
-	menu.addAction(new QAction("Send to Disassembler",this));
+	QString currentItemString = tblRegView->item(m_iSelectedRow, 0)->text();
+	if(currentItemString.length() > 0)
+	{
+		if(currentItemString.compare("OF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Overflow flag", this));
+		}
+		else if(currentItemString.compare("DF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Direction flag", this));
+		}
+		else if(currentItemString.compare("TF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Trap flag", this));
+		}
+		else if(currentItemString.compare("SF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Sign flag", this));
+		}
+		else if(currentItemString.compare("ZF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Zero flag", this));
+		}
+		else if(currentItemString.compare("AF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Auxiliarty carry flag", this));
+		}
+		else if(currentItemString.compare("PF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Parity flag", this));
+		}
+		else if(currentItemString.compare("CF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Carry flag", this));
+		}
+		else if(currentItemString.compare("IF") == 0)
+		{
+			menu.addAction(new QAction("Toggle Interrupt flag", this));
+		}
+		else if(currentItemString.compare("EFlags") != 0 &&
+			currentItemString.compare("SegCs") != 0 &&
+			currentItemString.compare("SegDs") != 0 &&
+			currentItemString.compare("SegEs") != 0 &&
+			currentItemString.compare("SegFs") != 0 &&
+			currentItemString.compare("SegGs") != 0 &&
+			currentItemString.compare("SegSs") != 0)
+		{
+			menu.addAction(new QAction("Send to StackView",this));
+			menu.addAction(new QAction("Send to Disassembler",this));
+		}
+	}
+
+	menu.addSeparator();
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Value",this));
@@ -88,61 +141,74 @@ void qtDLGRegisters::OnContextMenu(QPoint qPoint)
 
 void qtDLGRegisters::MenuCallback(QAction* pAction)
 {
-	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
+	if(!m_pDebugger->GetDebuggingState()) return;
 
-	if(!pMainWindow->coreDebugger->GetDebuggingState()) return;
-
-	if(QString().compare(pAction->text(),"Send to Disassembler") == 0)
+	if(pAction->text().compare("Send to Disassembler") == 0)
 	{
-		if(!pMainWindow->coreDisAs->InsertNewDisassembly(pMainWindow->coreDebugger->GetCurrentProcessHandle(),tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16)))
+		if(!qtDLGNanomite::GetInstance()->coreDisAs->InsertNewDisassembly(m_pDebugger->GetCurrentProcessHandle(),tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16)))
 			emit OnDisplayDisassembly(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16));
 	}
-	else if(QString().compare(pAction->text(),"Send to StackView") == 0)
+	else if(pAction->text().compare("Send to StackView") == 0)
 	{
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
 		if(clsAPIImport::pIsWow64Process)
-			clsAPIImport::pIsWow64Process(pMainWindow->coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+			clsAPIImport::pIsWow64Process(m_pDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
 		if(bIsWOW64)
-			pMainWindow->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),4);
+			qtDLGNanomite::GetInstance()->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16), 4);
 		else
-			pMainWindow->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),8);
+			qtDLGNanomite::GetInstance()->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16), 8);
 #else
-		pMainWindow->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),4);
+		qtDLGNanomite::GetInstance()->stackView->LoadStackView(tblRegView->item(m_iSelectedRow,1)->text().toULongLong(0,16),4);
 #endif
 	}
-	else if(QString().compare(pAction->text(),"Line") == 0)
+	else if(pAction->text().compare("Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(QString("%1:%2").arg(tblRegView->item(m_iSelectedRow,0)->text()).arg(tblRegView->item(m_iSelectedRow,1)->text()));
 	}
-	else if(QString().compare(pAction->text(),"Value") == 0)
+	else if(pAction->text().compare("Value") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
 		clipboard->setText(tblRegView->item(m_iSelectedRow,1)->text());
+	}
+	else if(pAction->text().contains("Toggle"))
+	{
+#ifdef _AMD64_
+		BOOL bIsWOW64 = false;
+		if(clsAPIImport::pIsWow64Process)
+			clsAPIImport::pIsWow64Process(m_pDebugger->GetCurrentProcessHandle(), &bIsWOW64);
+
+		if(bIsWOW64)
+			m_pDebugger->wowProcessContext.EFlags = ToggleFlag(m_pDebugger->wowProcessContext.EFlags, pAction->text());
+		else
+			m_pDebugger->ProcessContext.EFlags = ToggleFlag(m_pDebugger->ProcessContext.EFlags, pAction->text());
+#else
+		m_pDebugger->ProcessContext.EFlags = ToggleFlag(m_pDebugger->ProcessContext.EFlags, pAction->text());
+#endif
+
+		LoadRegView();
 	}
 }
 
 void qtDLGRegisters::OnChangeRequest(QTableWidgetItem *pItem)
 {
-	qtDLGNanomite *pMainWindow = qtDLGNanomite::GetInstance();
-
-	if(!pMainWindow->coreDebugger->GetDebuggingState())
+	if(!m_pDebugger->GetDebuggingState())
 		return;
 
 	qtDLGRegEdit *newRegEditWindow;
 #ifdef _AMD64_
 	BOOL bIsWOW64 = false;
 	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(pMainWindow->coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+		clsAPIImport::pIsWow64Process(m_pDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
 	if(bIsWOW64)
-		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pMainWindow->coreDebugger->wowProcessContext,false);
+		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&m_pDebugger->wowProcessContext,false);
 	else
-		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pMainWindow->coreDebugger->ProcessContext,true);			
+		newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&m_pDebugger->ProcessContext,true);			
 #else
-	newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&pMainWindow->coreDebugger->ProcessContext,false);			
+	newRegEditWindow = new qtDLGRegEdit(this,Qt::Window,&m_pDebugger->ProcessContext,false);			
 #endif	
 
 	connect(newRegEditWindow,SIGNAL(OnUpdateRegView()),this,SLOT(LoadRegView()));
@@ -150,11 +216,6 @@ void qtDLGRegisters::OnChangeRequest(QTableWidgetItem *pItem)
 }
 
 void qtDLGRegisters::LoadRegView()
-{
-	LoadRegView(qtDLGNanomite::GetInstance()->coreDebugger);
-}
-
-void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 {
 	tblRegView->setRowCount(0);
 	tblFPU->setRowCount(0);
@@ -170,51 +231,56 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	BOOL bIsWOW64 = false;
 
 	if(clsAPIImport::pIsWow64Process)
-		clsAPIImport::pIsWow64Process(coreDebugger->GetCurrentProcessHandle(),&bIsWOW64);
+		clsAPIImport::pIsWow64Process(m_pDebugger->GetCurrentProcessHandle(),&bIsWOW64);
 
 	if(bIsWOW64)
 	{
-		dwEFlags = coreDebugger->wowProcessContext.EFlags;
+		dwEFlags = m_pDebugger->wowProcessContext.EFlags;
 
-		PrintValueInTable(tblRegView,"EAX",QString("%1").arg(coreDebugger->wowProcessContext.Eax,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"EBX",QString("%1").arg(coreDebugger->wowProcessContext.Ebx,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"ECX",QString("%1").arg(coreDebugger->wowProcessContext.Ecx,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"EDX",QString("%1").arg(coreDebugger->wowProcessContext.Edx,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"ESP",QString("%1").arg(coreDebugger->wowProcessContext.Esp,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"EBP",QString("%1").arg(coreDebugger->wowProcessContext.Ebp,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"ESI",QString("%1").arg(coreDebugger->wowProcessContext.Esi,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"EDI",QString("%1").arg(coreDebugger->wowProcessContext.Edi,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"EIP",QString("%1").arg(coreDebugger->wowProcessContext.Eip,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegCs",QString("%1").arg(coreDebugger->wowProcessContext.SegCs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegDs",QString("%1").arg(coreDebugger->wowProcessContext.SegDs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegEs",QString("%1").arg(coreDebugger->wowProcessContext.SegEs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegFs",QString("%1").arg(coreDebugger->wowProcessContext.SegFs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegGs",QString("%1").arg(coreDebugger->wowProcessContext.SegGs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegSs",QString("%1").arg(coreDebugger->wowProcessContext.SegSs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EAX",QString("%1").arg(m_pDebugger->wowProcessContext.Eax,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EBX",QString("%1").arg(m_pDebugger->wowProcessContext.Ebx,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"ECX",QString("%1").arg(m_pDebugger->wowProcessContext.Ecx,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EDX",QString("%1").arg(m_pDebugger->wowProcessContext.Edx,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"ESP",QString("%1").arg(m_pDebugger->wowProcessContext.Esp,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EBP",QString("%1").arg(m_pDebugger->wowProcessContext.Ebp,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"ESI",QString("%1").arg(m_pDebugger->wowProcessContext.Esi,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EDI",QString("%1").arg(m_pDebugger->wowProcessContext.Edi,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EIP",QString("%1").arg(m_pDebugger->wowProcessContext.Eip,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegCs",QString("%1").arg(m_pDebugger->wowProcessContext.SegCs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegDs",QString("%1").arg(m_pDebugger->wowProcessContext.SegDs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegEs",QString("%1").arg(m_pDebugger->wowProcessContext.SegEs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegFs",QString("%1").arg(m_pDebugger->wowProcessContext.SegFs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegGs",QString("%1").arg(m_pDebugger->wowProcessContext.SegGs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegSs",QString("%1").arg(m_pDebugger->wowProcessContext.SegSs,16,16,QChar('0')));
 						
-		for (int i = 0; i < 8; i++) {
-			double value = readFloat80(&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10]);
+		for (int i = 0; i < 8; i++)
+		{
+			double value = readFloat80(&m_pDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10]);
 			PrintValueInTable(tblFPU,QString("ST(%1)").arg(i), QString("%1").arg(value));
 		}
 		
-		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true)
+		{
 			tabWidget->insertTab(2, mmxRegs, "MMX");
 
 			DWORD64* pMMX;
-			for (int i = 0; i < 8; i++) {
-				pMMX = (DWORD64*)&coreDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10];
+			for (int i = 0; i < 8; i++)
+			{
+				pMMX = (DWORD64*)&m_pDebugger->wowProcessContext.FloatSave.RegisterArea[i * 10];
 				PrintValueInTable(tblMMX,QString("MMX%1").arg(i), QString("%1").arg(*pMMX, 16, 16, QChar('0')));
 			}
 		}
 		else
 			tabWidget->removeTab(2);
 
-		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
+		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true)
+		{
 			tabWidget->insertTab(3, sseRegs, "SSE");
 
 			uint128_t *pXMM;
-			for (int i = 0; i < 8; i++) {
-				pXMM = (uint128_t*)&coreDebugger->wowProcessContext.ExtendedRegisters[(10 + i) * 16];
+			for (int i = 0; i < 8; i++)
+			{
+				pXMM = (uint128_t*)&m_pDebugger->wowProcessContext.ExtendedRegisters[(10 + i) * 16];
 				PrintValueInTable(	tblSSE,
 									QString("XMM%1").arg(i), 
 									QString("%1 %2").arg((*pXMM).low, 16, 16, QChar('0')).arg((*pXMM).high, 16, 16, QChar('0')));
@@ -224,113 +290,123 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 			tabWidget->removeTab(3);
 
 		// EFlags
-		PrintValueInTable(tblRegView,"EFlags", QString("%1").arg(coreDebugger->wowProcessContext.EFlags, 16, 16, QChar('0')));
+		PrintValueInTable(tblRegView,"EFlags", QString("%1").arg(m_pDebugger->wowProcessContext.EFlags, 16, 16, QChar('0')));
 	}
 	else
 	{
-		dwEFlags = coreDebugger->ProcessContext.EFlags;
+		dwEFlags = m_pDebugger->ProcessContext.EFlags;
 		
-		PrintValueInTable(tblRegView,"RAX",QString("%1").arg(coreDebugger->ProcessContext.Rax,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RBX",QString("%1").arg(coreDebugger->ProcessContext.Rbx,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RCX",QString("%1").arg(coreDebugger->ProcessContext.Rcx,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RDX",QString("%1").arg(coreDebugger->ProcessContext.Rdx,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RSP",QString("%1").arg(coreDebugger->ProcessContext.Rsp,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RBP",QString("%1").arg(coreDebugger->ProcessContext.Rbp,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RSI",QString("%1").arg(coreDebugger->ProcessContext.Rsi,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RDI",QString("%1").arg(coreDebugger->ProcessContext.Rdi,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"RIP",QString("%1").arg(coreDebugger->ProcessContext.Rip,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R8",QString("%1").arg(coreDebugger->ProcessContext.R8,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R9",QString("%1").arg(coreDebugger->ProcessContext.R9,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R10",QString("%1").arg(coreDebugger->ProcessContext.R10,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R11",QString("%1").arg(coreDebugger->ProcessContext.R11,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R12",QString("%1").arg(coreDebugger->ProcessContext.R12,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R13",QString("%1").arg(coreDebugger->ProcessContext.R13,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R14",QString("%1").arg(coreDebugger->ProcessContext.R14,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"R15",QString("%1").arg(coreDebugger->ProcessContext.R15,16,16,QChar('0')));		
-		PrintValueInTable(tblRegView,"SegCs",QString("%1").arg(coreDebugger->ProcessContext.SegCs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegDs",QString("%1").arg(coreDebugger->ProcessContext.SegDs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegEs",QString("%1").arg(coreDebugger->ProcessContext.SegEs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegFs",QString("%1").arg(coreDebugger->ProcessContext.SegFs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,16,16,QChar('0')));
-		PrintValueInTable(tblRegView,"SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RAX",QString("%1").arg(m_pDebugger->ProcessContext.Rax,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RBX",QString("%1").arg(m_pDebugger->ProcessContext.Rbx,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RCX",QString("%1").arg(m_pDebugger->ProcessContext.Rcx,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RDX",QString("%1").arg(m_pDebugger->ProcessContext.Rdx,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RSP",QString("%1").arg(m_pDebugger->ProcessContext.Rsp,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RBP",QString("%1").arg(m_pDebugger->ProcessContext.Rbp,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RSI",QString("%1").arg(m_pDebugger->ProcessContext.Rsi,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RDI",QString("%1").arg(m_pDebugger->ProcessContext.Rdi,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"RIP",QString("%1").arg(m_pDebugger->ProcessContext.Rip,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R8",QString("%1").arg(m_pDebugger->ProcessContext.R8,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R9",QString("%1").arg(m_pDebugger->ProcessContext.R9,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R10",QString("%1").arg(m_pDebugger->ProcessContext.R10,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R11",QString("%1").arg(m_pDebugger->ProcessContext.R11,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R12",QString("%1").arg(m_pDebugger->ProcessContext.R12,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R13",QString("%1").arg(m_pDebugger->ProcessContext.R13,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R14",QString("%1").arg(m_pDebugger->ProcessContext.R14,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"R15",QString("%1").arg(m_pDebugger->ProcessContext.R15,16,16,QChar('0')));		
+		PrintValueInTable(tblRegView,"SegCs",QString("%1").arg(m_pDebugger->ProcessContext.SegCs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegDs",QString("%1").arg(m_pDebugger->ProcessContext.SegDs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegEs",QString("%1").arg(m_pDebugger->ProcessContext.SegEs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegFs",QString("%1").arg(m_pDebugger->ProcessContext.SegFs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegGs",QString("%1").arg(m_pDebugger->ProcessContext.SegGs,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"SegSs",QString("%1").arg(m_pDebugger->ProcessContext.SegSs,16,16,QChar('0')));
 						
-		for (int i = 0; i < 8; i++) {
+		for (int i = 0; i < 8; i++) 
+		{
 			PrintValueInTable(	tblFPU,
 								QString("ST(%1)").arg(i),
-								QString("%1 %2").arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16,QChar('0'))
-												.arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].High, 16, 16, QChar('0')));
+								QString("%1 %2").arg(m_pDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16,QChar('0'))
+												.arg(m_pDebugger->ProcessContext.FltSave.FloatRegisters[i].High, 16, 16, QChar('0')));
 		}
 
-		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+		if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true)
+		{
 			tabWidget->insertTab(2, mmxRegs, "MMX");
 
-			for (int i = 0; i < 8; i++) {
+			for (int i = 0; i < 8; i++) 
+			{
 				PrintValueInTable(	tblMMX,
 									QString("MMX%1").arg(i),
-									QString("%1").arg(coreDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16, QChar('0')));
+									QString("%1").arg(m_pDebugger->ProcessContext.FltSave.FloatRegisters[i].Low, 16, 16, QChar('0')));
 			}
 		}
 		else
 			tabWidget->removeTab(2);
 
-		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
+		if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true)
+		{
 			tabWidget->insertTab(3, sseRegs, "SSE");
 
-			for(int i = 0; i < 16; i++) {
+			for(int i = 0; i < 16; i++) 
+			{
 				PrintValueInTable(	tblSSE,
 									QString("XMM%1").arg(i), 
-									QString("%1 %2").arg(coreDebugger->ProcessContext.FltSave.XmmRegisters[i].Low, 16, 16,QChar('0'))
-													.arg(coreDebugger->ProcessContext.FltSave.XmmRegisters[i].High, 16, 16, QChar('0')));
+									QString("%1 %2").arg(m_pDebugger->ProcessContext.FltSave.XmmRegisters[i].Low, 16, 16,QChar('0'))
+													.arg(m_pDebugger->ProcessContext.FltSave.XmmRegisters[i].High, 16, 16, QChar('0')));
 			}
 		}
 		else
 			tabWidget->removeTab(3);
 
 		// EFlags
-		PrintValueInTable(tblRegView,"EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,16,16,QChar('0')));
+		PrintValueInTable(tblRegView,"EFlags",QString("%1").arg(m_pDebugger->ProcessContext.EFlags,16,16,QChar('0')));
 	}
 #else
-	dwEFlags = coreDebugger->ProcessContext.EFlags;
+	dwEFlags = m_pDebugger->ProcessContext.EFlags;
 
-	PrintValueInTable(tblRegView,"EAX",QString("%1").arg(coreDebugger->ProcessContext.Eax,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"EBX",QString("%1").arg(coreDebugger->ProcessContext.Ebx,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"ECX",QString("%1").arg(coreDebugger->ProcessContext.Ecx,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"EDX",QString("%1").arg(coreDebugger->ProcessContext.Edx,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"ESP",QString("%1").arg(coreDebugger->ProcessContext.Esp,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"EBP",QString("%1").arg(coreDebugger->ProcessContext.Ebp,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"ESI",QString("%1").arg(coreDebugger->ProcessContext.Esi,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"EDI",QString("%1").arg(coreDebugger->ProcessContext.Edi,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"EIP",QString("%1").arg(coreDebugger->ProcessContext.Eip,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"SegCs",QString("%1").arg(coreDebugger->ProcessContext.SegCs,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"SegDs",QString("%1").arg(coreDebugger->ProcessContext.SegDs,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"SegEs",QString("%1").arg(coreDebugger->ProcessContext.SegEs,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"SegFs",QString("%1").arg(coreDebugger->ProcessContext.SegFs,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"SegGs",QString("%1").arg(coreDebugger->ProcessContext.SegGs,8,16,QChar('0')));
-	PrintValueInTable(tblRegView,"SegSs",QString("%1").arg(coreDebugger->ProcessContext.SegSs,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EAX",QString("%1").arg(m_pDebugger->ProcessContext.Eax,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EBX",QString("%1").arg(m_pDebugger->ProcessContext.Ebx,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"ECX",QString("%1").arg(m_pDebugger->ProcessContext.Ecx,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EDX",QString("%1").arg(m_pDebugger->ProcessContext.Edx,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"ESP",QString("%1").arg(m_pDebugger->ProcessContext.Esp,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EBP",QString("%1").arg(m_pDebugger->ProcessContext.Ebp,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"ESI",QString("%1").arg(m_pDebugger->ProcessContext.Esi,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EDI",QString("%1").arg(m_pDebugger->ProcessContext.Edi,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EIP",QString("%1").arg(m_pDebugger->ProcessContext.Eip,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"SegCs",QString("%1").arg(m_pDebugger->ProcessContext.SegCs,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"SegDs",QString("%1").arg(m_pDebugger->ProcessContext.SegDs,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"SegEs",QString("%1").arg(m_pDebugger->ProcessContext.SegEs,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"SegFs",QString("%1").arg(m_pDebugger->ProcessContext.SegFs,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"SegGs",QString("%1").arg(m_pDebugger->ProcessContext.SegGs,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"SegSs",QString("%1").arg(m_pDebugger->ProcessContext.SegSs,8,16,QChar('0')));
 
-	for (int i = 0; i < 8; i++) {
-		double value = readFloat80(&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
+	for (int i = 0; i < 8; i++) 
+	{
+		double value = readFloat80(&m_pDebugger->ProcessContext.FloatSave.RegisterArea[i * 10]);
 		PrintValueInTable(tblFPU,QString("ST(%1)").arg(i), QString("%1").arg(value));	
 	}
 
-	if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) {
+	if (IsProcessorFeaturePresent(PF_MMX_INSTRUCTIONS_AVAILABLE) == true) 
+	{
 		tabWidget->insertTab(2, mmxRegs, "MMX");
 
 		DWORD64* pMMX;
-		for (int i = 0; i < 8; i++) {
-			pMMX = (DWORD64*)&coreDebugger->ProcessContext.FloatSave.RegisterArea[i * 10];
+		for (int i = 0; i < 8; i++) 
+		{
+			pMMX = (DWORD64*)&m_pDebugger->ProcessContext.FloatSave.RegisterArea[i * 10];
 			PrintValueInTable(tblMMX,QString("MMX%1").arg(i),QString("%1").arg(*pMMX, 16, 16, QChar('0')));
 		}
 	}
 	else
 		tabWidget->removeTab(2);
 
-	if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) {
+	if (IsProcessorFeaturePresent(PF_XMMI_INSTRUCTIONS_AVAILABLE) == true) 
+	{
 		tabWidget->insertTab(3, sseRegs, "SSE");
 
 		uint128_t *pXMM;
-		for (int i = 0; i < 8; i++) {
-			pXMM = (uint128_t*)&coreDebugger->ProcessContext.ExtendedRegisters[(10 + i) * 16];
+		for (int i = 0; i < 8; i++) 
+		{
+			pXMM = (uint128_t*)&m_pDebugger->ProcessContext.ExtendedRegisters[(10 + i) * 16];
 			PrintValueInTable(tblSSE,QString("XMM%1").arg(i), QString("%1 %2").arg((*pXMM).low, 16, 16, QChar('0')).arg((*pXMM).high, 16, 16, QChar('0')));
 		}		
 	}
@@ -338,7 +414,7 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 		tabWidget->removeTab(3);
 
 	// EFlags
-	PrintValueInTable(tblRegView,"EFlags",QString("%1").arg(coreDebugger->ProcessContext.EFlags,8,16,QChar('0')));
+	PrintValueInTable(tblRegView,"EFlags",QString("%1").arg(m_pDebugger->ProcessContext.EFlags,8,16,QChar('0')));
 #endif
 
 	BOOL bCF = false, // Carry Flag
@@ -360,14 +436,15 @@ void qtDLGRegisters::LoadRegView(clsDebugger *coreDebugger)
 	bPF = (dwEFlags & 0x4) ? true : false;
 	bCF = (dwEFlags & 0x1) ? true : false;
 
-	PrintValueInTable(tblRegView,"OF",QString("%1").arg(bOF));
-	PrintValueInTable(tblRegView,"DF",QString("%1").arg(bDF));
-	PrintValueInTable(tblRegView,"TF",QString("%1").arg(bTF));
-	PrintValueInTable(tblRegView,"SF",QString("%1").arg(bSF));
-	PrintValueInTable(tblRegView,"ZF",QString("%1").arg(bZF));
-	PrintValueInTable(tblRegView,"AF",QString("%1").arg(bAF));
-	PrintValueInTable(tblRegView,"PF",QString("%1").arg(bPF));
-	PrintValueInTable(tblRegView,"CF",QString("%1").arg(bCF));
+	PrintValueInTable(tblRegView,"", "");
+	PrintValueInTable(tblRegView, "OF", QString("%1").arg(bOF));
+	PrintValueInTable(tblRegView, "DF", QString("%1").arg(bDF));
+	PrintValueInTable(tblRegView, "TF", QString("%1").arg(bTF));
+	PrintValueInTable(tblRegView, "SF", QString("%1").arg(bSF));
+	PrintValueInTable(tblRegView, "ZF", QString("%1").arg(bZF));
+	PrintValueInTable(tblRegView, "AF", QString("%1").arg(bAF));
+	PrintValueInTable(tblRegView, "PF", QString("%1").arg(bPF));
+	PrintValueInTable(tblRegView, "CF", QString("%1").arg(bCF));
 }
 
 void qtDLGRegisters::PrintValueInTable(QTableWidget *pTable, QString regName, QString regValue)
@@ -423,4 +500,56 @@ double qtDLGRegisters::readFloat80(const uint8_t buffer[10])
     //value = (-1)^s * (m / 2^63) * 2^(e - 16383)
     double significand = ((double)mantissa / ((uint64_t)1 << 63));
     return sign * ldexp(significand, exponent - EXP_BIAS);
+}
+
+DWORD qtDLGRegisters::ToggleFlag(DWORD eFlags, QString selectedElement)
+{
+	DWORD tempEFlags = eFlags;
+
+	if(selectedElement.compare("Toggle Overflow flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x800);
+	}
+	else if(selectedElement.compare("Toggle Direction flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x400);
+	}
+	else if(selectedElement.compare("Toggle Trap flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x100);
+	}
+	else if(selectedElement.compare("Toggle Sign flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x80);
+	}
+	else if(selectedElement.compare("Toggle Zero flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x40);
+	}
+	else if(selectedElement.compare("Toggle Auxiliarty carry flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x10);
+	}
+	else if(selectedElement.compare("Toggle Parity flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x4);
+	}
+	else if(selectedElement.compare("Toggle Carry flag") == 0)
+	{
+		tempEFlags = SetEFlag(eFlags, 0x1);
+	}
+
+	return tempEFlags;
+}
+
+DWORD qtDLGRegisters::SetEFlag(DWORD eFlags, DWORD flag)
+{
+	DWORD tempEFlags = eFlags;
+
+	if(eFlags & flag)
+		tempEFlags &= ~flag;
+	else
+		tempEFlags |= flag;
+
+	return tempEFlags;
 }

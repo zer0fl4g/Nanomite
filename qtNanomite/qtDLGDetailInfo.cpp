@@ -92,6 +92,7 @@ void qtDLGDetailInfo::OnCustomPIDContextMenu(QPoint qPoint)
 	menu.addAction(new QAction("Create full process dump",this));
 	menu.addAction(new QAction("Show EntryPoint in disassembler",this));
 	menu.addAction(new QAction("Show PBI/PEB",this));
+	menu.addSeparator();
 
 	int ProcessPriority = GetProcessPriorityByPid(tblPIDs->item(m_selectedRow,0)->text().toULongLong(0,16));
 	if(ProcessPriority != 0)
@@ -169,6 +170,7 @@ void qtDLGDetailInfo::OnCustomTIDContextMenu(QPoint qPoint)
 	menu.addAction(new QAction("Show TBI/TEB",this));
 	menu.addAction(new QAction("Suspend",this));
 	menu.addAction(new QAction("Resume",this));
+	menu.addSeparator();
 
 	int ThreadPriority = GetThreadPriorityByTid(tblTIDs->item(m_selectedRow,1)->text().toULongLong(0,16));
 	if(ThreadPriority != THREAD_PRIORITY_ERROR_RETURN)

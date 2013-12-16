@@ -31,6 +31,8 @@ clsDisassembler::clsDisassembler()
 {
 	m_startOffset = 0;m_endOffset = 0;m_startPage = 0;
 	m_isWorking = false;
+	
+	this->setAutoDelete(false);
 
 	connect(this,SIGNAL(finished()),this,SLOT(OnThreadFinished()),Qt::QueuedConnection);
 }
@@ -58,7 +60,8 @@ bool clsDisassembler::InsertNewDisassembly(HANDLE hProc,quint64 dwEIP,bool bClea
 	if(IsNewInsertNeeded())
 	{
 		SectionDisAs.clear();
-		this->start();
+		QThreadPool::globalInstance()->start(this);
+
 		return true;
 	}
 	
@@ -219,6 +222,7 @@ void clsDisassembler::run()
 		m_startOffset = 0;
 	}
 
+	emit finished();
 	emit DisAsFinished(m_searchedOffset);
 }
 

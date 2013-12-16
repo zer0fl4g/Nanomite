@@ -66,7 +66,7 @@ void qtDLGStack::LoadStackView(quint64 stackBaseOffset, DWORD stackAlign)
 		return;
 	}
 
-	clsMemoryProtector tempMemProtect(hProcess, PAGE_READWRITE, dwSize, dwStartOffset, &worked);
+	clsMemoryProtector tempMemProtect(hProcess, PAGE_EXECUTE_READWRITE, dwSize, dwStartOffset, &worked);
 
 	if(!ReadProcessMemory(hProcess,(LPVOID)dwStartOffset,(LPVOID)bBuffer,dwSize,NULL))
 	{
@@ -190,6 +190,7 @@ void qtDLGStack::OnContextMenu(QPoint qPoint)
 	if(m_selectedRow < 0) return;
 
 	menu.addAction(new QAction("Send to Disassembler",this));
+	menu.addSeparator();
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Offset",this));

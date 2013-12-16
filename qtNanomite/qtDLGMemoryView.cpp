@@ -75,6 +75,7 @@ void qtDLGMemoryView::OnCustomContextMenuRequested(QPoint qPoint)
 
 	menu.addAction(new QAction("Send to HexView",this));
 	menu.addAction(new QAction("Dump to File",this));
+	menu.addSeparator();
 	QMenu *submenu = menu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line",this));
 	submenu->addAction(new QAction("Base Address",this));

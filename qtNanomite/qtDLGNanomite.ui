@@ -538,12 +538,12 @@
   </action>
   <action name="actionFile_Save">
    <property name="text">
-    <string>Save</string>
+    <string>Save Project</string>
    </property>
   </action>
   <action name="actionFile_Load">
    <property name="text">
-    <string>Load</string>
+    <string>Load Project</string>
    </property>
   </action>
  </widget>

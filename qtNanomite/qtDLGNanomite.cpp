@@ -52,6 +52,7 @@ qtDLGNanomite::qtDLGNanomite(QWidget *parent, Qt::WFlags flags)
 	qRegisterMetaType<quint64>("quint64");
 	qRegisterMetaType<BPStruct>("BPStruct");
 	qRegisterMetaType<HANDLE>("HANDLE");
+	qRegisterMetaType<QList<callstackDisplay>>("QList<callstackDisplay>");
 
 	clsAPIImport::LoadFunctions();
 
@@ -222,7 +223,7 @@ void qtDLGNanomite::OnDebuggerBreak()
 	else
 	{
 		// clear tracing stuff
-		coreDebugger->SetTraceFlagForPID(coreDebugger->GetCurrentPID(),false);
+		coreDebugger->SetTraceFlagForPID(coreDebugger->GetCurrentPID(), false);
 		actionDebug_Trace_Stop->setEnabled(false);
 		actionDebug_Trace_Start->setEnabled(true);
 		qtDLGTrace::disableStatusBarTimer();
@@ -231,8 +232,9 @@ void qtDLGNanomite::OnDebuggerBreak()
 		callstackView->ShowCallStack();
 
 		// display Reg
-		cpuRegView->LoadRegView(coreDebugger);
+		cpuRegView->LoadRegView();
 
+		// display StackView
 		quint64 dwEIP = NULL;
 #ifdef _AMD64_
 		BOOL bIsWOW64 = false;
@@ -254,11 +256,10 @@ void qtDLGNanomite::OnDebuggerBreak()
 		stackView->LoadStackView(coreDebugger->ProcessContext.Esp,4);
 #endif
 
-		// Update Disassembler
-		if(!coreDisAs->InsertNewDisassembly(coreDebugger->GetCurrentProcessHandle(),dwEIP))
-			DisAsGUI->OnDisplayDisassembly(dwEIP);
+		// display Disassembler
+		DisAsGUI->OnDisplayDisassembly(dwEIP);
 
-		// Update Toolbar
+		// update Toolbar
 		UpdateStateBar(STATE_SUSPEND);
 	}
 }
