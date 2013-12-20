@@ -18,8 +18,7 @@
 #include "qtDLGProcessPrivilege.h"
 
 #include "clsMemManager.h"
-
-#include <QClipboard>
+#include "clsClipboardHelper.h"
 
 qtDLGProcessPrivilege::qtDLGProcessPrivilege(QWidget *parent, Qt::WFlags flags, qint32 processID)
 	: QWidget(parent, flags),
@@ -169,19 +168,16 @@ void qtDLGProcessPrivilege::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3")
-			.arg(tblProcPriv->item(m_selectedRow,0)->text())
-			.arg(tblProcPriv->item(m_selectedRow,1)->text())
-			.arg(tblProcPriv->item(m_selectedRow,2)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblProcPriv, -1));
 	}
 	else if(QString().compare(pAction->text(),"Privilege Name") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblProcPriv->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblProcPriv, 1));
 	}
 	else if(QString().compare(pAction->text(),"State") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblProcPriv->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblProcPriv, 2));
 	}
 }

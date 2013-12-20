@@ -17,11 +17,11 @@
 #include "qtDLGLogView.h"
 
 #include "clsMemManager.h"
+#include "clsClipboardHelper.h"
 
 #include <Windows.h>
 #include <time.h>
 
-#include <QClipboard>
 #include <QTextStream>
 #include <QFileDialog>
 #include <QMenu>
@@ -89,17 +89,17 @@ void qtDLGLogView::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2").arg(tblLogBox->item(m_selectedRow,0)->text()).arg(tblLogBox->item(m_selectedRow,1)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblLogBox, -1));
 	}
 	else if(QString().compare(pAction->text(),"Time") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblLogBox->item(m_selectedRow,0)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblLogBox, 0));
 	}
 	else if(QString().compare(pAction->text(),"Text") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblLogBox->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblLogBox, 1));
 	}
 }
 

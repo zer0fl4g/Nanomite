@@ -24,6 +24,7 @@
 #include "clsHelperClass.h"
 #include "clsSymbolAndSyntax.h"
 #include "clsBreakpointManager.h"
+#include "clsClipboardHelper.h"
 
 qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	: QWidget(parent)
@@ -57,6 +58,8 @@ qtDLGDisassembler::qtDLGDisassembler(QWidget *parent)
 	tblDisAs->horizontalHeader()->setFixedHeight(21);
 
 	m_maxRows = ((tblDisAs->verticalHeader()->height()) / 11) - 1;
+
+	buildContextMenu();
 }
 
 qtDLGDisassembler::~qtDLGDisassembler()
@@ -287,35 +290,38 @@ bool qtDLGDisassembler::eventFilter(QObject *pObject, QEvent *event)
 	return false;
 }
 
-void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
+void qtDLGDisassembler::buildContextMenu()
 {
-	m_iSelectedRow = tblDisAs->indexAt(qPoint).row();
-	if(m_iSelectedRow < 0) return;
-
-	QMenu menu;
-	QMenu *submenu = menu.addMenu("Copy to Clipboard");
+	QMenu *submenu = m_contextMenu.addMenu("Copy to Clipboard");
 	submenu->addAction(new QAction("Line", this));
 	submenu->addAction(new QAction("Offset", this));
 	submenu->addAction(new QAction("OpCodes", this));
 	submenu->addAction(new QAction("Mnemonic", this));
 	submenu->addAction(new QAction("Comment", this));
-	menu.addMenu(submenu);
-	menu.addSeparator();
-	menu.addAction(new QAction("Edit Instruction", this));	
-	menu.addAction(new QAction("Goto Offset / Function", this));
-	menu.addAction(new QAction("Set R/EIP to this", this));
-	menu.addAction(new QAction("Show Source", this));	
-	menu.addAction(new QAction("Toggle SW Breakpoint", this));
-	menu.addSeparator();
-	menu.addAction(new QAction("Set Comment", this));
-	menu.addAction(new QAction("Set Bookmark", this));
-	menu.addSeparator();
-	menu.addAction(new QAction("Execute to this", this));
-	menu.addAction(new QAction("Trace to this", this));
+	m_contextMenu.addMenu(submenu);
+	//menu.addMenu(clsClipboardHelper::getTableClipboardMenu(tblDisAs, &menu));
+	m_contextMenu.addSeparator();
+	m_contextMenu.addAction(new QAction("Edit Instruction", this));	
+	m_contextMenu.addAction(new QAction("Goto Offset / Function", this));
+	m_contextMenu.addAction(new QAction("Set R/EIP to this", this));
+	m_contextMenu.addAction(new QAction("Show Source", this));	
+	m_contextMenu.addAction(new QAction("Toggle SW Breakpoint", this));
+	m_contextMenu.addSeparator();
+	m_contextMenu.addAction(new QAction("Set Comment", this));
+	m_contextMenu.addAction(new QAction("Set Bookmark", this));
+	m_contextMenu.addSeparator();
+	m_contextMenu.addAction(new QAction("Execute to this", this));
+	m_contextMenu.addAction(new QAction("Trace to this", this));
 	
-	connect(&menu,SIGNAL(triggered(QAction*)),this,SLOT(CustomDisassemblerMenuCallback(QAction*)));
+	connect(&m_contextMenu, SIGNAL(triggered(QAction*)), this, SLOT(CustomDisassemblerMenuCallback(QAction*)));
+}
 
-	menu.exec(QCursor::pos());
+void qtDLGDisassembler::OnCustomDisassemblerContextMenu(QPoint qPoint)
+{
+	m_iSelectedRow = tblDisAs->indexAt(qPoint).row();
+	if(m_iSelectedRow < 0) return;
+
+	m_contextMenu.exec(QCursor::pos());
 }
 
 void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
@@ -418,31 +424,31 @@ void qtDLGDisassembler::CustomDisassemblerMenuCallback(QAction* pAction)
 	else if(pAction->text().compare("Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3:%4")
-			.arg(tblDisAs->item(m_iSelectedRow,0)->text())
-			.arg(tblDisAs->item(m_iSelectedRow,1)->text())
-			.arg(tblDisAs->item(m_iSelectedRow,2)->text())
-			.arg(tblDisAs->item(m_iSelectedRow,3)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDisAs, -1));
 	}
 	else if(pAction->text().compare("Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(m_iSelectedRow,0)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDisAs, 0));
+
 	}
 	else if(pAction->text().compare("OpCodes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(m_iSelectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDisAs, 1));
+
 	}
 	else if(pAction->text().compare("Mnemonic") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(m_iSelectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDisAs, 2));
+
 	}
 	else if(pAction->text().compare("Comment") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDisAs->item(m_iSelectedRow,3)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDisAs, 3));
+
 	}
 	else if(pAction->text().compare("Toggle SW Breakpoint") == 0)
 	{

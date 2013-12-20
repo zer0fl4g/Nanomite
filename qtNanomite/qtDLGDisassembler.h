@@ -26,6 +26,8 @@
 
 #include "qtDLGSourceViewer.h"
 
+#include <QMenu>
+
 /**
 * @file qtDLGDisassembler.h
 * @brief Displaying stringdata from debugged file
@@ -93,7 +95,10 @@ private:
 
 	quint64 m_lastEIP;
 
+	QMenu m_contextMenu;
+
 	void resizeEvent(QResizeEvent *event);
+	void buildContextMenu();
 
 	bool OnMoveUpOrDown(bool isUp, bool isPage = false);
 

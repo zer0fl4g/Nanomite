@@ -245,6 +245,7 @@
     <ClCompile Include="clsDebugger\clsDebuggerCallbacks.cpp" />
     <ClCompile Include="clsDebugger\clsDebuggerPublicAPI.cpp" />
     <ClCompile Include="clsDisassembler.cpp" />
+    <ClCompile Include="clsClipboardHelper.cpp" />
     <ClCompile Include="clsFunctionsViewWorker.cpp" />
     <ClCompile Include="clsHelperClass.cpp" />
     <ClCompile Include="clsHexViewWorker.cpp" />
@@ -803,6 +804,7 @@
       <Outputs Condition="'$(Configuration)|$(Platform)'=='Release|x64'">.\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp</Outputs>
       <Command Condition="'$(Configuration)|$(Platform)'=='Release|x64'">"$(QTDIR)\bin\moc.exe"  "%(FullPath)" -o ".\TempOutput\GeneratedFiles\$(ConfigurationName)\moc_%(Filename).cpp"  -DUNICODE -D_AMD64_ -DQT_DLL -DQT_NO_DEBUG -DNDEBUG -DQT_CORE_LIB -DQT_GUI_LIB -DQT_NETWORK_LIB "-I." "-I$(QTDIR)\include" "-I$(QTDIR)\include\QtCore" "-I$(QTDIR)\include\QtGui" "-I$(QTDIR)\include\QtNetwork" "-I.\TempOutput\GeneratedFiles\$(ConfigurationName)\." "-I.\TempOutput\GeneratedFiles"</Command>
     </CustomBuild>
+    <ClInclude Include="clsClipboardHelper.h" />
     <ClInclude Include="clsMemoryProtector.h" />
     <ClInclude Include="clsProcessDump.h" />
     <CustomBuild Include="qtDLGBookmark.h">

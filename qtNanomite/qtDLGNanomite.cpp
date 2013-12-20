@@ -15,7 +15,6 @@
  *    along with Nanomite.  If not, see <http://www.gnu.org/licenses/>.
  */
 #include <QShortcut>
-#include <QClipboard>
 
 #include "qtDLGNanomite.h"
 #include "qtDLGRegEdit.h"

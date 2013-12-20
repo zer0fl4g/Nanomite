@@ -19,6 +19,7 @@
 
 #include "clsMemManager.h"
 #include "clsAPIImport.h"
+#include "clsClipboardHelper.h"
 
 #include <QClipboard>
 #include <QMenu>
@@ -90,49 +91,42 @@ void qtDLGCallstack::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3:%4:%5:%6:%7")
-			.arg(tblCallstack->item(m_selectedRow,0)->text())
-			.arg(tblCallstack->item(m_selectedRow,1)->text())
-			.arg(tblCallstack->item(m_selectedRow,2)->text())
-			.arg(tblCallstack->item(m_selectedRow,3)->text())
-			.arg(tblCallstack->item(m_selectedRow,4)->text())
-			.arg(tblCallstack->item(m_selectedRow,5)->text())
-			.arg(tblCallstack->item(m_selectedRow,6)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, -1));
 	}
 	else if(QString().compare(pAction->text(),"Stack Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,0)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 0));
 	}
 	else if(QString().compare(pAction->text(),"current Function Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 1));
 	}
 	else if(QString().compare(pAction->text(),"current Module.Function") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 2));
 	}
 	else if(QString().compare(pAction->text(),"return Function Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,3)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 3));
 	}
 	else if(QString().compare(pAction->text(),"return Module.Function") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,4)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 4));
 	}
 	else if(QString().compare(pAction->text(),"Source Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,5)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 5));
 	}
 	else if(QString().compare(pAction->text(),"Source File") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblCallstack->item(m_selectedRow,6)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblCallstack, 6));
 	}
 }
 

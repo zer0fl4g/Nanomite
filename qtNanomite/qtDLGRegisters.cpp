@@ -20,8 +20,8 @@
 
 #include "clsMemManager.h"
 #include "clsAPIImport.h"
+#include "clsClipboardHelper.h"
 
-#include <QClipboard>
 #include <QMenu>
 
 #include <cmath>
@@ -166,12 +166,12 @@ void qtDLGRegisters::MenuCallback(QAction* pAction)
 	else if(pAction->text().compare("Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2").arg(tblRegView->item(m_iSelectedRow,0)->text()).arg(tblRegView->item(m_iSelectedRow,1)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblRegView, -1));
 	}
 	else if(pAction->text().compare("Value") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblRegView->item(m_iSelectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblRegView, 1));
 	}
 	else if(pAction->text().contains("Toggle"))
 	{

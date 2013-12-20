@@ -17,8 +17,8 @@
 #include "qtDLGDebugStrings.h"
 
 #include "clsMemManager.h"
+#include "clsClipboardHelper.h"
 
-#include <QClipboard>
 #include <QShortcut>
 #include <QMenu>
 
@@ -64,14 +64,12 @@ void qtDLGDebugStrings::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2")
-			.arg(tblDebugStrings->item(m_selectedRow,0)->text())
-			.arg(tblDebugStrings->item(m_selectedRow,1)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDebugStrings, -1));
 	}
 	else if(QString().compare(pAction->text(),"Debug String") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblDebugStrings->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblDebugStrings, 1));
 	}
 }
 

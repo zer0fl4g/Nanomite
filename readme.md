@@ -1,4 +1,4 @@
-#Nanomite - Graphical Debugger for x64 and x86 on Windows
+#Nanomite - Windows Debugger for x64 and x86
 
 ## Features
 - Debugging x86 and x64 (+ WOW64) processes
@@ -111,5 +111,9 @@
 + added execute to selected line
 + added possibility to toggle eflags directly from context menu in the register view
 + improved internal PE file handling
++ improved copy to clipboard context menu
+
+####Notes:
+	- You can now copy multi lines to the clipboard using the context menu
 
 ###For the full changelog click [here](https://github.com/zer0fl4g/Nanomite/blob/master/changelog.md)

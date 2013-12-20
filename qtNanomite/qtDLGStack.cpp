@@ -21,6 +21,7 @@
 #include "clsAPIImport.h"
 #include "clsHelperClass.h"
 #include "clsMemoryProtector.h"
+#include "clsClipboardHelper.h"
 
 qtDLGStack::qtDLGStack(QWidget *parent)
 	: QDockWidget(parent),
@@ -212,26 +213,22 @@ void qtDLGStack::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3:%4")
-			.arg(tblStack->item(m_selectedRow,0)->text())
-			.arg(tblStack->item(m_selectedRow,1)->text())
-			.arg(tblStack->item(m_selectedRow,2)->text())
-			.arg(tblStack->item(m_selectedRow,3)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStack, -1));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(m_selectedRow,0)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStack, 0));
 	}
 	else if(QString().compare(pAction->text(),"Data") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStack, 1));
 	}
 	else if(QString().compare(pAction->text(),"Comment") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStack->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStack, 2));
 	}
 }
 

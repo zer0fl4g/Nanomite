@@ -19,6 +19,7 @@
 
 #include "clsMemManager.h"
 #include "clsMemDump.h"
+#include "clsClipboardHelper.h"
 
 #include <Psapi.h>
 #include <TlHelp32.h>
@@ -185,37 +186,32 @@ void qtDLGMemoryView::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3:%4:%5")
-			.arg(tblMemoryView->item(m_selectedRow,0)->text())
-			.arg(tblMemoryView->item(m_selectedRow,1)->text())
-			.arg(tblMemoryView->item(m_selectedRow,2)->text())
-			.arg(tblMemoryView->item(m_selectedRow,3)->text())
-			.arg(tblMemoryView->item(m_selectedRow,4)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblMemoryView, -1));
 	}
 	else if(QString().compare(pAction->text(),"Base Address") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblMemoryView, 1));
 	}
 	else if(QString().compare(pAction->text(),"Size") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblMemoryView, 2));
 	}
 	else if(QString().compare(pAction->text(),"Module") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(m_selectedRow,3)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblMemoryView, 3));
 	}
 	else if(QString().compare(pAction->text(),"Type") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(m_selectedRow,4)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblMemoryView, 4));
 	}
 	else if(QString().compare(pAction->text(),"Access") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblMemoryView->item(m_selectedRow,5)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblMemoryView, 5));
 	}
 	else if(QString().compare(pAction->text(),"PAGE_EXECUTE") == 0)
 		SetPageProctection(PAGE_EXECUTE);

@@ -19,10 +19,10 @@
 
 #include "clsMemManager.h"
 #include "clsMemDump.h"
+#include "clsClipboardHelper.h"
 
 #include <TlHelp32.h>
 
-#include <QClipboard>
 #include <QShortcut>
 
 qtDLGHeapView::qtDLGHeapView(QWidget *parent, Qt::WFlags flags,int processID)
@@ -116,38 +116,32 @@ void qtDLGHeapView::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3:%4:%5:%6")
-			.arg(tblHeapBlocks->item(m_selectedRow,0)->text())
-			.arg(tblHeapBlocks->item(m_selectedRow,1)->text())
-			.arg(tblHeapBlocks->item(m_selectedRow,2)->text())
-			.arg(tblHeapBlocks->item(m_selectedRow,3)->text())
-			.arg(tblHeapBlocks->item(m_selectedRow,4)->text())
-			.arg(tblHeapBlocks->item(m_selectedRow,5)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHeapBlocks, -1));
 	}
 	else if(QString().compare(pAction->text(),"HeapID") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHeapBlocks, 1));
 	}
 	else if(QString().compare(pAction->text(),"Address") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHeapBlocks, 2));
 	}
 	else if(QString().compare(pAction->text(),"Block Size") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(m_selectedRow,3)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHeapBlocks, 3));
 	}
 	else if(QString().compare(pAction->text(),"Block Count") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(m_selectedRow,4)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHeapBlocks, 4));
 	}
 	else if(QString().compare(pAction->text(),"Flags") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHeapBlocks->item(m_selectedRow,5)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHeapBlocks, 5));
 	}
 }
 

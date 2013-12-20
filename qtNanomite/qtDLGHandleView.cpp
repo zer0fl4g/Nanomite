@@ -18,10 +18,9 @@
 #include "qtDLGNanomite.h"
 
 #include "clsAPIImport.h"
-#include "NativeHeaders.h"
 #include "clsMemManager.h"
-
-#include <QClipboard>
+#include "clsClipboardHelper.h"
+#include "NativeHeaders.h"
 
 qtDLGHandleView::qtDLGHandleView(QWidget *parent, Qt::WFlags flags,qint32 processID)
 	: QWidget(parent, flags),
@@ -187,24 +186,21 @@ void qtDLGHandleView::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3")
-			.arg(tblHandleView->item(m_selectedRow,1)->text())
-			.arg(tblHandleView->item(m_selectedRow,2)->text())
-			.arg(tblHandleView->item(m_selectedRow,3)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHandleView, -1));
 	}
 	else if(QString().compare(pAction->text(),"Handle") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHandleView->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHandleView, 1));
 	}
 	else if(QString().compare(pAction->text(),"Type") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHandleView->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHandleView, 2));
 	}
 	else if(QString().compare(pAction->text(),"Name") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblHandleView->item(m_selectedRow,3)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblHandleView, 3));
 	}
 }

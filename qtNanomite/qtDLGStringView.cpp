@@ -17,9 +17,9 @@
 #include "qtDLGStringView.h"
 
 #include "clsMemManager.h"
+#include "clsClipboardHelper.h"
 
 #include <QMenu>
-#include <QClipboard>
 
 qtDLGStringView::qtDLGStringView(QWidget *parent, Qt::WFlags flags, qint32 processID)
 	: QWidget(parent, flags),
@@ -153,20 +153,17 @@ void qtDLGStringView::MenuCallback(QAction* pAction)
 	if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3")
-			.arg(tblStringView->item(m_selectedRow,0)->text())
-			.arg(tblStringView->item(m_selectedRow,1)->text())
-			.arg(tblStringView->item(m_selectedRow,2)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStringView, -1));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStringView->item(m_selectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStringView, 1));
 	}
 	else if(QString().compare(pAction->text(),"String") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblStringView->item(m_selectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblStringView, 2));
 	}
 }
 

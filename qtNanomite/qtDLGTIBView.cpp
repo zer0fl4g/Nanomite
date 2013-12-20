@@ -20,7 +20,6 @@
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 
-#include <QClipboard>
 #include <QMenu>
 #include <QShortcut>
 #include <QMessageBox>

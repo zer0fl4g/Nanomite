@@ -20,11 +20,11 @@
 #include "clsMemManager.h"
 #include "clsHelperClass.h"
 #include "clsMemoryProtector.h"
+#include "clsClipboardHelper.h"
 
 #include <Psapi.h>
 
 #include <QMenu>
-#include <QClipboard>
 #include <QMap>
 
 qtDLGPatchManager *qtDLGPatchManager::pThis = NULL;
@@ -142,44 +142,37 @@ void qtDLGPatchManager::MenuCallback(QAction* pAction)
 	else if(QString().compare(pAction->text(),"Line") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(QString("%1:%2:%3:%4:%5:%6:%7")
-			.arg(tblPatches->item(m_iSelectedRow,0)->text())
-			.arg(tblPatches->item(m_iSelectedRow,1)->text())
-			.arg(tblPatches->item(m_iSelectedRow,2)->text())
-			.arg(tblPatches->item(m_iSelectedRow,3)->text())
-			.arg(tblPatches->item(m_iSelectedRow,4)->text())
-			.arg(tblPatches->item(m_iSelectedRow,5)->text())
-			.arg(tblPatches->item(m_iSelectedRow,6)->text()));
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, -1));
 	}
 	else if(QString().compare(pAction->text(),"Offset") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(m_iSelectedRow,1)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, 1));
 	}
 	else if(QString().compare(pAction->text(),"Org. Bytes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(m_iSelectedRow,2)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, 2));
 	}
 	else if(QString().compare(pAction->text(),"New Bytes") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(m_iSelectedRow,3)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, 3));
 	}
 	else if(QString().compare(pAction->text(),"Size") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(m_iSelectedRow,4)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, 4));
 	}
 	else if(QString().compare(pAction->text(),"Saved") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(m_iSelectedRow,5)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, 5));
 	}
 	else if(QString().compare(pAction->text(),"Written") == 0)
 	{
 		QClipboard* clipboard = QApplication::clipboard();
-		clipboard->setText(tblPatches->item(m_iSelectedRow,5)->text());
+		clipboard->setText(clsClipboardHelper::getTableToClipboard(tblPatches, 6));
 	}
 }
 
