@@ -244,7 +244,6 @@ void clsDebugger::DebuggingLoop()
 				if(dbgSettings.bBreakOnNewPID)
 					dwContinueStatus = CallBreakDebugger(&debug_event,0);
 				
-				m_pPEManager->CloseFile(processPath, debug_event.dwProcessId);
 				break;
 			}
 		case CREATE_THREAD_DEBUG_EVENT:
@@ -418,7 +417,10 @@ void clsDebugger::DebuggingLoop()
 							{
 								bIsEP = true;
 								
-								m_pPEManager->OpenFile(QString::fromWCharArray(pCurrentPID->sFileName), pCurrentPID->dwPID, pCurrentPID->imageBase);
+								QString tempFilePath = QString::fromWCharArray(pCurrentPID->sFileName);
+
+								m_pPEManager->CloseFile(tempFilePath, pCurrentPID->dwPID);
+								m_pPEManager->OpenFile(tempFilePath, pCurrentPID->dwPID, pCurrentPID->imageBase);
 
 								m_pBreakpointManager->BreakpointUpdateOffsets(pCurrentPID->hProc,pCurrentPID->dwPID);
 								emit UpdateOffsetsPatches(pCurrentPID->hProc,pCurrentPID->dwPID);

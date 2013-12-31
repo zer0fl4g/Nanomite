@@ -1,6 +1,19 @@
 #Nanomite - Graphical Debugger for x64 and x86 on Windows
 
 ## Changelog
+###Version 0.1 beta 17
++ fixed a bug in the internal exception handler which could cause a termination on windows 8.1
++ fixed a bug which made patching jumps impossible
++ added option for "DebugSetProcessKillOnExit"
++ added option to load symbols from ms servers
++ added execute to selected line
++ added possibility to toggle eflags directly from context menu in the register view
++ improved internal PE file handling
++ improved copy to clipboard context menu
+
+####Notes:
+	- You can now copy multi lines to the clipboard using the context menu
+
 ###Version 0.1 beta 16
 + fixed a bug which can lead to a crash of the debugge when using step over while debugge was running
 + fixed a bug which can lead to a crash while using step over

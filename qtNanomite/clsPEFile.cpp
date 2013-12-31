@@ -215,7 +215,7 @@ bool clsPEFile::LoadFile(QString FileName, int PID, quint64 imageBase)
 		}
 	}
 
-	fileEntropie = loadEntropie(moduleSize);
+	fileEntropie = NULL; //loadEntropie(moduleSize);
 	
 	fileSections = loadSections();
 
